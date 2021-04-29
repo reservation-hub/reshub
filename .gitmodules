@@ -1,0 +1,3 @@
+[submodule "reshub-deploy"]
+	path = reshub-deploy
+	url = git@github.com:reservation-hub/reshub-deploy.git

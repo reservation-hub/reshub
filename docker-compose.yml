@@ -1,0 +1,61 @@
+version: "3.7"
+volumes:
+  reshub-server-node_modules:
+  reshub-client-node_modules:
+  data-node:
+
+services:
+
+  # server
+  server:
+    build:
+      context: .
+      dockerfile: docker/server/Dockerfile
+    container_name: reshub-server
+    environment: 
+      - NODE_ENV=development
+      - COMMAND=${COMMAND:-serve}
+      - PORT=8090
+    env_file: 
+      - .env
+    image: reshub-server
+    ports: 
+      - 8090:8090
+    volumes:
+      - ./app/server:/app
+      - reshub-server-node_modules:/app/node_modules
+    tty: true
+    depends_on: 
+      - db
+  
+  # client
+  client:
+    build:
+      context: .
+      dockerfile: docker/client/Dockerfile
+    container_name: reshub-client
+    environment:
+      - COMMAND=${COMMAND:-start}
+    env_file:
+      - .env
+    image: reshub-client
+    ports:
+      - 8080:3000
+    volumes:
+      - ./app/client:/app
+      - reshub-client-node_modules:/app/node_modules
+    tty: true
+    depends_on:
+      - db
+
+  # db
+  db:
+    image: mongo
+    container_name: reshub_mongodb
+    volumes:
+        - data-node:/data/db
+    ports:
+        - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
