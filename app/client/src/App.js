@@ -1,22 +1,7 @@
 import logo from './logo.svg';
-import axios from 'axios'
 import './App.css';
 
-// const fetchData = () => {
-  
-// }
-
-let data
-axios
-  .get('http://localhost:8090')
-  .then(val => {
-    console.log('val: ', val)
-    data = val.data
-  })
-  .catch(e => console.log(e))
-
 function App() {
-  console.log('data : ', data)
   return (
     <div className="App">
       <header className="App-header">
