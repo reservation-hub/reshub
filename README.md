@@ -2,10 +2,11 @@
 
 ## 立ち上げ
 
-aliasの設定
+aliasの設定と環境変数定義
 
 ```
 $ source aliases.sh
+$ reshub-init
 ```
 
 ### ClientとServerを別々の窓で立ち上げる!!
