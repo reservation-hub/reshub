@@ -1,5 +1,11 @@
 const { models, isValidObjectId } = require("mongoose")
 
+const crudController = {
+    index(req, res) {
+        
+    }
+}
+
 class CrudController {
     constructor(model) {
         this.model = model
