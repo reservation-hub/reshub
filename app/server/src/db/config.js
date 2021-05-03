@@ -1,7 +1,7 @@
 const dbOptions = {
     useNewUrlParser: true,
     useCreateIndex: true,
-    dbName: 'message-board',
+    dbName: 'reshub',
     user: 'root',
     pass: 'root',
     auth: {
