@@ -27,6 +27,20 @@ services:
     depends_on: 
       - db
   
+  # prd server
+  server-prd:
+    container_name: reshub-server
+    environment: 
+      - NODE_ENV=production
+      - COMMAND=${COMMAND:-start}
+    env_file: 
+      - .env
+    image: reshub-server_prd
+    ports: 
+      - 8090:8090
+    depends_on: 
+      - db
+
   # client
   client:
     build:
@@ -47,7 +61,7 @@ services:
 
   # db
   db:
-    image: mongo
+    image: mongo:4.2
     container_name: reshub_mongodb
     volumes:
         - data-node:/data/db

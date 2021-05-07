@@ -1,14 +1,14 @@
 # init
 alias reshub-init="git submodule update --init reshub-deploy \
-                  && cp reshub-deploy/.env* ./ \
+                  && cp reshub-deploy/.env* . \
                   && echo '.envを作成してください'
 "
 
 # lcl
-alias reshub-lcl-build="docker-compose build server client"
+alias reshub-lcl-build="docker-compose build"
 alias reshub-lcl="reshub-lcl-build && docker-compose up server client"
-alias reshub-lcl-server="reshub-lcl-build && docker-compose up server"
-alias reshub-lcl-client="reshub-lcl-build && docker-compose up client"
+alias reshub-lcl-server="reshub-lcl-build server && docker-compose up server"
+alias reshub-lcl-client="reshub-lcl-build client && docker-compose up client"
 alias reshub-lcl-server-logs="docker-compose logs -f --tail 100 server"
 alias reshub-lcl-client-logs="docker-compose logs -f --tail 100 client"
 alias reshub-lcl-restart="docker-compose restart server client"

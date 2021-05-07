@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon --legacy-watch src/app.js"
+    "serve": "nodemon --legacy-watch src/app.js",
+    "start": "node src/app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^8.5.1",
     "express": "^4.17.1",
     "mongoose": "^5.11.19"
   },
