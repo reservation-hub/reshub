@@ -1,17 +1,10 @@
 const express = require('express')
 const router = express.Router()
+const { validationSchema: shopSchema, Shop } = require('../models/shop')
+const { schemaMiddleware: middleware, idMiddleware } = require('../../lib/validators')
+const { crudController } = require('../controllers/crudController')
 
-const { City } = require('../models/city')
-
-router.get('/', (req, res, next) => {
-  // const fs = require('fs')
-  // const data = fs.readFileSync('cities.json')
-  // const cities = JSON.parse(data)
-  // City.insertMany(cities)
-  // .then(result=> {
-  //   res.send(result)
-  // })
-  // .catch(e => next(e))
-})
+router.use('/:id', idMiddleware())
+router.post('/', middleware(shopSchema), crudController.index({ Model: Shop }))
 
 module.exports = router
