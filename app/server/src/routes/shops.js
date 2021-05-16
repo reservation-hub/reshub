@@ -1,11 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const controller = require('../controllers/shopController')
+const { registerCrud } = require('../controllers/crudController')
+const { validationSchema: shopSchema, Shop } = require('../models/shop')
 
-router.get('/', controller.index)
-router.get('/:id', controller.show)
-router.post('/', controller.insert)
-router.patch('/:id', controller.update)
-router.delete('/id', controller.delete)
+registerCrud(Shop, shopSchema, '', router)
 
 module.exports = router

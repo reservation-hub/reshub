@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const Joi = require('joi')
+Joi.objectId = require('joi-objectid')(Joi)
 const Schema = mongoose.Schema
 
 const shopSchema = Schema(
@@ -14,16 +16,19 @@ const shopSchema = Schema(
       trim: true,
     },
     area: {
-      // type: Schema.Types.ObjectId,
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
       ref: 'Area'
     },
-    prefec: {
-      // type: Schema.Types.ObjectId,
-      type: Number,
+    prefecture: {
+      type: Schema.Types.ObjectId,
       required: true,
-      ref: 'Prefec'
+      ref: 'Prefecture'
+    },
+    city: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: 'City'
     },
     brand: {
       type: String,
@@ -39,5 +44,14 @@ const shopSchema = Schema(
     strictQuery: true,
   }
 )
+
+exports.validationSchema = Joi.object({
+  name: Joi.string().alphanum(),
+  slug: Joi.string().alphanum(),
+  area: Joi.objectId(),
+  prefecture: Joi.objectId(),
+  city: Joi.objectId(),
+  brand: Joi.string(),
+})
 
 exports.Shop = mongoose.model('Shop', shopSchema)

@@ -5,3 +5,7 @@ exports.filterUndefined = obj => {
     })
   )
 }
+
+exports.filterForeignKey = obj => {
+  return Object.keys(obj).filter(key => obj[key].instance === 'ObjectID' && key !== '_id')
+}
