@@ -1,4 +1,5 @@
 exports.errorHandler = (err, req, res, next) => {
+  console.log(err)
   if ("ValidationError" === err.name) {
     const messages = err.details.map(e => {
       return {
@@ -13,6 +14,5 @@ exports.errorHandler = (err, req, res, next) => {
     return res.status(404).send({message: 'Error: Not Found'})
   }
 
-  console.log(err)
   return res.status(500).send({message: 'Internal Server Error'})
 }
