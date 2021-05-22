@@ -1,8 +1,8 @@
 version: "3.7"
 volumes:
-  reshub-server-node_modules:
-  reshub-client-node_modules:
-  data-node:
+  server-node_modules:
+  client-node_modules:
+  db-data:
 
 services:
 
@@ -20,7 +20,7 @@ services:
       - 8090:8090
     volumes:
       - ./app/server:/app
-      - reshub-server-node_modules:/app/node_modules
+      - server-node_modules:/app/node_modules
     tty: true
     depends_on: 
       - db
@@ -50,15 +50,15 @@ services:
       - 8080:8080
     volumes:
       - ./app/client:/app
-      - reshub-client-node_modules:/app/node_modules
+      - client-node_modules:/app/node_modules
     tty: true
 
   # db
   db:
     image: mongo:4.2
-    container_name: reshub_mongodb
+    container_name: reshub-mongodb
     volumes:
-        - data-node:/data/db
+        - db-data:/data/db
     ports:
         - 27017:27017
     environment:

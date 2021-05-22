@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon --legacy-watch src/app.js",
+    "serve": "nodemon --legacy-watch -r dotenv/config src/app.js dotenv_config_path=/environment/.env",
     "start": "node src/app.js"
   },
   "keywords": [],

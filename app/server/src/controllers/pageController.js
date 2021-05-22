@@ -7,9 +7,7 @@ const pages = {
   'cities': 'city'
 }
 
-router.get('/', (req, res, next) => {
-
-  return res.send(pages)
-})
+// index
+router.get('/', (req, res, next) => res.send(pages))
 
 exports.router = router
