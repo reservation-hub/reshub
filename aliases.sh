@@ -1,7 +1,6 @@
 # init
 alias reshub-init="git submodule update --init reshub-deploy \
                   && cp reshub-deploy/.env* . \
-                  && echo '.envを作成してください'
 "
 
 # lcl

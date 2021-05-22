@@ -15,8 +15,6 @@ services:
     environment: 
       - NODE_ENV=development
       - COMMAND=${COMMAND:-serve}
-    env_file: 
-      - .env
     image: reshub-server
     ports: 
       - 8090:8090
@@ -33,8 +31,6 @@ services:
     environment: 
       - NODE_ENV=production
       - COMMAND=${COMMAND:-start}
-    env_file: 
-      - .env
     image: reshub-server_prd
     ports: 
       - 8090:8090
@@ -49,8 +45,6 @@ services:
     container_name: reshub-client
     environment:
       - COMMAND=${COMMAND:-start}
-    env_file:
-      - .env
     image: reshub-client
     ports:
       - 8080:8080
