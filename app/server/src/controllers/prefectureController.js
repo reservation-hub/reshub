@@ -4,6 +4,6 @@ const { Prefecture } = require('../models/prefecture')
 const { crudController } = require('../../lib/crudController')
 
 router.get('/', crudController.index(Prefecture))
-router.get('/:slug', crudController.show(Prefecture, 'slug'))
+router.get('/:slug', crudController.show(Prefecture, {slug: 'slug'}))
 
 exports.router = router

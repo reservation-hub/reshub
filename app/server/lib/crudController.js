@@ -53,7 +53,7 @@ exports.crudController = {
   show(Model, options = { slug: 'id', populate: false}) {
     return (req, res, next) => {
       const foreignKey = options.populate ? filterForeignKey(Model.schema.paths) : []
-      const searchSlug = 'id' === slug ? {_id: req.params.id} : {slug: req.params.slug}
+      const searchSlug = 'id' === options.slug ? {_id: req.params.id} : {slug: req.params.slug}
       Model.find(searchSlug).orFail()
       .populate(foreignKey)
       .exec()
