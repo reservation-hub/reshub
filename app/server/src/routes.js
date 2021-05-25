@@ -1,13 +1,16 @@
-const { router: shopController } = require('./controllers/shopController')
-const { router: areaController } = require('./controllers/areaController')
-const { router: prefectureController } = require('./controllers/prefectureController')
-const { router: cityController } = require('./controllers/cityController')
-const { router: pageController } = require('./controllers/pageController')
+const apiRoutes = [
+  require('./controllers/API/areaController'),
+  require('./controllers/API/indexController'),
+]
 
 module.exports = (app) => {
-  app.use('/area', areaController)
-  app.use('/prefecture', prefectureController)
-  app.use('/city', cityController)
-  app.use('/shop', shopController)
-  app.use('/', pageController)
+  app.use('/api', apiRoutes)
+
+  app.use('/area', require('./controllers/areaController'))
+  app.use('/prefecture', require('./controllers/prefectureController'))
+  app.use('/city', require('./controllers/cityController'))
+  app.use('/shop', require('./controllers/shopController'))
+  app.use('/', require('./controllers/pageController'))
+
+  app.use('/*', (req, res, next) => next({code: 404})) // 404s
 }

@@ -35,6 +35,11 @@ const shopSchema = Schema(
       required: true,
       trim: true,
     },
+    details: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     coupons: [{
       type: Schema.Types.ObjectId,
       required: true,

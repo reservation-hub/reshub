@@ -3,8 +3,15 @@ const Schema = mongoose.Schema
 
 const citySchema = Schema(
   {
-    name: String,
-    prefecture: String
+    name: {
+      type: String,
+      required: true,
+    },
+    prefecture: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: 'Prefecture',
+    }
   }
 )
 

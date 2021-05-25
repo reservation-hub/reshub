@@ -7,7 +7,11 @@ const pages = {
   'cities': 'city'
 }
 
-// index
-router.get('/', (req, res, next) => res.send(pages))
+const index = (pages) => {
+  return (req, res, next) => res.send(pages)
+}
 
-exports.router = router
+// index
+router.get('/', index(pages))
+
+module.exports = router

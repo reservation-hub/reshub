@@ -23,11 +23,11 @@ function reshub-db-backup() {
   else
     echo "コンテナを停止します"
     echo "Stopping containers"
-    docker stop reshub-server reshub_mongodb
+    docker stop reshub-server reshub-mongodb
 
     echo "バックアップ開始";
     echo "Back up starting..."
-    docker run --rm -ti --volumes-from reshub_mongodb -v $(pwd):/backup ubuntu tar cvf /backup/$1.tar /data/db
+    docker run --rm -ti --volumes-from reshub-mongodb -v $(pwd):/backup ubuntu tar cvf /backup/$1.tar /data/db
 
     if [ $? -eq 0 ]; then
       echo "バックアップ完了"
@@ -51,11 +51,11 @@ function reshub-db-restore() {
   else
     echo "コンテナを停止します"
     echo "Stopping containers"
-    docker stop reshub-server reshub_mongodb
+    docker stop reshub-server reshub-mongodb
 
     echo "修復開始"
     echo "Restoring database..."
-    docker run --rm --volumes-from reshub_mongodb -v $(pwd):/backup mongo:4.2 bash -c "cd /data && tar xvf /backup/$1.tar --strip 1 && mongod --repair"
+    docker run --rm --volumes-from reshub-mongodb -v $(pwd):/backup mongo:4.2 bash -c "cd /data && tar xvf /backup/$1.tar --strip 1 && mongod --repair"
 
     if [ $? -eq 0 ]; then
       echo "修復完了"

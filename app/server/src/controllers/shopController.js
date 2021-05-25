@@ -5,4 +5,4 @@ const { registerCrud } = require('../../lib/crudController')
 
 registerCrud(Shop, shopSchema, router, {populate: true})
 
-exports.router = router
+module.exports = router
