@@ -14,7 +14,7 @@ const prefectureSchema = Schema(
       trim: true,
     },
     area: {
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
       ref: 'Area',
     },
