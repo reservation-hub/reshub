@@ -46,5 +46,20 @@ module.exports = {
         }
       },
     ])
+  },
+  fetchById({area: areaSlug, prefecture: prefectureSlug, city: cityId, shop: _id}) {
+    return Shop.aggregate([
+      ...lookupParam('area'),
+      ...lookupParam('prefecture'),
+      ...lookupParam('city'),
+      {
+        $match: {
+          'area.slug': areaSlug,
+          'prefecture.slug': prefectureSlug,
+          'city._id': ObjectId(cityId),
+          '_id': ObjectId(_id),
+        }
+      },
+    ])
   }
 }

@@ -1,14 +1,14 @@
+const eah = require('express-async-handler')
 const express = require('express')
 const router = express.Router()
-const { Shop } = require('../../models/shop')
 const ShopRepository = require('../../repositories/shopRepository')
 const shopSeeder = require('../../../lib/shopSeeder')
 
-router.get('/', (req, res, next) => {
+router.get('/', eah((req, res, next) => {
   const limit = req.query.limit || 10
-  ShopRepository.fetchByCount(limit)
-  .then(shops => res.send(shops))
-})
+  const shops = ShopRepository.fetchByCount(limit)
+  return res.send(shops)
+}))
 
 // faker
 
