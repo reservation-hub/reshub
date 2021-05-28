@@ -3,6 +3,8 @@ const express = require('express')
 const router = express.Router()
 const ShopRepository = require('../../repositories/shopRepository')
 
+router.use('/:area/:prefecture/:city', require('./shopController'))
+
 router.get('/:area', eah(async (req, res, next) => {
   const shops = await ShopRepository.fetchByAreaSlug(req.params)
   return res.send(shops)
