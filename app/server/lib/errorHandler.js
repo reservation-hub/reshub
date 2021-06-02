@@ -1,5 +1,7 @@
 exports.errorHandler = (err, req, res, next) => {
-  console.log(err)
+  console.log('session : ', req.session)
+  console.log('error: ', err)
+  // console.log('req: ', req)
   if ("ValidationError" === err.name) {
     const messages = err.details.map(e => {
       return {
