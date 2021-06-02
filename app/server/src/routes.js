@@ -12,5 +12,5 @@ module.exports = (app) => {
   app.use('/shop', require('./controllers/shopController'))
   app.use('/', require('./controllers/pageController'))
 
-  app.use('/*', (req, res, next) => next({code: 404})) // 404s
+  app.use('/*', (req, res, next) => next({code: 404, message: 'Bad route'})) // 404s
 }
