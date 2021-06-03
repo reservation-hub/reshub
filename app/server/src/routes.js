@@ -5,6 +5,7 @@ const apiRoutes = [
 
 module.exports = (app) => {
   app.use('/api', apiRoutes)
+  app.use('/auth', require('./controllers/auth/authController'))
 
   app.use('/area', require('./controllers/areaController'))
   app.use('/prefecture', require('./controllers/prefectureController'))
