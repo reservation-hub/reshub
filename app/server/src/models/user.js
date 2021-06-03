@@ -1,31 +1,27 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
+const Joi = require('joi')
 
 const userSchema = Schema(
   {
-    firstName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    lastName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    googleID: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    firstName: String,
+    lastName: String,
+    email: String,
+    username: String,
+    password: String,
+    googleID: String,
   }, {
     timestamps: true,
   }
 )
+
+exports.validationSchema = Joi.object({
+  username: Joi.string().trim().alphanum().required(),
+  password: Joi.string().trim().alphanum().required(),
+  confirm: Joi.string().trim().alphanum().required(),
+  email: Joi.string().email().trim().required(),
+  firstName: Joi.string().trim().required(),
+  lastName: Joi.string().trim().required(),
+})
 
 exports.User = mongoose.model('User', userSchema)
