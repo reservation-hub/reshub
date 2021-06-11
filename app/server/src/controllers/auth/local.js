@@ -1,24 +1,17 @@
-const express = require('express')
-const router = express.Router()
+const router = require('express').Router()
 const bcrypt = require('bcrypt')
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const { validationSchema: validator, User } = require('../../models/user')
+const { login } = require('./utils')
 
 passport.use(new LocalStrategy(async (username, password, done) => {
   const user = await User.findOne({username}).exec()
-  if (!user) return done(null, false, { message: 'Authentication failed' })
-  if (!bcrypt.compareSync(password, user.password)) return done(null, false, { message: 'Authentication failed' })
+  if (!user || !bcrypt.compareSync(password, user.password)) return done(null, false, { message: 'Authentication failed' })
   return done(null, user)
 }))
 
-router.post('/login', passport.authenticate('local'),
-(req, res, next) => {
-  const { user } = req
-  delete user.password
-  req.session.user = user
-  return res.send({})
-})
+router.post('/login', passport.authenticate('local'), login)
 
 router.post('/signup', async (req, res, next) => {
   const { value, error } = validator.validate(req.body)

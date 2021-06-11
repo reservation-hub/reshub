@@ -22,6 +22,9 @@ exports.validationSchema = Joi.object({
   email: Joi.string().email().trim().required(),
   firstName: Joi.string().trim().required(),
   lastName: Joi.string().trim().required(),
+  googleID: Joi.string().trim(),
+  lineID: Joi.string().trim(),
+  twitterID: Joi.string().trim(),
 })
 
 exports.User = mongoose.model('User', userSchema)
