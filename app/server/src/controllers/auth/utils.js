@@ -32,7 +32,7 @@ exports.passportData = (profile) => {
       }
       break
     case 'line':
-      return {...defaultData, lineID: profile.id}
+      return {email: profile.email, lineID: profile.id}
       break
   }
 }
