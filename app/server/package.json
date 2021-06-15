@@ -22,7 +22,9 @@
     "mongoose": "^5.11.19",
     "passport": "^0.4.1",
     "passport-google-oauth": "^2.0.0",
+    "passport-line-auth": "^0.2.9",
     "passport-local": "^1.0.0",
+    "passport-twitter": "^1.0.4",
     "pluralize": "^8.0.0"
   },
   "devDependencies": {
