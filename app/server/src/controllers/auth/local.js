@@ -35,4 +35,9 @@ router.post('/signup', async (req, res, next) => {
   })
 })
 
+router.get('/logout', async (req, res, next) => {
+  req.logout()
+  res.send({message: 'logged out!'})
+})
+
 module.exports = router
