@@ -5,6 +5,14 @@ const session = require('express-session')
 const passport = require('passport')
 const { errorHandler } = require('../lib/errorHandler')
 
+// session management
+const redis = require('redis')
+const redisClient = redis.createClient({ host: "redis" })
+const redisStore = require('connect-redis')(session)
+redisClient.on('error', err => {
+    console.log('Redis error : ', err)
+})
+
 const app = express()
 
 passport.serializeUser(function(user, done) {
@@ -23,8 +31,9 @@ app.use(session({
     secret: 'reservation hub',
     resave: false,
     saveUninitialized: false,
-    // cookie: { secure: true, maxAge: 60 * 60 * 1000 },
+    // cookie: { secure: true, maxAge: 60 * 60 * 1000 }, /* commented out because since it's not yet running on https, we can't use secure: true*/
     cookie: { maxAge: 60 * 60 * 1000 },
+    store: new redisStore({ client: redisClient })
 }))
 app.use(passport.initialize());
 app.use(passport.session());
