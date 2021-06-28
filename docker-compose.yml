@@ -24,6 +24,7 @@ services:
     tty: true
     depends_on: 
       - db
+      - redis
   
   # prd server
   server-prd:
@@ -36,6 +37,7 @@ services:
       - 8090:8090
     depends_on: 
       - db
+      - redis
 
   # client
   client:
@@ -64,3 +66,9 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
+
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379
+    

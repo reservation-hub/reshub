@@ -10,8 +10,7 @@ const pages = {
 
 const index = (pages) => {
   return (req, res, next) => {
-    // console.log(req.user)
-    res.send({pages})
+    return res.send({page: "/"})
   }
 }
 
