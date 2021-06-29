@@ -11,7 +11,15 @@ exports.login = (req, res, next) => {
   }
 
   req.session.user = user
-  return res.send({message: 'success'})
+  return res.send({})
+}
+
+exports.passport404Error = (profile) => {
+  return {
+    code: 404,
+    message: "User not found",
+    data: this.passportData(profile),
+  }
 }
 
 exports.passportData = (profile) => {
@@ -24,15 +32,12 @@ exports.passportData = (profile) => {
         email: profile.emails[0].value,
         googleID: profile.id
       }
-      break
     case 'twitter':
       return {
         email: profile.emails[0].value,
         twitterID: profile.id,
       }
-      break
     case 'line':
-      return {email: profile.email, lineID: profile.id}
-      break
+      return { email: profile.email, lineID: profile.id }
   }
 }

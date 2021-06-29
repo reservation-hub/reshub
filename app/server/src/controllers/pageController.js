@@ -10,17 +10,11 @@ const pages = {
 
 const index = (pages) => {
   return (req, res, next) => {
-    // console.log(req.user)
-    res.send({pages})
+    return res.send({page: "/"})
   }
 }
 
 // index
 router.get('/', index(pages))
-
-router.get('/logout', (req, res, next) => {
-  req.logout()
-  res.redirect('/')
-})
 
 module.exports = router

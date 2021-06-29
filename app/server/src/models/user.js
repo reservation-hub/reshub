@@ -10,6 +10,8 @@ const userSchema = Schema(
     username: String,
     password: String,
     googleID: String,
+    lineID: String,
+    twitterID: String,
   }, {
     timestamps: true,
   }
