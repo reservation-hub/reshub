@@ -1,8 +1,8 @@
 const router = require('express').Router()
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
-const { User } = require('../../models/user')
-const { login, passportData } = require('./utils')
+const UserRepository = require('../../repositories/userRepository')
+const { login, passport404Error } = require('./utils')
 
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
@@ -10,8 +10,12 @@ passport.use(new GoogleStrategy({
   callbackURL: `${process.env.RESHUB_URL}/auth/google/callback`,
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    let user = await User.findOne({googleID: profile.id}).or([{email: profile.emails[0].value}]).exec()
-    if (!user) return done({ code: 404, message: "User not found", data: passportData(profile) })
+    let user = await UserRepository.findByProps([{ googleID: profile.id }, { email: profile.emails[0].value }])
+    if (!user) return done(passport404Error(profile))
+
+    // ユーザー情報がDBにあったらIDをユーザー情報に追加する
+    user = await UserRepository.addIdFromPassportProfile(user, profile)
+
     return done(null, user)
   } catch (e) {
     done(e, null)

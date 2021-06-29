@@ -16,11 +16,11 @@ redisClient.on('error', err => {
 const app = express()
 
 passport.serializeUser(function(user, done) {
-    done(null, user.id);
+    done(null, user._id);
 });
 
-passport.deserializeUser(function(id, done) {
-    require('./models/user').User.findById(id)
+passport.deserializeUser(function(_id, done) {
+    require('./models/user').User.findById(_id)
     .then(user => done(null, user))
     .catch(e => done(e, null))
 });

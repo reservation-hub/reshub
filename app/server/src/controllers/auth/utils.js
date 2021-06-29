@@ -11,7 +11,15 @@ exports.login = (req, res, next) => {
   }
 
   req.session.user = user
-  return res.send({ message: 'success' })
+  return res.send({})
+}
+
+exports.passport404Error = (profile) => {
+  return {
+    code: 404,
+    message: "User not found",
+    data: this.passportData(profile),
+  }
 }
 
 exports.passportData = (profile) => {

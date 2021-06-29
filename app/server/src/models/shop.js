@@ -51,12 +51,13 @@ const shopSchema = Schema(
 )
 
 exports.validationSchema = Joi.object({
-  name: Joi.string().alphanum(),
-  slug: Joi.string().alphanum(),
-  area: Joi.objectId(),
-  prefecture: Joi.objectId(),
-  city: Joi.objectId(),
-  brand: Joi.string(),
+  name: Joi.string().alphanum().required(),
+  slug: Joi.string().alphanum().required(),
+  area: Joi.objectId().required(),
+  prefecture: Joi.objectId().required(),
+  city: Joi.objectId().required(),
+  brand: Joi.string().required(),
+  details: Joi.string().required(),
 })
 
 exports.Shop = mongoose.model('Shop', shopSchema)

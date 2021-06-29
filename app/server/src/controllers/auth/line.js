@@ -1,8 +1,8 @@
 const router = require('express').Router()
 const passport = require('passport')
 const LineStrategy = require('passport-line-auth')
-const { User } = require('../../models/user')
-const { login, passportData } = require('./utils')
+const UserRepository = require('../../repositories/userRepository')
+const { login, passport404Error } = require('./utils')
 const jwt = require('jsonwebtoken')
 
 passport.use(new LineStrategy({
@@ -14,9 +14,15 @@ passport.use(new LineStrategy({
   uiLocales: 'en-US',
 }, async (token, tokenSecret, params, profile, done) => {
   try {
-    profile.email = email
-    let user = await User.findOne({lineID: profile.id}).or([{email}]).exec()
-    if (!user) return done({ code: 404, message: "User not found", data: passportData(profile) })
+    // メールをparamsから取得
+    profile.email = jwt.decode(params.id_token).email
+
+    let user = await UserRepository.findByProps([{ LineID: profile.id }, { email: profile.email }])
+    if (!user) return done(passport404Error(profile))
+
+    // ユーザー情報がDBにあったらIDをユーザー情報に追加する
+    user = await UserRepository.addIdFromPassportProfile(user, profile)
+
     return done(null, user)
   } catch (e) {
     done(e, null)
