@@ -1,9 +1,9 @@
 const mongoose = require('mongoose')
 const { Types: { ObjectId }} = mongoose
 
-exports.schemaMiddleware = (schema) => {
+exports.schemaMiddleware = (validationSchema) => {
   return (req, res, next) => {
-    schema.validateAsync(req.body, {abortEarly: false})
+    validationSchema.validateAsync(req.body, {abortEarly: false})
     .then(validated => {
       next()
     })

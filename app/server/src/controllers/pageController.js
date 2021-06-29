@@ -17,9 +17,4 @@ const index = (pages) => {
 // index
 router.get('/', index(pages))
 
-router.get('/logout', (req, res, next) => {
-  req.logout()
-  res.redirect('/')
-})
-
 module.exports = router

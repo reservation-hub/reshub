@@ -1,8 +1,8 @@
 const router = require('express').Router()
 const passport = require('passport')
 const TwitterStrategy = require('passport-twitter')
-const { User } = require('../../models/user')
-const { login, passportData } = require('./utils')
+const UserRepository = require('../../repositories/userRepository')
+const { login, passport404Error } = require('./utils')
 
 passport.use(new TwitterStrategy({
   consumerKey: process.env.TWITTER_API_KEY,
@@ -11,8 +11,12 @@ passport.use(new TwitterStrategy({
   includeEmail: true,
 }, async (token, tokenSecret, profile, done) => {
   try {
-    let user = await User.findOne({twitterID: profile.id}).or([{email: profile.emails[0].value}]).exec()
-    if (!user) return done({ code: 404, message: "User not found", data: passportData(profile) })
+    let user = await UserRepository.findByProps([{ twitterID: profile.id }, { email: profile.emails[0].value }])
+    if (!user) return done(passport404Error(profile))
+    
+    // ユーザー情報がDBにあったらIDをユーザー情報に追加する
+    user = await UserRepository.addIdFromPassportProfile(user, profile)
+
     return done(null, user)
   } catch (e) {
     done(e, null)
