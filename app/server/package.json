@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon --legacy-watch -r dotenv/config src/app.js dotenv_config_path=/environment/.env",
-    "start": "node src/app.js",
+    "serve": "nodemon --legacy-watch main.js",
+    "start": "node main.js",
     "seed": "node -r dotenv/config seed.js dotenv_config_path=/environment/.env"
   },
   "keywords": [],
@@ -15,7 +15,6 @@
     "bcrypt": "^5.0.1",
     "connect-redis": "^6.0.0",
     "cors": "^2.8.5",
-    "dotenv": "^8.5.1",
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "express-session": "^1.17.2",
