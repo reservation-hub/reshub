@@ -15,6 +15,8 @@ services:
     environment: 
       - NODE_ENV=development
       - COMMAND=${COMMAND:-serve}
+    env_file: 
+      - .env.dev
     image: reshub-server
     ports: 
       - 8090:8090

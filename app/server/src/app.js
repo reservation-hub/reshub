@@ -40,6 +40,4 @@ app.use(passport.session());
 require('./routes')(app)
 app.use(errorHandler)
 
-app.listen(8090, () => {
-    console.log('server is up')
-})  
+module.exports = app
