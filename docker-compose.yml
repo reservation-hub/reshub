@@ -49,6 +49,8 @@ services:
     container_name: reshub-client
     environment:
       - COMMAND=${COMMAND:-start}
+    env_file: 
+      - .env
     image: reshub-client
     ports:
       - 8080:3000
