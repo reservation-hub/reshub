@@ -15,7 +15,7 @@ const CommonStyle = makeStyles({
   },
   bc: {
     position: 'absolute',
-    top: '25%',
+    top: '20%',
     left: '25%',
     right: '25%'
   },
@@ -35,12 +35,25 @@ const CommonStyle = makeStyles({
     }
   },
   a1: {
-    width: '100%',
     marginTop: '.6888rem',
-    padding: '.2255rem',
+    padding: '.2855rem',
     border: '1px solid #999',
     borderRadius: '.25rem',
-    textDecoration: 'none'
+    textDecoration: 'none',
+    color: '#999',
+    fontSize: '1.2rem',
+    '&:hover': {
+      borderColor: '#d3d8db',
+      color: '#fafafa',
+      backgroundColor: '#d3d8db',
+      transition: '.3s ease'
+    }
+  },
+  ics1: {
+    width: '25px',
+    height: '25px',
+    margin: '.1rem -2rem 0 1rem',
+    float: 'left',
   }
 })
 
