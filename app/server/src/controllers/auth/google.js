@@ -15,7 +15,6 @@ passport.use(new GoogleStrategy({
 
     // ユーザー情報がDBにあったらIDをユーザー情報に追加する
     user = await UserRepository.addIdFromPassportProfile(user, profile)
-    console.log('access token : ', accessToken)
     return done(null, user)
   } catch (e) {
     done(e, null)

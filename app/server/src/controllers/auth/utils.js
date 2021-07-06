@@ -1,26 +1,31 @@
 const jwt = require('jsonwebtoken')
+const cookieOptions = { 
+  httpOnly: true, 
+  secure: true, 
+  sameSite: "none", 
+  maxAge: 360000, 
+  signed: true, 
+}
 
 exports.login = (req, res, next) => {
   const { user: profile } = req
   const user = {}
   
   // create safe user obj
-  if (profile.password) {
-    Object.keys(profile._doc).map(key => {
-      if (key !== "password") user[key] = profile[key]
-    })
-  } else {
-    Object.assign(user, profile._doc)
-  }
+  Object.entries(profile.toObject()).map(([key, value]) => {
+    if (key !== 'password') user[key] = value
+  })
 
   // create token
-  
-
-  // set return values
-
-  
-  
-  return res.send(user)
+  const token = jwt.sign({ user }, process.env.JWT_TOKEN_SECRET, {
+    audience: 'http://localhost:8080',
+    expiresIn: "1d",
+    issuer: process.env.RESHUB_URL
+  })
+  console.log('token : ', token)
+  // set cookies values
+  res.cookie('authToken', token, cookieOptions)
+  return res.send({ user })
 }
 
 exports.passport404Error = (profile) => {
