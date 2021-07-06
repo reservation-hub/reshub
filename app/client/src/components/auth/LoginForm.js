@@ -23,16 +23,20 @@ const Login = ({ value, setValue }) => {
   return (
     <main className={ login.loginRoot }>
       <div className={ common.bc }>
+
         {/* header area */}
         <Container 
           maxWidth='sm'
           align='right' 
-          className={login.headerFooter}
+          className={ 
+            `${ login.headerFooter } ${ common.mb1 }`
+          }
         >
           <Typography variant='h4'>
             Reshub-Admin
           </Typography>
         </Container>
+
         {/* main contents */}
         <Container maxWidth='sm'className={ login.formBox }>
           <Grid 
@@ -75,40 +79,24 @@ const Login = ({ value, setValue }) => {
             </Grid>
             <Grid 
               container 
-              item 
-              xs 
+              item  
               align='center' 
               direction='column'
             >
               <a href='#' className={ common.a1 }> 
-                <span>
-                  { <FcGoogle /> }
-                </span>
-                <span>
-                  Login with Google
-                </span>
-              </a>
-              <a href='#' className={ common.a1 }>
-                <span>
-                  { <FaLine /> }
-                </span>
-                Login with Line
-              </a>
-              <a href='#' className={ common.a1 }>
-                { <FaTwitter /> }
-                Login with Twitter
-              </a>
-              <a href='#' className={ common.a1 }>
-                { <FaFacebook /> }
-                Login with Facebook
+                <FcGoogle className={ common.ics1 } />
+                Login with Google
               </a>
             </Grid>
           </Grid>
         </Container>
+
         {/* footer area */}
         <Container 
           maxWidth='sm'
-          className={login.headerFooter}
+          className={ 
+            `${ login.headerFooter } ${ common.mt1 }` 
+          }
         >
           <Typography variant='h5'>
             Copyright 2021 Reshub
