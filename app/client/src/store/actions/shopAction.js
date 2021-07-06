@@ -4,11 +4,11 @@
 
 import apiEndpoint from '../../utils/api/axios'
 import { 
+  SHOP_FETCH_SUCCESS,
+  SHOP_GET_SUCCESS,
   SHOP_ADD_SUCCESS, 
   SHOP_DELETE_SUCCESS, 
-  SHOP_EDIT_SUCCESS, 
-  SHOP_FETCH_SUCCESS,
-  SHOP_GET_SUCCESS, 
+  SHOP_EDIT_SUCCESS,  
   SHOP_REQUEST_FAILURE, 
   SHOP_REQUEST_START 
 } from '../types/shopTypes'
