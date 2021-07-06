@@ -25,11 +25,15 @@ exports.errorHandler = (err, req, res, next) => {
   }
 
   if (err.name === "DocumentNotFoundError") {
-    return res.status(404).send({message: 'Error: Not Found'})
+    return res.status(404).send({ message: 'Error: Not Found' })
   }
 
   if (err.code === 401) {
     return res.status(err.code).send({ message: "ERROR"})
+  }
+
+  if (err.name === "JsonWebTokenError") {
+    return res.status(400).send({ message: err.message })
   }
 
   return res.status(err.code || 500).send({message: err.message || 'Internal Server Error', data: err.data})

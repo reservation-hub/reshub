@@ -1,32 +1,28 @@
-const express = require('express')
-const path = require('path')
-
+const jwtPassport = require('./controllers/auth/jwt')
 const apiRoutes = [
   require('./controllers/API/areaController'),
   require('./controllers/API/indexController'),
 ]
 
-const authCheck = (req, res, next) => {
-  if (req.user === undefined) return next({ message: 'aa', code: 401})
-  return next()
+// TODO learn how to get cookies set in postman then use it for route protection
+const protectRoute = () => (req, res, next) => {
+  return jwtPassport.authenticate('jwt', { session: false }, () => {
+    const { signedCookies, cookies } = req
+    console.log('signed cookies : ', signedCookies)
+    console.log('cookies ', cookies)
+    // console.log(req)
+    return next()
+  })(req, res, next)
 }
 
 module.exports = (app) => {
   app.use('/api', apiRoutes)
   app.use('/auth', require('./controllers/auth/authController'))
 
-  app.use('/areas', require('./controllers/areaController'))
-  app.use('/prefectures', require('./controllers/prefectureController'))
-  app.use('/cities', require('./controllers/cityController'))
-  app.use('/shops', require('./controllers/shopController'))
+  app.use('/areas', jwtPassport.authenticate('jwt', { session: false }), require('./controllers/areaController'))
+  app.use('/prefectures', jwtPassport.authenticate('jwt', { session: false }), require('./controllers/prefectureController'))
+  app.use('/cities', jwtPassport.authenticate('jwt', { session: false }), require('./controllers/cityController'))
+  app.use('/shops', jwtPassport.authenticate('jwt', { session: false }), require('./controllers/shopController'))
 
-  if (process.env.NODE_ENV === "production") {
-    console.log("PUBLIC FOLDER PATH : ", path.join(__dirname, 'public'))
-    app.use(express.static(path.join(__dirname, 'public')))
-    app.get(['/', '/*'], (req, res, next) => {
-      res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    })
-  } else {
-    app.use('/*', (req, res, next) => next({code: 404, message: 'Bad route'})) // 404s
-  }
+  app.use('/*', (req, res, next) => next({code: 404, message: 'Bad route'})) // 404s
 }

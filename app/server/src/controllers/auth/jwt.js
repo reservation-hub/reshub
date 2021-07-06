@@ -5,15 +5,16 @@ const UserRepository = require('../../repositories/userRepository')
 const options = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_TOKEN_SECRET,
-  issuer: 'localhost:8080',
-  audience: 'localhost:8090',
+  audience: 'http://localhost:8080',
+  expiresIn: "1d",
+  issuer: process.env.RESHUB_URL
 }
 
 passport.use(new JWTStrategy(options, async (jwtPayload, done) => {
   try {
-    let user = await UserRepository.findByProps({ _id: jwtPayload._id })
-    if (!user) return done('JWT TOKEN ERROR')
-    return done('SUCCESS')
+    let user = await UserRepository.findByProps({ _id: jwtPayload.user._id })
+    if (!user) return done("Unauthorized")
+    return done(null, user)
   } catch (e) {return done(e, null)}
 }))
 

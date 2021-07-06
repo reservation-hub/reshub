@@ -1,8 +1,8 @@
 const router = require('express').Router()
 const passport = require('passport')
 const LineStrategy = require('passport-line-auth')
-const UserRepository = require('../../repositories/userRepository')
-const { login, passport404Error } = require('./utils')
+const UserRepository = require('../../../repositories/userRepository')
+const { login, passport404Error } = require('../../auth/utils')
 const jwt = require('jsonwebtoken')
 
 passport.use(new LineStrategy({
