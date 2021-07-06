@@ -3,6 +3,7 @@ const cors = require('cors')
 const db = require('./db/mongoose')
 const session = require('express-session')
 const passport = require('passport')
+const helmet = require('helmet')
 const { errorHandler } = require('../lib/errorHandler')
 
 // session management
@@ -26,15 +27,10 @@ passport.deserializeUser(function(_id, done) {
 });
 
 app.use(express.json())
-app.use(cors())
-app.use(session({
-    secret: 'reservation hub',
-    resave: false,
-    saveUninitialized: false,
-    // cookie: { secure: true, maxAge: 60 * 60 * 1000 }, /* commented out because since it's not yet running on https, we can't use secure: true*/
-    cookie: { maxAge: 60 * 60 * 1000 },
-    store: new redisStore({ client: redisClient })
-}))
+if (process.env.NODE_ENV === 'development') {
+  app.use(cors())
+}
+app.use(helmet())
 app.use(passport.initialize());
 app.use(passport.session());
 require('./routes')(app)

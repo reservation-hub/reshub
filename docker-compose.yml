@@ -16,8 +16,8 @@ services:
       - NODE_ENV=development
       - COMMAND=${COMMAND:-serve}
     env_file: 
-      - .env.dev
-    image: reshub-server
+      - reshub-deploy/.env.dev
+    image: reshub-server:latest
     ports: 
       - 8090:8090
     volumes:
@@ -28,15 +28,20 @@ services:
       - db
       - redis
   
-  # prd server
-  server-prd:
-    container_name: reshub-server
+  # prd
+  production:
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+    container_name: reshub-server_prd
     environment: 
       - NODE_ENV=production
       - COMMAND=${COMMAND:-start}
-    image: reshub-server_prd
+    env_file: 
+      - reshub-deploy/.env.production
+    image: reshub_prd
     ports: 
-      - 8090:8090
+      - 8091:8090
     depends_on: 
       - db
       - redis
@@ -50,8 +55,8 @@ services:
     environment:
       - COMMAND=${COMMAND:-start}
     env_file: 
-      - .env
-    image: reshub-client
+      - reshub-deploy/.env.dev
+    image: reshub-client:latest
     ports:
       - 8080:3000
     volumes:

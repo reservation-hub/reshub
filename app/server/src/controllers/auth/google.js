@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const passport = require('passport')
-const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
+const GoogleStrategy = require('passport-google-oauth20').Strategy
 const UserRepository = require('../../repositories/userRepository')
 const { login, passport404Error } = require('./utils')
 
@@ -15,15 +15,15 @@ passport.use(new GoogleStrategy({
 
     // ユーザー情報がDBにあったらIDをユーザー情報に追加する
     user = await UserRepository.addIdFromPassportProfile(user, profile)
-
+    console.log('access token : ', accessToken)
     return done(null, user)
   } catch (e) {
     done(e, null)
   }
 }))
 
-router.get('/', passport.authenticate('google', { scope: ['email', 'profile']}))
+router.get('/', passport.authenticate('google', { scope: ['email', 'profile'] }))
 
-router.get('/callback', passport.authenticate('google'), login)
+router.get('/callback', passport.authenticate('google', { session: false }), login)
 
 module.exports = router

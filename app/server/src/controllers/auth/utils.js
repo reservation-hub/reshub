@@ -1,7 +1,10 @@
+const jwt = require('jsonwebtoken')
+
 exports.login = (req, res, next) => {
   const { user: profile } = req
   const user = {}
   
+  // create safe user obj
   if (profile.password) {
     Object.keys(profile._doc).map(key => {
       if (key !== "password") user[key] = profile[key]
@@ -10,8 +13,14 @@ exports.login = (req, res, next) => {
     Object.assign(user, profile._doc)
   }
 
-  req.session.user = user
-  return res.send({})
+  // create token
+  
+
+  // set return values
+
+  
+  
+  return res.send(user)
 }
 
 exports.passport404Error = (profile) => {

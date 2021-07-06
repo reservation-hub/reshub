@@ -3,6 +3,7 @@ const router = express.Router()
 const { validationSchema: shopSchema, Shop } = require('../models/shop')
 const { registerCrud } = require('../../lib/crudController')
 
-registerCrud(Shop, shopSchema, router, {populate: true})
+// path 
+registerCrud(/*path /shops/*/Shop, shopSchema, router, {populate: true})
 
 module.exports = router
