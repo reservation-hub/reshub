@@ -50,7 +50,7 @@ services:
     environment:
       - COMMAND=${COMMAND:-start}
     env_file: 
-      - .env
+      - .env.dev
     image: reshub-client
     ports:
       - 8080:3000
