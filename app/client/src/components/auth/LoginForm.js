@@ -6,11 +6,6 @@ import {
   Typography 
 } from '@material-ui/core'
 import { FcGoogle } from 'react-icons/fc'
-import { 
-  FaFacebook,
-  FaTwitter,
-  FaLine 
-} from 'react-icons/fa'
 // import { Link } from 'react-router-dom'
 import LoginStyle from './LoginStyle'
 import CommonStyle from '../CommonStyle'
