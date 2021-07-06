@@ -29,8 +29,8 @@ passport.use(new LineStrategy({
   }
 }))
 
-router.get('/', passport.authenticate('line'))
+router.get('/', passport.authenticate('line', { session: false }))
 
-router.get('/callback', passport.authenticate('line'), login)
+router.get('/callback', passport.authenticate('line', { session: false }), login)
 
 module.exports = router

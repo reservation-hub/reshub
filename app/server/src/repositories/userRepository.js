@@ -15,7 +15,6 @@ module.exports = {
     return await User.findOne(prop).exec()
   },
   async addIdFromPassportProfile(user, profile) {
-    console.log('profile : ', profile)
     switch (profile.provider) {
       case 'google':
         user.googleID = profile.id
@@ -29,7 +28,6 @@ module.exports = {
       default:
         break;
     }
-    console.log('user : ', user)
     return await user.save()
   }
 }

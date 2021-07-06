@@ -11,7 +11,7 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, async (username, pass
   return done(null, user)
 }))
 
-router.post('/login', passport.authenticate('local'), login)
+router.post('/login', passport.authenticate('local', { session: false }), login)
 
 router.get('/logout', async (req, res, next) => {
   req.logout()

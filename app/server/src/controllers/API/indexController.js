@@ -10,7 +10,7 @@ router.get('/', eah((req, res, next) => {
   return res.send(shops)
 }))
 
-// faker
+// faker - フェークのショップデータ作るやつなので無視でお願いします
 
 router.get('/fake', shopSeeder(10))
 

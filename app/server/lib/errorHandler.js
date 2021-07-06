@@ -29,7 +29,7 @@ exports.errorHandler = (err, req, res, next) => {
   }
 
   if (err.code === 401) {
-    return res.status(err.code).redirect('/auth/login')
+    return res.status(err.code).send({ message: "ERROR"})
   }
 
   return res.status(err.code || 500).send({message: err.message || 'Internal Server Error', data: err.data})
