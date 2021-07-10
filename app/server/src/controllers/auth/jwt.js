@@ -1,9 +1,21 @@
 const passport = require('passport')
-const { Strategy: JWTStrategy, ExtractJwt } = require('passport-jwt')
+const { Strategy: JWTStrategy } = require('passport-jwt')
 const UserRepository = require('../../repositories/userRepository')
 
+const cookieExtractor = (req) => {
+  const authHeader = req.get('authorization')
+  if (!authHeader) return null 
+
+  const { authToken } = req.signedCookies
+  const headerToken = authHeader.split(" ")[1]
+  if (req && authToken && headerToken && authToken === headerToken) {
+    return authToken
+  }
+  return null
+}
+
 const options = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: cookieExtractor,
   secretOrKey: process.env.JWT_TOKEN_SECRET,
   audience: 'http://localhost:8080',
   expiresIn: "1d",

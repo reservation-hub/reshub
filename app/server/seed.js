@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt')
 const db = require('./src/db/mongoose')
 const { User } = require('./src/models/user')
 const admins = [
@@ -24,14 +23,17 @@ const admins = [
   }
 ]
 
-admins.forEach(admin => {
+console.log("running seeder")
+admins.forEach(async admin => {
   const values = {}
   Object.entries(admin).forEach(([key, val]) => {
     values[key] = val
   })
-  const unhashedPass = "testtest"
-  const hash = bcrypt.hashSync(unhashedPass, saltRounds = 10)
-  values.password = hash
-  const user = new User(values)
-  user.save()
+  try {
+    const user = new User(values)
+    console.log("add", user)
+    await user.save()
+  } catch (e) {console.log('ERROR', e)}
 })
+
+console.log("Seeding done!")
