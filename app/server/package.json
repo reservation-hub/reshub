@@ -6,7 +6,7 @@
   "scripts": {
     "serve": "nodemon --legacy-watch main.js",
     "start": "node main.js",
-    "seed": "node -r dotenv/config seed.js dotenv_config_path=/environment/.env"
+    "seed": "node seed.js"
   },
   "keywords": [],
   "author": "",
