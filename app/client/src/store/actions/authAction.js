@@ -39,7 +39,7 @@ export const loginStart = (email, password) => dispatch => {
 
     dispatch({
       type: USER_REQUEST_SUCCESS,
-      payload: res.data
+      payload: res
     })
   } catch (e) {
     dispatch(userRequestFailure(e))
@@ -47,18 +47,16 @@ export const loginStart = (email, password) => dispatch => {
 
 }
 
-export const googleLogin = (response) => async dispatch => {
+export const googleLogin = (googleResponse) => async dispatch => {
 
   dispatch(userRequestStart())
-  console.log(response)
   try {
-    const res = apiEndpoint.googleLogin(response)
-    console.log('res: ', res)
-    setAuthToken(res.tokenId)
-    console.log('token: ', res.data)
+    const { data: { user, token } } = await apiEndpoint.googleLogin(googleResponse.tokenId)
+    
     dispatch({
       type: USER_REQUEST_SUCCESS,
-      payload: res.data
+      payload: user,
+      token: token
     })
   } catch (e) {
     dispatch(userRequestFailure(e))

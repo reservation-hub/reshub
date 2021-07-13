@@ -2,11 +2,18 @@ const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 const UserRepository = require('../repositories/userRepository')
 const eah = require('express-async-handler')
-const passport = require('./passport')
+const { OAuth2Client } = require('google-auth-library')
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
-const login = (req, res, next) => {
-  const { user: profile } = req
-  const user = {}
+const login = eah(async (req, res, next) => {
+  const { email } = res.locals.auth  
+  let user = await UserRepository.findByProps({ email })
+  if (!user) return next({ code: 404, message: "User not found" })
+
+  user = user.toObject()
+  delete user.password
+
+  // トークン生成
   const cookieOptions = { 
     httpOnly: process.env.NODE_ENV === 'production', 
     secure: process.env.NODE_ENV === 'production', 
@@ -14,13 +21,6 @@ const login = (req, res, next) => {
     maxAge: 1000 * 60 * 60 * 12, 
     signed: true, 
   }
-  
-  // create safe user obj
-  Object.entries(profile.toObject()).map(([key, value]) => {
-    if (key !== 'password') user[key] = value
-  })
-
-  // トークン生成
   const token = jwt.sign({ user }, process.env.JWT_TOKEN_SECRET, {
     audience: 'http://localhost:8080',
     expiresIn: "1d",
@@ -30,7 +30,7 @@ const login = (req, res, next) => {
   // クッキーを設定
   res.cookie('authToken', token, cookieOptions)
   return res.send({ user, token })
-}
+})
 
 const verifyIfLoggedIn = eah(async (req, res, next) => {
   const { signedCookies } = req
@@ -41,11 +41,25 @@ const verifyIfLoggedIn = eah(async (req, res, next) => {
   const user = await UserRepository.findByProps([{ email: token.user.email }, { _id: token.user._id }])
   if (!user) return next({ code: 403, message: "Unauthorized Access"})
 
-  return res.send({ message: "User is already logged in!" })
+  return next({ code: 400, message: "User is already logged in!" })
   
 })
 
-router.get('/google', verifyIfLoggedIn, passport.authenticate('google', { scope: ['email', 'profile'] }))
-router.get('/google/callback', verifyIfLoggedIn, passport.authenticate('google', { session: false }), login)
+const checkToken = eah(async (req, res, next) => {
+  const { tokenId } = req.body
+  if (!tokenId) return next({ code: 401, message: "Bad Request" })
+
+  const ticket = await client.verifyIdToken({
+    idToken: tokenId,
+    audience: process.env.GOOGLE_CLIENT_ID
+  })
+
+  const { email } = ticket.getPayload()
+  if (!email) return next({ code: 401, message: "Bad Request" })
+  res.locals.auth = { email }
+  return next()
+})
+
+router.post('/google', verifyIfLoggedIn, checkToken, login)
 
 module.exports = router
