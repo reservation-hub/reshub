@@ -79,6 +79,21 @@ export const deleteShop = async (id) => await axios.delete(
   `${ BASE_URL }/shops/${ id }`
 )
 
+//-----------------------------------------------
+// authenticate
+//-----------------------------------------------
+
+export const localLogin = async (email, password) => await axios.post(
+  `${ BASE_URL }/auth/test`, { email, password }
+)
+
+export const googleLogin = async (res) => await axios.get(
+  `${ BASE_URL }/auth/google`, { res }
+)
+
+export const logout = async () => await axios.get(
+  `${ BASE_URL }/auth/logout`
+)
 
 const apiEndpoint = {
   fetchAll,
@@ -93,7 +108,10 @@ const apiEndpoint = {
   addShop,
   patchShop,
   putShop,
-  deleteShop
+  deleteShop,
+  localLogin,
+  googleLogin,
+  logout
 }
 
 export default apiEndpoint
