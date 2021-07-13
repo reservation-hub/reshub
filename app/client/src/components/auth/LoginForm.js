@@ -5,23 +5,15 @@ import {
   TextField,
   Typography 
 } from '@material-ui/core'
-import { useDispatch } from 'react-redux'
 import { FcGoogle } from 'react-icons/fc'
-import { GoogleLogin } from 'react-google-login'
-import { googleLogin } from '../../store/actions/authAction'
+// import { Link } from 'react-router-dom'
 import LoginStyle from './LoginStyle'
 import CommonStyle from '../CommonStyle'
 
-const Login = ({ value, setValue, onSubmit }) => {
+const Login = ({ value, setValue }) => {
 
   const login = LoginStyle()
   const common = CommonStyle()
-  const dispatch = useDispatch()
-  
-  const onSuccess = (response) => {
-    // dispatch(googleLogin(response))
-    console.log(response)
-  }
 
   return (
     <main className={ login.loginRoot }>
@@ -49,7 +41,7 @@ const Login = ({ value, setValue, onSubmit }) => {
             className={ common.h255 }
           >
             <Grid item xs>
-              <form onSubmit={ onSubmit }>
+              <form>
                 <TextField 
                   label='email'
                   name='email'
@@ -86,12 +78,10 @@ const Login = ({ value, setValue, onSubmit }) => {
               align='center' 
               direction='column'
             >
-              <GoogleLogin 
-                clientId={ process.env.REACT_APP_GOOGLE_CLIENT_ID }
-                onSuccess={ onSuccess }
-                onFailure={ onSuccess }
-                cookiePolicy={ 'single_host_origin' }
-              />
+              <a href='#' className={ common.a1 }> 
+                <FcGoogle className={ common.ics1 } />
+                Login with Google
+              </a>
             </Grid>
           </Grid>
         </Container>
