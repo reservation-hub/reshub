@@ -1,7 +1,7 @@
 import axios from 'axios'
 import BASE_URL from './index'
 
-const instance = axios.create({
+export const instance = axios.create({
   withCredentials: true,
   baseURL: BASE_URL
 })
@@ -92,12 +92,6 @@ export const localLogin = async (email, password) => await instance.post(
   `/auth/test`, { email, password }
 )
 
-// export const googleLogin = async (tokenId) => await instance.request({
-//   url: `/auth/google`,
-//   method: "post",
-//   data: { tokenId },
-//   withCredentials: true
-// })
 export const googleLogin = async (tokenId) => await instance.post(
   `/auth/google`, { tokenId }
 )
@@ -122,7 +116,8 @@ const apiEndpoint = {
   deleteShop,
   localLogin,
   googleLogin,
-  logout
+  logout,
+  instance,
 }
 
 export default apiEndpoint

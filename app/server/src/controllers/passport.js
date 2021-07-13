@@ -27,11 +27,11 @@ passport.use(new GoogleStrategy(googleOptions, async (accessToken, refreshToken,
 const { Strategy: JWTStrategy } = require('passport-jwt')
 
 const cookieExtractor = (req) => {
-  const authHeader = req.get('authorization')
-  if (!authHeader) return null 
+  const headerToken = req.get('authorization')
+  if (!headerToken) return null 
 
   const { authToken } = req.signedCookies
-  const headerToken = authHeader.split(" ")[1]
+  console.log(headerToken, authToken)
   if (req && authToken && headerToken && authToken === headerToken) {
     return authToken
   }
@@ -51,7 +51,7 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
     let user = await UserRepository.findByProps({ _id: jwtPayload.user._id })
     if (!user) return done("Unauthorized")
     return done(null, user)
-  } catch (e) {return done(e, null)}
+  } catch (e) { return done(e, null) }
 }))
 
 // local

@@ -2,8 +2,7 @@ const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 const UserRepository = require('../repositories/userRepository')
 const eah = require('express-async-handler')
-const { OAuth2Client } = require('google-auth-library')
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+const passport = require('./passport')
 
 const login = eah(async (req, res, next) => {
   const { email } = res.locals.auth  
@@ -45,6 +44,9 @@ const verifyIfLoggedIn = eah(async (req, res, next) => {
   
 })
 
+const { OAuth2Client } = require('google-auth-library')
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+
 const checkToken = eah(async (req, res, next) => {
   const { tokenId } = req.body
   if (!tokenId) return next({ code: 401, message: "Bad Request" })
@@ -60,6 +62,12 @@ const checkToken = eah(async (req, res, next) => {
   return next()
 })
 
+const logout = (req, res, next) => {
+  res.clearCookie('authToken')
+  res.send('Logged out successfully!')
+}
+
 router.post('/google', verifyIfLoggedIn, checkToken, login)
+router.get('/logout', passport.authenticate('jwt', { session: false }), logout)
 
 module.exports = router
