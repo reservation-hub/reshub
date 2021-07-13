@@ -3,12 +3,13 @@ import {
   Grid,
   Container,
   TextField,
-  Typography 
+  Typography,
+  Button
 } from '@material-ui/core'
 import { useDispatch } from 'react-redux'
 import { FcGoogle } from 'react-icons/fc'
 import { GoogleLogin } from 'react-google-login'
-import { googleLogin } from '../../store/actions/authAction'
+import { googleLogin, logout } from '../../store/actions/authAction'
 import LoginStyle from './LoginStyle'
 import CommonStyle from '../CommonStyle'
 
@@ -20,7 +21,11 @@ const Login = ({ value, setValue, onSubmit }) => {
   
   const onSuccess = (response) => {
     dispatch(googleLogin(response))
-    console.log(response)
+  }
+
+  const onLogOut = () => {
+    console.log('should logout')
+    dispatch(logout())
   }
 
   return (
@@ -92,6 +97,7 @@ const Login = ({ value, setValue, onSubmit }) => {
                 onFailure={ onSuccess }
                 cookiePolicy={ 'single_host_origin' }
               />
+              <Button onClick={ onLogOut }>Log Out</Button>
             </Grid>
           </Grid>
         </Container>

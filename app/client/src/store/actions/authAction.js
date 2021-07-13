@@ -11,7 +11,9 @@ import setAuthToken from '../../utils/setAuthToken'
 import { 
   USER_REQUEST_START, 
   USER_REQUEST_SUCCESS, 
-  USER_REQUEST_FAILURE 
+  USER_REQUEST_FAILURE,
+  LOGOUT_REQUEST_FAILURE,
+  LOGOUT_REQUEST_SUCCESS 
 } from '../types/authTypes'
 
 export const userRequestStart = () => {
@@ -23,6 +25,13 @@ export const userRequestStart = () => {
 export const userRequestFailure = (err) => {
   return {
     type: USER_REQUEST_FAILURE,
+    payload: err.response.data
+  }
+}
+
+export const logoutRequestFailure = (err) => {
+  return {
+    type: LOGOUT_REQUEST_FAILURE,
     payload: err.response.data
   }
 }
@@ -52,14 +61,30 @@ export const googleLogin = (googleResponse) => async dispatch => {
   dispatch(userRequestStart())
   try {
     const { data: { user, token } } = await apiEndpoint.googleLogin(googleResponse.tokenId)
-    
+
+    setAuthToken(token)
+
     dispatch({
       type: USER_REQUEST_SUCCESS,
-      payload: user,
-      token: token
+      payload: user
     })
   } catch (e) {
     dispatch(userRequestFailure(e))
     console.log(e)
   }
+}
+
+export const logout = () => async dispatch => {
+  try {
+    const { message } = await apiEndpoint.logout()
+
+    dispatch({
+      type: LOGOUT_REQUEST_SUCCESS,
+      payload: message
+    })
+
+  } catch (e) {
+    dispatch(logoutRequestFailure(e))
+  }
+
 }
