@@ -53,28 +53,28 @@ const seed = async () => {
     } catch(e) {console.log("Role Seeder Error", e)}
   })
 
-  const role = await Role.findOne({ name: "admin" })
-
-  console.log('running admins seeder')
-  admins.forEach(async admin => {
-    const values = {}
-    Object.entries(admin).forEach(([key, val]) => {
-      values[key] = val
+  
+  Role.findOne({ name: "admin" }).then(role => {
+    console.log('running admins seeder')
+    admins.forEach(async admin => {
+      const values = {}
+      Object.entries(admin).forEach(([key, val]) => {
+        values[key] = val
+      })
+      try {
+        const user = new User(values)
+        console.log('role : ', role)
+        user.roles.push(role)
+        const duplicate = await User.find({email: user.email}).exec()
+        if (duplicate.length > 0) return
+        user.save()
+      } catch (e) {console.log('ERROR', e)}
     })
-    try {
-      const user = new User(values)
-      user.roles.push(role)
-      const duplicate = await User.find({email: user.email}).exec()
-      if (duplicate.length > 0) return
-      user.save()
-    } catch (e) {console.log('ERROR', e)}
-  })
+  }).catch(e => e)
+
   
   console.log("Seeding done!")
   
 }
 
 seed()
-setTimeout(() => {
-  process.exit()
-}, 1000);
