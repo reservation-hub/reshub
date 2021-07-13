@@ -19,7 +19,7 @@ const Login = ({ value, setValue, onSubmit }) => {
   const dispatch = useDispatch()
   
   const onSuccess = (response) => {
-    // dispatch(googleLogin(response))
+    dispatch(googleLogin(response))
     console.log(response)
   }
 

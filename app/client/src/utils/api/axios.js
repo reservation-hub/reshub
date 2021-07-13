@@ -1,33 +1,38 @@
 import axios from 'axios'
 import BASE_URL from './index'
 
+const instance = axios.create({
+  withCredentials: true,
+  baseURL: BASE_URL
+})
+
 //-----------------------------------------------
 // get method
 //-----------------------------------------------
 
 // 全てのデータをGETする
-export const fetchAll = async () => await axios.get(
-  `${ BASE_URL }/`
+export const fetchAll = async () => await instance.get(
+  `/`
 )
 
 // お店のデータをGETする
-export const getShop = async () => await axios.get(
-  `${ BASE_URL }/shops`
+export const getShop = async () => await instance.get(
+  `/shops`
 )
 
 // エリアデータをGETする
-export const getArea = async () => await axios.get(
-  `${ BASE_URL }/area`
+export const getArea = async () => await instance.get(
+  `/area`
 ) 
 
 // prefectureデータをGETする
-export const getPrefecture = async () => await axios.get(
-  `${ BASE_URL }/prefecture`
+export const getPrefecture = async () => await instance.get(
+  `/prefecture`
 )
 
 // citisデータをGETする
-export const getCities = async () => await axios.get(
-  `${ BASE_URL }/cities`
+export const getCities = async () => await instance.get(
+  `/cities`
 )
 
 
@@ -36,23 +41,23 @@ export const getCities = async () => await axios.get(
 //-----------------------------------------------
 
 //　お店データを一つだけGETする
-export const getOneShop = async (id) => await axios.get(
-  `${ BASE_URL }/shops/${ id }`
+export const getOneShop = async (id) => await instance.get(
+  `/shops/${ id }`
 )
 
 //　エリアデータを一つだけGETする
-export const getOneArea = async (id) => await axios.get(
-  `${ BASE_URL }/area/${ id }`
+export const getOneArea = async (id) => await instance.get(
+  `/area/${ id }`
 )
 
 //　県データを一つだけGETする
-export const getOnePrefecture = async (id) => await axios.get(
-  `${ BASE_URL }/prefecture/${ id }`
+export const getOnePrefecture = async (id) => await instance.get(
+  `/prefecture/${ id }`
 )
 
 //　都市データを一つだけGETする
-export const getOneCities = async (id) => await axios.get(
-  `${ BASE_URL }/cities/${ id }`
+export const getOneCities = async (id) => await instance.get(
+  `/cities/${ id }`
 )
 
 //-----------------------------------------------
@@ -60,39 +65,45 @@ export const getOneCities = async (id) => await axios.get(
 //-----------------------------------------------
 
 // add Shop data
-export const addShop = async (shopData) => await axios.post(
-  `${ BASE_URL }/shops`, { ...shopData }
+export const addShop = async (shopData) => await instance.post(
+  `/shops`, { ...shopData }
 )
 
 // patch Shop data
-export const patchShop = async (id, shopData) => await axios.patch(
-  `${ BASE_URL }/shops/${ id }`, { ...shopData }
+export const patchShop = async (id, shopData) => await instance.patch(
+  `/shops/${ id }`, { ...shopData }
 )
 
 // put Shop data
-export const putShop = async (id, shopData) => await axios.put(
-  `${ BASE_URL }/shops/${ id }`, { ...shopData }
+export const putShop = async (id, shopData) => await instance.put(
+  `/shops/${ id }`, { ...shopData }
 )
 
 // delete Shop data
-export const deleteShop = async (id) => await axios.delete(
-  `${ BASE_URL }/shops/${ id }`
+export const deleteShop = async (id) => await instance.delete(
+  `/shops/${ id }`
 )
 
 //-----------------------------------------------
 // authenticate
 //-----------------------------------------------
 
-export const localLogin = async (email, password) => await axios.post(
-  `${ BASE_URL }/auth/test`, { email, password }
+export const localLogin = async (email, password) => await instance.post(
+  `/auth/test`, { email, password }
 )
 
-export const googleLogin = async (res) => await axios.get(
-  `${ BASE_URL }/auth/google`, { res }
+// export const googleLogin = async (tokenId) => await instance.request({
+//   url: `/auth/google`,
+//   method: "post",
+//   data: { tokenId },
+//   withCredentials: true
+// })
+export const googleLogin = async (tokenId) => await instance.post(
+  `/auth/google`, { tokenId }
 )
 
-export const logout = async () => await axios.get(
-  `${ BASE_URL }/auth/logout`
+export const logout = async () => await instance.get(
+  `/auth/logout`
 )
 
 const apiEndpoint = {
