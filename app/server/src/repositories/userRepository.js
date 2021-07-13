@@ -10,9 +10,9 @@ module.exports = {
   },
   async findByProps(prop) {
     if (Array.isArray(prop)) {
-      return await User.findOne({$or: prop}).exec()
+      return await User.findOne({$or: prop}).populate("roles").exec()
     }
-    return await User.findOne(prop).exec()
+    return await User.findOne(prop).populate("roles").exec()
   },
   async addIdFromPassportProfile(user, profile) {
     switch (profile.provider) {
