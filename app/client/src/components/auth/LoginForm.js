@@ -7,7 +7,6 @@ import {
   Button
 } from '@material-ui/core'
 import { useDispatch } from 'react-redux'
-import { FcGoogle } from 'react-icons/fc'
 import { GoogleLogin } from 'react-google-login'
 import { googleLogin, logout } from '../../store/actions/authAction'
 import LoginStyle from './LoginStyle'
