@@ -12,6 +12,9 @@ const userSchema = Schema(
     googleID: String,
     lineID: String,
     twitterID: String,
+    roles: [
+      { type: Schema.Types.ObjectId, ref: 'Role' }
+    ],
   }, {
     timestamps: true,
   }
@@ -27,6 +30,7 @@ exports.validationSchema = Joi.object({
   googleID: Joi.string().trim(),
   lineID: Joi.string().trim(),
   twitterID: Joi.string().trim(),
+  roles: Joi.array().items(Joi.string()),
 })
 
 exports.User = mongoose.model('User', userSchema)
