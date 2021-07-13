@@ -7,7 +7,7 @@ const initialState = {
   area: {}
 }
 
-export const citiesReducer = (
+export const areaReducer = (
   state = initialState, action
 ) => {
   switch (action.type) {
