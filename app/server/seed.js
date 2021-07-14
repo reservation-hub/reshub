@@ -1,6 +1,7 @@
-const db = require('./src/db/mongoose')
+require('./src/db/mongoose')
 const { User } = require('./src/models/user')
 const { Role } = require('./src/models/role')
+const { Area } = require('./src/models/area')
 
 const admins = [
   {
@@ -21,7 +22,7 @@ const admins = [
   {
     firstName: "Sabir",
     lastName: "Barahi",
-    email: "sabirbarahi41@gmail.com",
+    email: "sabirbarahi41@gmail.com"
   }
 ]
 
@@ -38,43 +39,60 @@ const roles = [
     name: 'shop_owner',
     description: 'Shop owner. Can edit user roles for shop staff.'
   }
-]
+];
 
-const seed = async () => {
+(async () => {
   console.log("running seeder")
   
   console.log('running roles seeder')
-  roles.forEach(async item => {
+  await Promise.all(roles.map(async item => {
     try {
       const role = new Role(item)
       const duplicate = await Role.find({ name: role.name }).exec()
-      if (duplicate.length > 0) return
+      if (duplicate.length > 0) return duplicate
       role.save()
-    } catch(e) {console.log("Role Seeder Error", e)}
+      return role
+    } catch (e) {console.error('Role Error', e)}
+  }))
+
+  const role = await Role.findOne({ name: "admin" })
+
+  console.log('running admins seeder')
+
+  const adminPromises = admins.map(async admin => {
+    const values = {}
+    Object.entries(admin).forEach(([key, val]) => {
+      values[key] = val
+    })
+    
+    try {
+      const user = new User(values)
+      user.roles.push(role)
+      
+      const duplicate = await User.find({email: user.email}).exec()
+      if (duplicate.length > 0) return duplicate
+      await user.save()
+      return user
+    } catch (e) {console.error('User Error', e)}
   })
 
+  await Promise.all(adminPromises)
   
-  Role.findOne({ name: "admin" }).then(role => {
-    console.log('running admins seeder')
-    admins.forEach(async admin => {
-      const values = {}
-      Object.entries(admin).forEach(([key, val]) => {
-        values[key] = val
-      })
-      try {
-        const user = new User(values)
-        console.log('role : ', role)
-        user.roles.push(role)
-        const duplicate = await User.find({email: user.email}).exec()
-        if (duplicate.length > 0) return
-        user.save()
-      } catch (e) {console.log('ERROR', e)}
-    })
-  }).catch(e => e)
+  console.log('running location seeders')
 
-  
+  const areas = require('./areas')
+  const areaPromises = areas.map(async area => {
+    try {
+      const areaObject = new Area(area)
+      const duplicate = await Area.find({ _id: area._id }).exec()
+      if (duplicate.length > 0) return duplicate
+      await areaObject.save()
+      return areaObject
+    } catch(e) { console.error('Area Error', e) }
+  })
+
+  await Promise.all(areaPromises)
   console.log("Seeding done!")
+  process.exit()
   
-}
-
-seed()
+})()

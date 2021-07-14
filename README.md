@@ -23,6 +23,13 @@ Server
 $ reshub-lcl-server
 ```
 
+
+### Seedを実行したい場合
+
+```
+$ docker-compose exec server npm run seed
+```
+
 ### 環境設定
 
 - Client: http://localhost:8080
