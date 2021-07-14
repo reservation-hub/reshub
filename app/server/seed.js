@@ -1,4 +1,5 @@
 require('./src/db/mongoose')
+const bcrypt = require('bcrypt')
 const { User } = require('./src/models/user')
 const { Role } = require('./src/models/role')
 const { Area } = require('./src/models/area')
@@ -7,21 +8,25 @@ const admins = [
   {
     firstName: "Eugene",
     lastName: "Sinamban",
+    password: "testtest",
     email: "eugene.sinamban@gmail.com",
   },
   {
     firstName: "Yoonsung",
     lastName: "Jang",
+    password: "testtest",
     email: "upthe15752@gmail.com"
   },
   {
     firstName: "Sana",
     lastName: "Nakamura",
+    password: "testtest",
     email: "dq.tri.fi@gmail.com"
   },
   {
     firstName: "Sabir",
     lastName: "Barahi",
+    password: "testtest",
     email: "sabirbarahi41@gmail.com"
   }
 ]
@@ -67,10 +72,11 @@ const roles = [
     
     try {
       const user = new User(values)
-      user.roles.push(role)
-      
       const duplicate = await User.find({email: user.email}).exec()
       if (duplicate.length > 0) return duplicate
+
+      user.roles.push(role)
+      user.password = bcrypt.hashSync(user.password, saltRounds = 10)
       await user.save()
       return user
     } catch (e) {console.error('User Error', e)}

@@ -13,7 +13,7 @@ import {
   USER_REQUEST_SUCCESS, 
   USER_REQUEST_FAILURE,
   LOGOUT_REQUEST_FAILURE,
-  LOGOUT_REQUEST_SUCCESS 
+  LOGOUT_REQUEST_SUCCESS,
 } from '../types/authTypes'
 
 export const userRequestStart = () => {
@@ -36,19 +36,17 @@ export const logoutRequestFailure = (err) => {
   }
 }
 
-export const loginStart = (email, password) => dispatch => {
+export const loginStart = (email, password) => async dispatch => {
 
   try {
     
-    const res = apiEndpoint.localLogin(email, password)
-
-    setAuthToken(res.data)
-
-    console.log('token: ', res.data)
+    const { data: { user, token } } = await apiEndpoint.localLogin(email, password)
+    
+    setAuthToken(token)
 
     dispatch({
       type: USER_REQUEST_SUCCESS,
-      payload: res
+      payload: user
     })
   } catch (e) {
     dispatch(userRequestFailure(e))

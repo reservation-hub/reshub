@@ -89,7 +89,7 @@ export const deleteShop = async (id) => await instance.delete(
 //-----------------------------------------------
 
 export const localLogin = async (email, password) => await instance.post(
-  `/auth/test`, { email, password }
+  `/auth/login`, { email, password }
 )
 
 export const googleLogin = async (tokenId) => await instance.post(

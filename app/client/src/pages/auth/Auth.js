@@ -15,8 +15,7 @@ const Auth = () => {
   const onSubmit = useCallback(e => {
     e.preventDefault()
     dispatch(loginStart(value.email, value.password))
-  }, [dispatch, value.email, value.password]
-  )
+  }, [dispatch, value.email, value.password])
   
   return(
     <Login 
