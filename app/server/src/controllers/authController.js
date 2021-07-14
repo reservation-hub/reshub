@@ -5,7 +5,7 @@ const eah = require('express-async-handler')
 const passport = require('./passport')
 
 const login = eah(async (req, res, next) => {
-  const { email } = res.locals.auth  
+  const { email } = res.locals.auth ?? req.user ?? {}
   let user = await UserRepository.findByProps({ email })
   if (!user) return next({ code: 404, message: "User not found" })
 
@@ -34,7 +34,7 @@ const login = eah(async (req, res, next) => {
 const verifyIfLoggedIn = eah(async (req, res, next) => {
   const { signedCookies } = req
 
-  if (!signedCookies.authToken) return next()
+  if (!signedCookies || !signedCookies.authToken) return next()
 
   const token = jwt.verify(signedCookies.authToken, process.env.JWT_TOKEN_SECRET)
   const user = await UserRepository.findByProps([{ email: token.user.email }, { _id: token.user._id }])
@@ -47,7 +47,7 @@ const verifyIfLoggedIn = eah(async (req, res, next) => {
 const { OAuth2Client } = require('google-auth-library')
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
-const checkToken = eah(async (req, res, next) => {
+const checkGoogleToken = eah(async (req, res, next) => {
   const { tokenId } = req.body
   if (!tokenId) return next({ code: 401, message: "Bad Request" })
 
@@ -67,7 +67,8 @@ const logout = (req, res, next) => {
   res.send('Logged out successfully!')
 }
 
-router.post('/google', verifyIfLoggedIn, checkToken, login)
+router.post('/google', verifyIfLoggedIn, checkGoogleToken, login)
+router.post('/login', verifyIfLoggedIn, passport.authenticate('local', { session: false }), login)
 router.get('/logout', passport.authenticate('jwt', { session: false }), logout)
 
 module.exports = router

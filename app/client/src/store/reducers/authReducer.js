@@ -7,6 +7,8 @@
  */
 
 import { 
+  LOGOUT_REQUEST_FAILURE,
+  LOGOUT_REQUEST_SUCCESS,
   USER_REQUEST_FAILURE, 
   USER_REQUEST_SUCCESS 
 } from "../types/authTypes"
@@ -20,21 +22,33 @@ const initialState = {
 
 export const authReducer =  (state = initialState, action) => {
   switch (action.type) {
-  case USER_REQUEST_SUCCESS:
-    return { 
-      ...state, 
-      loading: false,
-      isAuthenticated: true,
-      user: action.payload
-     }
+    case USER_REQUEST_SUCCESS:
+      return { 
+        ...state, 
+        loading: false,
+        isAuthenticated: true,
+        user: action.payload
+      }
     case USER_REQUEST_FAILURE:
       return {
         ...state,
         loading: false,
-        isAuthenticated:false,
+        isAuthenticated: false,
         err: action.payload
       }
-  default:
-    return state
+    case LOGOUT_REQUEST_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        isAuthenticated: false,
+        user: {}
+      }
+    case LOGOUT_REQUEST_FAILURE:
+      return {
+        ...state,
+        loading: false,
+      }
+    default:
+      return state
   }
 }
