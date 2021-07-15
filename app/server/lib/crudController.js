@@ -1,3 +1,6 @@
+
+//納得いかないでもいま使ってくれもうちょっと調べる
+const db = mongoist(process.env.DB_HOST)
 const { schemaMiddleware: middleware, idMiddleware } = require('./validators')
 const { filterForeignKey } = require('./filter')
 const defaultOptions = {
@@ -39,13 +42,27 @@ exports.registerCrud = (Model, schema, router, options) => {
 
 exports.crudController = {
   index(Model, options = { populate: false}) {
-    return (req, res, next) => {
+    return async (req, res, next) => {
       const foreignKey = options.populate ? filterForeignKey(Model.schema.paths) : []
-      Model.find({})
-      .populate(foreignKey)
-      .exec()
-      .then(models => {
-        return res.send(models)
+     
+
+      //納得いかない,でもいま使ってくれ,もうちょっと調べる
+
+      Model.paginate( {
+        query: {
+          id: req._id,
+        },
+        paginateField: 'created',
+        limit:10,
+        next: req.query.next,
+        previous: req.query.previous 
+      })
+      .then(result=>{
+        result.results = result.results
+        result.results.map(item => Model.populate(item,[{path: foreignKey}]))
+        return result
+      }).then(result=>{
+        res.send(result)
       })
       .catch(e => next(e))
     }
