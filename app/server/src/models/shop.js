@@ -3,7 +3,7 @@ const Joi = require('joi')
 Joi.objectId = require('joi-objectid')(Joi)
 const Schema = mongoose.Schema
 const MongoosePaging = require('mongo-cursor-pagination')
-const { mongoosePlugin } = require('mongo-cursor-pagination/src');
+
 const shopSchema = Schema(
   {
     name: {
