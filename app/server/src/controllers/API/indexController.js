@@ -1,10 +1,11 @@
 const eah = require('express-async-handler')
 const express = require('express')
+
 const router = express.Router()
 const ShopRepository = require('../../repositories/shopRepository')
 const shopSeeder = require('../../../lib/shopSeeder')
 
-router.get('/', eah((req, res, next) => {
+router.get('/', eah((req, res) => {
   const limit = req.query.limit || 10
   const shops = ShopRepository.fetchByCount(limit)
   return res.send(shops)

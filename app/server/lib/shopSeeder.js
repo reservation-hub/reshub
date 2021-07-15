@@ -1,16 +1,15 @@
-module.exports = (count) => async (req, res, next) => {
+const { City } = require('../src/models/city')
+const { Shop } = require('../src/models/shop')
 
-  const { City } = require('../src/models/city')
-  const { Shop } = require('../src/models/shop')
-  
+module.exports = count => async (req, res) => {
   let counter = 0
   const shops = []
 
-  while(counter < count) {
+  while (counter < count) {
     const cityCount = 1747
     const random = Math.floor(Math.random() * cityCount)
-    const city = await City.findOne({}).skip(random).populate({path: 'prefecture', populate: 'area'}).exec()
-  
+    const city = await City.findOne({}).skip(random).populate({ path: 'prefecture', populate: 'area' }).exec()
+
     const shop = new Shop({
       name: 'test',
       slug: 'test',
@@ -20,12 +19,11 @@ module.exports = (count) => async (req, res, next) => {
       details: 'New Salon in town',
       brand: 'test',
     })
-  
+
     shop.save()
     shops.push(shop)
     counter++
   }
 
-  return res.send({data: shops})
-
+  return res.send({ data: shops })
 }

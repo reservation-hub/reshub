@@ -1,0 +1,7 @@
+node_modules
+areas-db.js
+cities-db.js
+prefec-db.js
+**/API/authStrategies/*
+seed.js
+shopSeeder.js

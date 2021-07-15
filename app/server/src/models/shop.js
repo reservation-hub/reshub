@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 const Joi = require('joi')
 Joi.objectId = require('joi-objectid')(Joi)
-const Schema = mongoose.Schema
+
+const { Schema } = mongoose
 const MongoosePaging = require('mongo-cursor-pagination')
 
 const shopSchema = Schema(
@@ -19,17 +20,17 @@ const shopSchema = Schema(
     area: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'Area'
+      ref: 'Area',
     },
     prefecture: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'Prefecture'
+      ref: 'Prefecture',
     },
     city: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'City'
+      ref: 'City',
     },
     brand: {
       type: String,
@@ -44,11 +45,11 @@ const shopSchema = Schema(
     coupons: [{
       type: Schema.Types.ObjectId,
       required: true,
-    }]
+    }],
   }, {
     timestamps: true,
     strictQuery: true,
-  }
+  },
 )
 
 exports.validationSchema = Joi.object({

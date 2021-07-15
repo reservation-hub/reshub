@@ -1,6 +1,8 @@
 const eah = require('express-async-handler')
 const { schemaMiddleware: middleware, idMiddleware } = require('./validators')
-const { filterForeignKey } = require('./filter')
+
+const filterForeignKey = obj => Object.keys(obj).filter(key => obj[key].instance === 'ObjectID' && key !== '_id')
+
 const defaultOptions = {
   idMiddleware: true,
   index: true,
@@ -15,19 +17,19 @@ const defaultOptions = {
 exports.registerCrud = (Model, schema, router, options) => {
   const newOptions = {
     ...defaultOptions,
-    ...options
+    ...options,
   }
-  if (newOptions.idMiddleware && 'id' === newOptions.slug) {
-    router.use(`/:id`, idMiddleware())
+  if (newOptions.idMiddleware && newOptions.slug === 'id') {
+    router.use('/:id', idMiddleware())
   }
   if (newOptions.index) {
-    router.get(`/`, this.crudController.index(Model, newOptions))
+    router.get('/', this.crudController.index(Model, newOptions))
   }
   if (newOptions.show) {
     router.get(`/:${newOptions.slug}`, this.crudController.show(Model, newOptions))
   }
   if (newOptions.insert) {
-    router.post(`/`, middleware(schema), this.crudController.insert(Model))
+    router.post('/', middleware(schema), this.crudController.insert(Model))
   }
   if (newOptions.update) {
     router.patch(`/:${newOptions.slug}`, middleware(schema), this.crudController.update(Model, newOptions))
@@ -39,11 +41,11 @@ exports.registerCrud = (Model, schema, router, options) => {
 }
 
 exports.crudController = {
-  index(Model, options = { populate: false}) {
+  index(Model, options = { populate: false }) {
     return eah(async (req, res, next) => {
       const foreignKey = options.populate ? filterForeignKey(Model.schema.paths) : []
-      //納得いかない,でもいま使ってくれ,もうちょっと調べる 
-      Model.paginate( {
+      // 納得いかない,でもいま使ってくれ,もうちょっと調べる
+      Model.paginate({
         query: {
           id: req._id,
         },
@@ -51,48 +53,47 @@ exports.crudController = {
         limit: 10,
         next: req.query.next,
       })
-      .then(result=>{
-        result.results = result.results
-        result.results.map(item => Model.populate(item,[{path: foreignKey}]))
-        return result
-      }).then(result => {
-        console.log('result', result)
-        res.send(result)
-      })
-      .catch(e => next(e))
+        .then(result => {
+          result.results.map(item => Model.populate(item, [{ path: foreignKey }]))
+          return result
+        }).then(result => {
+          res.send(result)
+        })
+        .catch(e => next(e))
     })
   },
-  show(Model, options = { slug: 'id', populate: false}) {
-    return eah(async (req, res, next) => {
+  show(Model, options = { slug: 'id', populate: false }) {
+    return eah(async (req, res) => {
       const foreignKey = options.populate ? filterForeignKey(Model.schema.paths) : []
-      const searchSlug = 'id' === options.slug ? {_id: req.params.id} : {slug: req.params.slug}
-      const model = 
-        await Model.find(searchSlug)
-          .orFail()
-          .populate(foreignKey)
-          .exec()
+      const searchSlug = options.slug === 'id' ? { _id: req.params.id } : { slug: req.params.slug }
+      const model = await Model.find(searchSlug)
+        .orFail()
+        .populate(foreignKey)
+        .exec()
       return res.send(model)
     })
   },
   insert(Model) {
-    return eah(async (req, res, next) => {
+    return eah(async (req, res) => {
       const model = new Model(req.body)
       await model.save()
       return res.status(201).send(model)
-    }) 
+    })
   },
   update(Model, options = { slug: 'id' }) {
-    return eah(async (req, res, next) => {
-      const searchSlug = 'id' === options.slug ? {_id: req.params.id} : {slug: req.params.slug}
-      const model = await Model.findOneAndUpdate(searchSlug, req.body, {new: true, omitUndefined: true}).orFail().exec()
+    return eah(async (req, res) => {
+      const searchSlug = options.slug === 'id' ? { _id: req.params.id } : { slug: req.params.slug }
+      const model = await Model
+        .findOneAndUpdate(searchSlug, req.body, { new: true, omitUndefined: true })
+        .orFail().exec()
       return res.send(model)
-    }) 
+    })
   },
-  delete(Model, options = { slug : 'id' }) {
-    return eah(async (req, res, next) => {
-      const searchSlug = 'id' === options.slug ? {_id: req.params.id} : {slug: req.params.slug}
+  delete(Model, options = { slug: 'id' }) {
+    return eah(async (req, res) => {
+      const searchSlug = options.slug === 'id' ? { _id: req.params.id } : { slug: req.params.slug }
       await Model.findOneAndDelete(searchSlug).orFail().exec()
-      return res.send({message: 'Successfully deleted'})
+      return res.send({ message: 'Successfully deleted' })
     })
   },
 }

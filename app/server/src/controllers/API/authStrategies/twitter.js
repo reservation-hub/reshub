@@ -15,7 +15,7 @@ passport.use(new TwitterStrategy({
     let user = await UserRepository.findByProps([{ twitterID: profile.id }, { email: profile.emails[0].value }])
     console.log('test twitter', user)
     if (!user) return done(passport404Error(profile))
-    
+
     // ユーザー情報がDBにあったらIDをユーザー情報に追加する
     user = await UserRepository.addIdFromPassportProfile(user, profile)
 
@@ -26,7 +26,7 @@ passport.use(new TwitterStrategy({
 }))
 
 router.get('/', (req, res, next) => {
-  console.log("twitter")
+  console.log('twitter')
   return next()
 }, passport.authenticate('twitter'))
 

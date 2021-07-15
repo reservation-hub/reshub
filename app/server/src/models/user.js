@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+
+const { Schema } = mongoose
 const Joi = require('joi')
 const MongoosePaging = require('mongo-cursor-pagination')
 
@@ -14,11 +15,11 @@ const userSchema = Schema(
     lineID: String,
     twitterID: String,
     roles: [
-      { type: Schema.Types.ObjectId, ref: 'Role' }
+      { type: Schema.Types.ObjectId, ref: 'Role' },
     ],
   }, {
     timestamps: true,
-  }
+  },
 )
 
 exports.validationSchema = Joi.object({

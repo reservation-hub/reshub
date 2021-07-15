@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema
+
+const { Schema } = mongoose
 
 const MongoosePaging = require('mongo-cursor-pagination')
 
@@ -20,7 +21,7 @@ const prefectureSchema = Schema(
       required: true,
       ref: 'Area',
     },
-  }
+  },
 )
 prefectureSchema.plugin(MongoosePaging.mongoosePlugin)
 

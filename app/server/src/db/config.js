@@ -5,14 +5,14 @@ const dbOptions = {
   user: process.env.DB_USER,
   pass: process.env.DB_PASS,
   auth: {
-    authdb: process.env.DB_AUTH_DB
+    authdb: process.env.DB_AUTH_DB,
   },
   useUnifiedTopology: true,
   useFindAndModify: false,
 }
-const DB_HOST = process.env.DB_HOST
+const { DB_HOST } = process.env
 
 module.exports = {
   dbOptions,
-  DB_HOST
+  DB_HOST,
 }
