@@ -2,7 +2,8 @@ const mongoose = require('mongoose')
 const Joi = require('joi')
 Joi.objectId = require('joi-objectid')(Joi)
 const Schema = mongoose.Schema
-
+const MongoosePaging = require('mongo-cursor-pagination')
+const { mongoosePlugin } = require('mongo-cursor-pagination/src');
 const shopSchema = Schema(
   {
     name: {
@@ -60,4 +61,5 @@ exports.validationSchema = Joi.object({
   details: Joi.string().required(),
 })
 
+shopSchema.plugin(MongoosePaging.mongoosePlugin)
 exports.Shop = mongoose.model('Shop', shopSchema)

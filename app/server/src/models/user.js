@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const Joi = require('joi')
-
+const MongoosePaging = require('mongo-cursor-pagination')
+const { mongoosePlugin } = require('mongo-cursor-pagination/src');
 const userSchema = Schema(
   {
     firstName: String,
@@ -32,5 +33,5 @@ exports.validationSchema = Joi.object({
   twitterID: Joi.string().trim(),
   roles: Joi.array().items(Joi.string()),
 })
-
+userSchema.plugin(MongoosePaging.mongoosePlugin)
 exports.User = mongoose.model('User', userSchema)

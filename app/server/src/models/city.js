@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-
+const MongoosePaging = require('mongo-cursor-pagination')
+const { mongoosePlugin } = require('mongo-cursor-pagination/src');
 const citySchema = Schema(
   {
     name: {
@@ -14,5 +15,5 @@ const citySchema = Schema(
     }
   }
 )
-
+citySchema.plugin(MongoosePaging.mongoosePlugin)
 exports.City = mongoose.model('City', citySchema)
