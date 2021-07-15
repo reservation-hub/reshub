@@ -1,6 +1,5 @@
 
 //納得いかないでもいま使ってくれもうちょっと調べる
-const db = mongoist(process.env.DB_HOST)
 const { schemaMiddleware: middleware, idMiddleware } = require('./validators')
 const { filterForeignKey } = require('./filter')
 const defaultOptions = {
@@ -54,8 +53,7 @@ exports.crudController = {
         },
         paginateField: 'created',
         limit:10,
-        next: req.query.next,
-        previous: req.query.previous 
+        next: req.query.next
       })
       .then(result=>{
         result.results = result.results
