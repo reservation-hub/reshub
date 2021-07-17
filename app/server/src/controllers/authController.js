@@ -32,7 +32,7 @@ const login = eah(async (req, res, next) => {
   return res.send({ user, token })
 })
 
-const verifyIfLoggedIn = eah(async (req, res, next) => {
+const verifyIfNotLoggedInYet = eah(async (req, res, next) => {
   const { signedCookies } = req
 
   if (!signedCookies || !signedCookies.authToken) return next()
@@ -69,8 +69,9 @@ const logout = (req, res) => {
   res.send('Logged out successfully!')
 }
 
-router.post('/google', verifyIfLoggedIn, checkGoogleToken, login)
-router.post('/login', verifyIfLoggedIn, passport.authenticate('local', { session: false }), login)
+router.post('/google', verifyIfNotLoggedInYet, checkGoogleToken, login)
+router.post('/login', verifyIfNotLoggedInYet, passport.authenticate('local', { session: false }), login)
+router.post('/silent_refresh', passport.authenticate('jwt', { session: false }), login)
 router.get('/logout', passport.authenticate('jwt', { session: false }), logout)
 
 module.exports = router
