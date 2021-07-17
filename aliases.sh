@@ -12,6 +12,7 @@ alias reshub-lcl-restart="docker-compose restart server client"
 alias reshub-lcl-server-bash="docker-compose exec server bash"
 alias reshub-lcl-client-bash="docker-compose exec client bash"
 alias reshub-lcl-db-bash="docker-compose exec db mongo --username root --authenticationDatabase admin --password root"
+alias db-seed="docker-compose exec server npm run seed"
 
 # db back up
 function reshub-db-backup() {
