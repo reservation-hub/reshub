@@ -11,7 +11,6 @@ import { GoogleLogin } from 'react-google-login'
 import { googleLogin, logout } from '../../store/actions/authAction'
 import LoginStyle from './LoginStyle'
 import CommonStyle from '../CommonStyle'
-import jwt_decode from 'jwt-decode'
 
 const Login = ({ value, setValue, onSubmit }) => {
 
@@ -21,9 +20,9 @@ const Login = ({ value, setValue, onSubmit }) => {
   const user = useSelector(state => state.auth)
   console.log(user)
   
-  const onSuccess = (response) => {
-    // dispatch(googleLogin(response))
-    console.log(response)
+  const googleHandler = (response) => {
+    dispatch(googleLogin(response))
+    // console.log(response)
   }
 
   const onLogOut = () => {
@@ -96,8 +95,8 @@ const Login = ({ value, setValue, onSubmit }) => {
             >
               <GoogleLogin 
                 clientId={ process.env.REACT_APP_GOOGLE_CLIENT_ID }
-                onSuccess={ onSuccess }
-                onFailure={ onSuccess }
+                onSuccess={ googleHandler }
+                onFailure={ googleHandler }
                 cookiePolicy={ 'single_host_origin' }
                 approvalPrompt="force"
                 prompt='consent'

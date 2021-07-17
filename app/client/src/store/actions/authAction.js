@@ -4,11 +4,11 @@
 
 import apiEndpoint from '../../utils/api/axios'
 import setAuthToken from '../../utils/setAuthToken'
+import Cookies from 'js-cookie'
 import { 
   USER_REQUEST_START, 
   USER_REQUEST_SUCCESS, 
   USER_REQUEST_FAILURE,
-  LOGOUT_REQUEST_FAILURE,
   LOGOUT_REQUEST_SUCCESS,
 } from '../types/authTypes'
 
@@ -18,16 +18,17 @@ export const userRequestStart = () => {
   }
 }
 
+// export const userRequestSuccess = (token, user) => {
+//   setAuthToken(token)
+//   return {
+//     tyep: USER_REQUEST_SUCCESS,
+//     user
+//   }
+// }
+
 export const userRequestFailure = (err) => {
   return {
     type: USER_REQUEST_FAILURE,
-    payload: err.response.data
-  }
-}
-
-export const logoutRequestFailure = (err) => {
-  return {
-    type: LOGOUT_REQUEST_FAILURE,
     payload: err.response.data
   }
 }
@@ -36,14 +37,13 @@ export const loginStart = (email, password) => async dispatch => {
 
   try {
     
-    const { data: { user, token } } = await apiEndpoint.localLogin(email, password)
+    const user = await apiEndpoint.localLogin(email, password)
+    const token = user.data.token
     
-    setAuthToken(token)
+    console.log(Cookies.set('refreshToken', token)) 
+    // setAuthToken(Cookies.get('refreshToken'))
 
-    dispatch({
-      type: USER_REQUEST_SUCCESS,
-      payload: user
-    })
+    // dispatch(userRequestSuccess(token, user.data.user))
   } catch (e) {
     dispatch(userRequestFailure(e))
   }
@@ -56,8 +56,8 @@ export const googleLogin = (googleResponse) => async (dispatch) => {
   try {
     const user = await apiEndpoint.googleLogin(googleResponse.tokenId)
     const token = user.data.token
-
-    setAuthToken(token)
+    Cookies.set('refreshToken', token)
+    setAuthToken(Cookies.get('refreshToken'))
 
     dispatch({
       type: USER_REQUEST_SUCCESS,

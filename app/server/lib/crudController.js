@@ -1,6 +1,5 @@
 
 //納得いかないでもいま使ってくれもうちょっと調べる
-const db = mongoist(process.env.DB_HOST)
 const { schemaMiddleware: middleware, idMiddleware } = require('./validators')
 const { filterForeignKey } = require('./filter')
 const defaultOptions = {

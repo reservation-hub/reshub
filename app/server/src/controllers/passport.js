@@ -28,6 +28,7 @@ const { Strategy: JWTStrategy } = require('passport-jwt')
 
 const cookieExtractor = (req) => {
   const headerToken = req.get('authorization')
+  console.log('header: ', headerToken)
   if (!headerToken) return null 
 
   const { authToken } = req.signedCookies
