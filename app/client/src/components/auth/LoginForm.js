@@ -11,6 +11,7 @@ import { GoogleLogin } from 'react-google-login'
 import { googleLogin, logout } from '../../store/actions/authAction'
 import LoginStyle from './LoginStyle'
 import CommonStyle from '../CommonStyle'
+import jwt_decode from 'jwt-decode'
 
 const Login = ({ value, setValue, onSubmit }) => {
 
@@ -21,7 +22,8 @@ const Login = ({ value, setValue, onSubmit }) => {
   console.log(user)
   
   const onSuccess = (response) => {
-    dispatch(googleLogin(response))
+    // dispatch(googleLogin(response))
+    console.log(response)
   }
 
   const onLogOut = () => {
@@ -97,12 +99,13 @@ const Login = ({ value, setValue, onSubmit }) => {
                 onSuccess={ onSuccess }
                 onFailure={ onSuccess }
                 cookiePolicy={ 'single_host_origin' }
+                approvalPrompt="force"
+                prompt='consent'
               />
               <Button onClick={ onLogOut }>Log Out</Button>
             </Grid>
           </Grid>
         </Container>
-        <button onClick={ () => logout() }>logout</button>
         {/* footer area */}
         <Container 
           maxWidth='sm'
