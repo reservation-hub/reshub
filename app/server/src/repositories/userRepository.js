@@ -9,25 +9,23 @@ module.exports = {
     return user
   },
   async findByProps(prop) {
-    if (Array.isArray(prop)) {
-      return await User.findOne({$or: prop}).populate("roles").exec()
-    }
-    return await User.findOne(prop).populate("roles").exec()
+    const param = Array.isArray(prop) ? { $or: prop } : prop
+    return User.findOne(param).populate('roles').exec()
   },
   async addIdFromPassportProfile(user, profile) {
     switch (profile.provider) {
       case 'google':
         user.googleID = profile.id
-        break;
+        break
       case 'twitter':
         user.twitterID = profile.id
-        break;
+        break
       case 'line':
         user.lineID = profile.id
-        break;
+        break
       default:
-        break;
+        break
     }
-    return await user.save()
-  }
+    return user.save()
+  },
 }

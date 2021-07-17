@@ -1,4 +1,5 @@
 const express = require('express')
+
 const router = express.Router()
 const { Area } = require('../models/area')
 const { crudController } = require('../../lib/crudController')

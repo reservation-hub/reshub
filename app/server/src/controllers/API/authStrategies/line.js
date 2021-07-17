@@ -1,15 +1,15 @@
 const router = require('express').Router()
 const passport = require('passport')
 const LineStrategy = require('passport-line-auth')
+const jwt = require('jsonwebtoken')
 const UserRepository = require('../../../repositories/userRepository')
 const { login, passport404Error } = require('../../auth/utils')
-const jwt = require('jsonwebtoken')
 
 passport.use(new LineStrategy({
   channelID: process.env.LINE_CHANNEL_ID,
   channelSecret: process.env.LINE_CHANNEL_SECRET,
   callbackURL: `${process.env.RESHUB_URL}/auth/line/callback`,
-  scope: ['profile', 'openid', 'email',],
+  scope: ['profile', 'openid', 'email'],
   botPrompt: 'normal',
   uiLocales: 'en-US',
 }, async (token, tokenSecret, params, profile, done) => {
