@@ -37,11 +37,13 @@ const cookieExtractor = req => {
     // eslint-disable-next-line prefer-destructuring
     headerToken = req.get('authorization').split(' ')[1]
   }
+  if (!headerToken) console.error('HEADER TOKEN : ', headerToken)
 
   let authToken
   if (req.signedCookies) {
     authToken = req.signedCookies.authToken
   }
+  if (!authToken) console.error('AUTH TOKEN : ', authToken)
 
   if (req && authToken && headerToken && authToken === headerToken) {
     return authToken
@@ -59,6 +61,9 @@ const jwtOptions = {
 
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
+    // eslint-disable-next-line no-console
+    console.log('jwtPayload : ', jwtPayload)
+    if (!jwtPayload.user) console.error('NO USER IN PAYLOAD')
     // eslint-disable-next-line no-underscore-dangle
     const user = await UserRepository.findByProps({ _id: jwtPayload.user._id })
     // eslint-disable-next-line no-console
