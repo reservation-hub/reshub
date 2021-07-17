@@ -6,7 +6,7 @@ import {
   Typography,
   Button
 } from '@material-ui/core'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { GoogleLogin } from 'react-google-login'
 import { googleLogin, logout } from '../../store/actions/authAction'
 import LoginStyle from './LoginStyle'
@@ -17,6 +17,8 @@ const Login = ({ value, setValue, onSubmit }) => {
   const login = LoginStyle()
   const common = CommonStyle()
   const dispatch = useDispatch()
+  const user = useSelector(state => state.auth)
+  console.log(user)
   
   const onSuccess = (response) => {
     dispatch(googleLogin(response))
@@ -100,7 +102,7 @@ const Login = ({ value, setValue, onSubmit }) => {
             </Grid>
           </Grid>
         </Container>
-
+        <button onClick={ () => logout() }>logout</button>
         {/* footer area */}
         <Container 
           maxWidth='sm'

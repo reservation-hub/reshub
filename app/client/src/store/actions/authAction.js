@@ -2,10 +2,6 @@
 // redux action ユーザー印証管理関数
 //----------------------------------
 
-/**
- * こっちは現在保留中
- */
-
 import apiEndpoint from '../../utils/api/axios'
 import setAuthToken from '../../utils/setAuthToken'
 import { 
@@ -54,13 +50,14 @@ export const loginStart = (email, password) => async dispatch => {
 
 }
 
-export const googleLogin = (googleResponse) => async dispatch => {
+export const googleLogin = (googleResponse) => async (dispatch) => {
 
   dispatch(userRequestStart())
   try {
     const { data: { user, token } } = await apiEndpoint.googleLogin(googleResponse.tokenId)
-
+    
     setAuthToken(token)
+    console.log(user)
 
     dispatch({
       type: USER_REQUEST_SUCCESS,
