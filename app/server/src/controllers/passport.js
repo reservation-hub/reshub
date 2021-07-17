@@ -32,10 +32,17 @@ passport.use(new GoogleStrategy(googleOptions, async (accessToken, refreshToken,
 // JWT
 
 const cookieExtractor = req => {
-  const headerToken = req.get('authorization')
-  if (!headerToken) return null
+  let headerToken
+  if (req.get('authorization')) {
+    // eslint-disable-next-line prefer-destructuring
+    headerToken = req.get('authorization').split(' ')[1]
+  }
 
-  const { authToken } = req.signedCookies
+  let authToken
+  if (req.signedCookies) {
+    authToken = req.signedCookies.authToken
+  }
+
   if (req && authToken && headerToken && authToken === headerToken) {
     return authToken
   }
@@ -54,6 +61,8 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
     // eslint-disable-next-line no-underscore-dangle
     const user = await UserRepository.findByProps({ _id: jwtPayload.user._id })
+    // eslint-disable-next-line no-console
+    console.log('USER : ', user)
     if (!user) return done('Unauthorized')
     return done(null, user)
   } catch (e) { return done(e, null) }
