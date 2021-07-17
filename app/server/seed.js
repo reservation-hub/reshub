@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt')
 const { User } = require('./src/models/user')
 const { Role } = require('./src/models/role')
 const { Area } = require('./src/models/area')
+const { Prefecture } = require('./src/models/prefecture')
+const { City } = require('./src/models/city')
 
 const admins = [
   {
@@ -86,7 +88,9 @@ const roles = [
 
   console.log('running location seeders')
 
-  const areas = require('./areas')
+  console.log('running area seeder')
+
+  const areas = require('./areas-db')
   const areaPromises = areas.map(async area => {
     try {
       const areaObject = new Area(area)
@@ -98,6 +102,38 @@ const roles = [
   })
 
   await Promise.all(areaPromises)
+
+  console.log('running prefecture seeder')
+
+  const prefectures = require('./prefec-db')
+  const prefecturePromises = prefectures.map(async prefecture => {
+    try {
+      const prefectureObject = new Prefecture(prefecture)
+      const duplicate = await Prefecture.find({ _id: prefecture._id}).exec()
+      if (duplicate.length > 0) return duplicate
+      await prefectureObject.save()
+      return prefectureObject
+    } catch (e) { console.error('Prefecture Error', e) }
+  })
+
+  await Promise.all(prefecturePromises)
+  console.log('running city seeder')
+
+  const cities = require('./cities-db')
+  const prefectureList = await Prefecture.find({}).exec()
+  const cityPromises = cities.filter(city => city.name !== '').map(async city => {
+    try {
+      const prefecture = prefectureList[prefectureList.findIndex(prefecture => prefecture.slug === city.prefecture)]
+      const cityObject = new City({ ...city, prefecture: prefecture._id })
+      const duplicate = await City.find({ _id: city._id })
+      if (duplicate.length > 0) return duplicate
+      await cityObject.save()
+      return cityObject
+    } catch (e) { console.error('City Error', e )}
+  })
+  
+  await Promise.all(cityPromises)
+
   console.log('Seeding done!')
   process.exit()
 })()

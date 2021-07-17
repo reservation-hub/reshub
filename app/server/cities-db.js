@@ -369,8 +369,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5ca45', name: '蘂取村', prefecture: 'hokkaido', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5ca46', name: '', prefecture: 'aomori', __v: 0,
-}, {
   _id: '60952511af9fa20950f5ca47', name: '青森市', prefecture: 'aomori', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ca48', name: '弘前市', prefecture: 'aomori', __v: 0,
@@ -451,8 +449,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5ca6e', name: '新郷村', prefecture: 'aomori', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5ca6f', name: '', prefecture: 'iwate', __v: 0,
-}, {
   _id: '60952511af9fa20950f5ca70', name: '盛岡市', prefecture: 'iwate', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ca71', name: '宮古市', prefecture: 'iwate', __v: 0,
@@ -518,8 +514,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5ca8f', name: '洋野町', prefecture: 'iwate', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ca90', name: '一戸町', prefecture: 'iwate', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5ca91', name: '', prefecture: 'miyagi', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ca92', name: '仙台市', prefecture: 'miyagi', __v: 0,
 }, {
@@ -591,8 +585,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5cab4', name: '南三陸町', prefecture: 'miyagi', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5cab5', name: '', prefecture: 'akita', __v: 0,
-}, {
   _id: '60952511af9fa20950f5cab6', name: '秋田市', prefecture: 'akita', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cab7', name: '能代市', prefecture: 'akita', __v: 0,
@@ -642,8 +634,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5cacd', name: '羽後町', prefecture: 'akita', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cace', name: '東成瀬村', prefecture: 'akita', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5cacf', name: '', prefecture: 'yamagata', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cad0', name: '山形市', prefecture: 'yamagata', __v: 0,
 }, {
@@ -714,8 +704,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5caf1', name: '庄内町', prefecture: 'yamagata', __v: 0,
 }, {
   _id: '60952511af9fa20950f5caf2', name: '遊佐町', prefecture: 'yamagata', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5caf3', name: '', prefecture: 'fukushima', __v: 0,
 }, {
   _id: '60952511af9fa20950f5caf4', name: '福島市', prefecture: 'fukushima', __v: 0,
 }, {
@@ -835,8 +823,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5cb2e', name: '飯舘村', prefecture: 'fukushima', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5cb2f', name: '', prefecture: 'ibaraki', __v: 0,
-}, {
   _id: '60952511af9fa20950f5cb30', name: '水戸市', prefecture: 'ibaraki', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cb31', name: '日立市', prefecture: 'ibaraki', __v: 0,
@@ -924,8 +910,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5cb5a', name: '境町', prefecture: 'ibaraki', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cb5b', name: '利根町', prefecture: 'ibaraki', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5cb5c', name: '', prefecture: 'tochigi', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cb5d', name: '宇都宮市', prefecture: 'tochigi', __v: 0,
 }, {
@@ -1048,8 +1032,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5cb98', name: '大泉町', prefecture: 'gumma', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cb99', name: '邑楽町', prefecture: 'gumma', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5cb9a', name: '', prefecture: 'saitama', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cb9b', name: 'さいたま市', prefecture: 'saitama', __v: 0,
 }, {
@@ -1177,8 +1159,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5cbd9', name: '松伏町', prefecture: 'saitama', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5cbda', name: '', prefecture: 'chiba', __v: 0,
-}, {
   _id: '60952511af9fa20950f5cbdb', name: '千葉市', prefecture: 'chiba', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cbdc', name: '銚子市', prefecture: 'chiba', __v: 0,
@@ -1286,8 +1266,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5cc0f', name: '御宿町', prefecture: 'chiba', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cc10', name: '鋸南町', prefecture: 'chiba', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5cc11', name: '', prefecture: 'tokyo', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cc12', name: '千代田区', prefecture: 'tokyo', __v: 0,
 }, {
@@ -1413,8 +1391,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5cc4f', name: '小笠原村', prefecture: 'tokyo', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5cc50', name: '', prefecture: 'kanagawa', __v: 0,
-}, {
   _id: '60952511af9fa20950f5cc51', name: '横浜市', prefecture: 'kanagawa', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cc52', name: '川崎市', prefecture: 'kanagawa', __v: 0,
@@ -1481,8 +1457,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5cc71', name: '清川村', prefecture: 'kanagawa', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5cc72', name: '', prefecture: 'niigata', __v: 0,
-}, {
   _id: '60952511af9fa20950f5cc73', name: '新潟市', prefecture: 'niigata', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cc74', name: '長岡市', prefecture: 'niigata', __v: 0,
@@ -1543,8 +1517,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5cc90', name: '粟島浦村', prefecture: 'niigata', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5cc91', name: '', prefecture: 'toyama', __v: 0,
-}, {
   _id: '60952511af9fa20950f5cc92', name: '富山市', prefecture: 'toyama', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cc93', name: '高岡市', prefecture: 'toyama', __v: 0,
@@ -1574,8 +1546,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5cc9f', name: '入善町', prefecture: 'toyama', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cca0', name: '朝日町', prefecture: 'toyama', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5cca1', name: '', prefecture: 'ishikawa', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cca2', name: '金沢市', prefecture: 'ishikawa', __v: 0,
 }, {
@@ -1615,8 +1585,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5ccb4', name: '能登町', prefecture: 'ishikawa', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5ccb5', name: '', prefecture: 'fukui', __v: 0,
-}, {
   _id: '60952511af9fa20950f5ccb6', name: '福井市', prefecture: 'fukui', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ccb7', name: '敦賀市', prefecture: 'fukui', __v: 0,
@@ -1650,8 +1618,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5ccc5', name: 'おおい町', prefecture: 'fukui', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ccc6', name: '若狭町', prefecture: 'fukui', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5ccc7', name: '', prefecture: 'yamanashi', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ccc8', name: '甲府市', prefecture: 'yamanashi', __v: 0,
 }, {
@@ -1706,8 +1672,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5cce1', name: '小菅村', prefecture: 'yamanashi', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cce2', name: '丹波山村', prefecture: 'yamanashi', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5cce3', name: '', prefecture: 'nagano', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cce4', name: '長野市', prefecture: 'nagano', __v: 0,
 }, {
@@ -1863,8 +1827,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5cd30', name: '栄村', prefecture: 'nagano', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5cd31', name: '', prefecture: 'gifu', __v: 0,
-}, {
   _id: '60952511af9fa20950f5cd32', name: '岐阜市', prefecture: 'gifu', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cd33', name: '大垣市', prefecture: 'gifu', __v: 0,
@@ -1949,8 +1911,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5cd5b', name: '白川村', prefecture: 'gifu', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5cd5c', name: '', prefecture: 'shizuoka', __v: 0,
-}, {
   _id: '60952511af9fa20950f5cd5d', name: '静岡市', prefecture: 'shizuoka', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cd5e', name: '浜松市', prefecture: 'shizuoka', __v: 0,
@@ -2020,8 +1980,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5cd7e', name: '川根本町', prefecture: 'shizuoka', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cd7f', name: '森町', prefecture: 'shizuoka', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5cd80', name: '', prefecture: 'aichi', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cd81', name: '名古屋市', prefecture: 'aichi', __v: 0,
 }, {
@@ -2131,8 +2089,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5cdb6', name: '豊根村', prefecture: 'aichi', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5cdb7', name: '', prefecture: 'mie', __v: 0,
-}, {
   _id: '60952511af9fa20950f5cdb8', name: '津市', prefecture: 'mie', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cdb9', name: '四日市市', prefecture: 'mie', __v: 0,
@@ -2191,8 +2147,6 @@ module.exports = [{
 }, {
   _id: '60952511af9fa20950f5cdd4', name: '紀宝町', prefecture: 'mie', __v: 0,
 }, {
-  _id: '60952511af9fa20950f5cdd5', name: '', prefecture: 'shiga', __v: 0,
-}, {
   _id: '60952511af9fa20950f5cdd6', name: '大津市', prefecture: 'shiga', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cdd7', name: '彦根市', prefecture: 'shiga', __v: 0,
@@ -2230,8 +2184,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5cde7', name: '甲良町', prefecture: 'shiga', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cde8', name: '多賀町', prefecture: 'shiga', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5cde9', name: '', prefecture: 'kyoto', __v: 0,
 }, {
   _id: '60952511af9fa20950f5cdea', name: '京都市', prefecture: 'kyoto', __v: 0,
 }, {
@@ -2284,8 +2236,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5ce02', name: '伊根町', prefecture: 'kyoto', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ce03', name: '与謝野町', prefecture: 'kyoto', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5ce04', name: '', prefecture: 'osaka', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ce05', name: '大阪市', prefecture: 'osaka', __v: 0,
 }, {
@@ -2372,8 +2322,6 @@ module.exports = [{
   _id: '60952511af9fa20950f5ce2e', name: '河南町', prefecture: 'osaka', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ce2f', name: '千早赤阪村', prefecture: 'osaka', __v: 0,
-}, {
-  _id: '60952511af9fa20950f5ce30', name: '', prefecture: 'hyogo', __v: 0,
 }, {
   _id: '60952511af9fa20950f5ce31', name: '神戸市', prefecture: 'hyogo', __v: 0,
 }, {

@@ -3,16 +3,13 @@ const express = require('express')
 
 const router = express.Router()
 const ShopRepository = require('../../repositories/shopRepository')
-const shopSeeder = require('../../../lib/shopSeeder')
 
-router.get('/', eah((req, res) => {
+router.get('/', eah(async (req, res) => {
   const limit = req.query.limit || 10
-  const shops = ShopRepository.fetchByCount(limit)
+  const shops = await ShopRepository.fetchByCount(limit)
   return res.send(shops)
 }))
 
 // faker - フェークのショップデータ作るやつなので無視でお願いします
-
-router.get('/fake', shopSeeder(10))
 
 module.exports = router

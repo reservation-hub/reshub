@@ -2,6 +2,13 @@ const passport = require('./controllers/passport')
 const apiAreaController = require('./controllers/API/areaController')
 const apiIndexController = require('./controllers/API/indexController')
 
+const authController = require('./controllers/authController')
+const areaController = require('./controllers/areaController')
+const prefectureController = require('./controllers/prefectureController')
+const cityController = require('./controllers/cityController')
+const roleController = require('./controllers/roleController')
+const shopController = require('./controllers/shopController')
+
 const apiRoutes = [
   apiAreaController,
   apiIndexController,
@@ -22,13 +29,6 @@ const roleCheck = roles => (req, res, next) => {
   if (!authorized) return next({ code: 403, message: 'User unauthorized' })
   return next()
 }
-
-const authController = require('./controllers/authController')
-const areaController = require('./controllers/areaController')
-const prefectureController = require('./controllers/prefectureController')
-const cityController = require('./controllers/cityController')
-const roleController = require('./controllers/roleController')
-const shopController = require('./controllers/shopController')
 
 module.exports = app => {
   app.use('/api', apiRoutes)

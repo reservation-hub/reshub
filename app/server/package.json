@@ -7,6 +7,7 @@
     "serve": "nodemon --legacy-watch --exec 'npm run lint && node main.js'",
     "start": "node main.js",
     "seed": "node seed.js",
+    "seed-shop": "node shopSeeder.js",
     "lint": "./node_modules/.bin/eslint --ignore-path /app/.eslintignore ."
   },
   "keywords": [],

@@ -1,4 +1,4 @@
-[{
+module.exports = [{
   _id: '6094f699f54fbb067881c9d2', name: '北海道', slug: 'hokkaido', area: '6094de0155249603a880cb84', __v: 0,
 }, {
   _id: '6094f699f54fbb067881c9d3', name: '青森県', slug: 'aomori', area: '6094de0155249603a880cb84', __v: 0,
