@@ -41,22 +41,22 @@ export const getCities = async () => await instance.get(
 //-----------------------------------------------
 
 //　お店データを一つだけGETする
-export const getOneShop = async (id) => await instance.get(
+export const getOneShop = async id => await instance.get(
   `/shops/${ id }`
 )
 
 //　エリアデータを一つだけGETする
-export const getOneArea = async (id) => await instance.get(
+export const getOneArea = async id => await instance.get(
   `/area/${ id }`
 )
 
 //　県データを一つだけGETする
-export const getOnePrefecture = async (id) => await instance.get(
+export const getOnePrefecture = async id => await instance.get(
   `/prefecture/${ id }`
 )
 
 //　都市データを一つだけGETする
-export const getOneCities = async (id) => await instance.get(
+export const getOneCities = async id => await instance.get(
   `/cities/${ id }`
 )
 
@@ -65,7 +65,7 @@ export const getOneCities = async (id) => await instance.get(
 //-----------------------------------------------
 
 // add Shop data
-export const addShop = async (shopData) => await instance.post(
+export const addShop = async shopData => await instance.post(
   `/shops`, { ...shopData }
 )
 
@@ -80,7 +80,7 @@ export const putShop = async (id, shopData) => await instance.put(
 )
 
 // delete Shop data
-export const deleteShop = async (id) => await instance.delete(
+export const deleteShop = async id => await instance.delete(
   `/shops/${ id }`
 )
 
@@ -92,8 +92,12 @@ export const localLogin = async (email, password) => await instance.post(
   `/auth/login`, { email, password }
 )
 
-export const googleLogin = async (tokenId) => await instance.post(
+export const googleLogin = async tokenId => await instance.post(
   `/auth/google`, { tokenId }
+)
+
+export const silentRefresh = async () => await instance.post(
+  `/auth/silent_refresh`
 )
 
 export const logout = async () => await instance.get(
@@ -116,8 +120,9 @@ const apiEndpoint = {
   deleteShop,
   localLogin,
   googleLogin,
+  silentRefresh,
   logout,
-  instance,
+  instance
 }
 
 export default apiEndpoint

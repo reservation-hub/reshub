@@ -23,7 +23,7 @@ export const shopRequestStart = () => {
 }
 
 //　リクエストが失敗したらこっち
-export const shopRequestFaliure = (err) => {
+export const shopRequestFaliure = err => {
 
   return {
     type: SHOP_REQUEST_FAILURE,
@@ -37,7 +37,7 @@ export const fetchShopList = () => async dispatch => {
 
   dispatch(shopRequestStart())
   try {
-    const res = apiEndpoint.getShop()
+    const res = await apiEndpoint.getShop()
     dispatch({
       type: SHOP_FETCH_SUCCESS,
       payload: res.data
@@ -49,11 +49,11 @@ export const fetchShopList = () => async dispatch => {
 }
 
 //　お店データを一つだけ読み込む
-export const getOneShop = (id) => async dispatch => {
+export const getOneShop = id => async dispatch => {
 
   dispatch(shopRequestStart())
   try {
-    const res = apiEndpoint.getOneShop(id)
+    const res = await apiEndpoint.getOneShop(id)
     dispatch({
       type: SHOP_GET_SUCCESS,
       payload: res.data
@@ -65,11 +65,11 @@ export const getOneShop = (id) => async dispatch => {
 }
 
 //　お店データを追加する
-export const addShop = (shopData) => async dispatch => {
+export const addShop = shopData => async dispatch => {
 
   dispatch(shopRequestStart())
   try {
-    const res = apiEndpoint.addShop(shopData)
+    const res = await apiEndpoint.addShop(shopData)
     dispatch({
       type: SHOP_ADD_SUCCESS,
       payload: res.data
@@ -85,7 +85,7 @@ export const editShopData = (id, shopData) => async dispatch => {
 
   dispatch(shopRequestStart())
   try {
-    const res = apiEndpoint.patchShop(id, shopData)
+    const res = await apiEndpoint.patchShop(id, shopData)
     dispatch({
       type: SHOP_EDIT_SUCCESS,
       payload: res.data
@@ -97,11 +97,11 @@ export const editShopData = (id, shopData) => async dispatch => {
 }
 
 //　お店のデータを削除する
-export const deleteShopData = (id) => async dispatch => {
+export const deleteShopData = id => async dispatch => {
 
   dispatch(shopRequestStart())
   try {
-    const res = apiEndpoint.deleteShop(id)
+    const res = await apiEndpoint.deleteShop(id)
     dispatch({
       type: SHOP_DELETE_SUCCESS,
       payload: res.data

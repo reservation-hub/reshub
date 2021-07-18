@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { 
   Grid,
   Container,
@@ -7,26 +7,33 @@ import {
   Button
 } from '@material-ui/core'
 import { useDispatch } from 'react-redux'
-import { FcGoogle } from 'react-icons/fc'
 import { GoogleLogin } from 'react-google-login'
-import { googleLogin, logout } from '../../store/actions/authAction'
+import { logout, silentLogin } from '../../store/actions/authAction'
 import LoginStyle from './LoginStyle'
 import CommonStyle from '../CommonStyle'
+import Cookies from 'js-cookie'
 
-const Login = ({ value, setValue, onSubmit }) => {
+const Login = ({ 
+  value, 
+  setValue, 
+  onSubmit, 
+  googleHandler 
+}) => {
 
   const login = LoginStyle()
   const common = CommonStyle()
   const dispatch = useDispatch()
-  
-  const onSuccess = (response) => {
-    dispatch(googleLogin(response))
-  }
+  const token = Cookies.get('refreshToken')
 
   const onLogOut = () => {
-    console.log('should logout')
     dispatch(logout())
   }
+
+  useEffect(() => {
+    if(token) {
+      dispatch(silentLogin())
+    }
+  }, [dispatch, token])
 
   return (
     <main className={ login.loginRoot }>
@@ -93,15 +100,16 @@ const Login = ({ value, setValue, onSubmit }) => {
             >
               <GoogleLogin 
                 clientId={ process.env.REACT_APP_GOOGLE_CLIENT_ID }
-                onSuccess={ onSuccess }
-                onFailure={ onSuccess }
+                onSuccess={ googleHandler }
+                onFailure={ googleHandler }
                 cookiePolicy={ 'single_host_origin' }
+                approvalPrompt='force'
+                prompt='consent'
               />
               <Button onClick={ onLogOut }>Log Out</Button>
             </Grid>
           </Grid>
         </Container>
-
         {/* footer area */}
         <Container 
           maxWidth='sm'
@@ -118,4 +126,4 @@ const Login = ({ value, setValue, onSubmit }) => {
   )
 }
 
-export default Login
+export default React.memo(Login)

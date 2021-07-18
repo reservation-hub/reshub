@@ -9,6 +9,8 @@ import { areaReducer } from './areaReducer'
 import { prefectureReducer } from './prefectureReducer'
 import { cityReducer } from './cityReducer'
 
+
+
 export const rootReducer = combineReducers({
     auth: authReducer,
     shop: shopReducer,
@@ -16,3 +18,5 @@ export const rootReducer = combineReducers({
     prefecture: prefectureReducer,
     city: cityReducer
   })
+
+

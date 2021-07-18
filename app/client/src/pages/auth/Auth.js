@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react'
 import { useDispatch } from 'react-redux'
-import Login from '../../components/auth/LoginForm'
-import { loginStart } from '../../store/actions/authAction'
+import { loginStart, googleLogin } from '../../store/actions/authAction'
 import useInput from '../../utils/useInput'
+import Login from '../../components/auth/LoginForm'
 
 const Auth = () => {
 
@@ -16,12 +16,19 @@ const Auth = () => {
     e.preventDefault()
     dispatch(loginStart(value.email, value.password))
   }, [dispatch, value.email, value.password])
+
+  const googleHandler = useCallback(
+    response => {
+      dispatch(googleLogin(response))
+    }, [dispatch]
+  )
   
   return(
     <Login 
       value={ value } 
       setValue={ setValue } 
       onSubmit={ onSubmit } 
+      googleHandler={ googleHandler }
     />
   ) 
 }
