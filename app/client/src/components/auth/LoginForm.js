@@ -22,6 +22,7 @@ const Login = ({ value, setValue, onSubmit }) => {
 
   const googleHandler = (response) => {
     dispatch(googleLogin(response))
+    // console.log(response)
   }
 
   const onLogOut = () => {
