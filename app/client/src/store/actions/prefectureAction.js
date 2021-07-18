@@ -11,7 +11,7 @@ export const prefRequestStart = () => {
   }
 }
 
-export const prefRequestFailure = (err) => {
+export const prefRequestFailure = err => {
   return {
     type: PREFECTURE_REQUEST_FAILURE,
     payload: err.response.data
@@ -22,7 +22,7 @@ export const getPrefecture = () => async dispatch => {
 
   dispatch(prefRequestStart())
   try {
-    const res = apiEndpoint.getPrefecture()
+    const res = await apiEndpoint.getPrefecture()
     dispatch({
       type: PREFECTURE_REQUEST_SUCCESS,
       payload: res.data
@@ -33,11 +33,11 @@ export const getPrefecture = () => async dispatch => {
   
 }
 
-export const getOnePrefecture = (id) => async dispatch => {
+export const getOnePrefecture = id => async dispatch => {
 
   dispatch(prefRequestStart())
   try {
-    const res = apiEndpoint.getOnePrefecture(id)
+    const res = await apiEndpoint.getOnePrefecture(id)
     dispatch({
       type: PREFECTURE_REQUEST_SUCCESS,
       payload: res.data

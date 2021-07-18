@@ -44,7 +44,10 @@ const cookieExtractor = req => {
     authToken = req.signedCookies.authToken
   }
   if (!authToken) console.error('AUTH TOKEN : ', authToken)
-
+  // eslint-disable-next-line no-console
+  console.log(authToken)
+  // eslint-disable-next-line no-console
+  console.log(headerToken)
   if (req && authToken && headerToken && authToken === headerToken) {
     return authToken
   }

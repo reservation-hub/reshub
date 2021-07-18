@@ -2,17 +2,13 @@
 // redux action ユーザー印証管理関数
 //----------------------------------
 
-/**
- * こっちは現在保留中
- */
-
 import apiEndpoint from '../../utils/api/axios'
 import setAuthToken from '../../utils/setAuthToken'
+import Cookies from 'js-cookie'
 import { 
   USER_REQUEST_START, 
   USER_REQUEST_SUCCESS, 
   USER_REQUEST_FAILURE,
-  LOGOUT_REQUEST_FAILURE,
   LOGOUT_REQUEST_SUCCESS,
 } from '../types/authTypes'
 
@@ -22,49 +18,59 @@ export const userRequestStart = () => {
   }
 }
 
-export const userRequestFailure = (err) => {
+export const userRequestFailure = err => {
   return {
     type: USER_REQUEST_FAILURE,
     payload: err.response.data
   }
 }
 
-export const logoutRequestFailure = (err) => {
-  return {
-    type: LOGOUT_REQUEST_FAILURE,
-    payload: err.response.data
+export const sr = () => async dispatch => {
+  try {
+    const user = await apiEndpoint.silentRefresh()
+    const token = user.data.token
+    
+    Cookies.set('refreshToken', token)
+    setAuthToken(Cookies.get('refreshToken'))
+    
+    dispatch({
+      type: USER_REQUEST_SUCCESS,
+      payload: user.data.user
+    })
+  } catch (e) {
+    console.log(e.response)
   }
+
 }
 
 export const loginStart = (email, password) => async dispatch => {
 
   try {
     
-    const { data: { user, token } } = await apiEndpoint.localLogin(email, password)
+    const user = await apiEndpoint.localLogin(email, password)
+    const token = user.data.token
     
-    setAuthToken(token)
+    // setAuthToken(Cookies.get('refreshToken'))
 
-    dispatch({
-      type: USER_REQUEST_SUCCESS,
-      payload: user
-    })
+    // dispatch(userRequestSuccess(token, user.data.user))
   } catch (e) {
     dispatch(userRequestFailure(e))
   }
 
 }
 
-export const googleLogin = (googleResponse) => async dispatch => {
+export const googleLogin = googleResponse => async (dispatch) => {
 
   dispatch(userRequestStart())
   try {
-    const { data: { user, token } } = await apiEndpoint.googleLogin(googleResponse.tokenId)
-
-    setAuthToken(token)
+    const user = await apiEndpoint.googleLogin(googleResponse.tokenId)
+    const token = user.data.token
+    Cookies.set('refreshToken', token)
+    setAuthToken(Cookies.get('refreshToken'))
 
     dispatch({
       type: USER_REQUEST_SUCCESS,
-      payload: user
+      payload: user.data.user
     })
   } catch (e) {
     dispatch(userRequestFailure(e))
@@ -74,15 +80,15 @@ export const googleLogin = (googleResponse) => async dispatch => {
 
 export const logout = () => async dispatch => {
   try {
-    const { message } = await apiEndpoint.logout()
+    const message = await apiEndpoint.logout()    
+    Cookies.remove('refreshToken')
 
     dispatch({
       type: LOGOUT_REQUEST_SUCCESS,
       payload: message
     })
-
   } catch (e) {
-    dispatch(logoutRequestFailure(e))
+    dispatch(userRequestFailure(e))
   }
 
 }

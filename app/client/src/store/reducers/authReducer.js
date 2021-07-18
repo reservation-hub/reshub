@@ -2,12 +2,7 @@
 // redux reducer ユーザー印証 
 //----------------------------------
 
-/**
- * こっちは現在保留中
- */
-
 import { 
-  LOGOUT_REQUEST_FAILURE,
   LOGOUT_REQUEST_SUCCESS,
   USER_REQUEST_FAILURE, 
   USER_REQUEST_SUCCESS 
@@ -15,7 +10,7 @@ import {
 
 const initialState = {
   loading: true,
-  isAuthenticated: false,
+  isAuthenticated: null,
   user: {},
   err: null
 }
@@ -34,7 +29,7 @@ export const authReducer =  (state = initialState, action) => {
         ...state,
         loading: false,
         isAuthenticated: false,
-        err: action.payload
+        err: action.payload || {}
       }
     case LOGOUT_REQUEST_SUCCESS:
       return {
@@ -42,11 +37,6 @@ export const authReducer =  (state = initialState, action) => {
         loading: false,
         isAuthenticated: false,
         user: {}
-      }
-    case LOGOUT_REQUEST_FAILURE:
-      return {
-        ...state,
-        loading: false,
       }
     default:
       return state

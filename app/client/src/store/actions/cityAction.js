@@ -1,30 +1,30 @@
 import apiEndpoint from '../../utils/api/axios'
 import {
-  CITIES_REQUEST_START,
-  CITIES_REQUEST_SUCCESS,
-  CITIES_REQUEST_FAILURE
+  CITY_REQUEST_START,
+  CITY_REQUEST_SUCCESS,
+  CITY_REQUEST_FAILURE
 } from '../types/citiesTypes'
 
 export const citiesRequestStart = () => {
   return {
-    type: CITIES_REQUEST_START
+    type: CITY_REQUEST_START
   }
 }
 
-export const citiesRequestFailure = (err) => {
+export const citiesRequestFailure = err => {
   return {
-    type: CITIES_REQUEST_FAILURE,
+    type: CITY_REQUEST_FAILURE,
     paylaod: err.response.data
   }
 }
 
-export const getCities = () => async dispatch => {
+export const getCity = () => async dispatch => {
 
   dispatch(citiesRequestStart())
   try {
-    const res = apiEndpoint.getCities()
+    const res = await apiEndpoint.getCities()
     dispatch({
-      type: CITIES_REQUEST_SUCCESS,
+      type: CITY_REQUEST_SUCCESS,
       payload: res.dada
     })
   } catch (e) {
@@ -33,13 +33,13 @@ export const getCities = () => async dispatch => {
 
 }
 
-export const getOneCities = (id) => async dispatch => {
+export const getOneCity = id => async dispatch => {
 
   dispatch(citiesRequestStart())
   try {
-    const res = apiEndpoint.getOneCities(id)
+    const res = await apiEndpoint.getOneCities(id)
     dispatch({
-      type: CITIES_REQUEST_SUCCESS,
+      type: CITY_REQUEST_SUCCESS,
       payload: res.dada
     })
   } catch (e) {

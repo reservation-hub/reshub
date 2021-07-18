@@ -11,7 +11,7 @@ export const areaRequestStart = () => {
   }
 }
 
-export const areaRequestFailure = (err) => {
+export const areaRequestFailure = err => {
   return {
     type: AREA_REQUEST_FAILURE,
     payload: err.response.data
@@ -23,7 +23,7 @@ export const getArea = () => async dispatch => {
   dispatch(areaRequestStart())
 
   try {
-    const res = apiEndpoint.getArea()
+    const res = await apiEndpoint.getArea()
     dispatch({
       type: AREA_REQUEST_SUCCESS,
       payload: res.data
@@ -34,12 +34,12 @@ export const getArea = () => async dispatch => {
 
 }
 
-export const getOneArea = (id) => async dispatch => {
+export const getOneArea = id => async dispatch => {
   
   dispatch(areaRequestStart())
 
   try {
-    const res = apiEndpoint.getOneArea(id)
+    const res = await apiEndpoint.getOneArea(id)
     dispatch({
       type: AREA_REQUEST_SUCCESS,
       payload: res.data
