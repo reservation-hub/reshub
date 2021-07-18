@@ -12,12 +12,14 @@ import {
   LOGOUT_REQUEST_SUCCESS,
 } from '../types/authTypes'
 
+//ユーザーのリクエストをスタートするアクション
 export const userRequestStart = () => {
   return { 
     type: USER_REQUEST_START 
   }
 }
 
+//ユーザーのリクエストが失敗の時に実行するアクション
 export const userRequestFailure = err => {
   return {
     type: USER_REQUEST_FAILURE,
@@ -25,7 +27,8 @@ export const userRequestFailure = err => {
   }
 }
 
-export const sr = () => async dispatch => {
+// refresh tokenをサーバーに投げてユーザー情報をもらってくるアクション
+export const silentLogin = () => async dispatch => {
   try {
     const user = await apiEndpoint.silentRefresh()
     const token = user.data.token
@@ -43,30 +46,16 @@ export const sr = () => async dispatch => {
 
 }
 
+// localログインを実行するアクション
 export const loginStart = (email, password) => async dispatch => {
 
   try {
-    
     const user = await apiEndpoint.localLogin(email, password)
+    console.log(user)
     const token = user.data.token
     
-    // setAuthToken(Cookies.get('refreshToken'))
-
-    // dispatch(userRequestSuccess(token, user.data.user))
-  } catch (e) {
-    dispatch(userRequestFailure(e))
-  }
-
-}
-
-export const googleLogin = googleResponse => async (dispatch) => {
-
-  dispatch(userRequestStart())
-  try {
-    const user = await apiEndpoint.googleLogin(googleResponse.tokenId)
-    const token = user.data.token
     Cookies.set('refreshToken', token)
-    setAuthToken(Cookies.get('refreshToken'))
+    setAuthToken(token)
 
     dispatch({
       type: USER_REQUEST_SUCCESS,
@@ -74,10 +63,31 @@ export const googleLogin = googleResponse => async (dispatch) => {
     })
   } catch (e) {
     dispatch(userRequestFailure(e))
-    console.log(e)
+  }
+
+}
+
+// googelログインを実行するアクション
+export const googleLogin = googleResponse => async (dispatch) => {
+
+  dispatch(userRequestStart())
+  try {
+    const user = await apiEndpoint.googleLogin(googleResponse.tokenId)
+    const token = user.data.token
+
+    Cookies.set('refreshToken', token)
+    setAuthToken(token)
+
+    dispatch({
+      type: USER_REQUEST_SUCCESS,
+      payload: user.data.user
+    })
+  } catch (e) {
+    dispatch(userRequestFailure(e))
   }
 }
 
+//　ログアウトを実行するアクション
 export const logout = () => async dispatch => {
   try {
     const message = await apiEndpoint.logout()    

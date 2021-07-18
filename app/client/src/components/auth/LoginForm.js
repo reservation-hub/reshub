@@ -6,24 +6,24 @@ import {
   Typography,
   Button
 } from '@material-ui/core'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { GoogleLogin } from 'react-google-login'
-import { googleLogin, logout, sr } from '../../store/actions/authAction'
+import { logout, silentLogin } from '../../store/actions/authAction'
 import LoginStyle from './LoginStyle'
 import CommonStyle from '../CommonStyle'
 import Cookies from 'js-cookie'
 
-const Login = ({ value, setValue, onSubmit }) => {
+const Login = ({ 
+  value, 
+  setValue, 
+  onSubmit, 
+  googleHandler 
+}) => {
 
   const login = LoginStyle()
   const common = CommonStyle()
   const dispatch = useDispatch()
   const token = Cookies.get('refreshToken')
-
-  const googleHandler = (response) => {
-    dispatch(googleLogin(response))
-    // console.log(response)
-  }
 
   const onLogOut = () => {
     dispatch(logout())
@@ -31,7 +31,7 @@ const Login = ({ value, setValue, onSubmit }) => {
 
   useEffect(() => {
     if(token) {
-      dispatch(sr())
+      dispatch(silentLogin())
     }
   }, [dispatch, token])
 
@@ -126,4 +126,4 @@ const Login = ({ value, setValue, onSubmit }) => {
   )
 }
 
-export default Login
+export default React.memo(Login)

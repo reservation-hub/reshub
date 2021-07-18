@@ -96,7 +96,7 @@ export const googleLogin = async tokenId => await instance.post(
   `/auth/google`, { tokenId }
 )
 
-export const silentRefresh = async () => await instance.get(
+export const silentRefresh = async () => await instance.post(
   `/auth/silent_refresh`
 )
 

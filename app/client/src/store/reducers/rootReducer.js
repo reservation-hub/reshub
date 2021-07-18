@@ -8,16 +8,10 @@ import { shopReducer } from './shopReducer'
 import { areaReducer } from './areaReducer'
 import { prefectureReducer } from './prefectureReducer'
 import { cityReducer } from './cityReducer'
-import { persistReducer } from 'redux-persist'
-import storage from 'redux-persist/lib/storage'
 
-const persistConfig = {
-  key: 'root',
-  storage,
-  whitelist: ['auth']
-}
 
-const rootReducer = combineReducers({
+
+export const rootReducer = combineReducers({
     auth: authReducer,
     shop: shopReducer,
     area: areaReducer,
@@ -26,4 +20,3 @@ const rootReducer = combineReducers({
   })
 
 
-  export default persistReducer(persistConfig, rootReducer)

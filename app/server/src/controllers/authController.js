@@ -71,7 +71,7 @@ const logout = (req, res) => {
 
 router.post('/google', verifyIfNotLoggedInYet, checkGoogleToken, login)
 router.post('/login', verifyIfNotLoggedInYet, passport.authenticate('local', { session: false }), login)
-router.get('/silent_refresh', passport.authenticate('jwt', { session: false }), login)
+router.post('/silent_refresh', passport.authenticate('jwt', { session: false }), login)
 router.get('/logout', passport.authenticate('jwt', { session: false }), logout)
 
 module.exports = router

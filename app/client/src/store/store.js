@@ -3,7 +3,7 @@
 //----------------------------------
 
 import { createStore, applyMiddleware, compose } from 'redux'
-import persistReducer from './reducers/rootReducer'
+import { rootReducer } from './reducers/rootReducer'
 import thunk from 'redux-thunk'
 import logger from 'redux-logger'
 import setAuthToken from '../utils/setAuthToken'
@@ -14,7 +14,7 @@ const middleware = [thunk, logger]
 
 const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 const store = createStore(
-  persistReducer, composeEnhancer(applyMiddleware(...middleware))
+  rootReducer, composeEnhancer(applyMiddleware(...middleware))
 )
 
 const token = Cookies.get('refreshToken')
