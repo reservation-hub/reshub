@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const { Schema } = mongoose
-const MongoosePaging = require('mongo-cursor-pagination')
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 const areaSchema = Schema(
   {
@@ -20,5 +20,5 @@ const areaSchema = Schema(
     strictQuery: true,
   },
 )
-areaSchema.plugin(MongoosePaging.mongoosePlugin)
+areaSchema.plugin(mongoosePaginate)
 exports.Area = mongoose.model('Area', areaSchema)

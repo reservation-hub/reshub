@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const { Schema } = mongoose
 
-const MongoosePaging = require('mongo-cursor-pagination')
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 const prefectureSchema = Schema(
   {
@@ -23,6 +23,6 @@ const prefectureSchema = Schema(
     },
   },
 )
-prefectureSchema.plugin(MongoosePaging.mongoosePlugin)
+prefectureSchema.plugin(mongoosePaginate)
 
 exports.Prefecture = mongoose.model('Prefecture', prefectureSchema)
