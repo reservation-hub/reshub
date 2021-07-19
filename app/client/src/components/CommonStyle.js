@@ -13,13 +13,13 @@ const CommonStyle = makeStyles({
   mb2: {
     marginBottom: '2rem'
   },
-  bc: {
+  boxCenter: {
     position: 'absolute',
-    top: '20%',
+    top: '25%',
     left: '25%',
     right: '25%'
   },
-  b1: {
+  commonButton: {
     width: '100%',
     padding: '.32rem',
     fontSize: '1.2rem',
@@ -31,21 +31,6 @@ const CommonStyle = makeStyles({
     '&:hover': {
       color: '#fafafa',
       backgroundColor: '#84A8E3',
-      transition: '.3s ease'
-    }
-  },
-  a1: {
-    marginTop: '.6888rem',
-    padding: '.2855rem',
-    border: '1px solid #999',
-    borderRadius: '.25rem',
-    textDecoration: 'none',
-    color: '#999',
-    fontSize: '1.2rem',
-    '&:hover': {
-      borderColor: '#d3d8db',
-      color: '#fafafa',
-      backgroundColor: '#d3d8db',
       transition: '.3s ease'
     }
   },

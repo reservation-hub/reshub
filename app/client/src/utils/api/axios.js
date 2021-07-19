@@ -1,10 +1,4 @@
-import axios from 'axios'
-import BASE_URL from './index'
-
-export const instance = axios.create({
-  withCredentials: true,
-  baseURL: BASE_URL
-})
+import instance from './index'
 
 //-----------------------------------------------
 // get method
@@ -27,7 +21,7 @@ export const getArea = async () => await instance.get(
 
 // prefectureデータをGETする
 export const getPrefecture = async () => await instance.get(
-  `/prefecture`
+  `/prefectures`
 )
 
 // citisデータをGETする

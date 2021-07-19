@@ -1,4 +1,4 @@
-import { instance } from '../utils/api/axios'
+import instance from '../utils/api/index'
 
 const setAuthToken = token => {
   if (token) {

@@ -4,6 +4,7 @@
 
 import apiEndpoint from '../../utils/api/axios'
 import setAuthToken from '../../utils/setAuthToken'
+import history from '../../utils/history'
 import Cookies from 'js-cookie'
 import { 
   USER_REQUEST_START, 
@@ -29,6 +30,7 @@ export const userRequestFailure = err => {
 
 // refresh tokenをサーバーに投げてユーザー情報をもらってくるアクション
 export const silentLogin = () => async dispatch => {
+
   try {
     const user = await apiEndpoint.silentRefresh()
     const token = user.data.token
@@ -82,9 +84,12 @@ export const googleLogin = googleResponse => async (dispatch) => {
       type: USER_REQUEST_SUCCESS,
       payload: user.data.user
     })
+
+    history.push('/pre')
   } catch (e) {
     dispatch(userRequestFailure(e))
   }
+  
 }
 
 //　ログアウトを実行するアクション

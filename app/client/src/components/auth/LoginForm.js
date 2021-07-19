@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { 
   Grid,
   Container,
@@ -8,10 +8,9 @@ import {
 } from '@material-ui/core'
 import { useDispatch } from 'react-redux'
 import { GoogleLogin } from 'react-google-login'
-import { logout, silentLogin } from '../../store/actions/authAction'
+import { logout } from '../../store/actions/authAction'
 import LoginStyle from './LoginStyle'
 import CommonStyle from '../CommonStyle'
-import Cookies from 'js-cookie'
 
 const Login = ({ 
   value, 
@@ -22,22 +21,16 @@ const Login = ({
 
   const login = LoginStyle()
   const common = CommonStyle()
+  
   const dispatch = useDispatch()
-  const token = Cookies.get('refreshToken')
 
   const onLogOut = () => {
     dispatch(logout())
   }
 
-  useEffect(() => {
-    if(token) {
-      dispatch(silentLogin())
-    }
-  }, [dispatch, token])
-
   return (
     <main className={ login.loginRoot }>
-      <div className={ common.bc }>
+      <div className={ common.boxCenter }>
 
         {/* header area */}
         <Container 
@@ -87,7 +80,7 @@ const Login = ({
                   }
                   fullWidth
                 />
-                <button className={ common.b1 }>
+                <button className={ common.commonButton }>
                   Login
                 </button>
               </form>
