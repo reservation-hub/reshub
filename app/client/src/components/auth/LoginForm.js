@@ -1,5 +1,6 @@
 import React from 'react'
 import { 
+  Paper,
   Grid,
   Container,
   TextField,
@@ -29,7 +30,7 @@ const Login = ({
   }
 
   return (
-    <main className={ login.loginRoot }>
+    <Paper className={ login.loginRoot }>
       <div className={ common.boxCenter }>
 
         {/* header area */}
@@ -115,7 +116,7 @@ const Login = ({
           </Typography>
         </Container>
       </div>
-    </main> 
+    </Paper> 
   )
 }
 

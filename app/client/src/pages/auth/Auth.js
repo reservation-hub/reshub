@@ -24,12 +24,14 @@ const Auth = () => {
   )
   
   return(
-    <Login 
-      value={ value } 
-      setValue={ setValue } 
-      onSubmit={ onSubmit } 
-      googleHandler={ googleHandler }
-    />
+    <main>
+      <Login 
+        value={ value } 
+        setValue={ setValue } 
+        onSubmit={ onSubmit } 
+        googleHandler={ googleHandler }
+      />
+    </main>
   ) 
 }
 

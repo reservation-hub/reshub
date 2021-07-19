@@ -14,14 +14,14 @@ const areaRequestStart = () => {
 const fetchArea = area => {
   return {
     type: AREA_REQUEST_SUCCESS,
-    area
+    payload: area
   }
 }
 
 const areaRequestFailure = err => {
   return {
     type: AREA_REQUEST_FAILURE,
-    err
+    payload: err
   }
 }
 

@@ -23,7 +23,7 @@ const userRequestStart = () => {
 const fetchUser = user => {
   return {
     type: USER_REQUEST_SUCCESS,
-    user
+    payload: user
   }
 }
 
@@ -31,7 +31,7 @@ const fetchUser = user => {
 const userRequestFailure = err => {
   return {
     type: USER_REQUEST_FAILURE,
-    err
+    payload :err
   }
 }
 
@@ -45,10 +45,7 @@ export const silentLogin = () => async dispatch => {
     Cookies.set('refreshToken', token)
     setAuthToken(Cookies.get('refreshToken'))
     
-    dispatch({
-      type: USER_REQUEST_SUCCESS,
-      payload: user.data.user
-    })
+    dispatch(fetchUser(user.data.user))
   } catch (e) {
     dispatch(userRequestFailure(e.response.data))
   }
@@ -95,7 +92,6 @@ export const googleLogin = googleResponse => async (dispatch) => {
 //　ログアウトを実行するアクション
 export const logout = () => async dispatch => {
 
-  dispatch(userRequestStart())
   try {
     const message = await apiEndpoint.logout()    
     Cookies.remove('refreshToken')

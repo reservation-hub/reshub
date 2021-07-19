@@ -8,17 +8,16 @@ const Prefecture = () => {
 
   const dispatch = useDispatch()
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated)
-  const prefecture = useSelector(state => state.prefecture)
-  console.log(isAuthenticated)
+  const { perfecture } = useSelector(state => state.prefecture)
   
   useEffect(() => {
     dispatch(getPrefecture())
   }, [dispatch])
 
-  if(!isAuthenticated) return <Redirect to='/' />
-
   return (
-    <PrefectureList />
+    <main>
+      <PrefectureList prefectures={ perfecture.docs } />
+    </main>
   )
 }
 

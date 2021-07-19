@@ -14,14 +14,14 @@ const cityRequestStart = () => {
 const fetchCity = city => {
   return {
     type: CITY_REQUEST_SUCCESS,
-    city
+    payload: city
   }
 }
 
 const cityRequestFailure = err => {
   return {
     type: CITY_REQUEST_FAILURE,
-    paylaod: err.response.data
+    paylaod: err
   }
 }
 

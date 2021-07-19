@@ -24,7 +24,7 @@ const shopRequestStart = () => {
 const shopRequestFaliure = err => {
   return {
     type: SHOP_REQUEST_FAILURE,
-    err
+    payload: err
   }
 } 
 

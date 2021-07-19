@@ -14,7 +14,7 @@ const prefRequestStart = () => {
 const fetchPrefecture = prefecture => {
   return {
     type: PREFECTURE_REQUEST_SUCCESS,
-    prefecture
+    payload: prefecture
   }
 }
 
