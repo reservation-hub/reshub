@@ -6,13 +6,17 @@ import {
   TableHead, 
   TableBody, 
   TableRow,
-  TableCell  
+  TableCell,
+  Typography  
 } from '@material-ui/core'
 
 const PrefectureList = ({ prefectures }) => {
 
   return (
     <Paper>
+      <Typography variant='h4'>
+        Prefecture List
+      </Typography>
       <Table>
         <TableHead>
           <TableRow>

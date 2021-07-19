@@ -31,7 +31,7 @@ const fetchUser = user => {
 const userRequestFailure = err => {
   return {
     type: USER_REQUEST_FAILURE,
-    payload :err
+    payload: err
   }
 }
 
@@ -64,6 +64,8 @@ export const loginStart = (email, password) => async dispatch => {
     setAuthToken(token)
 
     dispatch(fetchUser(user.data.user))
+
+    history.push('/')
   } catch (e) {
     dispatch(userRequestFailure(e.response.data))
   }
@@ -82,7 +84,7 @@ export const googleLogin = googleResponse => async (dispatch) => {
 
     dispatch(fetchUser(user.data.user))
 
-    history.push('/pre')
+    history.push('/')
   } catch (e) {
     dispatch(userRequestFailure(e.response.data))
   }
@@ -100,6 +102,8 @@ export const logout = () => async dispatch => {
       type: LOGOUT_REQUEST_SUCCESS,
       payload: message
     })
+
+    history.push('/')
   } catch (e) {
     dispatch(userRequestFailure(e.response.data))
   }
