@@ -3,14 +3,14 @@ import {
   TableCell  
 } from '@material-ui/core'
 
-const PrefectureItem = ({ pre, preNo }) => {
+const PrefectureItem = ({ preName, preNo }) => {
   return (
     <TableRow>
       <TableCell>
         { preNo }
       </TableCell>
       <TableCell>
-        { pre.name }
+        { preName }
       </TableCell>
     </TableRow>
   )

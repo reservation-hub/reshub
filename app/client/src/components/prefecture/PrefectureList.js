@@ -29,8 +29,8 @@ const PrefectureList = ({ prefectures }) => {
             (pre, index) => (
               <PrefectureItem 
                 key={ index } 
-                pre={ pre } 
                 preNo={ index } 
+                preName={ pre.name } 
               />
             )
           ) }
