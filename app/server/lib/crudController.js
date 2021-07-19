@@ -42,24 +42,15 @@ exports.registerCrud = (Model, schema, router, options) => {
 
 exports.crudController = {
   index(Model, options = { populate: false }) {
-    return eah(async (req, res, next) => {
+    return eah(async (req, res) => {
       const foreignKey = options.populate ? filterForeignKey(Model.schema.paths) : []
-      // 納得いかない,でもいま使ってくれ,もうちょっと調べる
-      Model.paginate({
-        query: {
-          id: req._id,
-        },
-        paginateField: 'createdAt',
+      const paginateOptions = {
+        page: req.query.params,
         limit: 10,
-        next: req.query.next,
-      })
-        .then(result => {
-          result.results.map(item => Model.populate(item, [{ path: foreignKey }]))
-          return result
-        }).then(result => {
-          res.send(result)
-        })
-        .catch(e => next(e))
+        populate: foreignKey,
+      }
+      const models = await Model.paginate({}, paginateOptions)
+      return res.send(models)
     })
   },
   show(Model, options = { slug: 'id', populate: false }) {
