@@ -3,7 +3,7 @@ import {
   CITY_REQUEST_START,
   CITY_REQUEST_SUCCESS,
   CITY_REQUEST_FAILURE
-} from '../types/citiesTypes'
+} from '../types/cityTypes'
 
 const cityRequestStart = () => {
   return {

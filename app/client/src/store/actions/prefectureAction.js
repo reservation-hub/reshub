@@ -21,7 +21,7 @@ const fetchPrefecture = prefecture => {
 const prefRequestFailure = err => {
   return {
     type: PREFECTURE_REQUEST_FAILURE,
-    err
+    payload: err
   }
 }
 

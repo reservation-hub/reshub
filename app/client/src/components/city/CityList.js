@@ -1,5 +1,3 @@
-import React from 'react'
-import PrefectureItem from './PrefectureItem'
 import {
   Paper, 
   Table,
@@ -9,13 +7,14 @@ import {
   TableCell,
   Typography  
 } from '@material-ui/core'
+import CityItem from './CityItem'
 
-const PrefectureList = ({ prefectures }) => {
-
+const CityList = ({ cities }) => {
+  
   return (
     <Paper>
       <Typography variant='h4'>
-        Prefecture List
+        City List
       </Typography>
       <Table>
         <TableHead>
@@ -24,17 +23,17 @@ const PrefectureList = ({ prefectures }) => {
               No
             </TableCell>
             <TableCell>
-              Prefecture
+              City
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          { prefectures && prefectures.map(
-            (pre, index) => (
-              <PrefectureItem 
-                key={ index } 
-                preNo={ index } 
-                preName={ pre.name } 
+          { cities && cities.map(
+            (city, index) => (
+              <CityItem
+                key={ index }
+                cityNo={ index }
+                cityName={ city.name }
               />
             )
           ) }
@@ -44,4 +43,4 @@ const PrefectureList = ({ prefectures }) => {
   )
 }
 
-export default PrefectureList
+export default CityList
