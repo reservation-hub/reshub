@@ -1,35 +1,38 @@
-import apiEndpoint from '../../utils/api/axios'
+import apiEndpoint from '../../utils/api/apiEndpoint'
 import { 
   AREA_REQUEST_START,
   AREA_REQUEST_SUCCESS,
   AREA_REQUEST_FAILURE
  } from '../types/areaTypes'
 
-export const areaRequestStart = () => {
+const areaRequestStart = () => {
   return {
     type: AREA_REQUEST_START
   }
 }
 
-export const areaRequestFailure = err => {
+const fetchArea = area => {
+  return {
+    type: AREA_REQUEST_SUCCESS,
+    payload: area
+  }
+}
+
+const areaRequestFailure = err => {
   return {
     type: AREA_REQUEST_FAILURE,
-    payload: err.response.data
+    payload: err
   }
 }
 
 export const getArea = () => async dispatch => {
   
   dispatch(areaRequestStart())
-
   try {
     const res = await apiEndpoint.getArea()
-    dispatch({
-      type: AREA_REQUEST_SUCCESS,
-      payload: res.data
-    })
+    dispatch(fetchArea(res.data))
   } catch (e) {
-    dispatch(areaRequestFailure(e))
+    dispatch(areaRequestFailure(e.response.data))
   }
 
 }
@@ -37,15 +40,11 @@ export const getArea = () => async dispatch => {
 export const getOneArea = id => async dispatch => {
   
   dispatch(areaRequestStart())
-
   try {
     const res = await apiEndpoint.getOneArea(id)
-    dispatch({
-      type: AREA_REQUEST_SUCCESS,
-      payload: res.data
-    })
+    dispatch(fetchArea(res.data))
   } catch (e) {
-    dispatch(areaRequestFailure(e))
+    dispatch(areaRequestFailure(e.response.data))
   }
   
 }

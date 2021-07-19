@@ -2,8 +2,9 @@
 // redux action ユーザー印証管理関数
 //----------------------------------
 
-import apiEndpoint from '../../utils/api/axios'
+import apiEndpoint from '../../utils/api/apiEndpoint'
 import setAuthToken from '../../utils/setAuthToken'
+import history from '../../utils/history'
 import Cookies from 'js-cookie'
 import { 
   USER_REQUEST_START, 
@@ -13,22 +14,30 @@ import {
 } from '../types/authTypes'
 
 //ユーザーのリクエストをスタートするアクション
-export const userRequestStart = () => {
+const userRequestStart = () => {
   return { 
     type: USER_REQUEST_START 
   }
 }
 
+const fetchUser = user => {
+  return {
+    type: USER_REQUEST_SUCCESS,
+    payload: user
+  }
+}
+
 //ユーザーのリクエストが失敗の時に実行するアクション
-export const userRequestFailure = err => {
+const userRequestFailure = err => {
   return {
     type: USER_REQUEST_FAILURE,
-    payload: err.response.data
+    payload :err
   }
 }
 
 // refresh tokenをサーバーに投げてユーザー情報をもらってくるアクション
 export const silentLogin = () => async dispatch => {
+
   try {
     const user = await apiEndpoint.silentRefresh()
     const token = user.data.token
@@ -36,12 +45,9 @@ export const silentLogin = () => async dispatch => {
     Cookies.set('refreshToken', token)
     setAuthToken(Cookies.get('refreshToken'))
     
-    dispatch({
-      type: USER_REQUEST_SUCCESS,
-      payload: user.data.user
-    })
+    dispatch(fetchUser(user.data.user))
   } catch (e) {
-    console.log(e.response)
+    dispatch(userRequestFailure(e.response.data))
   }
 
 }
@@ -49,20 +55,17 @@ export const silentLogin = () => async dispatch => {
 // localログインを実行するアクション
 export const loginStart = (email, password) => async dispatch => {
 
+  dispatch(userRequestStart())
   try {
     const user = await apiEndpoint.localLogin(email, password)
-    console.log(user)
     const token = user.data.token
     
     Cookies.set('refreshToken', token)
     setAuthToken(token)
 
-    dispatch({
-      type: USER_REQUEST_SUCCESS,
-      payload: user.data.user
-    })
+    dispatch(fetchUser(user.data.user))
   } catch (e) {
-    dispatch(userRequestFailure(e))
+    dispatch(userRequestFailure(e.response.data))
   }
 
 }
@@ -70,7 +73,6 @@ export const loginStart = (email, password) => async dispatch => {
 // googelログインを実行するアクション
 export const googleLogin = googleResponse => async (dispatch) => {
 
-  dispatch(userRequestStart())
   try {
     const user = await apiEndpoint.googleLogin(googleResponse.tokenId)
     const token = user.data.token
@@ -78,17 +80,18 @@ export const googleLogin = googleResponse => async (dispatch) => {
     Cookies.set('refreshToken', token)
     setAuthToken(token)
 
-    dispatch({
-      type: USER_REQUEST_SUCCESS,
-      payload: user.data.user
-    })
+    dispatch(fetchUser(user.data.user))
+
+    history.push('/pre')
   } catch (e) {
-    dispatch(userRequestFailure(e))
+    dispatch(userRequestFailure(e.response.data))
   }
+  
 }
 
 //　ログアウトを実行するアクション
 export const logout = () => async dispatch => {
+
   try {
     const message = await apiEndpoint.logout()    
     Cookies.remove('refreshToken')
@@ -98,7 +101,7 @@ export const logout = () => async dispatch => {
       payload: message
     })
   } catch (e) {
-    dispatch(userRequestFailure(e))
+    dispatch(userRequestFailure(e.response.data))
   }
 
 }
