@@ -4,6 +4,7 @@ import { silentLogin } from './store/actions/authAction'
 import Auth from './pages/auth/Auth'
 import Prefecture from './pages/prefecture/Prefecture'
 import Cookies from 'js-cookie'
+import Cities from './pages/city/Cities'
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
     <>
       <Auth />
       <Prefecture />
+      <Cities />
     </>
   )
 }
