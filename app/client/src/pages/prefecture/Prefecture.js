@@ -3,7 +3,6 @@ import { Redirect } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { getPrefecture } from '../../store/actions/prefectureAction'
 import PrefectureList from '../../components/prefecture/PrefectureList'
-import history from '../../utils/history'
 
 const Prefecture = () => {
 
@@ -14,7 +13,7 @@ const Prefecture = () => {
   
   useEffect(() => {
     dispatch(getPrefecture())
-  }, [])
+  }, [dispatch])
 
   if(!isAuthenticated) return <Redirect to='/' />
 

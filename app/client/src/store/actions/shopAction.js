@@ -2,7 +2,7 @@
 // redux action お店情報管理関数
 //----------------------------------
 
-import apiEndpoint from '../../utils/api/axios'
+import apiEndpoint from '../../utils/api/apiEndpoint'
 import { 
   SHOP_FETCH_SUCCESS,
   SHOP_GET_SUCCESS,
@@ -14,22 +14,18 @@ import {
 } from '../types/shopTypes'
 
 // リクエストを始まる
-export const shopRequestStart = () => {
-
+const shopRequestStart = () => {
   return { 
     type: SHOP_REQUEST_START 
   }
-
 }
 
 //　リクエストが失敗したらこっち
-export const shopRequestFaliure = err => {
-
+const shopRequestFaliure = err => {
   return {
     type: SHOP_REQUEST_FAILURE,
-    payload: err.response.data
+    err
   }
-
 } 
 
 //　全てのお店データを読み込む
