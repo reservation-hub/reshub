@@ -4,34 +4,52 @@
 
 aliasの設定と環境変数定義
 
-```
-$ source aliases.sh
-$ reshub-init
-```
-
-### ClientとServerを別々の窓で立ち上げる!!
-
-Client
-
-```
-$ reshub-lcl-client
+```bash
+source aliases.sh
+rh-init
 ```
 
-Server
+### 立ち上げ
 
+```bash
+rh
 ```
-$ reshub-lcl-server
-```
-
 
 ### Seedを実行したい場合
 
+```bash
+db-seed # shop以外
+db-seed-shop # shop 10個
 ```
-$ docker-compose exec server npm run seed
+
+### DBクライアントの立ち上げ
+
+reshubが立ち上がってるのが大前提
+
+docker ps で確認できる
+
+```bash
+db-studio
 ```
+
+そしてlocalhost:5555を開く
+
+### dbのバックアップを作るコマンド
+
+```bash
+rh-db-backup <ファイル名>
+```
+
+ファイル名を指定しないと失敗する
+
+### dbのバックアップでrestoreするコマンド
+
+```bash
+rh-db-restore <ファイル名>
+```
+
+ファイル名を指定しないと失敗する
 
 ### 環境設定
 
-- Client: http://localhost:8080
-- Server: http://localhost:8090
-
+- http://localhost:8090
