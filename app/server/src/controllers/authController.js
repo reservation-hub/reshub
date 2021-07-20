@@ -12,11 +12,8 @@ const login = eah(async (req, res, next) => {
 
   const { oAuth } = res.locals.auth ?? {}
   if (oAuth) {
-    await UserRepository.addIdFromPassportProfile(user, oAuth)
+    await UserRepository.addOAuthID(user, oAuth)
   }
-
-  // user = user.toObject()
-  delete user.password
 
   // トークン生成
   const cookieOptions = {
@@ -45,7 +42,7 @@ const verifyIfNotLoggedInYet = eah(async (req, res, next) => {
   const token = jwt.verify(signedCookies.authToken, process.env.JWT_TOKEN_SECRET)
   const user = await UserRepository.findByProps([
     { email: token.user.email },
-    { _id: token.user._id },
+    { id: token.user.id },
   ])
   if (!user) return next({ code: 403, message: 'Unauthorized Access' })
 

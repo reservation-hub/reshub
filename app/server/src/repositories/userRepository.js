@@ -81,32 +81,46 @@ module.exports = {
   async findByProps(prop) {
     const param = Array.isArray(prop) ? { OR: prop } : prop
     try {
-      return prisma.user.findUnique({
+      let user = await prisma.user.findUnique({
         where: param,
+        include: {
+          profile: true,
+          oAuthIDs: true,
+          roles: {
+            include: { role: true },
+          },
+        },
       })
+
+      delete user.password
+      user = { ...user, roles: user.roles.map(role => role.role) }
+
+      return user
     } catch (e) { return e }
   },
-  async addIdFromPassportProfile(user, profile) {
-    const data = {}
-    switch (profile.provider) {
-      case 'google':
-        if (!user.googleID) data.googleID = profile.id
-        break
-      case 'twitter':
-        if (!user.twitterID) data.twitterID = profile.id
-        break
-      case 'line':
-        if (!user.lineID) data.lineID = profile.id
-        break
-      default:
-        return user
-    }
+  async addOAuthID(user, oAuth) {
+    const idExists = ({ provider }) => user.oAuthIDs
+      .findIndex(id => id[provider] === oAuth.id) !== -1
 
-    try {
-      return await prisma.user.update({
-        where: { id: user.id },
-        data,
-      })
-    } catch (e) { return e }
+    switch (oAuth.provider) {
+      case 'google':
+        if (idExists(oAuth)) {
+          return prisma.userOAuthIds.upsert({
+            where: { userID: user.id },
+            update: {
+              googleID: oAuth.id,
+            },
+            create: {
+              googleID: oAuth.id,
+              user: {
+                connect: { id: user.id },
+              },
+            },
+          })
+        }
+        return null
+      default:
+        return null
+    }
   },
 }
