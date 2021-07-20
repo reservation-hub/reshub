@@ -3,8 +3,9 @@ import { useDispatch } from 'react-redux'
 import { silentLogin } from './store/actions/authAction'
 import Auth from './pages/auth/Auth'
 import Prefecture from './pages/prefecture/Prefecture'
-import Cookies from 'js-cookie'
 import Cities from './pages/city/Cities'
+import Cookies from 'js-cookie'
+import ModalOverlay from './components/modal/Modal'
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
       <Auth />
       <Prefecture />
       <Cities />
+      <ModalOverlay />
     </>
   )
 }

@@ -14,8 +14,8 @@ const Prefecture = () => {
     dispatch(getPrefecture())
   }, [dispatch])
 
-  if (!isAuthenticated) return history.push('/')
-  
+  if (!isAuthenticated) return null
+
   return (
     <main>
       <PrefectureList prefectures={ prefecture.docs } />

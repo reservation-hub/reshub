@@ -13,14 +13,19 @@ import Cookies from 'js-cookie'
 
 const persistConfig = {
   key: 'root',
-  storage
+  storage,
+  whitelist: ['auth']
 }
 
 const enhancedReducer = persistReducer(persistConfig, rootReducer)
 
-const middleware = [thunk, logger]
+const middleware = process.env.NODE_ENV !== 'production' ? [thunk, logger] : [thunk]
 
-const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+const composeEnhancer = 
+  (process.env.NODE_ENV !== 'production' && 
+    typeof window !== 'undefined' &&
+      window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose
+    
 const store = createStore(
   enhancedReducer, composeEnhancer(applyMiddleware(...middleware))
 )
