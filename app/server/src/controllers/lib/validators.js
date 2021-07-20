@@ -1,7 +1,3 @@
-const mongoose = require('mongoose')
-
-const { Types: { ObjectId } } = mongoose
-
 exports.schemaMiddleware = validationSchema => (req, res, next) => {
   validationSchema.validateAsync(req.body, { abortEarly: false })
     // todo fix validator, change to async await
@@ -10,9 +6,4 @@ exports.schemaMiddleware = validationSchema => (req, res, next) => {
       next()
     })
     .catch(e => next(e))
-}
-
-exports.idMiddleware = () => (req, res, next) => {
-  if (!ObjectId.isValid(req.params.id)) return next({ code: 404 })
-  return next()
 }

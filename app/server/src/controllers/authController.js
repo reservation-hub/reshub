@@ -1,16 +1,21 @@
 const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 const eah = require('express-async-handler')
-const { OAuth2Client } = require('google-auth-library')
+const { OAuth2Client: GoogleAuthClient } = require('google-auth-library')
 const UserRepository = require('../repositories/userRepository')
-const passport = require('./passport')
+const passport = require('./lib/passport')
 
 const login = eah(async (req, res, next) => {
   const { email } = res.locals.auth ?? req.user ?? {}
-  let user = await UserRepository.findByProps({ email })
+  const user = await UserRepository.findByProps({ email })
   if (!user) return next({ code: 404, message: 'User not found' })
 
-  user = user.toObject()
+  const { oAuth } = res.locals.auth ?? {}
+  if (oAuth) {
+    await UserRepository.addIdFromPassportProfile(user, oAuth)
+  }
+
+  // user = user.toObject()
   delete user.password
 
   // トークン生成
@@ -47,9 +52,8 @@ const verifyIfNotLoggedInYet = eah(async (req, res, next) => {
   return next({ code: 400, message: 'User is already logged in!' })
 })
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
-
 const checkGoogleToken = eah(async (req, res, next) => {
+  const client = new GoogleAuthClient(process.env.GOOGLE_CLIENT_ID)
   const { tokenId } = req.body
   if (!tokenId) return next({ code: 401, message: 'Bad Request' })
 
@@ -58,9 +62,9 @@ const checkGoogleToken = eah(async (req, res, next) => {
     audience: process.env.GOOGLE_CLIENT_ID,
   })
 
-  const { email } = ticket.getPayload()
+  const { email, sub } = ticket.getPayload()
   if (!email) return next({ code: 401, message: 'Bad Request' })
-  res.locals.auth = { email }
+  res.locals.auth = { email, oAuth: { provider: 'google', id: sub } }
   return next()
 })
 

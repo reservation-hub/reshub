@@ -3,6 +3,7 @@ volumes:
   server-node_modules:
   client-node_modules:
   db-data:
+  postgres-data:
 
 services:
 
@@ -20,13 +21,14 @@ services:
     image: reshub-server:latest
     ports: 
       - 8090:8090
+      - 5555:5555 # prisma studio port
     volumes:
       - ./app/server:/app
       - server-node_modules:/app/node_modules
     tty: true
     depends_on: 
       - db
-      - redis
+      - postgresql
   
   # prd
   production:
@@ -44,7 +46,6 @@ services:
       - 8091:8090
     depends_on: 
       - db
-      - redis
 
   # client
   client:
@@ -76,8 +77,12 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
 
-  redis:
-    image: redis:alpine
+  postgresql:
+    image: postgres:12
+    container_name: reshub-db
     ports:
-      - 6379
-    
+      - 5432:5432
+    volumes: 
+      - postgres-data:/var/lib/postgresql/data
+    env_file: 
+      - reshub-deploy/.env.dev

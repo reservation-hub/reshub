@@ -11,8 +11,10 @@ alias reshub-lcl-client-logs="docker-compose logs -f --tail 100 client"
 alias reshub-lcl-restart="docker-compose restart server client"
 alias reshub-lcl-server-bash="docker-compose exec server bash"
 alias reshub-lcl-client-bash="docker-compose exec client bash"
-alias reshub-lcl-db-bash="docker-compose exec db mongo --username root --authenticationDatabase admin --password root"
+alias reshub-lcl-db-bash="docker-compose exec postgresql psql --user root --db reshub --pass"
 alias db-seed="docker-compose exec server npm run seed"
+alias server-lint-fix="docker-compose exec server node_modules/.bin/eslint . --fix"
+alias db-studio="docker-compose exec server node_modules/.bin/prisma studio"
 
 # db back up
 function reshub-db-backup() {

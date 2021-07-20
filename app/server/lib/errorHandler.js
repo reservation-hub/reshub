@@ -21,7 +21,7 @@ exports.errorHandler = (err, req, res, next) => {
     return res.status(400).send(messages)
   }
 
-  if (err.name === 'DocumentNotFoundError') {
+  if (err.name === 'DocumentNotFoundError' || err.code === 404) {
     return res.status(404).send({ message: 'Error: Not Found' })
   }
 
