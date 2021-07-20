@@ -3,7 +3,6 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const passport = require('passport')
 const helmet = require('helmet')
-require('./db/mongoose')
 const { errorHandler } = require('../lib/errorHandler')
 
 const app = express()
