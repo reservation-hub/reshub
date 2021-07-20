@@ -2,49 +2,47 @@ version: "3.7"
 volumes:
   server-node_modules:
   client-node_modules:
-  db-data:
   postgres-data:
 
 services:
-
   # server
   server:
     build:
       context: .
       dockerfile: docker/server/Dockerfile
     container_name: reshub-server
-    environment: 
+    environment:
       - NODE_ENV=development
       - COMMAND=${COMMAND:-serve}
-    env_file: 
+    env_file:
       - reshub-deploy/.env.dev
     image: reshub-server:latest
-    ports: 
+    ports:
       - 8090:8090
       - 5555:5555 # prisma studio port
     volumes:
       - ./app/server:/app
       - server-node_modules:/app/node_modules
     tty: true
-    depends_on: 
+    depends_on:
       - db
       - postgresql
-  
+
   # prd
   production:
     build:
       context: .
       dockerfile: docker/production/Dockerfile
     container_name: reshub-server_prd
-    environment: 
+    environment:
       - NODE_ENV=production
       - COMMAND=${COMMAND:-start}
-    env_file: 
+    env_file:
       - reshub-deploy/.env.production
     image: reshub_prd
-    ports: 
+    ports:
       - 8091:8090
-    depends_on: 
+    depends_on:
       - db
 
   # client
@@ -55,7 +53,7 @@ services:
     container_name: reshub-client
     environment:
       - COMMAND=${COMMAND:-start}
-    env_file: 
+    env_file:
       - reshub-deploy/.env.dev
     image: reshub-client:latest
     ports:
@@ -65,24 +63,12 @@ services:
       - client-node_modules:/app/node_modules
     tty: true
 
-  # db
-  db:
-    image: mongo:4.2
-    container_name: reshub-mongodb
-    volumes:
-        - db-data:/data/db
-    ports:
-        - 27017:27017
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-
   postgresql:
     image: postgres:12
     container_name: reshub-db
     ports:
       - 5432:5432
-    volumes: 
+    volumes:
       - postgres-data:/var/lib/postgresql/data
-    env_file: 
+    env_file:
       - reshub-deploy/.env.dev
