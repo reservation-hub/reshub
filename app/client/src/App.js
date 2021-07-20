@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { silentLogin } from './store/actions/authAction'
+
+import { Router, Route,Switch } from 'react-router-dom'
+import Home from './pages/home/Home'
+import Error from './pages/error/Error'
+import history from './utils/history'
 import Login from './pages/auth/Login'
 import Prefecture from './pages/prefecture/Prefecture'
 import Cities from './pages/city/Cities'
@@ -8,8 +13,11 @@ import Cookies from 'js-cookie'
 import ModalOverlay from './components/modal/Modal'
 import Users from './pages/user/Users'
 
-function App() {
 
+
+
+const  App = () => {
+     
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -18,11 +26,16 @@ function App() {
 
   return (
     <>
-      <Login />
-      {/* <Prefecture />
-      <Cities />
-      <ModalOverlay /> */}
-      <Users />
+      <Router history={history}>
+        <Switch>
+          <Route exact path='/' component={ Home }/>
+          <Route path='/auth' component={ Login } /> 
+          {/* <Route path='/shop' component={ SalonList } /> */}
+          <Route path='/pre' component={ Prefecture }/>
+          <Route path='/city' component={ Cities } />
+          <Route component={ Error } />
+        </Switch>
+      </Router>
     </>
   )
 }
