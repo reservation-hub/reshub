@@ -2,9 +2,9 @@ import React, { useCallback } from 'react'
 import { useDispatch } from 'react-redux'
 import { loginStart, googleLogin } from '../../store/actions/authAction'
 import useInput from '../../utils/useInput'
-import Login from '../../components/auth/LoginForm'
+import LoginForm from '../../components/auth/LoginForm'
 
-const Auth = () => {
+const Login = () => {
 
   const dispatch = useDispatch()
 
@@ -25,7 +25,7 @@ const Auth = () => {
   
   return(
     <main>
-      <Login 
+      <LoginForm 
         value={ value } 
         setValue={ setValue } 
         onSubmit={ onSubmit } 
@@ -35,4 +35,4 @@ const Auth = () => {
   ) 
 }
 
-export default Auth
+export default Login

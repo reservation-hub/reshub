@@ -14,7 +14,7 @@ import {
 } from '../types/authTypes'
 
 //ユーザーのリクエストをスタートするアクション
-const userRequestStart = () => {
+const loginRequestStart = () => {
   return { 
     type: USER_REQUEST_START 
   }
@@ -28,7 +28,7 @@ const fetchUser = user => {
 }
 
 //ユーザーのリクエストが失敗の時に実行するアクション
-const userRequestFailure = err => {
+const loginRequestFailure = err => {
   return {
     type: USER_REQUEST_FAILURE,
     payload: err
@@ -47,7 +47,7 @@ export const silentLogin = () => async dispatch => {
     
     dispatch(fetchUser(user.data.user))
   } catch (e) {
-    dispatch(userRequestFailure(e.response.data))
+    dispatch(loginRequestFailure(e.response.data))
   }
 
 }
@@ -55,7 +55,7 @@ export const silentLogin = () => async dispatch => {
 // localログインを実行するアクション
 export const loginStart = (email, password) => async dispatch => {
 
-  dispatch(userRequestStart())
+  dispatch(loginRequestStart())
   try {
     const user = await apiEndpoint.localLogin(email, password)
     const token = user.data.token
@@ -67,7 +67,7 @@ export const loginStart = (email, password) => async dispatch => {
 
     history.push('/')
   } catch (e) {
-    dispatch(userRequestFailure(e.response.data))
+    dispatch(loginRequestFailure(e.response.data))
   }
 
 }
@@ -86,7 +86,7 @@ export const googleLogin = googleResponse => async (dispatch) => {
 
     history.push('/')
   } catch (e) {
-    dispatch(userRequestFailure(e.response.data))
+    dispatch(loginRequestFailure(e.response.data))
   }
   
 }
@@ -105,7 +105,7 @@ export const logout = () => async dispatch => {
 
     history.push('/')
   } catch (e) {
-    dispatch(userRequestFailure(e.response.data))
+    dispatch(loginRequestFailure(e.response.data))
   }
 
 }

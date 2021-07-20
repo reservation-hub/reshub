@@ -29,6 +29,10 @@ export const getCities = async () => await instance.get(
   `/cities`
 )
 
+export const getUsers = async () => await instance.get(
+  `/users`
+)
+
 
 //-----------------------------------------------
 // get one method
@@ -39,23 +43,12 @@ export const getOneShop = async id => await instance.get(
   `/shops/${ id }`
 )
 
-//　エリアデータを一つだけGETする
-export const getOneArea = async id => await instance.get(
-  `/area/${ id }`
-)
-
-//　県データを一つだけGETする
-export const getOnePrefecture = async id => await instance.get(
-  `/prefecture/${ id }`
-)
-
-//　都市データを一つだけGETする
-export const getOneCities = async id => await instance.get(
-  `/cities/${ id }`
+export const getOneUsers = async id => await instance.get(
+  `/users/${ id }`
 )
 
 //-----------------------------------------------
-// post method
+// Crud method
 //-----------------------------------------------
 
 // add Shop data
@@ -76,6 +69,26 @@ export const putShop = async (id, shopData) => await instance.put(
 // delete Shop data
 export const deleteShop = async id => await instance.delete(
   `/shops/${ id }`
+)
+
+// ユーザー追加
+export const addUser = async userData => await instance.post(
+  `/users`, { ...userData }
+)
+
+// ユーザー修正
+export const patchUser = async (id, userData) => await instance.patch(
+  `/users/${ id }`, { ...userData }
+)
+
+// ユーザー修正
+export const putUser = async (id, userData) => await instance.put(
+  `/users/${ id }`, { ...userData }
+)
+
+// ユーザー削除
+export const deleteUser = async id => await instance.delete(
+  `/users/${ id }`
 )
 
 //-----------------------------------------------
@@ -104,14 +117,17 @@ const apiEndpoint = {
   getArea,
   getPrefecture,
   getCities,
+  getUsers,
   getOneShop,
-  getOneArea,
-  getOnePrefecture,
-  getOneCities,
+  getOneUsers,
   addShop,
   patchShop,
   putShop,
   deleteShop,
+  addUser,
+  patchUser,
+  putUser,
+  deleteUser,
   localLogin,
   googleLogin,
   silentRefresh,
