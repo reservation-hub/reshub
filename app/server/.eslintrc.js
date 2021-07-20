@@ -15,6 +15,7 @@ module.exports = {
     'arrow-body-style': 'error',
     'arrow-spacing': 'error',
     'generator-star-spacing': 'error',
+    'no-console': ['error', { allow: ['error'] }],
     'no-duplicate-imports': 'error',
     'no-underscore-dangle': ['error', { allow: ['_id'] }],
     'no-useless-computed-key': 'error',
