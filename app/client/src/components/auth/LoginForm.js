@@ -13,7 +13,7 @@ import { logout } from '../../store/actions/authAction'
 import LoginStyle from './LoginStyle'
 import CommonStyle from '../CommonStyle'
 
-const Login = ({ 
+const LoginForm = ({ 
   value, 
   setValue, 
   onSubmit, 
@@ -120,4 +120,4 @@ const Login = ({
   )
 }
 
-export default React.memo(Login)
+export default React.memo(LoginForm)

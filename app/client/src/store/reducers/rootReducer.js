@@ -8,6 +8,7 @@ import { shopReducer } from './shopReducer'
 import { areaReducer } from './areaReducer'
 import { prefectureReducer } from './prefectureReducer'
 import { cityReducer } from './cityReducer'
+import { userReducer } from './userReducer'
 
 
 
@@ -16,7 +17,8 @@ export const rootReducer = combineReducers({
     shop: shopReducer,
     area: areaReducer,
     prefecture: prefectureReducer,
-    city: cityReducer
+    city: cityReducer,
+    user: userReducer
   })
 
 
