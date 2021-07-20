@@ -1,6 +1,6 @@
 const pluralize = require('pluralize')
 const { Types: { ObjectId } } = require('mongoose')
-const { Shop } = require('../models/shop')
+const { Shop } = require('../schemas/shop')
 
 const lookupParam = param => [{
   $lookup: {

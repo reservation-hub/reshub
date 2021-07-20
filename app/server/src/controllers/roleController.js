@@ -1,7 +1,8 @@
 const router = require('express').Router()
-const { Role } = require('../models/role')
-const { crudController } = require('../../lib/crudController')
+const { viewController } = require('./lib/crudController')
 
-router.get('/', crudController.index(Role))
+router.get('/', viewController.index('role'))
+router.get('/:id', viewController.show('role'))
+// TODO: add CUD endpoints
 
 module.exports = router

@@ -1,10 +1,6 @@
-const express = require('express')
+const router = require('express').Router()
+const { viewController } = require('./lib/crudController')
 
-const router = express.Router()
-const { Prefecture } = require('../models/prefecture')
-const { crudController } = require('../../lib/crudController')
-
-router.get('/', crudController.index(Prefecture))
-router.get('/:slug', crudController.show(Prefecture, { slug: 'slug' }))
+router.get('/', viewController.index('prefecture'))
 
 module.exports = router

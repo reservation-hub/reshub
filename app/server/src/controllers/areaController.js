@@ -1,10 +1,6 @@
-const express = require('express')
+const router = require('express').Router()
+const { viewController } = require('./lib/crudController')
 
-const router = express.Router()
-const { Area } = require('../models/area')
-const { crudController } = require('../../lib/crudController')
-
-router.get('/', crudController.index(Area))
-router.get('/:slug', crudController.show(Area, { slug: 'slug' }))
+router.get('/', viewController.index('area'))
 
 module.exports = router

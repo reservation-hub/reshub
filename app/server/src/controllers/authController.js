@@ -3,11 +3,11 @@ const jwt = require('jsonwebtoken')
 const eah = require('express-async-handler')
 const { OAuth2Client: GoogleAuthClient } = require('google-auth-library')
 const UserRepository = require('../repositories/userRepository')
-const passport = require('./passport')
+const passport = require('./lib/passport')
 
 const login = eah(async (req, res, next) => {
   const { email } = res.locals.auth ?? req.user ?? {}
-  let user = await UserRepository.findByProps({ email })
+  const user = await UserRepository.findByProps({ email })
   if (!user) return next({ code: 404, message: 'User not found' })
 
   const { oAuth } = res.locals.auth ?? {}
@@ -15,7 +15,7 @@ const login = eah(async (req, res, next) => {
     await UserRepository.addIdFromPassportProfile(user, oAuth)
   }
 
-  user = user.toObject()
+  // user = user.toObject()
   delete user.password
 
   // トークン生成

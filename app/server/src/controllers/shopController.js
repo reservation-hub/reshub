@@ -1,10 +1,10 @@
-const express = require('express')
+const router = require('express').Router()
+const { viewController } = require('./lib/crudController')
 
-const router = express.Router()
-const { validationSchema: shopSchema, Shop } = require('../models/shop')
-const { registerCrud } = require('../../lib/crudController')
+const include = {}
 
-// path
-registerCrud(/* path /shops/ */Shop, shopSchema, router, { populate: true })
+router.get('/', viewController.index('shop', include))
+router.get('/:id', viewController.show('shop'))
+// TODO: add CUD endpoints
 
 module.exports = router

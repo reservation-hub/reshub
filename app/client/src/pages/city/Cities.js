@@ -17,7 +17,7 @@ const Cities = () => {
 
   return (
     <main>
-      <CityList cities={ city.docs } />
+      {/* <CityList cities={ city.docs } /> */}
     </main>
   )
 }

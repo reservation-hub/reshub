@@ -2,7 +2,7 @@ const passport = require('passport')
 const bcrypt = require('bcrypt')
 const LocalStrategy = require('passport-local').Strategy
 const JWTStrategy = require('passport-jwt').Strategy
-const UserRepository = require('../repositories/userRepository')
+const UserRepository = require('../../repositories/userRepository')
 
 // JWT
 
@@ -43,7 +43,7 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
     console.log('jwtPayload : ', jwtPayload)
     if (!jwtPayload.user) console.error('NO USER IN PAYLOAD')
     // eslint-disable-next-line no-underscore-dangle
-    const user = await UserRepository.findByProps({ _id: jwtPayload.user._id })
+    const user = await UserRepository.findByProps({ id: jwtPayload.user.id })
     // eslint-disable-next-line no-console
     console.log('USER : ', user)
     if (!user) return done('Unauthorized')

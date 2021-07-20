@@ -18,7 +18,7 @@ const Prefecture = () => {
 
   return (
     <main>
-      <PrefectureList prefectures={ prefecture.docs } />
+      {/* <PrefectureList prefectures={ prefecture.docs } /> */}
     </main>
   )
 }
