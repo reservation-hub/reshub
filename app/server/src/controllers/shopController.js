@@ -1,10 +1,14 @@
 const router = require('express').Router()
 const { viewController } = require('./lib/crudController')
 
-const include = {}
+const include = {
+  area: true,
+  prefecture: true,
+  city: true,
+}
 
 router.get('/', viewController.index('shop', include))
-router.get('/:id', viewController.show('shop'))
+router.get('/:id', viewController.show('shop', include))
 // TODO: add CUD endpoints
 
 module.exports = router

@@ -2,7 +2,7 @@ const eah = require('express-async-handler')
 const prisma = require('../../db/prisma')
 
 exports.viewController = {
-  index(model, include) {
+  index(model, include, manyToMany) {
     return eah(async (req, res) => {
       const { page } = req.query
       const skipIndex = page > 1 ? (page - 1) * 10 : 0
@@ -14,6 +14,10 @@ exports.viewController = {
         include,
       })
 
+      if (manyToMany !== undefined) {
+        data = data.map(datum => manyToMany(datum))
+      }
+
       if (model === 'user') {
         data = data.map(item => {
           delete item.password
@@ -24,13 +28,18 @@ exports.viewController = {
       return res.send({ data, totalCount })
     })
   },
-  show(model, include) {
+  show(model, include, manyToMany) {
     return eah(async (req, res, next) => {
-      const datum = await prisma[model].findUnique({
+      let datum = await prisma[model].findUnique({
         where: { id: parseInt(req.params.id, 10) },
         include,
       })
       if (!datum) return next({ code: 404 })
+
+      if (manyToMany !== undefined) {
+        datum = manyToMany(datum)
+      }
+
       if (model === 'user') {
         delete datum.password
       }
