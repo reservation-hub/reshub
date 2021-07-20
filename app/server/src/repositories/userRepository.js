@@ -15,16 +15,16 @@ module.exports = {
   async addIdFromPassportProfile(user, profile) {
     switch (profile.provider) {
       case 'google':
-        user.googleID = profile.id
+        if (!user.googleID) user.googleID = profile.id
         break
       case 'twitter':
-        user.twitterID = profile.id
+        if (!user.twitterID) user.twitterID = profile.id
         break
       case 'line':
-        user.lineID = profile.id
+        if (!user.lineID) user.lineID = profile.id
         break
       default:
-        break
+        return user
     }
     return user.save()
   },

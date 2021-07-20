@@ -42,10 +42,6 @@ const roles = [
     name: 'shop_staff',
     description: 'Shop staff user role. Can view shop details connected to the user.',
   },
-  {
-    name: 'shop_owner',
-    description: 'Shop owner. Can edit user roles for shop staff.',
-  },
 ];
 
 (async () => {

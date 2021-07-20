@@ -5,3 +5,6 @@ prefec-db.js
 **/API/authStrategies/*
 seed.js
 shopSeeder.js
+postgreSeed.js
+createCityJson.js
+cities-db-with-id.js

@@ -35,10 +35,10 @@ module.exports = app => {
   app.use('/api', apiRoutes)
   app.use('/auth', authController)
 
-  app.use('/areas', protectRoute, roleCheck(['admin', 'shop_owner']), areaController)
-  app.use('/prefectures', protectRoute, roleCheck(['admin', 'shop_owner']), prefectureController)
-  app.use('/cities', protectRoute, roleCheck(['admin', 'shop_owner']), cityController)
-  app.use('/roles', protectRoute, roleCheck(['admin', 'shop_owner']), roleController)
+  app.use('/areas', protectRoute, roleCheck(['admin']), areaController)
+  app.use('/prefectures', protectRoute, roleCheck(['admin']), prefectureController)
+  app.use('/cities', protectRoute, roleCheck(['admin']), cityController)
+  app.use('/roles', protectRoute, roleCheck(['admin']), roleController)
   app.use('/shops', shopController)
   app.use('/users', userController)
 
