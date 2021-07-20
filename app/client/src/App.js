@@ -12,7 +12,7 @@ import Cities from './pages/city/Cities'
 import Cookies from 'js-cookie'
 import ModalOverlay from './components/modal/Modal'
 import Users from './pages/user/Users'
-
+import Salon from './pages/shop/Salon'
 
 
 
@@ -30,9 +30,10 @@ const  App = () => {
         <Switch>
           <Route exact path='/' component={ Home }/>
           <Route path='/auth' component={ Login } /> 
-          {/* <Route path='/shop' component={ SalonList } /> */}
           <Route path='/pre' component={ Prefecture }/>
           <Route path='/city' component={ Cities } />
+          <Route path='/salon' component={ Salon }/>
+          <Route path='/users' component={ Users } />
           <Route component={ Error } />
         </Switch>
       </Router>
