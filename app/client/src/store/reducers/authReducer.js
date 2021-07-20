@@ -10,7 +10,7 @@ import {
 
 const initialState = {
   loading: true,
-  isAuthenticated: null,
+  isAuthenticated: false,
   user: {},
   err: null
 }
@@ -32,6 +32,7 @@ export const authReducer =  (state = initialState, action) => {
         err: action.payload || {}
       }
     case LOGOUT_REQUEST_SUCCESS:
+      localStorage.removeItem('persist:root')
       return {
         ...state,
         loading: false,

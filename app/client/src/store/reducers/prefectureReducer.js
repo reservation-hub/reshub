@@ -4,7 +4,7 @@ import {
 } from "../types/prefectureTypes"
 
 const initialState = {
-  perfecture: {}
+  prefecture: {}
 }
 
 export const prefectureReducer = (
@@ -14,7 +14,7 @@ export const prefectureReducer = (
     case PREFECTURE_REQUEST_SUCCESS:
       return { 
         ...state, 
-        perfecture: action.payload 
+        prefecture: action.payload 
       }
     case PREFECTURE_REQUEST_FAILURE:
       return action.payload || {}

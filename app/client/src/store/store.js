@@ -4,17 +4,30 @@
 
 import { createStore, applyMiddleware, compose } from 'redux'
 import { rootReducer } from './reducers/rootReducer'
+import { persistReducer } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
 import thunk from 'redux-thunk'
 import logger from 'redux-logger'
 import setAuthToken from '../utils/setAuthToken'
 import Cookies from 'js-cookie'
 
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['auth']
+}
 
-const middleware = [thunk, logger]
+const enhancedReducer = persistReducer(persistConfig, rootReducer)
 
-const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+const middleware = process.env.NODE_ENV !== 'production' ? [thunk, logger] : [thunk]
+
+const composeEnhancer = 
+  (process.env.NODE_ENV !== 'production' && 
+    typeof window !== 'undefined' &&
+      window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose
+    
 const store = createStore(
-  rootReducer, composeEnhancer(applyMiddleware(...middleware))
+  enhancedReducer, composeEnhancer(applyMiddleware(...middleware))
 )
 
 const token = Cookies.get('refreshToken')
