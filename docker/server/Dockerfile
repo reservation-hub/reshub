@@ -2,7 +2,7 @@ FROM node:14
 
 WORKDIR /app
 
-COPY ./app/server .
+COPY ./app .
 
 COPY ./scripts/server /scripts
 
