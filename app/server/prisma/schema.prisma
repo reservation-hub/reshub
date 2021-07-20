@@ -30,9 +30,9 @@ model UserProfile {
 
 model UserOAuthIds {
   id         Int     @id @default(autoincrement())
-  facebookID String? @map("facebook_id")
-  googleID   String? @map("google_id")
-  userID     Int     @map("user_id")
+  facebookID String? @unique @map("facebook_id")
+  googleID   String? @unique @map("google_id")
+  userID     Int     @unique @map("user_id")
   user       User    @relation(fields: [userID], references: [id])
 }
 
