@@ -5,4 +5,3 @@ prefec-db.js
 **/API/authStrategies/*
 seed.js
 shopSeeder.js
-shopRepository.js

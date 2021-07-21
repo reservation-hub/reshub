@@ -21,12 +21,17 @@ exports.errorHandler = (err, req, res, next) => {
     return res.status(400).send(messages)
   }
 
+  // prisma errors
+  if (err.code[0] === 'P') {
+    return res.status(401).send({ message: err.meta.cause || 'Bad request' })
+  }
+
   if (err.name === 'DocumentNotFoundError' || err.code === 404) {
-    return res.status(404).send({ message: 'Error: Not Found' })
+    return res.status(404).send({ message: err.message || 'Error: Not Found' })
   }
 
   if (err.code === 401) {
-    return res.status(err.code).send({ message: 'ERROR' })
+    return res.status(err.code).send({ message: err.message || 'ERROR' })
   }
 
   if (err.name === 'JsonWebTokenError') {
