@@ -1,4 +1,7 @@
 const router = require('express').Router()
+// const Joi = require('joi')
+// const eah = require('express-async-handler')
+// const { userSchema } = require('../schemas/user')
 const { viewController } = require('./lib/crudController')
 
 const include = {
@@ -12,6 +15,13 @@ const include = {
 }
 
 const manyToMany = model => ({ ...model, roles: model.roles.map(role => role.role) })
+
+// const insertUser = eah(async (req, res, next) => {
+//   Joi.assert(req.body, userSchema)
+//   const {
+
+//   }
+// })
 
 router.get('/', viewController.index('user', include, manyToMany))
 router.get('/:id', viewController.show('user', include, manyToMany))

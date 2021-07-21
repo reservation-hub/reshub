@@ -53,11 +53,11 @@ const updateShop = eah(async (req, res, next) => {
 
 const deleteShop = eah(async (req, res, next) => {
   const id = parseInt(req.params.id, 10)
-  const deletedUser = await shopRepository.deleteShop(id)
-  if (!deletedUser) {
+  const deletedShop = await shopRepository.deleteShop(id)
+  if (!deletedShop) {
     return next({ code: 401, message: 'Shop delete error' })
   }
-  return res.send({ data: deletedUser })
+  return res.send({ data: deletedShop })
 })
 
 // routes
@@ -67,6 +67,5 @@ router.get('/:id', viewController.show('shop', include))
 router.post('/', insertShop)
 router.patch('/:id', updateShop)
 router.delete('/:id', deleteShop)
-// TODO: add CUD endpoints
 
 module.exports = router

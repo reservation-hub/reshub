@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialActions"]
 }
 
 datasource db {
@@ -8,14 +9,14 @@ datasource db {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  email        String         @unique @db.VarChar(255)
-  username     String?        @db.VarChar(255)
-  password     String         @db.VarChar(255)
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
+  id           Int           @id @default(autoincrement())
+  email        String        @unique @db.VarChar(255)
+  username     String?       @db.VarChar(255)
+  password     String        @db.VarChar(255)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
   reservations Reservation[]
-  oAuthIDs     UserOAuthIds[]
+  oAuthIDs     UserOAuthIds?
   profile      UserProfile?
   roles        UserRoles[]
 }
@@ -25,7 +26,7 @@ model UserProfile {
   firstName String @db.VarChar(255)
   lastName  String @db.VarChar(255)
   userID    Int    @unique @map("user_id")
-  user      User   @relation(fields: [userID], references: [id])
+  user      User   @relation(fields: [userID], references: [id], onDelete: SetNull)
 }
 
 model UserOAuthIds {
@@ -33,7 +34,7 @@ model UserOAuthIds {
   facebookID String? @unique @map("facebook_id")
   googleID   String? @unique @map("google_id")
   userID     Int     @unique @map("user_id")
-  user       User    @relation(fields: [userID], references: [id])
+  user       User    @relation(fields: [userID], references: [id], onDelete: SetNull)
 }
 
 model Role {
@@ -117,7 +118,7 @@ model Reservation {
   shopID          Int      @map("shop_id")
   stylistID       Int      @map("stylist_id")
   userId          Int      @map("user_id")
-  shop            Shop     @relation(fields: [shopID], references: [id])
+  shop            Shop     @relation(fields: [shopID], references: [id], onDelete: SetNull)
   stylist         Stylist  @relation(fields: [stylistID], references: [id])
   user            User     @relation(fields: [userId], references: [id])
 }

@@ -99,12 +99,9 @@ module.exports = {
     } catch (e) { return e }
   },
   async addOAuthID(user, oAuth) {
-    const idExists = ({ provider }) => user.oAuthIDs
-      .findIndex(id => id[provider] === oAuth.id) !== -1
-
     switch (oAuth.provider) {
       case 'google':
-        if (idExists(oAuth)) {
+        if (!user.oAuthIDs.googleID) {
           return prisma.userOAuthIds.upsert({
             where: { userID: user.id },
             update: {
