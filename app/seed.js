@@ -62,13 +62,14 @@ const roles = [
 
   const adminPromises = admins.map(async admin => {
     try {
-      return await userRepository.upsert({
-        email: admin.email,
-        password: bcrypt.hashSync(admin.password, saltRounds = 10),
-        firstName: admin.firstName,
-        lastName: admin.lastName,
-        roles: [adminRole],
-      })
+      return await userRepository.upsert(
+        admin.email,
+        admin.username,
+        bcrypt.hashSync(admin.password, saltRounds = 10),
+        admin.firstName,
+        admin.lastName,
+        [adminRole],
+      )
     } catch (e) {
       console.error(e)
       process.exit()

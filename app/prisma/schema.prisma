@@ -22,11 +22,13 @@ model User {
 }
 
 model UserProfile {
-  id        Int    @id @default(autoincrement())
-  firstName String @db.VarChar(255)
-  lastName  String @db.VarChar(255)
-  userID    Int    @unique @map("user_id")
-  user      User   @relation(fields: [userID], references: [id], onDelete: SetNull)
+  id          Int     @id @default(autoincrement())
+  firstName   String  @map("first_name") @db.VarChar(255)
+  lastName    String  @map("last_name") @db.VarChar(255)
+  phoneNumber String? @map("phone_number") @db.VarChar(15)
+  address     String? @db.VarChar(255)
+  userID      Int     @unique @map("user_id")
+  user        User    @relation(fields: [userID], references: [id], onDelete: Cascade)
 }
 
 model UserOAuthIds {
@@ -34,7 +36,7 @@ model UserOAuthIds {
   facebookID String? @unique @map("facebook_id")
   googleID   String? @unique @map("google_id")
   userID     Int     @unique @map("user_id")
-  user       User    @relation(fields: [userID], references: [id], onDelete: SetNull)
+  user       User    @relation(fields: [userID], references: [id], onDelete: Cascade)
 }
 
 model Role {
@@ -49,8 +51,8 @@ model UserRoles {
   id     Int  @id @default(autoincrement())
   roleID Int  @map("role_id")
   userID Int  @map("user_id")
-  role   Role @relation(fields: [roleID], references: [id])
-  user   User @relation(fields: [userID], references: [id])
+  role   Role @relation(fields: [roleID], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userID], references: [id], onDelete: Cascade)
 }
 
 model Area {
@@ -118,7 +120,7 @@ model Reservation {
   shopID          Int      @map("shop_id")
   stylistID       Int      @map("stylist_id")
   userId          Int      @map("user_id")
-  shop            Shop     @relation(fields: [shopID], references: [id], onDelete: SetNull)
+  shop            Shop     @relation(fields: [shopID], references: [id], onDelete: Cascade)
   stylist         Stylist  @relation(fields: [stylistID], references: [id])
   user            User     @relation(fields: [userId], references: [id])
 }

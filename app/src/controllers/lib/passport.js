@@ -19,10 +19,6 @@ const cookieExtractor = req => {
     authToken = req.signedCookies.authToken
   }
   if (!authToken) console.error('AUTH TOKEN : ', authToken)
-  // eslint-disable-next-line no-console
-  console.log(authToken)
-  // eslint-disable-next-line no-console
-  console.log(headerToken)
   if (req && authToken && headerToken && authToken === headerToken) {
     return authToken
   }
@@ -39,13 +35,8 @@ const jwtOptions = {
 
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
-    // eslint-disable-next-line no-console
-    console.log('jwtPayload : ', jwtPayload)
     if (!jwtPayload.user) console.error('NO USER IN PAYLOAD')
-    // eslint-disable-next-line no-underscore-dangle
     const user = await UserRepository.findByProps({ id: jwtPayload.user.id })
-    // eslint-disable-next-line no-console
-    console.log('USER : ', user)
     if (!user) return done('Unauthorized')
     return done(null, user)
   } catch (e) { return done(e, null) }
