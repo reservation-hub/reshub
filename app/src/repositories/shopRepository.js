@@ -1,14 +1,48 @@
-const { shopSchema } = require('../schemas/shop')
+const prisma = require('../db/prisma')
 
 module.exports = {
-  fetchByAreaSlug({ area: areaSlug }) {},
-  fetchByAreaAndPrefectureSlugs({ area: areaSlug, prefecture: prefectureSlug }) {},
-  fetchByAreaAndPrefectureAndCitySlugs({
-    area: areaSlug,
-    prefecture: prefectureSlug,
-    city: cityId,
-  }) {},
-  fetchById({
-    area: areaSlug, prefecture: prefectureSlug, city: cityId, shop: _id,
-  }) {},
+  async insertShop(name, areaID, prefectureID, cityID) {
+    try {
+      return prisma.shop.create({
+        data: {
+          name,
+          area: {
+            connect: { id: areaID },
+          },
+          prefecture: {
+            connect: { id: prefectureID },
+          },
+          city: {
+            connect: { id: cityID },
+          },
+        },
+      })
+    } catch (e) { return e }
+  },
+  async updateShop(id, name, areaID, prefectureID, cityID) {
+    try {
+      return prisma.shop.update({
+        where: { id },
+        data: {
+          name,
+          area: {
+            connect: { id: areaID },
+          },
+          prefecture: {
+            connect: { id: prefectureID },
+          },
+          city: {
+            connect: { id: cityID },
+          },
+        },
+      })
+    } catch (e) { return e }
+  },
+  async deleteShop(id) {
+    try {
+      return prisma.shop.delete({
+        where: { id },
+      })
+    } catch (e) { return e }
+  },
 }

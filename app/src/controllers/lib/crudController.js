@@ -34,7 +34,7 @@ exports.viewController = {
         where: { id: parseInt(req.params.id, 10) },
         include,
       })
-      if (!datum) return next({ code: 404 })
+      if (!datum) return next({ code: 404, message: 'Model not found' })
 
       if (manyToMany !== undefined) {
         datum = manyToMany(datum)
