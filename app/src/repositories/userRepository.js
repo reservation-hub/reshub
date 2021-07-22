@@ -39,7 +39,10 @@ module.exports = {
           },
         },
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async updateUser(
     id,
@@ -51,12 +54,6 @@ module.exports = {
     roles,
   ) {
     try {
-      // validate if roles are valid
-      const validRoleCount = await prisma.$queryRaw(`SELECT COUNT(*) FROM "Role" where id in (${roles.toString()});`)
-      if (validRoleCount[0].count !== roles.length) {
-        return null
-      }
-
       const user = await prisma.user.findUnique({
         where: { id },
         include: {
@@ -115,17 +112,21 @@ module.exports = {
         ])
         return transactionResult[1]
       }
-      // eslint-disable-next-line no-console
-      console.log('SHOULD ADD')
       return prisma.user.update(updateQuery)
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async deleteUser(id) {
     try {
       return prisma.user.delete({
         where: { id },
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async findByOAuth(id) {
     try {
@@ -134,7 +135,10 @@ module.exports = {
           oAuthIDs: id,
         },
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async upsert(
     email,
@@ -169,7 +173,10 @@ module.exports = {
           },
         },
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async findByProps(prop) {
     const param = Array.isArray(prop) ? { OR: prop } : prop
@@ -186,7 +193,10 @@ module.exports = {
       })
 
       return user
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async addOAuthID(user, oAuth) {
     switch (oAuth.provider) {

@@ -17,7 +17,10 @@ module.exports = {
           },
         },
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async updateShop(id, name, areaID, prefectureID, cityID) {
     try {
@@ -36,13 +39,19 @@ module.exports = {
           },
         },
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async deleteShop(id) {
     try {
       return prisma.shop.delete({
         where: { id },
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
 }

@@ -1,10 +1,25 @@
 const prisma = require('../db/prisma')
 
 module.exports = {
+  async extractValidRoles(roleIDs) {
+    try {
+      return prisma.role.findMany({
+        where: {
+          id: { in: roleIDs },
+        },
+      })
+    } catch (e) {
+      console.error(e)
+      return null
+    }
+  },
   async fetchAll() {
     try {
       return prisma.role.findMany()
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async fetch(slug) {
     try {
@@ -13,14 +28,20 @@ module.exports = {
           ...slug,
         },
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async create(values) {
     try {
       return prisma.role.create({
         data: values,
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
   async upsert(values) {
     try {
@@ -31,6 +52,9 @@ module.exports = {
         update: values,
         create: values,
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
 }

@@ -13,6 +13,9 @@ module.exports = {
           },
         },
       })
-    } catch (e) { return e }
+    } catch (e) {
+      console.error(e)
+      return null
+    }
   },
 }
