@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const Joi = require('joi')
 const eah = require('express-async-handler')
+const { parseIDToInt } = require('./lib/utils')
 const { viewController } = require('./lib/crudController')
 const locationRepository = require('../repositories/locationRepository')
 const shopRepository = require('../repositories/shopRepository')
@@ -36,7 +37,7 @@ const updateShop = eah(async (req, res, next) => {
   const {
     name, areaID, prefectureID, cityID,
   } = req.body
-  const id = parseInt(req.params.id, 10)
+  const { id } = res.locals
   const city = await locationRepository.fetchCity(cityID)
   if (!city) {
     return next({ code: 404, message: 'City not found' })
@@ -52,12 +53,12 @@ const updateShop = eah(async (req, res, next) => {
 })
 
 const deleteShop = eah(async (req, res, next) => {
-  const id = parseInt(req.params.id, 10)
-  const deletedUser = await shopRepository.deleteShop(id)
-  if (!deletedUser) {
+  const { id } = res.locals
+  const deletedShop = await shopRepository.deleteShop(id)
+  if (!deletedShop) {
     return next({ code: 401, message: 'Shop delete error' })
   }
-  return res.send({ data: deletedUser })
+  return res.send({ data: deletedShop })
 })
 
 // routes
@@ -65,8 +66,7 @@ const deleteShop = eah(async (req, res, next) => {
 router.get('/', viewController.index('shop', include))
 router.get('/:id', viewController.show('shop', include))
 router.post('/', insertShop)
-router.patch('/:id', updateShop)
-router.delete('/:id', deleteShop)
-// TODO: add CUD endpoints
+router.patch('/:id', parseIDToInt, updateShop)
+router.delete('/:id', parseIDToInt, deleteShop)
 
 module.exports = router

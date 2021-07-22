@@ -30,9 +30,7 @@
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.0",
-    "passport-line-auth": "^0.2.9",
     "passport-local": "^1.0.0",
-    "passport-twitter-oauth2": "^2.1.1",
     "pluralize": "^8.0.0",
     "redis": "^3.1.2"
   },

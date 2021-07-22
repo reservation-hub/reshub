@@ -7,9 +7,10 @@ alias rh="rh-build && docker-compose up server"
 alias rh-logs="docker-compose logs -f --tail 100 server"
 alias rh-bash="docker-compose exec server bash"
 alias rh-db-bash="docker-compose exec postgresql psql --user root --db reshub --pass"
+alias rh-lint-fix="docker-compose exec server node_modules/.bin/eslint . --fix"
+alias db-push="docker-compose exec server node_modules/.bin/prisma db push"
 alias db-seed="docker-compose exec server npm run seed"
 alias db-seed-shop="docker-compose exec server npm run seed-shop"
-alias rh-lint-fix="docker-compose exec server node_modules/.bin/eslint . --fix"
 alias db-studio="docker-compose exec server node_modules/.bin/prisma studio"
 
 # db back up

@@ -5,15 +5,8 @@ const { OAuth2Client: GoogleAuthClient } = require('google-auth-library')
 const UserRepository = require('../repositories/userRepository')
 const passport = require('./lib/passport')
 
-const login = eah(async (req, res, next) => {
-  const { email } = res.locals.auth ?? req.user ?? {}
-  const user = await UserRepository.findByProps({ email })
-  if (!user) return next({ code: 404, message: 'User not found' })
-
-  const { oAuth } = res.locals.auth ?? {}
-  if (oAuth) {
-    await UserRepository.addOAuthID(user, oAuth)
-  }
+const login = eah(async (req, res) => {
+  const { user } = req
 
   // トークン生成
   const cookieOptions = {
@@ -49,9 +42,9 @@ const verifyIfNotLoggedInYet = eah(async (req, res, next) => {
   return next({ code: 400, message: 'User is already logged in!' })
 })
 
-const checkGoogleToken = eah(async (req, res, next) => {
+const googleAuthenticate = eah(async (req, res, next) => {
   const client = new GoogleAuthClient(process.env.GOOGLE_CLIENT_ID)
-  const { tokenId } = req.body
+  const { provider, tokenId } = req.body
   if (!tokenId) return next({ code: 401, message: 'Bad Request' })
 
   const ticket = await client.verifyIdToken({
@@ -61,7 +54,19 @@ const checkGoogleToken = eah(async (req, res, next) => {
 
   const { email, sub } = ticket.getPayload()
   if (!email) return next({ code: 401, message: 'Bad Request' })
-  res.locals.auth = { email, oAuth: { provider: 'google', id: sub } }
+
+  let user = await UserRepository.findByProps({ email })
+  if (!user) return next({ code: 404, message: 'User not found' })
+  delete user.password
+  if (user.roles.length > 0) {
+    user = { ...user, roles: user.roles.map(role => role.role) }
+  }
+
+  if (!user.oAuthIDs.googleID) {
+    await UserRepository.addOAuthID(user, { provider, id: sub })
+  }
+
+  req.user = user
   return next()
 })
 
@@ -70,7 +75,7 @@ const logout = (req, res) => {
   res.send('Logged out successfully!')
 }
 
-router.post('/google', verifyIfNotLoggedInYet, checkGoogleToken, login)
+router.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
 router.post('/login', verifyIfNotLoggedInYet, passport.authenticate('local', { session: false }), login)
 router.post('/silent_refresh', passport.authenticate('jwt', { session: false }), login)
 router.get('/logout', passport.authenticate('jwt', { session: false }), logout)
