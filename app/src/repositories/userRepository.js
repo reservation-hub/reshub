@@ -1,6 +1,17 @@
 const prisma = require('../db/prisma')
 
 module.exports = {
+  /**
+   * @param {string} email
+   * @param {string} password
+   * @param {string} username
+   * @param {string} firstName
+   * @param {string} lastName
+   * @param {[integer]} roles
+   * 
+   * @returns {object}
+   * @throws {null} 
+   */
   async createUser(
     email,
     password,
@@ -44,6 +55,18 @@ module.exports = {
       return null
     }
   },
+  /**
+   * @param {id} id
+   * @param {string} email
+   * @param {string} password
+   * @param {string} username
+   * @param {string} firstName
+   * @param {string} lastName
+   * @param {[integer]} roles
+   * 
+   * @returns {object}
+   * @throws {null} 
+   */
   async updateUser(
     id,
     email,
@@ -118,6 +141,12 @@ module.exports = {
       return null
     }
   },
+  /**
+   * @param {integer} id
+   * 
+   * @returns {object}
+   * @throws {null} 
+   */
   async deleteUser(id) {
     try {
       return prisma.user.delete({
@@ -178,6 +207,12 @@ module.exports = {
       return null
     }
   },
+  /**
+   * @param {object|[object]} prop
+   * 
+   * @returns {object}
+   * @throws {null} 
+   */
   async findByProps(prop) {
     const param = Array.isArray(prop) ? { OR: prop } : prop
     try {
@@ -191,13 +226,19 @@ module.exports = {
           },
         },
       })
-
       return user
     } catch (e) {
       console.error(e)
       return null
     }
   },
+  /**
+   * @param {object} user [UserSchema]
+   * @param {object} oAuth [oAuth: { provider: string, id: integer }]
+   * 
+   * @returns {object}
+   * @throws {null} 
+   */
   async addOAuthID(user, oAuth) {
     switch (oAuth.provider) {
       case 'google':
