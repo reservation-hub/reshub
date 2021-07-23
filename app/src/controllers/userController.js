@@ -6,7 +6,7 @@ const RoleRepository = require('../repositories/roleRepository')
 const {
   userInsertSchema, userUpdateSchema, userProfileInsertSchema, userProfileUpdateSchema,
 } = require('./schemas/user')
-const { viewController } = require('./lib/crudController')
+const { viewController } = require('./lib/viewController')
 
 const include = {
   profile: true,

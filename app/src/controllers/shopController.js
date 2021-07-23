@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const eah = require('express-async-handler')
 const { parseIDToInt } = require('./lib/utils')
-const { viewController } = require('./lib/crudController')
+const { viewController } = require('./lib/viewController')
 const locationRepository = require('../repositories/locationRepository')
 const shopRepository = require('../repositories/shopRepository')
 const { shopInsertSchema, shopUpdateSchema } = require('./schemas/shop')
