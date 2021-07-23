@@ -5,54 +5,51 @@ module.exports = {
    * @param {string} email
    * @param {string} password
    * @param {string} username
-   * @param {string} firstName
-   * @param {string} lastName
+   * @param {object} profile
    * @param {[integer]} roles
-   * 
+   *
    * @returns {object}
-   * @throws {null} 
+   * @throws {null}
    */
   async createUser(
     email,
     password,
     username,
-    firstName,
-    lastName,
+    profile,
     roles,
   ) {
     try {
-      return prisma.user.create({
-        data: {
-          roles: {
-            create: roles.map(roleID => ({
-              role: {
-                connect: {
-                  id: roleID,
+      return {
+        value: await prisma.user.create({
+          data: {
+            roles: {
+              create: roles.map(role => ({
+                role: {
+                  connect: {
+                    id: role.id,
+                  },
                 },
-              },
-            })),
+              })),
+            },
+            profile: {
+              create: profile,
+            },
+            email,
+            password,
+            username,
           },
-          profile: {
-            create: {
-              firstName,
-              lastName,
+          include: {
+            profile: true,
+            oAuthIDs: true,
+            roles: {
+              include: { role: true },
             },
           },
-          email,
-          password,
-          username,
-        },
-        include: {
-          profile: true,
-          oAuthIDs: true,
-          roles: {
-            include: { role: true },
-          },
-        },
-      })
+        }),
+      }
     } catch (e) {
-      console.error(e)
-      return null
+      console.error(`Exception : ${e}`)
+      return { value: null, error: e }
     }
   },
   /**
@@ -60,57 +57,60 @@ module.exports = {
    * @param {string} email
    * @param {string} password
    * @param {string} username
-   * @param {string} firstName
-   * @param {string} lastName
-   * @param {[integer]} roles
-   * 
+   * @param {object} profile
+   * @param {[object]} roles
+   *
    * @returns {object}
-   * @throws {null} 
+   * @throws {null}
    */
   async updateUser(
-    id,
+    user,
     email,
     password,
     username,
-    firstName,
-    lastName,
+    profile,
     roles,
   ) {
     try {
-      const user = await prisma.user.findUnique({
-        where: { id },
-        include: {
-          roles: { include: { role: true } },
-        },
-      })
       const userRolesIDs = user.roles.map(role => role.role.id)
-      const rolesToadd = roles.filter(userRoleID => userRolesIDs.indexOf(userRoleID) === -1)
-      const rolesToRemove = userRolesIDs.filter(userRoleID => roles.indexOf(userRoleID) === -1)
+      const rolesToAdd = roles
+        .filter(userRoleID => userRolesIDs.findIndex(ur => ur.id === userRoleID) === -1)
+      const rolesToRemove = userRolesIDs
+        .filter(userRoleID => roles.findIndex(ur => ur.id === userRoleID) === -1)
 
-      // remove roles from user
       let removeQuery
       if (rolesToRemove.length > 0) {
-        removeQuery = `DELETE FROM "UserRoles" WHERE user_id = ${id} AND role_id IN (${rolesToRemove.toString()});`
+        removeQuery = `DELETE FROM "UserRoles" WHERE user_id = ${user.id} AND role_id IN (${rolesToRemove.toString()});`
       }
 
       let roleAddQuery
-      if (rolesToadd.length > 0) {
+      if (rolesToAdd.length > 0) {
         roleAddQuery = {
-          create: rolesToadd.map(roleID => ({
+          create: rolesToAdd.map(role => ({
             role: {
-              connect: { id: roleID },
+              connect: { id: role.id },
             },
           })),
         }
       }
 
+      const {
+        firstNameKanji, lastNameKanji, firstNameKana, lastNameKana,
+        phoneNumber, address, gender,
+      } = profile
+
       const updateQuery = {
-        where: { id },
+        where: { id: user.id },
         data: {
           profile: {
             update: {
-              firstName,
-              lastName,
+              firstNameKanji,
+              lastNameKanji,
+              firstNameKana,
+              lastNameKana,
+              phoneNumber,
+              address,
+              gender,
             },
           },
           roles: roleAddQuery,
@@ -133,48 +133,128 @@ module.exports = {
           prisma.$queryRaw(removeQuery),
           prisma.user.update(updateQuery),
         ])
-        return transactionResult[1]
+        return { value: transactionResult[1] }
       }
-      return prisma.user.update(updateQuery)
+      return { value: await prisma.user.update(updateQuery) }
     } catch (e) {
-      console.error(e)
-      return null
+      console.error(`Exception : ${e}`)
+      return { error: e }
     }
   },
   /**
    * @param {integer} id
-   * 
+   *
    * @returns {object}
-   * @throws {null} 
+   * @throws {null}
    */
   async deleteUser(id) {
     try {
-      return prisma.user.delete({
-        where: { id },
-      })
+      return {
+        value: await prisma.user.delete({
+          where: { id },
+        }),
+      }
     } catch (e) {
-      console.error(e)
-      return null
+      console.error(`Exception : ${e}`)
+      return { error: e }
     }
   },
   async findByOAuth(id) {
     try {
-      return prisma.user.findUnique({
-        where: {
-          oAuthIDs: id,
-        },
-      })
+      return {
+        value: await prisma.user.findUnique({
+          where: {
+            oAuthIDs: id,
+          },
+        }),
+      }
     } catch (e) {
-      console.error(e)
-      return null
+      console.error(`Exception : ${e}`)
+      return { error: e }
     }
   },
+  /**
+   * @param {object|[object]} prop
+   *
+   * @returns {object}
+   * @throws {null}
+   */
+  async findByProps(prop) {
+    const param = Array.isArray(prop) ? { OR: prop } : prop
+    try {
+      return {
+        value: await prisma.user.findUnique({
+          where: param,
+          include: {
+            profile: true,
+            oAuthIDs: true,
+            roles: {
+              include: { role: true },
+            },
+          },
+        }),
+      }
+    } catch (e) {
+      console.error(`User not found on prop : ${prop}, ${e}`)
+      return { error: e }
+    }
+  },
+  /**
+   * @param {object} user [UserSchema]
+   * @param {object} oAuth [oAuth: { provider: string, id: integer }]
+   *
+   * @returns {object}
+   * @throws {null}
+   */
+  async addOAuthID(user, oAuth) {
+    try {
+      switch (oAuth.provider) {
+        case 'google':
+          if (!user.oAuthIDs.googleID) {
+            return {
+              value: await prisma.userOAuthIds.upsert({
+                where: { userID: user.id },
+                update: {
+                  googleID: oAuth.id,
+                },
+                create: {
+                  googleID: oAuth.id,
+                  user: {
+                    connect: { id: user.id },
+                  },
+                },
+              }),
+            }
+          }
+          return { value: user }
+        default:
+          return { value: user }
+      }
+    } catch (e) {
+      console.error(`Exception : ${e}`)
+      return { error: e }
+    }
+  },
+  /**
+   *
+   * Upserts users. Primarily for seeding purposes.
+   *
+   * @param {string} email
+   * @param {string} username
+   * @param {string} password
+   * @param {string} firstName
+   * @param {string} lastName
+   * @param {[integer]} roles
+   * @returns {object}
+   */
   async upsert(
     email,
     username,
     password,
-    firstName,
-    lastName,
+    firstNameKanji,
+    lastNameKanji,
+    firstNameKana,
+    lastNameKana,
     roles,
   ) {
     try {
@@ -187,8 +267,10 @@ module.exports = {
           password,
           profile: {
             create: {
-              firstName,
-              lastName,
+              firstNameKanji,
+              lastNameKanji,
+              firstNameKana,
+              lastNameKana,
             },
           },
           roles: {
@@ -203,62 +285,8 @@ module.exports = {
         },
       })
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       return null
-    }
-  },
-  /**
-   * @param {object|[object]} prop
-   * 
-   * @returns {object}
-   * @throws {null} 
-   */
-  async findByProps(prop) {
-    const param = Array.isArray(prop) ? { OR: prop } : prop
-    try {
-      const user = await prisma.user.findUnique({
-        where: param,
-        include: {
-          profile: true,
-          oAuthIDs: true,
-          roles: {
-            include: { role: true },
-          },
-        },
-      })
-      return user
-    } catch (e) {
-      console.error(e)
-      return null
-    }
-  },
-  /**
-   * @param {object} user [UserSchema]
-   * @param {object} oAuth [oAuth: { provider: string, id: integer }]
-   * 
-   * @returns {object}
-   * @throws {null} 
-   */
-  async addOAuthID(user, oAuth) {
-    switch (oAuth.provider) {
-      case 'google':
-        if (!user.oAuthIDs.googleID) {
-          return prisma.userOAuthIds.upsert({
-            where: { userID: user.id },
-            update: {
-              googleID: oAuth.id,
-            },
-            create: {
-              googleID: oAuth.id,
-              user: {
-                connect: { id: user.id },
-              },
-            },
-          })
-        }
-        return null
-      default:
-        return null
     }
   },
 }

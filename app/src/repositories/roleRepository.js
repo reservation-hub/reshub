@@ -9,7 +9,7 @@ module.exports = {
         },
       })
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       return null
     }
   },
@@ -17,7 +17,7 @@ module.exports = {
     try {
       return prisma.role.findMany()
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       return null
     }
   },
@@ -29,7 +29,7 @@ module.exports = {
         },
       })
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       return null
     }
   },
@@ -39,7 +39,7 @@ module.exports = {
         data: values,
       })
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       return null
     }
   },
@@ -53,7 +53,7 @@ module.exports = {
         create: values,
       })
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       return null
     }
   },

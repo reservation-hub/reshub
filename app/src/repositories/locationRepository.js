@@ -14,7 +14,7 @@ module.exports = {
         },
       })
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       return null
     }
   },

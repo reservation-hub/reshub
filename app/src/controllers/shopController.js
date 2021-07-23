@@ -5,7 +5,7 @@ const { parseIDToInt } = require('./lib/utils')
 const { viewController } = require('./lib/crudController')
 const locationRepository = require('../repositories/locationRepository')
 const shopRepository = require('../repositories/shopRepository')
-const { shopSchema } = require('../schemas/shop')
+const { shopSchema } = require('./schemas/shop')
 
 const include = {
   area: true,
