@@ -18,4 +18,21 @@ module.exports = {
       return null
     }
   },
+  async locationsAreValid(areaID, prefectureID, cityID) {
+    try {
+      const count = await prisma.city.count({
+        where: {
+          prefecture: {
+            id: prefectureID,
+            area: { id: areaID },
+          },
+          id: cityID,
+        },
+      })
+      return { value: count !== 0 }
+    } catch (e) {
+      console.error(`Exception : ${e}`)
+      return { error: e }
+    }
+  },
 }
