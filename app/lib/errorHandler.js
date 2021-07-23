@@ -16,6 +16,11 @@ exports.errorHandler = (err, req, res, next) => {
         })),
       })
     }
+
+    if (error.code === 'P2025') {
+      // code 404 エラー
+      return res.status(404).send({ error: { message: error.meta.cause } })
+    }
     return res.status(400).send({ error: { message } })
   }
 

@@ -19,9 +19,9 @@ module.exports = {
           },
         }),
       }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
   async updateShop(id, name, areaID, prefectureID, cityID) {
@@ -43,9 +43,9 @@ module.exports = {
           },
         }),
       }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
   async deleteShop(id) {
@@ -55,9 +55,9 @@ module.exports = {
           where: { id },
         }),
       }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
 }

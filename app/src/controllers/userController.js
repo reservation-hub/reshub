@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const eah = require('express-async-handler')
-const { parseIDToInt } = require('./lib/utils')
+const { parseIntIDMiddleware } = require('./lib/utils')
 const UserRepository = require('../repositories/userRepository')
 const RoleRepository = require('../repositories/roleRepository')
 const {
@@ -46,7 +46,14 @@ const insertUser = eah(async (req, res, next) => {
     return next({ code: 401, message: 'Invalid input values', error: userProfileValuesError })
   }
 
-  const validRoles = await RoleRepository.extractValidRoles(userValues.roles)
+  const {
+    error: roleExtractionError,
+    value: validRoles,
+  } = await RoleRepository.extractValidRoles(userValues.roles)
+
+  if (roleExtractionError) {
+    return ({ code: 401, message: 'Invalid input values', error: roleExtractionError })
+  }
 
   const {
     error: createUserError,
@@ -86,9 +93,13 @@ const updateUser = eah(async (req, res, next) => {
     return next({ code: 401, message: 'Invalid input', error: userProfileValuesError })
   }
 
-  const validRoles = await RoleRepository.extractValidRoles(userValues.roles)
-  if (!validRoles) {
-    return next({ code: 401, message: 'Bad Request' })
+  const {
+    error: roleExtractionError,
+    value: validRoles,
+  } = await RoleRepository.extractValidRoles(userValues.roles)
+
+  if (roleExtractionError) {
+    return ({ code: 401, message: 'Invalid input values', error: roleExtractionError })
   }
 
   const { id } = res.locals
@@ -129,7 +140,7 @@ const deleteUser = eah(async (req, res, next) => {
 router.get('/', viewController.index('user', include, manyToMany))
 router.get('/:id', viewController.show('user', include, manyToMany))
 router.post('/', insertUser)
-router.patch('/:id', parseIDToInt, updateUser)
-router.delete('/:id', parseIDToInt, deleteUser)
+router.patch('/:id', parseIntIDMiddleware, updateUser)
+router.delete('/:id', parseIntIDMiddleware, deleteUser)
 
 module.exports = router

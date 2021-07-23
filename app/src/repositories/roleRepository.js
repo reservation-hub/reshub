@@ -3,14 +3,62 @@ const prisma = require('../db/prisma')
 module.exports = {
   async extractValidRoles(roleIDs) {
     try {
-      return prisma.role.findMany({
-        where: {
-          id: { in: roleIDs },
-        },
-      })
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return null
+      return {
+        value: await prisma.role.findMany({
+          where: {
+            id: { in: roleIDs },
+          },
+        }),
+      }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
+  async createRole(name, description, slug) {
+    try {
+      return {
+        value: await prisma.role.create({
+          data: {
+            name,
+            description,
+            slug,
+          },
+        }),
+      }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
+  async updateRole(id, name, description, slug) {
+    try {
+      return {
+        value: await prisma.role.update({
+          where: { id },
+          data: {
+            name,
+            description,
+            slug,
+          },
+        }),
+      }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      console.error('ERROR NAME', error.name)
+      return { error }
+    }
+  },
+  async deleteRole(id) {
+    try {
+      return {
+        value: await prisma.role.delete({
+          where: { id },
+        }),
+      }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
   async fetchAll() {

@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const eah = require('express-async-handler')
-const { parseIDToInt } = require('./lib/utils')
+const { parseIntIDMiddleware } = require('./lib/utils')
 const { viewController } = require('./lib/viewController')
 const locationRepository = require('../repositories/locationRepository')
 const shopRepository = require('../repositories/shopRepository')
@@ -48,7 +48,7 @@ const updateShop = eah(async (req, res, next) => {
   const {
     error: shopSchemaError,
     value: shopUpdateValues,
-  } = shopUpdateSchema.validate({ ...req.body, id }, joiOptions)
+  } = shopUpdateSchema.validate(req.body, joiOptions)
 
   if (shopSchemaError) {
     return next({ code: 401, message: 'Invalid input values', error: shopSchemaError })
@@ -65,7 +65,7 @@ const updateShop = eah(async (req, res, next) => {
     return next({ code: 401, message: 'Locations are invalid' })
   }
 
-  const { error, value: shop } = await shopRepository.updateShop(shopUpdateValues.id,
+  const { error, value: shop } = await shopRepository.updateShop(id,
     shopUpdateValues.name, shopUpdateValues.areaID,
     shopUpdateValues.prefectureID, shopUpdateValues.cityID)
   if (error) {
@@ -78,7 +78,7 @@ const deleteShop = eah(async (req, res, next) => {
   const { id } = res.locals
   const { error, value: deletedShop } = await shopRepository.deleteShop(id)
   if (error) {
-    return next({ code: 401, message: 'Shop delete error' })
+    return next({ code: 401, message: 'Shop delete error', error })
   }
   return res.send({ data: deletedShop })
 })
@@ -88,7 +88,7 @@ const deleteShop = eah(async (req, res, next) => {
 router.get('/', viewController.index('shop', include))
 router.get('/:id', viewController.show('shop', include))
 router.post('/', insertShop)
-router.patch('/:id', parseIDToInt, updateShop)
-router.delete('/:id', parseIDToInt, deleteShop)
+router.patch('/:id', parseIntIDMiddleware, updateShop)
+router.delete('/:id', parseIntIDMiddleware, deleteShop)
 
 module.exports = router
