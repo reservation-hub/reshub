@@ -4,7 +4,7 @@ const { parseIDToInt } = require('./lib/utils')
 const UserRepository = require('../repositories/userRepository')
 const RoleRepository = require('../repositories/roleRepository')
 const {
-  userInsertSchema, userUpdateSchema, userProfileInsertSchema, userProfileUpdateSchema,
+  userInsertSchema, userUpdateSchema, userProfileUpsertSchema,
 } = require('./schemas/user')
 const { viewController } = require('./lib/viewController')
 
@@ -40,7 +40,7 @@ const insertUser = eah(async (req, res, next) => {
   const {
     error: userProfileValuesError,
     value: userProfileValues,
-  } = userProfileInsertSchema.validate(req.body, joiOptions)
+  } = userProfileUpsertSchema.validate(req.body, joiOptions)
 
   if (userProfileValuesError) {
     return next({ code: 401, message: 'Invalid input values', error: userProfileValuesError })
@@ -80,7 +80,7 @@ const updateUser = eah(async (req, res, next) => {
   const {
     error: userProfileValuesError,
     value: userProfileValues,
-  } = userProfileUpdateSchema.validate(req.body, joiOptions)
+  } = userProfileUpsertSchema.validate(req.body, joiOptions)
 
   if (userProfileValuesError) {
     return next({ code: 401, message: 'Invalid input', error: userProfileValuesError })

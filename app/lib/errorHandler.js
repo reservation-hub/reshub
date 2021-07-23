@@ -4,6 +4,7 @@ const { Prisma } = require('@prisma/client')
 exports.errorHandler = (err, req, res, next) => {
   console.error('error: ', err)
 
+  // prisma errors
   if (err.error && err.error instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.error.code === 'P2002') {
       const invalidFields = err.error.meta.target
@@ -24,11 +25,6 @@ exports.errorHandler = (err, req, res, next) => {
       message: e.message,
     }))
     return res.status(400).send({ error: { message: messages } })
-  }
-
-  // prisma errors
-  if (err.code[0] === 'P') {
-    return res.status(401).send({ error: { message: err.meta.cause || 'Bad request' } })
   }
 
   if (err.code === 404) {

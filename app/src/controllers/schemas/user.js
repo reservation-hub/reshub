@@ -20,22 +20,11 @@ exports.userOAuthIDUpsertSchema = Joi.object({
   twitterID: Joi.string().trim(),
 })
 
-exports.userProfileInsertSchema = Joi.object({
+exports.userProfileUpsertSchema = Joi.object({
   firstNameKanji: Joi.string().trim().required(),
   lastNameKanji: Joi.string().trim().required(),
   firstNameKana: Joi.string().trim().required(),
   lastNameKana: Joi.string().trim().required(),
-  phoneNumber: Joi.string().trim(),
-  address: Joi.string().trim(),
-  gender: Joi.string().valid('0', '1'),
-  birthday: Joi.date(),
-})
-
-exports.userProfileUpdateSchema = Joi.object({
-  firstNameKanji: Joi.string().trim(),
-  lastNameKanji: Joi.string().trim(),
-  firstNameKana: Joi.string().trim(),
-  lastNameKana: Joi.string().trim(),
   phoneNumber: Joi.string().trim(),
   address: Joi.string().trim(),
   gender: Joi.string().valid('0', '1'),

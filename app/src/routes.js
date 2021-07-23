@@ -39,8 +39,8 @@ module.exports = app => {
   app.use('/prefectures', protectRoute, roleCheck(['admin']), prefectureController)
   app.use('/cities', protectRoute, roleCheck(['admin']), cityController)
   app.use('/roles', protectRoute, roleCheck(['admin']), roleController)
-  app.use('/shops', protectRoute, roleCheck(['admin']), shopController)
-  app.use('/users', protectRoute, roleCheck(['admin']), userController)
+  app.use('/shops', shopController)
+  app.use('/users', userController)
 
   app.use('/*', (req, res, next) => next({ code: 404, message: 'Bad route' })) // 404s
 }
