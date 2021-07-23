@@ -12,13 +12,13 @@ const cookieExtractor = req => {
     // eslint-disable-next-line prefer-destructuring
     headerToken = req.get('authorization').split(' ')[1]
   }
-  if (!headerToken) console.error('HEADER TOKEN : ', headerToken)
+  if (!headerToken) return null
 
   let authToken
   if (req.signedCookies) {
     authToken = req.signedCookies.authToken
   }
-  if (!authToken) console.error('AUTH TOKEN : ', authToken)
+  if (!authToken) return null
   if (req && authToken && headerToken && authToken === headerToken) {
     return authToken
   }
@@ -36,8 +36,8 @@ const jwtOptions = {
 passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
     if (!jwtPayload.user) console.error('NO USER IN PAYLOAD')
-    const user = await UserRepository.findByProps({ id: jwtPayload.user.id })
-    if (!user) return done('Unauthorized')
+    const { error, value: user } = await UserRepository.findByProps({ id: jwtPayload.user.id })
+    if (error) return done({ code: 404, message: 'User does not exist', error }, null)
     return done(null, user)
   } catch (e) { return done(e, null) }
 }))
@@ -46,8 +46,8 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
 
 passport.use(new LocalStrategy({ usernameField: 'email' }, async (username, password, done) => {
   if (!username || !password) return done({ code: 401, message: 'Authentication failed' }, null)
-  const user = await UserRepository.findByProps({ email: username })
-  if (!user || !bcrypt.compareSync(password, user.password)) return done({ code: 401, message: 'Authentication failed' }, null)
+  const { error, value: user } = await UserRepository.findByProps({ email: username })
+  if (error || !bcrypt.compareSync(password, user.password)) return done({ code: 401, message: 'Authentication failed', error }, null)
   return done(null, user)
 }))
 

@@ -1,42 +1,44 @@
+const { Prisma } = require('@prisma/client')
+
 // eslint-disable-next-line no-unused-vars
 exports.errorHandler = (err, req, res, next) => {
-  // eslint-disable-next-line no-console
-  console.log('error: ', err)
-  if (err.name === 'ValidationError') {
-    // mongoose model validation エラー処理
-    if (err.errors !== undefined && err.errors.details.name === 'ValidatorError') {
-      const mongooseErrors = Object.entries(err.errors).map(([key, val]) => ({
-        label: key,
-        message: val.message,
-      }))
-      return res.status(400).send(mongooseErrors)
-    }
-    // else
+  console.error('error: ', err)
+  const { error, message, code } = err
 
+  // prisma errors
+  if (error && error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === 'P2002') {
+      const invalidFields = error.meta.target
+      return res.status(400).send({
+        error: invalidFields.map(field => ({
+          name: field,
+          message: 'Duplicate value found on this field',
+        })),
+      })
+    }
+    return res.status(400).send({ error: { message } })
+  }
+
+  if (error.name === 'ValidationError') {
     // Joi Validation エラー処理
-    const messages = err.details.map(e => ({
+    const messages = error.details.map(e => ({
       label: e.context.label,
       message: e.message,
     }))
-    return res.status(400).send(messages)
+    return res.status(400).send({ error: { message: messages } })
   }
 
-  // prisma errors
-  if (err.code[0] === 'P') {
-    return res.status(401).send({ message: err.meta.cause || 'Bad request' })
+  if (code === 404) {
+    return res.status(code).send({ error: { message: message || 'Error: Not Found' } })
   }
 
-  if (err.name === 'DocumentNotFoundError' || err.code === 404) {
-    return res.status(404).send({ message: err.message || 'Error: Not Found' })
+  if (code === 401) {
+    return res.status(code).send({ error: { message: message || 'Error: Bad request' } })
   }
 
-  if (err.code === 401) {
-    return res.status(err.code).send({ message: err.message || 'ERROR' })
+  if (error.name === 'JsonWebTokenError') {
+    return res.status(400).send({ error: { message } })
   }
 
-  if (err.name === 'JsonWebTokenError') {
-    return res.status(400).send({ message: err.message })
-  }
-
-  return res.status(err.code || 500).send({ message: err.message || 'Internal Server Error', data: err.data })
+  return res.status(code || 500).send({ error: { message: message || 'Internal Server Error' } })
 }

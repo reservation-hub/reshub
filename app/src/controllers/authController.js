@@ -55,14 +55,13 @@ const googleAuthenticate = eah(async (req, res, next) => {
   const { email, sub } = ticket.getPayload()
   if (!email) return next({ code: 401, message: 'Bad Request' })
 
-  let user = await UserRepository.findByProps({ email })
-  if (!user) return next({ code: 404, message: 'User not found' })
+  const { error, value: user } = await UserRepository.findByProps({ email })
+  if (error) return next({ code: 404, message: 'User not found', error })
   delete user.password
   if (user.roles.length > 0) {
-    user = { ...user, roles: user.roles.map(role => role.role) }
+    user.roles = user.roles.map(role => role.role)
   }
-
-  if (!user.oAuthIDs.googleID) {
+  if (!user.oAuthIDs || !user.oAuthIDs.googleID) {
     await UserRepository.addOAuthID(user, { provider, id: sub })
   }
 

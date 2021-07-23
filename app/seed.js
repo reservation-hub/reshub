@@ -5,26 +5,34 @@ const roleRepository = require('./src/repositories/roleRepository')
 
 const admins = [
   {
-    firstName: 'eugene',
-    lastName: 'sinamban',
+    firstNameKanji: 'eugene',
+    lastNameKanji: 'sinamban',
+    firstNameKana: 'ユージン',
+    lastNameKana: 'シナンバン',
     password: 'testtest',
     email: 'eugene.sinamban@gmail.com',
   },
   {
-    firstName: 'yoonsung',
-    lastName: 'jang',
+    firstNameKanji: 'yoonsung',
+    lastNameKanji: 'jang',
+    firstNameKana: 'ユンソン',
+    lastNameKana: 'チャン',
     password: 'testtest',
     email: 'upthe15752@gmail.com',
   },
   {
-    firstName: 'sana',
-    lastName: 'nakamura',
+    firstNameKanji: 'sana',
+    lastNameKanji: 'nakamura',
+    firstNameKana: 'サナ',
+    lastNameKana: 'ナカムラ',
     password: 'testtest',
     email: 'dq.tri.fi@gmail.com',
   },
   {
-    firstName: 'sabir',
-    lastName: 'barahi',
+    firstNameKanji: 'sabir',
+    lastNameKanji: 'barahi',
+    firstNameKana: 'サビル',
+    lastNameKana: 'バラヒ',
     password: 'testtest',
     email: 'sabirbarahi41@gmail.com',
   },
@@ -66,12 +74,14 @@ const roles = [
         admin.email,
         admin.username,
         bcrypt.hashSync(admin.password, saltRounds = 10),
-        admin.firstName,
-        admin.lastName,
+        admin.firstNameKanji,
+        admin.lastNameKanji,
+        admin.firstNameKana,
+        admin.lastNameKana,
         [adminRole],
       )
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       process.exit()
     }
   })
@@ -108,7 +118,7 @@ const roles = [
       })
 
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       process.exit()
     }
   })
@@ -134,7 +144,7 @@ const roles = [
         },
       })
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       process.exit()
     }
   })

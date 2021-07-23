@@ -37,7 +37,7 @@ const prisma = require('./src/db/prisma');
         }
       })
     } catch (e) {
-      console.error(e)
+      console.error(`Exception : ${e}`)
       process.exit()
     }
     count--
