@@ -98,58 +98,58 @@ model Shop {
   menu         Menu?
   reservations Reservation[]
   stylists     ShopStylists[]
-  ShopDetail   ShopDetail?
+  shopDetail   ShopDetail?
 }
 
 model Menu {
   id     Int        @id @default(autoincrement())
-  shopID Int        @unique
+  shopID Int        @unique @map("shop_id")
   shop   Shop       @relation(fields: [shopID], references: [id])
   items  MenuItem[]
 }
 
 model MenuItem {
   id          Int         @id @default(autoincrement())
-  menuID      Int
+  menuID      Int         @unique @map("menu_id")
   name        String      @db.VarChar(255)
   description String      @db.VarChar(255)
   price       Int
   image       ModelImage? @relation(fields: [imageID], references: [id])
   menu        Menu        @relation(fields: [menuID], references: [id])
-  imageID     Int?
+  imageID     Int?        @unique @map("image_id")
 }
 
 model ShopDetail {
   id          Int          @id @default(autoincrement())
-  name        String?      @db.VarChar(255)
+  name        String       @db.VarChar(255)
   address     String?      @db.VarChar(255)
   phoneNumber String?      @map("phone_number") @db.VarChar(255)
-  shopID      Int
-  shop        Shop         @relation(fields: [shopID], references: [id])
+  shopID      Int          @unique @map("shop_id")
+  shop        Shop         @relation(fields: [shopID], references: [id], onDelete: Cascade)
   images      ModelImage[]
 }
 
 model ModelImage {
   id           Int         @id @default(autoincrement())
-  shopDetailID Int?
-  imageId      Int         @unique
+  shopDetailID Int?        @map("shop_detail_id")
+  imageId      Int         @unique @map("image_id")
   image        Image       @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  ShopDetail   ShopDetail? @relation(fields: [shopDetailID], references: [id], onDelete: Cascade)
-  Stylist      Stylist?
-  MenuItem     MenuItem?
+  shopDetail   ShopDetail? @relation(fields: [shopDetailID], references: [id], onDelete: Cascade)
+  stylist      Stylist?
+  menuItem     MenuItem?
 }
 
 model Image {
   id         Int         @id @default(autoincrement())
   text       String      @db.VarChar(255)
   url        String      @db.VarChar(255)
-  ModelImage ModelImage?
+  modelImage ModelImage?
 }
 
 model Stylist {
   id           Int            @id @default(autoincrement())
   shopID       Int            @map("shop_id")
-  imageID      Int?
+  imageID      Int?           @map("image_id")
   name         String         @db.VarChar(28)
   image        ModelImage?    @relation(fields: [imageID], references: [id], onDelete: SetNull)
   reservations Reservation[]
@@ -166,7 +166,7 @@ model ShopStylists {
 
 model Reservation {
   id              Int      @id @default(autoincrement())
-  reservationDate DateTime @db.Timestamp(6)
+  reservationDate DateTime @map("reservation_date") @db.Timestamp(6)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
   shopID          Int      @map("shop_id")

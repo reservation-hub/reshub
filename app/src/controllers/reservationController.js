@@ -20,7 +20,7 @@ const insertReservation = eah(async (req, res, next) => {
   } = reservationSchema.validate(req.body, joiOptions)
 
   if (reservationSchemaError) {
-    return next({ code: 401, message: 'Invalid input values', error: reservationSchemaError })
+    return next({ code: 400, message: 'Invalid input values', error: reservationSchemaError })
   }
 
   const {
@@ -32,7 +32,7 @@ const insertReservation = eah(async (req, res, next) => {
   )
 
   if (insertReservationError) {
-    return next({ code: 401, message: 'Invalid input values', error: insertReservationError })
+    return next({ code: 400, message: 'Invalid input values', error: insertReservationError })
   }
 
   return res.send({ data: reservation })

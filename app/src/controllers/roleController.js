@@ -14,7 +14,7 @@ const insertRole = eah(async (req, res, next) => {
   } = roleUpsertSchema.validate(req.body, joiOptions)
 
   if (roleSchemaError) {
-    return next({ code: 401, message: 'Invalid input values', error: roleSchemaError })
+    return next({ code: 400, message: 'Invalid input values', error: roleSchemaError })
   }
 
   const {
@@ -24,7 +24,7 @@ const insertRole = eah(async (req, res, next) => {
     roleInsertValues.description, roleInsertValues.slug)
 
   if (error) {
-    return next({ code: 401, message: 'Invalid input values', error })
+    return next({ code: 400, message: 'Invalid input values', error })
   }
 
   return res.send({ data: role })
@@ -39,7 +39,7 @@ const updateRole = eah(async (req, res, next) => {
   const { id } = res.locals
 
   if (roleSchemaError) {
-    return next({ code: 401, message: 'Invalid input values', error: roleSchemaError })
+    return next({ code: 400, message: 'Invalid input values', error: roleSchemaError })
   }
 
   const {
@@ -49,7 +49,7 @@ const updateRole = eah(async (req, res, next) => {
     roleInsertValues.description, roleInsertValues.slug)
 
   if (error) {
-    return next({ code: 401, message: 'Invalid input values', error })
+    return next({ code: 400, message: 'Invalid input values', error })
   }
 
   return res.send({ data: role })
@@ -64,7 +64,7 @@ const deleteRole = eah(async (req, res, next) => {
   } = await RoleRepository.deleteRole(id)
 
   if (error) {
-    return next({ code: 401, message: 'Invalid input values', error })
+    return next({ code: 400, message: 'Invalid input values', error })
   }
 
   return res.send({ data: role })
