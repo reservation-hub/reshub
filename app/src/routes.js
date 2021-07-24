@@ -39,7 +39,7 @@ module.exports = app => {
   app.use('/areas', protectRoute, roleCheck(['admin']), areaController)
   app.use('/prefectures', protectRoute, roleCheck(['admin']), prefectureController)
   app.use('/cities', protectRoute, roleCheck(['admin']), cityController)
-  app.use('/roles', roleController)
+  app.use('/roles', protectRoute, roleCheck(['admin']), roleController)
   app.use('/shops', protectRoute, roleCheck(['admin']), shopController)
   app.use('/reservations', protectRoute, roleCheck(['admin']), reservationController)
   app.use('/users', protectRoute, roleCheck(['admin']), userController)
