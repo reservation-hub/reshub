@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const eah = require('express-async-handler')
-const { parseIDToInt } = require('./lib/utils')
+const { parseIntIDMiddleware } = require('./lib/utils')
 const UserRepository = require('../repositories/userRepository')
 const RoleRepository = require('../repositories/roleRepository')
 const {
@@ -29,11 +29,11 @@ const insertUser = eah(async (req, res, next) => {
   } = userInsertSchema.validate(req.body, joiOptions)
 
   if (userValuesError) {
-    return next({ code: 401, message: 'Invalid input values', error: userValuesError })
+    return next({ code: 400, message: 'Invalid input values', error: userValuesError })
   }
 
   if (userValues.password !== userValues.confirm) {
-    return next({ code: 401, message: 'Passwords did not match!' })
+    return next({ code: 400, message: 'Passwords did not match!' })
   }
   delete userValues.confirm
 
@@ -43,10 +43,17 @@ const insertUser = eah(async (req, res, next) => {
   } = userProfileUpsertSchema.validate(req.body, joiOptions)
 
   if (userProfileValuesError) {
-    return next({ code: 401, message: 'Invalid input values', error: userProfileValuesError })
+    return next({ code: 400, message: 'Invalid input values', error: userProfileValuesError })
   }
 
-  const validRoles = await RoleRepository.extractValidRoles(userValues.roles)
+  const {
+    error: roleExtractionError,
+    value: validRoles,
+  } = await RoleRepository.extractValidRoles(userValues.roles)
+
+  if (roleExtractionError) {
+    return ({ code: 400, message: 'Invalid input values', error: roleExtractionError })
+  }
 
   const {
     error: createUserError,
@@ -56,7 +63,7 @@ const insertUser = eah(async (req, res, next) => {
       userValues.username, userProfileValues, validRoles)
 
   if (createUserError) {
-    return next({ code: 401, message: 'User was not create', error: createUserError })
+    return next({ code: 400, message: 'User was not create', error: createUserError })
   }
 
   delete user.password
@@ -74,7 +81,7 @@ const updateUser = eah(async (req, res, next) => {
   } = userUpdateSchema.validate(req.body, joiOptions)
 
   if (userValuesError) {
-    return next({ code: 401, message: 'Invalid input', error: userValuesError })
+    return next({ code: 400, message: 'Invalid input', error: userValuesError })
   }
 
   const {
@@ -83,12 +90,16 @@ const updateUser = eah(async (req, res, next) => {
   } = userProfileUpsertSchema.validate(req.body, joiOptions)
 
   if (userProfileValuesError) {
-    return next({ code: 401, message: 'Invalid input', error: userProfileValuesError })
+    return next({ code: 400, message: 'Invalid input', error: userProfileValuesError })
   }
 
-  const validRoles = await RoleRepository.extractValidRoles(userValues.roles)
-  if (!validRoles) {
-    return next({ code: 401, message: 'Bad Request' })
+  const {
+    error: roleExtractionError,
+    value: validRoles,
+  } = await RoleRepository.extractValidRoles(userValues.roles)
+
+  if (roleExtractionError) {
+    return ({ code: 400, message: 'Invalid input values', error: roleExtractionError })
   }
 
   const { id } = res.locals
@@ -105,7 +116,7 @@ const updateUser = eah(async (req, res, next) => {
 
   if (updateUserError) {
     console.error('update user error : ', updateUserError)
-    return next({ code: 401, message: 'update user error', error: updateUserError })
+    return next({ code: 400, message: 'update user error', error: updateUserError })
   }
 
   delete updatedUser.password
@@ -120,7 +131,7 @@ const deleteUser = eah(async (req, res, next) => {
   const { id } = res.locals
   const { error, value } = await UserRepository.deleteUser(id)
   if (error) {
-    return next({ code: 401, message: 'bad request' })
+    return next({ code: 400, message: 'bad request' })
   }
 
   return res.send({ message: `Deleted user at id: ${value.id}` })
@@ -129,7 +140,7 @@ const deleteUser = eah(async (req, res, next) => {
 router.get('/', viewController.index('user', include, manyToMany))
 router.get('/:id', viewController.show('user', include, manyToMany))
 router.post('/', insertUser)
-router.patch('/:id', parseIDToInt, updateUser)
-router.delete('/:id', parseIDToInt, deleteUser)
+router.patch('/:id', parseIntIDMiddleware, updateUser)
+router.delete('/:id', parseIntIDMiddleware, deleteUser)
 
 module.exports = router

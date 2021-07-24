@@ -1,12 +1,11 @@
 const prisma = require('../db/prisma')
 
 module.exports = {
-  async insertShop(name, areaID, prefectureID, cityID) {
+  async insertShop(name, address, phoneNumber, areaID, prefectureID, cityID) {
     try {
       return {
         value: await prisma.shop.create({
           data: {
-            name,
             area: {
               connect: { id: areaID },
             },
@@ -16,21 +15,30 @@ module.exports = {
             city: {
               connect: { id: cityID },
             },
+            shopDetail: {
+              create: {
+                name,
+                address,
+                phoneNumber,
+              },
+            },
+          },
+          include: {
+            shopDetail: true,
           },
         }),
       }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
-  async updateShop(id, name, areaID, prefectureID, cityID) {
+  async updateShop(id, name, address, phoneNumber, areaID, prefectureID, cityID) {
     try {
       return {
         value: await prisma.shop.update({
           where: { id },
           data: {
-            name,
             area: {
               connect: { id: areaID },
             },
@@ -40,12 +48,22 @@ module.exports = {
             city: {
               connect: { id: cityID },
             },
+            shopDetail: {
+              update: {
+                name,
+                address,
+                phoneNumber,
+              },
+            },
+          },
+          include: {
+            shopDetail: true,
           },
         }),
       }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
   async deleteShop(id) {
@@ -55,9 +73,9 @@ module.exports = {
           where: { id },
         }),
       }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
 }

@@ -47,9 +47,9 @@ module.exports = {
           },
         }),
       }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { value: null, error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
   /**
@@ -136,9 +136,9 @@ module.exports = {
         return { value: transactionResult[1] }
       }
       return { value: await prisma.user.update(updateQuery) }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
   /**
@@ -154,9 +154,9 @@ module.exports = {
           where: { id },
         }),
       }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
   async findByOAuth(id) {
@@ -168,9 +168,9 @@ module.exports = {
           },
         }),
       }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
   /**
@@ -230,9 +230,9 @@ module.exports = {
         default:
           return { value: user }
       }
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return { error: e }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
     }
   },
   /**

@@ -45,7 +45,7 @@ const verifyIfNotLoggedInYet = eah(async (req, res, next) => {
 const googleAuthenticate = eah(async (req, res, next) => {
   const client = new GoogleAuthClient(process.env.GOOGLE_CLIENT_ID)
   const { provider, tokenId } = req.body
-  if (!tokenId) return next({ code: 401, message: 'Bad Request' })
+  if (!tokenId) return next({ code: 400, message: 'Bad Request' })
 
   const ticket = await client.verifyIdToken({
     idToken: tokenId,
@@ -53,7 +53,7 @@ const googleAuthenticate = eah(async (req, res, next) => {
   })
 
   const { email, sub } = ticket.getPayload()
-  if (!email) return next({ code: 401, message: 'Bad Request' })
+  if (!email) return next({ code: 400, message: 'Bad Request' })
 
   const { error, value: user } = await UserRepository.findByProps({ email })
   if (error) return next({ code: 404, message: 'User not found', error })

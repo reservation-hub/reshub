@@ -12,6 +12,7 @@ alias db-push="docker-compose exec server node_modules/.bin/prisma db push"
 alias db-seed="docker-compose exec server npm run seed"
 alias db-seed-shop="docker-compose exec server npm run seed-shop"
 alias db-studio="docker-compose exec server node_modules/.bin/prisma studio"
+alias rh-test="docker-compose exec server node test.js"
 
 # db back up
 function rh-db-backup() {
@@ -25,7 +26,7 @@ function rh-db-backup() {
 
     echo "バックアップ開始";
     echo "Back up starting..."
-    docker run --rm -ti --volumes-from reshub-db -v $(pwd):/backup ubuntu tar cvf /backup/$1.tar /data/db
+    docker run --rm -ti --volumes-from reshub-db -v $(pwd):/backup ubuntu tar cvf /backup/$1.tar /var/lib/postgresql/data
 
     if [ $? -eq 0 ]; then
       echo "バックアップ完了"
@@ -49,11 +50,11 @@ function rh-db-restore() {
   else
     echo "コンテナを停止します"
     echo "Stopping containers"
-    docker stop reshub-server reshub-db
+    docker stop reshub reshub-db
 
     echo "修復開始"
     echo "Restoring database..."
-    docker run --rm --volumes-from reshub-db -v $(pwd):/backup mongo:4.2 bash -c "cd /data && tar xvf /backup/$1.tar --strip 1"
+    docker run --rm --volumes-from reshub-db -v $(pwd):/backup ubuntu bash -c "cd /var/lib/postgresql && tar xvf /backup/$1.tar --strip 3"
 
     if [ $? -eq 0 ]; then
       echo "修復完了"

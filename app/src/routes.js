@@ -9,6 +9,7 @@ const cityController = require('./controllers/cityController')
 const roleController = require('./controllers/roleController')
 const shopController = require('./controllers/shopController')
 const userController = require('./controllers/userController')
+const reservationController = require('./controllers/reservationController')
 
 const apiRoutes = [
   apiAreaController,
@@ -39,7 +40,8 @@ module.exports = app => {
   app.use('/prefectures', protectRoute, roleCheck(['admin']), prefectureController)
   app.use('/cities', protectRoute, roleCheck(['admin']), cityController)
   app.use('/roles', protectRoute, roleCheck(['admin']), roleController)
-  app.use('/shops', protectRoute, roleCheck(['admin']), shopController)
+  app.use('/shops', shopController)
+  app.use('/reservations', protectRoute, roleCheck(['admin']), reservationController)
   app.use('/users', protectRoute, roleCheck(['admin']), userController)
 
   app.use('/*', (req, res, next) => next({ code: 404, message: 'Bad route' })) // 404s
