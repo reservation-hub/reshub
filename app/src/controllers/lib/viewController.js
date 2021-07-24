@@ -12,16 +12,31 @@ module.exports = {
    */
   index(model, include, manyToMany) {
     return eah(async (req, res) => {
-      const { page } = req.query
+      const { page, order, condition } = req.query
       const skipIndex = page > 1 ? (page - 1) * 10 : 0
       const totalCount = await prisma[model].count()
+      let orderBy
+      switch (order) {
+        case 'desc':
+          orderBy = order
+          break
+        default:
+          orderBy = 'asc'
+      }
+
+      if (condition) {
+        // TODO 絞り込み実装
+      }
+
       const data = await prisma[model].findMany({
-        orderBy: { id: 'asc' },
+        where: {},
+        orderBy: { id: orderBy },
         skip: skipIndex,
         take: 10,
         include,
       })
 
+      // clean up data
       if (manyToMany !== undefined) {
         if (Array.isArray(manyToMany)) {
           manyToMany.forEach(target => {
