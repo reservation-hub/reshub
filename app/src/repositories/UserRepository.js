@@ -6,7 +6,7 @@ module.exports = {
    * @param {string} password
    * @param {string} username
    * @param {object} profile
-   * @param {[integer]} roles
+   * @param {[integer]} roleIds
    *
    * @returns {object}
    * @throws {null}
@@ -16,18 +16,16 @@ module.exports = {
     password,
     username,
     profile,
-    roles,
+    roleIds,
   ) {
     try {
       return {
         value: await prisma.user.create({
           data: {
             roles: {
-              create: roles.map(role => ({
+              create: roleIds.map(id => ({
                 role: {
-                  connect: {
-                    id: role.id,
-                  },
+                  connect: { id },
                 },
               })),
             },
@@ -37,13 +35,6 @@ module.exports = {
             email,
             password,
             username,
-          },
-          include: {
-            profile: true,
-            oAuthIDs: true,
-            roles: {
-              include: { role: true },
-            },
           },
         }),
       }
@@ -58,75 +49,63 @@ module.exports = {
    * @param {string} password
    * @param {string} username
    * @param {object} profile
-   * @param {[object]} roles
+   * @param {[integer]} rolesToAdd
+   * @param {[integer]} rolesToRemove
    *
    * @returns {object}
    * @throws {null}
    */
   async updateUser(
-    user,
+    id,
     email,
     password,
     username,
     profile,
-    roles,
+    rolesToAdd,
+    rolesToRemove,
   ) {
+    let removeQuery
+    if (rolesToRemove.length > 0) {
+      removeQuery = `DELETE FROM "UserRoles" WHERE user_id = ${id} AND role_id IN (${rolesToRemove.toString()});`
+    }
+
+    let roleAddQuery
+    if (rolesToAdd.length > 0) {
+      roleAddQuery = {
+        create: rolesToAdd.map(role => ({
+          role: {
+            connect: { id: role.id },
+          },
+        })),
+      }
+    }
+
+    const {
+      firstNameKanji, lastNameKanji, firstNameKana, lastNameKana,
+      phoneNumber, address, gender,
+    } = profile
+
+    const updateQuery = {
+      where: { id },
+      data: {
+        profile: {
+          update: {
+            firstNameKanji,
+            lastNameKanji,
+            firstNameKana,
+            lastNameKana,
+            phoneNumber,
+            address,
+            gender,
+          },
+        },
+        roles: roleAddQuery,
+        email,
+        password,
+        username,
+      },
+    }
     try {
-      const userRolesIDs = user.roles.map(role => role.role.id)
-      const rolesToAdd = roles
-        .filter(userRoleID => userRolesIDs.findIndex(ur => ur.id === userRoleID) === -1)
-      const rolesToRemove = userRolesIDs
-        .filter(userRoleID => roles.findIndex(ur => ur.id === userRoleID) === -1)
-
-      let removeQuery
-      if (rolesToRemove.length > 0) {
-        removeQuery = `DELETE FROM "UserRoles" WHERE user_id = ${user.id} AND role_id IN (${rolesToRemove.toString()});`
-      }
-
-      let roleAddQuery
-      if (rolesToAdd.length > 0) {
-        roleAddQuery = {
-          create: rolesToAdd.map(role => ({
-            role: {
-              connect: { id: role.id },
-            },
-          })),
-        }
-      }
-
-      const {
-        firstNameKanji, lastNameKanji, firstNameKana, lastNameKana,
-        phoneNumber, address, gender,
-      } = profile
-
-      const updateQuery = {
-        where: { id: user.id },
-        data: {
-          profile: {
-            update: {
-              firstNameKanji,
-              lastNameKanji,
-              firstNameKana,
-              lastNameKana,
-              phoneNumber,
-              address,
-              gender,
-            },
-          },
-          roles: roleAddQuery,
-          email,
-          password,
-          username,
-        },
-        include: {
-          profile: true,
-          oAuthIDs: true,
-          roles: {
-            include: { role: true },
-          },
-        },
-      }
-
       // execute
       if (removeQuery) {
         const transactionResult = await prisma.$transaction([

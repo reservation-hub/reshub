@@ -33,11 +33,11 @@ module.exports = {
       return { error }
     }
   },
-  async updateShop(id, name, address, phoneNumber, areaID, prefectureID, cityID) {
+  async updateShop(shop, name, address, phoneNumber, areaID, prefectureID, cityID) {
     try {
       return {
         value: await prisma.shop.update({
-          where: { id },
+          where: { id: shop.id },
           data: {
             area: {
               connect: { id: areaID },
@@ -76,6 +76,32 @@ module.exports = {
     } catch (error) {
       console.error(`Exception : ${error}`)
       return { error }
+    }
+  },
+  async findByProps(prop) {
+    const param = Array.isArray(prop) ? { OR: prop } : prop
+    try {
+      return {
+        value: await prisma.shop.findUnique({
+          where: param,
+        }),
+      }
+    } catch (e) {
+      console.error(`Shop not found on prop : ${prop}, ${e}`)
+      return { error: e }
+    }
+  },
+  async findExistingShopIDs(ids) {
+    try {
+      const validShops = await prisma.shop.findMany({
+        where: { id: { in: ids } },
+      })
+      return {
+        value: validShops.map(shop => shop.id),
+      }
+    } catch (e) {
+      console.error(`Shop not found on prop : ${ids.toString()}, ${e}`)
+      return { error: e }
     }
   },
 }

@@ -2,7 +2,7 @@ const passport = require('passport')
 const bcrypt = require('bcrypt')
 const LocalStrategy = require('passport-local').Strategy
 const JWTStrategy = require('passport-jwt').Strategy
-const UserRepository = require('../../repositories/userRepository')
+const UserRepository = require('../../repositories/UserRepository')
 
 // JWT
 

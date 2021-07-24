@@ -2,7 +2,7 @@ const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 const eah = require('express-async-handler')
 const { OAuth2Client: GoogleAuthClient } = require('google-auth-library')
-const UserRepository = require('../repositories/userRepository')
+const UserRepository = require('../repositories/UserRepository')
 const passport = require('./lib/passport')
 
 const login = eah(async (req, res) => {

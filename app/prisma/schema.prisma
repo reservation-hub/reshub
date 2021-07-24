@@ -97,26 +97,26 @@ model Shop {
   prefecture   Prefecture     @relation(fields: [prefectureID], references: [id])
   menu         Menu?
   reservations Reservation[]
-  stylists     ShopStylists[]
   shopDetail   ShopDetail?
+  stylists     ShopStylists[]
 }
 
 model Menu {
-  id     Int        @id @default(autoincrement())
-  shopID Int        @unique @map("shop_id")
-  shop   Shop       @relation(fields: [shopID], references: [id])
-  items  MenuItem[]
+  id     Int       @id @default(autoincrement())
+  shopID Int       @unique @map("shop_id")
+  shop   Shop      @relation(fields: [shopID], references: [id])
+  items  MenuItem?
 }
 
 model MenuItem {
   id          Int         @id @default(autoincrement())
-  menuID      Int         @unique @map("menu_id")
   name        String      @db.VarChar(255)
   description String      @db.VarChar(255)
   price       Int
+  imageID     Int?        @unique @map("image_id")
+  menuID      Int         @unique @map("menu_id")
   image       ModelImage? @relation(fields: [imageID], references: [id])
   menu        Menu        @relation(fields: [menuID], references: [id])
-  imageID     Int?        @unique @map("image_id")
 }
 
 model ShopDetail {
@@ -131,11 +131,12 @@ model ShopDetail {
 
 model ModelImage {
   id           Int         @id @default(autoincrement())
-  shopDetailID Int?        @map("shop_detail_id")
   imageId      Int         @unique @map("image_id")
+  shopDetailID Int?        @map("shop_detail_id")
+  stylistID    Int?        @unique
   image        Image       @relation(fields: [imageId], references: [id], onDelete: Cascade)
   shopDetail   ShopDetail? @relation(fields: [shopDetailID], references: [id], onDelete: Cascade)
-  stylist      Stylist?
+  stylist      Stylist?    @relation(fields: [stylistID], references: [id], onDelete: Cascade)
   menuItem     MenuItem?
 }
 
@@ -148,10 +149,8 @@ model Image {
 
 model Stylist {
   id           Int            @id @default(autoincrement())
-  shopID       Int            @map("shop_id")
-  imageID      Int?           @map("image_id")
   name         String         @db.VarChar(28)
-  image        ModelImage?    @relation(fields: [imageID], references: [id], onDelete: SetNull)
+  image        ModelImage?
   reservations Reservation[]
   shops        ShopStylists[]
 }
@@ -166,12 +165,12 @@ model ShopStylists {
 
 model Reservation {
   id              Int      @id @default(autoincrement())
-  reservationDate DateTime @map("reservation_date") @db.Timestamp(6)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
   shopID          Int      @map("shop_id")
   stylistID       Int      @map("stylist_id")
   userId          Int      @map("user_id")
+  reservationDate DateTime @map("reservation_date") @db.Timestamp(6)
   shop            Shop     @relation(fields: [shopID], references: [id], onDelete: Cascade)
   stylist         Stylist  @relation(fields: [stylistID], references: [id])
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)

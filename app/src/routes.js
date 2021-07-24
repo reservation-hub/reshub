@@ -10,6 +10,7 @@ const roleController = require('./controllers/roleController')
 const shopController = require('./controllers/shopController')
 const userController = require('./controllers/userController')
 const reservationController = require('./controllers/reservationController')
+const stylistController = require('./controllers/stylistController')
 
 const apiRoutes = [
   apiAreaController,
@@ -40,7 +41,8 @@ module.exports = app => {
   app.use('/prefectures', protectRoute, roleCheck(['admin']), prefectureController)
   app.use('/cities', protectRoute, roleCheck(['admin']), cityController)
   app.use('/roles', protectRoute, roleCheck(['admin']), roleController)
-  app.use('/shops', shopController)
+  app.use('/shops', protectRoute, roleCheck(['admin']), shopController)
+  app.use('/stylists', protectRoute, roleCheck(['admin']), stylistController)
   app.use('/reservations', protectRoute, roleCheck(['admin']), reservationController)
   app.use('/users', protectRoute, roleCheck(['admin']), userController)
 

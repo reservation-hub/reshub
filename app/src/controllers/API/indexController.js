@@ -2,7 +2,7 @@ const eah = require('express-async-handler')
 const express = require('express')
 
 const router = express.Router()
-const ShopRepository = require('../../repositories/shopRepository')
+const ShopRepository = require('../../repositories/ShopRepository')
 
 router.get('/', eah(async (req, res) => {
   const limit = req.query.limit || 10
