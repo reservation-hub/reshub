@@ -98,6 +98,7 @@ model Shop {
   menu         Menu?
   reservations Reservation[]
   stylists     ShopStylists[]
+  ShopDetail   ShopDetail?
 }
 
 model Menu {
@@ -108,12 +109,14 @@ model Menu {
 }
 
 model MenuItem {
-  id          Int    @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   menuID      Int
-  name        String @db.VarChar(255)
-  description String @db.VarChar(255)
+  name        String      @db.VarChar(255)
+  description String      @db.VarChar(255)
   price       Int
-  menu        Menu   @relation(fields: [menuID], references: [id])
+  image       ModelImage? @relation(fields: [imageID], references: [id])
+  menu        Menu        @relation(fields: [menuID], references: [id])
+  imageID     Int?
 }
 
 model ShopDetail {
@@ -121,16 +124,19 @@ model ShopDetail {
   name        String?      @db.VarChar(255)
   address     String?      @db.VarChar(255)
   phoneNumber String?      @map("phone_number") @db.VarChar(255)
+  shopID      Int
+  shop        Shop         @relation(fields: [shopID], references: [id])
   images      ModelImage[]
 }
 
 model ModelImage {
   id           Int         @id @default(autoincrement())
-  shopDetailId Int?
+  shopDetailID Int?
   imageId      Int         @unique
   image        Image       @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  ShopDetail   ShopDetail? @relation(fields: [shopDetailId], references: [id])
-  Stylist      Stylist[]
+  ShopDetail   ShopDetail? @relation(fields: [shopDetailID], references: [id], onDelete: Cascade)
+  Stylist      Stylist?
+  MenuItem     MenuItem?
 }
 
 model Image {
