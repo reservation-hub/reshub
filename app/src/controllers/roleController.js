@@ -71,16 +71,12 @@ const updateRole = eah(async (req, res, next) => {
 const deleteRole = eah(async (req, res, next) => {
   const { id } = res.locals
 
-  const {
-    error,
-    value: role,
-  } = await RoleRepository.deleteRole(id)
-
+  const { error } = await RoleRepository.deleteRole(id)
   if (error) {
-    return next({ code: 400, message: 'Invalid input values', error })
+    return next({ code: 404, message: 'Role not found', error })
   }
 
-  return res.send({ data: role })
+  return res.send({ data: { message: 'Role deleted' } })
 })
 
 router.get('/', viewController.index('role'))

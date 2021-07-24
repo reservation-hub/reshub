@@ -74,6 +74,18 @@ const logout = (req, res) => {
   res.send('Logged out successfully!')
 }
 
+// HACK test endpoint to get token and header
+router.get('/hack', async (req, res, next) => {
+  const { error, value: user } = await UserRepository.findByProps({ email: 'eugene.sinamban@gmail.com' })
+  if (error) return next({ code: 404, message: 'User not found', error })
+  delete user.password
+  if (user.roles.length > 0) {
+    user.roles = user.roles.map(role => role.role)
+  }
+  req.user = user
+  return next()
+}, login)
+
 router.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
 router.post('/login', verifyIfNotLoggedInYet, passport.authenticate('local', { session: false }), login)
 router.post('/silent_refresh', passport.authenticate('jwt', { session: false }), login)

@@ -131,12 +131,12 @@ const updateUser = eah(async (req, res, next) => {
 
 const deleteUser = eah(async (req, res, next) => {
   const { id } = res.locals
-  const { error, value } = await UserRepository.deleteUser(id)
+  const { error } = await UserRepository.deleteUser(id)
   if (error) {
-    return next({ code: 400, message: 'bad request' })
+    return next({ code: 404, message: 'User not found', error })
   }
 
-  return res.send({ message: `Deleted user at id: ${value.id}` })
+  return res.send({ data: { message: 'User deleted' } })
 })
 
 router.get('/', viewController.index('user', include, manyToMany))

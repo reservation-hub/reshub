@@ -91,11 +91,11 @@ const updateShop = eah(async (req, res, next) => {
 
 const deleteShop = eah(async (req, res, next) => {
   const { id } = res.locals
-  const { error, value: deletedShop } = await ShopRepository.deleteShop(id)
+  const { error } = await ShopRepository.deleteShop(id)
   if (error) {
-    return next({ code: 400, message: 'Shop delete error', error })
+    return next({ code: 404, message: 'Shop not found', error })
   }
-  return res.send({ data: deletedShop })
+  return res.send({ data: { message: 'Shop deleted' } })
 })
 
 // routes

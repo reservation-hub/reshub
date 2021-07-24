@@ -126,10 +126,19 @@ const updateStylist = eah(async (req, res, next) => {
   return res.send({ data: updatedStylist })
 })
 
+const deleteStylist = eah(async (req, res, next) => {
+  const { id } = res.locals
+  const { error } = await StylistRepository.deleteStylist(id)
+  if (error) {
+    return next({ code: 404, message: 'Stylist not found', error })
+  }
+  return res.send({ data: { message: 'Stylist deleted' } })
+})
+
 router.get('/', viewController.index('stylist', include, manyToMany))
 router.get('/:id', viewController.show('stylist', include, manyToMany))
 router.post('/', insertStylist)
 router.patch('/:id', parseIntIDMiddleware, updateStylist)
-// router.delete('/:id', parseIntIDMiddleware, deleteStylist)
+router.delete('/:id', parseIntIDMiddleware, deleteStylist)
 
 module.exports = router

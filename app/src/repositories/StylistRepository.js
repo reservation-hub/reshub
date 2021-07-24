@@ -94,6 +94,18 @@ module.exports = {
       return { error }
     }
   },
+  async deleteStylist(id) {
+    try {
+      return {
+        value: await prisma.user.delete({
+          where: { id },
+        }),
+      }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
   async findByProps(prop) {
     const param = Array.isArray(prop) ? { OR: prop } : prop
     try {

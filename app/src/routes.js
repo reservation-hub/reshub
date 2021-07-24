@@ -20,7 +20,7 @@ const apiRoutes = [
 const protectRoute = passport.authenticate('jwt', { session: false })
 const roleCheck = roles => (req, res, next) => {
   const { user } = req
-  const userRoles = user.roles.map(role => role.name)
+  const userRoles = user.roles.map(role => role.role.name)
   let authorized = false
   if (Array.isArray(roles)) {
     userRoles.forEach(role => {
