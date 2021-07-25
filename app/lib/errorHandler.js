@@ -5,8 +5,9 @@ exports.errorHandler = (err, req, res, next) => {
   console.error('error: ', err)
   const { error, message, code } = err
 
-  if (error) {
+  if (error !== undefined) {
     // prisma errors
+    console.error('Prisma error', error.message)
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') {
         const invalidFields = error.meta.target

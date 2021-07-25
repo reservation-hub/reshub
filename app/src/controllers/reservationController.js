@@ -1,8 +1,8 @@
 const router = require('express').Router()
 const eah = require('express-async-handler')
-const ReservationRepository = require('../repositories/reservationRepository')
+const ReservationRepository = require('../repositories/ReservationRepository')
 const { reservationSchema } = require('./schemas/reservation')
-const { viewController } = require('./lib/viewController')
+const viewController = require('./lib/viewController')
 
 const include = {
   area: true,

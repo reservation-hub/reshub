@@ -1,6 +1,17 @@
-const ReservationRepository = require('./src/repositories/reservationRepository');
+const prisma = require('./src/db/prisma');
 
 (async () => {
-  console.log('test insert reservation')
-  process.exit()
+  try {
+    // TODO test order by
+    const shops = await prisma.user.findMany({
+      orderBy: {
+        id: 'asc'
+      },
+    })
+    console.log(shops)
+  } catch (e) {
+    console.error(e)
+  } finally {
+    process.exit()
+  }
 })()

@@ -1,9 +1,9 @@
 const router = require('express').Router()
 const eah = require('express-async-handler')
 const { parseIntIDMiddleware } = require('./lib/utils')
-const { viewController } = require('./lib/viewController')
-const locationRepository = require('../repositories/locationRepository')
-const shopRepository = require('../repositories/shopRepository')
+const viewController = require('./lib/viewController')
+const locationRepository = require('../repositories/LocationRepository')
+const ShopRepository = require('../repositories/ShopRepository')
 const { shopUpsertSchema } = require('./schemas/shop')
 
 const include = {
@@ -35,7 +35,7 @@ const insertShop = eah(async (req, res, next) => {
     return next({ code: 400, message: 'Locations are invalid' })
   }
 
-  const { error, value: shop } = await shopRepository.insertShop(
+  const { error, value: shop } = await ShopRepository.insertShop(
     shopInsertValues.name, shopInsertValues.address, shopInsertValues.phoneNumber,
     shopInsertValues.areaID, shopInsertValues.prefectureID, shopInsertValues.cityID,
   )
@@ -46,7 +46,6 @@ const insertShop = eah(async (req, res, next) => {
 })
 
 const updateShop = eah(async (req, res, next) => {
-  const { id } = res.locals
   const {
     error: shopSchemaError,
     value: shopUpdateValues,
@@ -67,23 +66,36 @@ const updateShop = eah(async (req, res, next) => {
     return next({ code: 400, message: 'Locations are invalid' })
   }
 
-  const { error, value: shop } = await shopRepository.updateShop(
-    id, shopUpdateValues.name, shopUpdateValues.address, shopUpdateValues.phoneNumber,
+  const { id } = res.locals
+
+  const {
+    error: shopFetchError,
+    value: shop,
+  } = await ShopRepository.findByProps({ id })
+  if (shopFetchError) {
+    return next({ code: 500, message: 'Server Error', error: shopFetchError })
+  }
+  if (!shop) {
+    return next({ code: 404, message: 'Shop not found' })
+  }
+
+  const { error, value: updatedShop } = await ShopRepository.updateShop(
+    shop, shopUpdateValues.name, shopUpdateValues.address, shopUpdateValues.phoneNumber,
     shopUpdateValues.areaID, shopUpdateValues.prefectureID, shopUpdateValues.cityID,
   )
   if (error) {
     return next({ code: 400, message: 'Shop update error' })
   }
-  return res.send({ data: shop })
+  return res.send({ data: updatedShop })
 })
 
 const deleteShop = eah(async (req, res, next) => {
   const { id } = res.locals
-  const { error, value: deletedShop } = await shopRepository.deleteShop(id)
+  const { error } = await ShopRepository.deleteShop(id)
   if (error) {
-    return next({ code: 400, message: 'Shop delete error', error })
+    return next({ code: 404, message: 'Shop not found', error })
   }
-  return res.send({ data: deletedShop })
+  return res.send({ data: { message: 'Shop deleted' } })
 })
 
 // routes

@@ -1,12 +1,12 @@
 const router = require('express').Router()
 const eah = require('express-async-handler')
 const { parseIntIDMiddleware } = require('./lib/utils')
-const UserRepository = require('../repositories/userRepository')
-const RoleRepository = require('../repositories/roleRepository')
+const UserRepository = require('../repositories/UserRepository')
+const RoleRepository = require('../repositories/RoleRepository')
 const {
   userInsertSchema, userUpdateSchema, userProfileUpsertSchema,
 } = require('./schemas/user')
-const { viewController } = require('./lib/viewController')
+const viewController = require('./lib/viewController')
 
 const include = {
   profile: true,
@@ -18,7 +18,7 @@ const include = {
   },
 }
 
-const manyToMany = model => ({ ...model, roles: model.roles.map(role => role.role) })
+const manyToMany = 'roles'
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
@@ -48,8 +48,8 @@ const insertUser = eah(async (req, res, next) => {
 
   const {
     error: roleExtractionError,
-    value: validRoles,
-  } = await RoleRepository.extractValidRoles(userValues.roles)
+    value: validRoleIDs,
+  } = await RoleRepository.extractValidRoleIDs(userValues.roles)
 
   if (roleExtractionError) {
     return ({ code: 400, message: 'Invalid input values', error: roleExtractionError })
@@ -60,17 +60,13 @@ const insertUser = eah(async (req, res, next) => {
     value: user,
   } = await UserRepository
     .createUser(userValues.email, userValues.password,
-      userValues.username, userProfileValues, validRoles)
+      userValues.username, userProfileValues, validRoleIDs)
 
   if (createUserError) {
     return next({ code: 400, message: 'User was not create', error: createUserError })
   }
 
   delete user.password
-  if (user.roles.length > 0) {
-    user.roles = user.roles.map(role => role.role)
-  }
-
   return res.send({ data: user })
 })
 
@@ -95,8 +91,8 @@ const updateUser = eah(async (req, res, next) => {
 
   const {
     error: roleExtractionError,
-    value: validRoles,
-  } = await RoleRepository.extractValidRoles(userValues.roles)
+    value: validRoleIDs,
+  } = await RoleRepository.extractValidRoleIDs(userValues.roles)
 
   if (roleExtractionError) {
     return ({ code: 400, message: 'Invalid input values', error: roleExtractionError })
@@ -104,14 +100,24 @@ const updateUser = eah(async (req, res, next) => {
 
   const { id } = res.locals
 
-  const { error: userFetchError, value: user } = await UserRepository.findByProps({ id })
+  const {
+    error: userFetchError,
+    value: user,
+  } = await UserRepository.findByProps({ id })
   if (userFetchError) {
-    return next({ code: 404, message: 'User Not Found', error: userFetchError })
+    return next({ code: 500, message: 'Server Error', error: userFetchError })
+  }
+  if (!user) {
+    return next({ code: 404, message: 'User Not Found' })
   }
 
+  const userRoleIDs = user.roles.map(role => role.role.id)
+  const rolesToAdd = validRoleIDs.filter(validRoleID => userRoleIDs.indexOf(validRoleID) === -1)
+  const rolesToRemove = userRoleIDs.filter(uuid => validRoleIDs.indexOf(uuid) === -1)
+
   const { error: updateUserError, value: updatedUser } = await UserRepository.updateUser(
-    user, userValues.email, userValues.password, userValues.username,
-    userProfileValues, validRoles,
+    id, userValues.email, userValues.password, userValues.username,
+    userProfileValues, rolesToAdd, rolesToRemove,
   )
 
   if (updateUserError) {
@@ -120,21 +126,17 @@ const updateUser = eah(async (req, res, next) => {
   }
 
   delete updatedUser.password
-  if (updatedUser.roles.length > 0) {
-    updatedUser.roles = updatedUser.roles.map(role => role.role)
-  }
-
   return res.send({ data: updatedUser })
 })
 
 const deleteUser = eah(async (req, res, next) => {
   const { id } = res.locals
-  const { error, value } = await UserRepository.deleteUser(id)
+  const { error } = await UserRepository.deleteUser(id)
   if (error) {
-    return next({ code: 400, message: 'bad request' })
+    return next({ code: 404, message: 'User not found', error })
   }
 
-  return res.send({ message: `Deleted user at id: ${value.id}` })
+  return res.send({ data: { message: 'User deleted' } })
 })
 
 router.get('/', viewController.index('user', include, manyToMany))
