@@ -14,6 +14,7 @@ const include = {
     },
   },
 }
+
 const parseReservation = reservation => {
   if (reservation) {
     // clean shop
@@ -34,6 +35,7 @@ const parseReservation = reservation => {
     delete reservation.user.profile
   }
 }
+
 module.exports = {
   async fetchAll(page = 0, order = 'asc', filter) {
     try {

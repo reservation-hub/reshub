@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
-const prisma = require('./src/db/prisma');
-const UserRepository = require('./src/repositories/UserRepository')
-const RoleRepository = require('./src/repositories/RoleRepository');
+const prisma = require('../src/db/prisma');
+const UserRepository = require('../src/repositories/UserRepository')
+const RoleRepository = require('../src/repositories/RoleRepository');
 
 const admins = [
   {
