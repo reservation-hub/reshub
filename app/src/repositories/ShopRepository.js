@@ -5,16 +5,15 @@ const include = {
   shopDetail: true,
 }
 
-const parseShop = shop => {
-  if (shop) {
-    const keys = Object.keys(shop.shopDetail)
-    keys.forEach(key => {
-      if (!(key === 'id' || key === 'shopID')) {
-        shop[key] = shop.shopDetail[key]
-      }
-    })
-    delete shop.shopDetail
-  }
+const cleanRelationModels = shop => {
+  // clean shop detail values
+  const keys = Object.keys(shop.shopDetail)
+  keys.forEach(key => {
+    if (!(key === 'id' || key === 'shopID')) {
+      shop[key] = shop.shopDetail[key]
+    }
+  })
+  delete shop.shopDetail
 }
 
 module.exports = {
@@ -25,7 +24,7 @@ module.exports = {
         value: shops,
       } = await CommonRepository.fetchAll('shop', page, order, filter, include)
       if (fetchShopsError) throw fetchShopsError
-      shops.forEach(shop => parseShop(shop))
+      shops.forEach(shop => cleanRelationModels(shop))
       return { value: shops }
     } catch (error) {
       console.error(`Exception : ${error}`)
@@ -46,7 +45,9 @@ module.exports = {
     try {
       const { error, value } = await CommonRepository.fetch('shop', id, include)
       if (error) throw error
-      parseShop(value)
+      if (value) {
+        cleanRelationModels(value)
+      }
       return { value }
     } catch (error) {
       console.error(`Exception : ${error}`)

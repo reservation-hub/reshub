@@ -11,9 +11,12 @@ const indexSchema = require('./schemas/indexSchema')
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const index = eah(async (req, res, next) => {
-  const { error, value: schemaValues } = indexSchema.validate(req.query, joiOptions)
-  if (error) {
-    return next({ code: 400, message: 'Invalid query values', error })
+  const {
+    error: schemaError,
+    value: schemaValues,
+  } = indexSchema.validate(req.query, joiOptions)
+  if (schemaError) {
+    return next({ code: 400, message: 'Invalid query values', error: schemaError })
   }
 
   const {

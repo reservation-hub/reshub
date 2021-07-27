@@ -9,23 +9,21 @@ const include = {
   },
 }
 
-const parseUser = user => {
-  if (user) {
-    // delete password for user value
-    delete user.password
+const cleanRelationModels = user => {
+  // delete password for user value
+  delete user.password
 
-    // merge profile into user
-    const profileKeys = Object.keys(user.profile)
-    profileKeys.forEach(key => {
-      if (!(key === 'id' || key === 'userID')) {
-        user[key] = user.profile[key]
-      }
-    })
-    delete user.profile
+  // merge profile into user
+  const profileKeys = Object.keys(user.profile)
+  profileKeys.forEach(key => {
+    if (!(key === 'id' || key === 'userID')) {
+      user[key] = user.profile[key]
+    }
+  })
+  delete user.profile
 
-    // clean roles
-    user.roles = user.roles.map(role => role.role)
-  }
+  // clean roles
+  user.roles = user.roles.map(role => role.role)
 }
 
 module.exports = {
@@ -40,7 +38,7 @@ module.exports = {
       const { error, value: data } = await CommonRepository.fetchAll('user', page, order, filter, include)
       if (error) throw error
 
-      data.forEach(datum => parseUser(datum))
+      data.forEach(datum => cleanRelationModels(datum))
 
       return { value: data }
     } catch (error) {
@@ -67,7 +65,7 @@ module.exports = {
       const { error, value: user } = await CommonRepository.fetch('user', id, include)
       if (error) throw error
 
-      parseUser(user)
+      cleanRelationModels(user)
 
       return { value: user }
     } catch (error) {

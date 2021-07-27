@@ -1,6 +1,4 @@
 const passport = require('./controllers/lib/passport')
-const apiAreaController = require('./controllers/API/areaController')
-const apiIndexController = require('./controllers/API/indexController')
 
 const authController = require('./controllers/authController')
 const areaController = require('./controllers/areaController')
@@ -12,10 +10,7 @@ const userController = require('./controllers/userController')
 const reservationController = require('./controllers/reservationController')
 const stylistController = require('./controllers/stylistController')
 
-const apiRoutes = [
-  apiAreaController,
-  apiIndexController,
-]
+const apiRoutes = []
 
 const protectRoute = passport.authenticate('jwt', { session: false })
 const roleCheck = roles => (req, res, next) => {

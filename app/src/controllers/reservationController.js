@@ -16,7 +16,7 @@ const index = eah(async (req, res, next) => {
   const {
     error: fetchReservationsError,
     value: reservations,
-  } = await ReservationRepository.fetchAll(
+  } = await ReservationRepository.fetchReservations(
     schemaValues.page,
     schemaValues.order,
     schemaValues.filter,
