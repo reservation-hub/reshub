@@ -1,4 +1,5 @@
 const prisma = require('../db/prisma')
+const CommonRepository = require('./CommonRepository')
 
 module.exports = {
   async extractValidRoleIDs(roleIDs) {
@@ -12,6 +13,36 @@ module.exports = {
       return {
         value: validRoles.map(validRole => validRole.id),
       }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
+  async fetchRoles(page = 0, order = 'asc', filter) {
+    try {
+      const { error, value: data } = await CommonRepository.fetchAll('role', page, order, filter)
+      if (error) throw error
+      return { value: data }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
+  async fetchRole(id) {
+    try {
+      const { error, value } = await CommonRepository.fetch('role', id)
+      if (error) throw error
+      return { value }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
+  async totalCount(filter) {
+    try {
+      const { error, value } = await CommonRepository.totalCount('role', filter)
+      if (error) throw error
+      return { value }
     } catch (error) {
       console.error(`Exception : ${error}`)
       return { error }
@@ -61,14 +92,6 @@ module.exports = {
     } catch (error) {
       console.error(`Exception : ${error}`)
       return { error }
-    }
-  },
-  async fetchAll() {
-    try {
-      return prisma.role.findMany()
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      return null
     }
   },
   async findByProps(prop) {

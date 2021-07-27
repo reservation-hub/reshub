@@ -1,6 +1,80 @@
 const prisma = require('../db/prisma')
+const CommonRepository = require('./CommonRepository')
+
+const include = {
+  profile: true,
+  oAuthIDs: true,
+  roles: {
+    include: { role: true },
+  },
+}
+
+const parseUser = user => {
+  if (user) {
+    // delete password for user value
+    delete user.password
+
+    // merge profile into user
+    const profileKeys = Object.keys(user.profile)
+    profileKeys.forEach(key => {
+      if (!(key === 'id' || key === 'userID')) {
+        user[key] = user.profile[key]
+      }
+    })
+    delete user.profile
+
+    // clean roles
+    user.roles = user.roles.map(role => role.role)
+  }
+}
 
 module.exports = {
+  /**
+   *
+   * @param {int} page
+   * @param {string} order asc / desc
+   * @param {array[string]} filter array of param name to narrow results
+   */
+  async fetchUsers(page = 0, order = 'asc', filter) {
+    try {
+      const { error, value: data } = await CommonRepository.fetchAll('user', page, order, filter, include)
+      if (error) throw error
+
+      data.forEach(datum => parseUser(datum))
+
+      return { value: data }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
+  async totalCount(filter) {
+    try {
+      const {
+        error,
+        value,
+      } = await CommonRepository.totalCount('user', filter)
+      if (error) throw error
+
+      return { value }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
+  async fetchUser(id) {
+    try {
+      const { error, value: user } = await CommonRepository.fetch('user', id, include)
+      if (error) throw error
+
+      parseUser(user)
+
+      return { value: user }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
   /**
    * @param {string} email
    * @param {string} password

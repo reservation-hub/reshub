@@ -1,19 +1,60 @@
 const router = require('express').Router()
 const eah = require('express-async-handler')
-const viewController = require('./lib/viewController')
 const StylistRepository = require('../repositories/StylistRepository')
 const ShopRepository = require('../repositories/ShopRepository')
 const { parseIntIDMiddleware } = require('./lib/utils')
 const { stylistUpsertSchema } = require('./schemas/stylist')
-
-const include = {
-  reservations: true,
-  shops: true,
-}
-
-const manyToMany = ['reservations', 'shops']
+const indexSchema = require('./schemas/indexSchema')
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
+
+const index = eah(async (req, res, next) => {
+  const {
+    error: schemaError,
+    value: schemaValues,
+  } = indexSchema.validate(req.query, joiOptions)
+  if (schemaError) {
+    return next({ code: 400, message: 'Invalid query values', error: schemaError })
+  }
+
+  const {
+    error: fetchStylistsError,
+    value: stylists,
+  } = await StylistRepository.fetchStylists(
+    schemaValues.page,
+    schemaValues.order,
+    schemaValues.filter,
+  )
+  if (fetchStylistsError) {
+    return next({ code: 500, message: 'Server error', error: fetchStylistsError })
+  }
+
+  const {
+    error: fetchStylistsCountError,
+    value: stylistsCount,
+  } = await StylistRepository.totalCount(schemaValues.filter)
+  if (fetchStylistsCountError) {
+    return next({ code: 500, message: 'Server error', error: fetchStylistsCountError })
+  }
+
+  return res.send({ data: stylists, totalCount: stylistsCount })
+})
+
+const showStylist = eah(async (req, res, next) => {
+  const { id } = res.locals
+  const {
+    error: stylistFetchError,
+    value: stylist,
+  } = await StylistRepository.fetchStylist(id)
+  if (stylistFetchError) {
+    return next({ code: 500, message: 'Server error', error: stylistFetchError })
+  }
+  if (!stylist) {
+    return next({ code: 404, message: 'Stylist not found' })
+  }
+
+  return res.send({ data: stylist })
+})
 
 const insertStylist = eah(async (req, res, next) => {
   const {
@@ -135,8 +176,8 @@ const deleteStylist = eah(async (req, res, next) => {
   return res.send({ data: { message: 'Stylist deleted' } })
 })
 
-router.get('/', viewController.index('stylist', include, manyToMany))
-router.get('/:id', viewController.show('stylist', include, manyToMany))
+router.get('/', index)
+router.get('/:id', parseIntIDMiddleware, showStylist)
 router.post('/', insertStylist)
 router.patch('/:id', parseIntIDMiddleware, updateStylist)
 router.delete('/:id', parseIntIDMiddleware, deleteStylist)

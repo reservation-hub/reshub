@@ -1,18 +1,82 @@
 const router = require('express').Router()
 const eah = require('express-async-handler')
 const { parseIntIDMiddleware } = require('./lib/utils')
-const viewController = require('./lib/viewController')
 const locationRepository = require('../repositories/LocationRepository')
 const ShopRepository = require('../repositories/ShopRepository')
 const { shopUpsertSchema } = require('./schemas/shop')
-
-const include = {
-  area: true,
-  prefecture: true,
-  city: true,
-}
+const indexSchema = require('./schemas/indexSchema')
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
+
+const index = eah(async (req, res, next) => {
+  const {
+    error: schemaError,
+    value: schemaValues,
+  } = indexSchema.validate(req.query, joiOptions)
+  if (schemaError) {
+    return next({ code: 400, message: 'Invalid query values', error: schemaError })
+  }
+
+  const {
+    error: fetchShopsError,
+    value: shops,
+  } = await ShopRepository.fetchShops(
+    schemaValues.page,
+    schemaValues.order,
+    schemaValues.filter,
+  )
+  if (fetchShopsError) {
+    return next({ code: 500, message: 'Server error', error: fetchShopsError })
+  }
+
+  const shopIDs = shops.map(shop => shop.id)
+
+  const {
+    error: fetchTotalReservationsCountError,
+    value: totalReservationsCount,
+  } = await ShopRepository.fetchShopReservationsCountByIDs(shopIDs)
+  if (fetchTotalReservationsCountError) {
+    return next({ code: 500, message: 'Server error', error: fetchTotalReservationsCountError })
+  }
+
+  const {
+    error: fetchTotalStylistsCountError,
+    value: totalStylistsCount,
+  } = await ShopRepository.fetchShopStylistsCountByIDs(shopIDs)
+  if (fetchTotalStylistsCountError) {
+    return next({ code: 500, message: 'Server error', error: fetchTotalStylistsCountError })
+  }
+
+  // merge data
+  const data = shops.map(shop => ({
+    ...shop,
+    reservationsCount: totalReservationsCount[shop.id],
+    stylistsCount: totalStylistsCount[shop.id],
+  }))
+
+  const {
+    error: fetchCountError,
+    value: shopCounts,
+  } = await ShopRepository.totalCount(schemaValues.filter)
+  if (fetchCountError) {
+    return next({ code: 500, message: 'Server error', error: fetchCountError })
+  }
+
+  return res.send({ data, totalCount: shopCounts })
+})
+
+const showShop = eah(async (req, res, next) => {
+  const { id } = res.locals
+  const { error, value } = await ShopRepository.fetchShop(id)
+  if (error) {
+    return next({ code: 500, message: 'Server error', error })
+  }
+  if (!value) {
+    return next({ code: 404, message: 'Shop Not Found' })
+  }
+
+  return res.send({ data: value })
+})
 
 const insertShop = eah(async (req, res, next) => {
   const {
@@ -100,8 +164,8 @@ const deleteShop = eah(async (req, res, next) => {
 
 // routes
 
-router.get('/', viewController.index('shop', include))
-router.get('/:id', viewController.show('shop', include))
+router.get('/', index)
+router.get('/:id', parseIntIDMiddleware, showShop)
 router.post('/', insertShop)
 router.patch('/:id', parseIntIDMiddleware, updateShop)
 router.delete('/:id', parseIntIDMiddleware, deleteShop)
