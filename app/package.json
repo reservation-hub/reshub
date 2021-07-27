@@ -6,16 +6,17 @@
   "scripts": {
     "serve": "nodemon --legacy-watch --exec 'npm run lint && node main.js'",
     "start": "node main.js",
-    "seed": "node seed.js",
-    "seed-shop": "node shopSeeder.js",
-    "lint": "./node_modules/.bin/eslint --ignore-path /app/.eslintignore ."
+    "seed": "node seedFiles/seed.js",
+    "seed-shop": "node seedFiles/shopSeeder.js",
+    "lint": "eslint --ignore-path /app/.eslintignore .",
+    "migrate": "prisma migrate dev"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@joi/date": "^2.1.0",
-    "@prisma/client": "^2.27.0",
+    "@prisma/client": "^2.28.0",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
@@ -37,6 +38,7 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.23.4",
     "nodemon": "^2.0.7",
-    "prisma": "^2.27.0"
+    "prisma": "^2.28.0",
+    "supertest": "^6.1.4"
   }
 }
