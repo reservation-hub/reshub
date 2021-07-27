@@ -6,13 +6,15 @@ const include = {
 }
 
 const parseShop = shop => {
-  const keys = Object.keys(shop.shopDetail)
-  keys.forEach(key => {
-    if (!(key === 'id' || key === 'shopID')) {
-      shop[key] = shop.shopDetail[key]
-    }
-  })
-  delete shop.shopDetail
+  if (shop) {
+    const keys = Object.keys(shop.shopDetail)
+    keys.forEach(key => {
+      if (!(key === 'id' || key === 'shopID')) {
+        shop[key] = shop.shopDetail[key]
+      }
+    })
+    delete shop.shopDetail
+  }
 }
 
 module.exports = {

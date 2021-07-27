@@ -4,7 +4,12 @@ const CommonRepository = require('./CommonRepository')
 const include = {
   shop: true,
   stylist: true,
-  user: { id: true, profile: true },
+  user: {
+    select: {
+      id: true,
+      profile: true,
+    },
+  },
 }
 // const parseReservation = reservation => {
 //   // remove

@@ -69,7 +69,7 @@ const showShop = eah(async (req, res, next) => {
   const { id } = res.locals
   const { error, value } = await ShopRepository.fetchShop(id)
   if (error) {
-    return next({ code: 500, message: 'Server error' })
+    return next({ code: 500, message: 'Server error', error })
   }
   if (!value) {
     return next({ code: 404, message: 'Shop Not Found' })

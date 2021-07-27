@@ -10,20 +10,22 @@ const include = {
 }
 
 const parseUser = user => {
-  // delete password for user value
-  delete user.password
+  if (user) {
+    // delete password for user value
+    delete user.password
 
-  // merge profile into user
-  const profileKeys = Object.keys(user.profile)
-  profileKeys.forEach(key => {
-    if (!(key === 'id' || key === 'userID')) {
-      user[key] = user.profile[key]
-    }
-  })
-  delete user.profile
+    // merge profile into user
+    const profileKeys = Object.keys(user.profile)
+    profileKeys.forEach(key => {
+      if (!(key === 'id' || key === 'userID')) {
+        user[key] = user.profile[key]
+      }
+    })
+    delete user.profile
 
-  // clean roles
-  user.roles = user.roles.map(role => role.role)
+    // clean roles
+    user.roles = user.roles.map(role => role.role)
+  }
 }
 
 module.exports = {
