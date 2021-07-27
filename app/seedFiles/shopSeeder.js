@@ -1,4 +1,4 @@
-const prisma = require('./src/db/prisma');
+const prisma = require('../src/db/prisma');
 
 (async () => {
   const cityCount = 1747
@@ -18,7 +18,6 @@ const prisma = require('./src/db/prisma');
       })
       await prisma.shop.create({
         data: {
-          name: "TEST",
           city: {
             connect: {
               id: city.id
@@ -32,6 +31,11 @@ const prisma = require('./src/db/prisma');
           area: {
             connect: {
               id: city.prefecture.area.id
+            }
+          },
+          shopDetail: {
+            create: {
+              name: "Test Shop"
             }
           }
         }
