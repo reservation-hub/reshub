@@ -1,6 +1,37 @@
 const prisma = require('../db/prisma')
+const CommonRepository = require('./CommonRepository')
 
 module.exports = {
+  async fetchStylists(page = 0, order = 'asc', filter) {
+    try {
+      const { error, value: data } = await CommonRepository.fetchAll('stylist', page, order, filter)
+      if (error) throw error
+      return { value: data }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
+  async fetchStylist(id) {
+    try {
+      const { error, value } = await CommonRepository.fetch('stylist', id)
+      if (error) throw error
+      return { value }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
+  async totalCount(filter) {
+    try {
+      const { error, value } = await CommonRepository.totalCount('stylist', filter)
+      if (error) throw error
+      return { value }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
   async insertStylist(name, shopIDs, image) {
     let imageQuery
     if (image) {

@@ -48,6 +48,7 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, async (username, pass
   if (!username || !password) return done({ code: 400, message: 'メールアドレス、もしくはパスワードが間違っています' }, null)
   const { error, value: user } = await UserRepository.findByProps({ email: username })
   if (error || !bcrypt.compareSync(password, user.password)) return done({ code: 400, message: 'メールアドレス、もしくはパスワードが間違っています', error }, null)
+  delete user.password
   return done(null, user)
 }))
 

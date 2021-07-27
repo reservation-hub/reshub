@@ -6,21 +6,52 @@ const RoleRepository = require('../repositories/RoleRepository')
 const {
   userInsertSchema, userUpdateSchema, userProfileUpsertSchema,
 } = require('./schemas/user')
-const viewController = require('./lib/viewController')
-
-const include = {
-  profile: true,
-  oAuthIDs: true,
-  roles: {
-    include: {
-      role: true,
-    },
-  },
-}
-
-const manyToMany = 'roles'
+const indexSchema = require('./schemas/indexSchema')
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
+
+const index = eah(async (req, res, next) => {
+  const { error, value: schemaValues } = indexSchema.validate(req.query, joiOptions)
+  if (error) {
+    return next({ code: 400, message: 'Invalid query values', error })
+  }
+
+  const {
+    error: usersError,
+    value: users,
+  } = await UserRepository.fetchUsers(
+    schemaValues.page, schemaValues.order, schemaValues.filter,
+  )
+  if (usersError) {
+    return next({ code: 500, message: 'Server error', error: usersError })
+  }
+
+  const {
+    error: userCountError,
+    value: usersCount,
+  } = await UserRepository.totalCount(schemaValues.filter)
+  if (userCountError) {
+    return next({ code: 500, message: 'Server error', error: userCountError })
+  }
+
+  return res.send({ data: users, totalCount: usersCount })
+})
+
+const showUser = eah(async (req, res, next) => {
+  const { id } = res.locals
+  const {
+    error: userFetchError,
+    value: user,
+  } = await UserRepository.fetchUser(id)
+  if (userFetchError) {
+    return next({ code: 500, message: 'Server Error', error: userFetchError })
+  }
+  if (!user) {
+    return next({ code: 404, message: 'User Not Found' })
+  }
+
+  return res.send({ data: user })
+})
 
 const insertUser = eah(async (req, res, next) => {
   const {
@@ -139,8 +170,8 @@ const deleteUser = eah(async (req, res, next) => {
   return res.send({ data: { message: 'User deleted' } })
 })
 
-router.get('/', viewController.index('user', include, manyToMany))
-router.get('/:id', viewController.show('user', include, manyToMany))
+router.get('/', index)
+router.get('/:id', parseIntIDMiddleware, showUser)
 router.post('/', insertUser)
 router.patch('/:id', parseIntIDMiddleware, updateUser)
 router.delete('/:id', parseIntIDMiddleware, deleteUser)
