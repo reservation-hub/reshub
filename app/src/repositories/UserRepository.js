@@ -261,23 +261,20 @@ module.exports = {
     try {
       switch (oAuth.provider) {
         case 'google':
-          if (!user.oAuthIDs.googleID) {
-            return {
-              value: await prisma.userOAuthIds.upsert({
-                where: { userID: user.id },
-                update: {
-                  googleID: oAuth.id,
+          return {
+            value: await prisma.userOAuthIds.upsert({
+              where: { userID: user.id },
+              update: {
+                googleID: oAuth.id,
+              },
+              create: {
+                googleID: oAuth.id,
+                user: {
+                  connect: { id: user.id },
                 },
-                create: {
-                  googleID: oAuth.id,
-                  user: {
-                    connect: { id: user.id },
-                  },
-                },
-              }),
-            }
+              },
+            }),
           }
-          return { value: user }
         default:
           return { value: user }
       }
