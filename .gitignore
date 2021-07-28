@@ -3,3 +3,4 @@
 app/client/build
 # backup files
 rh-*
+.devcontainer
