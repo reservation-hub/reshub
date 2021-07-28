@@ -68,8 +68,6 @@ const insertStylist = eah(async (req, res, next) => {
 
   if (schemaValues.image) {
     // TODO: add upload image process
-    // eslint-disable-next-line no-console
-    console.log('should upload here')
   }
 
   const {
@@ -112,8 +110,6 @@ const updateStylist = eah(async (req, res, next) => {
 
   if (schemaValues.image) {
     // TODO: add upload image process
-    // eslint-disable-next-line no-console
-    console.log('should upload here')
   }
 
   const {
