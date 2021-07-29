@@ -15,15 +15,7 @@ const apiRoutes = []
 const protectRoute = passport.authenticate('jwt', { session: false })
 const roleCheck = roles => (req, res, next) => {
   const { user } = req
-  const userRoles = user.roles.map(role => role.role.name)
-  let authorized = false
-  if (Array.isArray(roles)) {
-    userRoles.forEach(role => {
-      if (roles.indexOf(role) !== -1) authorized = true
-    })
-  } else if (userRoles.indexOf(roles) !== -1) {
-    authorized = true
-  }
+  const authorized = user.roles.filter(ur => roles.includes(ur.name)).length > 0
   if (!authorized) return next({ code: 403, message: 'User unauthorized' })
   return next()
 }

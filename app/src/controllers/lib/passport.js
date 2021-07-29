@@ -37,7 +37,8 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
     if (!jwtPayload.user) console.error('NO USER IN PAYLOAD')
     const { error, value: user } = await UserRepository.findByProps({ id: jwtPayload.user.id })
-    if (error) return done({ code: 404, message: 'User does not exist', error }, null)
+    if (error || !user) return done({ code: 404, message: 'User does not exist', error }, null)
+    delete user.password
     return done(null, user)
   } catch (e) { return done(e, null) }
 }))

@@ -10,9 +10,6 @@ const include = {
 }
 
 const cleanRelationModels = user => {
-  // delete password for user value
-  delete user.password
-
   // merge profile into user
   const profileKeys = Object.keys(user.profile)
   profileKeys.forEach(key => {
@@ -23,7 +20,11 @@ const cleanRelationModels = user => {
   delete user.profile
 
   // clean roles
-  user.roles = user.roles.map(role => role.role)
+  user.roles = user.roles.map(role => ({
+    name: role.role.name,
+    description: role.role.description,
+    slug: role.role.slug,
+  }))
 }
 
 module.exports = {
@@ -233,18 +234,14 @@ module.exports = {
   async findByProps(prop) {
     const param = Array.isArray(prop) ? { OR: prop } : prop
     try {
-      return {
-        value: await prisma.user.findUnique({
-          where: param,
-          include: {
-            profile: true,
-            oAuthIDs: true,
-            roles: {
-              include: { role: true },
-            },
-          },
-        }),
+      const user = await prisma.user.findUnique({
+        where: param,
+        include,
+      })
+      if (user) {
+        cleanRelationModels(user)
       }
+      return { value: user }
     } catch (e) {
       console.error(`User not found on prop : ${prop}, ${e}`)
       return { error: e }
