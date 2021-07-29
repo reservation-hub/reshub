@@ -144,8 +144,9 @@ const updateUser = eah(async (req, res, next) => {
   if (!user) {
     return next({ code: 404, message: 'User Not Found' })
   }
+  delete user.password
 
-  const userRoleIDs = user.roles.map(role => role.role.id)
+  const userRoleIDs = user.roles.map(role => role.id)
   const rolesToAdd = validRoleIDs.filter(validRoleID => userRoleIDs.indexOf(validRoleID) === -1)
   const rolesToRemove = userRoleIDs.filter(uuid => validRoleIDs.indexOf(uuid) === -1)
 

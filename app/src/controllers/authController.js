@@ -7,6 +7,8 @@ const passport = require('./lib/passport')
 
 const login = eah(async (req, res) => {
   const { user } = req
+  // eslint-disable-next-line no-console
+  console.log('USER : ', user)
 
   // トークン生成
   const cookieOptions = {
@@ -58,9 +60,6 @@ const googleAuthenticate = eah(async (req, res, next) => {
   const { error, value: user } = await UserRepository.findByProps({ email })
   if (error) return next({ code: 404, message: 'User not found', error })
   delete user.password
-  if (user.roles.length > 0) {
-    user.roles = user.roles.map(role => role.role)
-  }
   if (!user.oAuthIDs || !user.oAuthIDs.googleID) {
     await UserRepository.addOAuthID(user, { provider, id: sub })
   }
@@ -79,9 +78,6 @@ router.get('/hack', async (req, res, next) => {
   const { error, value: user } = await UserRepository.findByProps({ email: 'eugene.sinamban@gmail.com' })
   if (error) return next({ code: 404, message: 'User not found', error })
   delete user.password
-  if (user.roles.length > 0) {
-    user.roles = user.roles.map(role => role.role)
-  }
   req.user = user
   return next()
 }, login)
