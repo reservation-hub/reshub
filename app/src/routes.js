@@ -9,8 +9,9 @@ const shopController = require('./controllers/shopController')
 const userController = require('./controllers/userController')
 const reservationController = require('./controllers/reservationController')
 const stylistController = require('./controllers/stylistController')
+const signupController = require('./clientControllers/signupController')
 
-const apiRoutes = []
+const apiRoutes = [signupController]
 
 const protectRoute = passport.authenticate('jwt', { session: false })
 const roleCheck = roles => (req, res, next) => {
@@ -21,7 +22,7 @@ const roleCheck = roles => (req, res, next) => {
 }
 
 module.exports = app => {
-  app.use('/api', protectRoute, apiRoutes)
+  app.use('/api', apiRoutes)
   app.use('/auth', authController)
 
   app.use('/areas', protectRoute, roleCheck(['admin']), areaController)

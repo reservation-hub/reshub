@@ -84,6 +84,26 @@ module.exports = {
    * @returns {object}
    * @throws {null}
    */
+  async signupUser(
+    email,
+    password,
+    username,
+  ) {
+    try {
+      return {
+        value: await prisma.user.create({
+          data: {
+            email,
+            password,
+            username,
+          },
+        }),
+      }
+    } catch (error) {
+      console.error(`Exception : ${error}`)
+      return { error }
+    }
+  },
   async createUser(
     email,
     password,
