@@ -2,20 +2,22 @@ import { Request } from 'express'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
-import AuthService from '../services/AuthService'
+import AuthService, { localAuthenticationQuery } from '../services/AuthService'
 import UserService from '../services/UserService'
 import { User } from '../entities/User'
+import { localStrategySchema } from '../controllers/schemas/auth'
 
 export type AuthServiceInterface = {
-  authenticateByEmailAndPassword(email: string, password: string): Promise<User>
+  authenticateByEmailAndPassword(query: localAuthenticationQuery): Promise<User>
 }
+
+const joiOptions = { abortEarly: false, stripUnknown: true }
 
 // JWT
 
 const cookieExtractor = (req: Request) => {
   let headerToken
   if (req.get('authorization')) {
-    // eslint-disable-next-line prefer-destructuring
     headerToken = req.get('authorization')?.split(' ')[1]
   }
   if (!headerToken) return null
@@ -43,14 +45,19 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
     const user = await UserService.fetchUser(jwtPayload.user.id)
     return done(null, user)
-  } catch (error) { return done({ error }, null) }
+  } catch (error) { return done(error, null) }
 }))
 
 // local
 
 passport.use(new LocalStrategy({ usernameField: 'email' }, async (username, password, done) => {
-  const user = await AuthService.authenticateByEmailAndPassword(username, password)
-  return done(null, user)
+  try {
+    const schemaValues = await localStrategySchema.validateAsync({ email: username, password }, joiOptions)
+    const user = await AuthService.authenticateByEmailAndPassword(schemaValues)
+    return done(null, user)
+  } catch (error) {
+    return done(error, null)
+  }
 }))
 
 export default passport

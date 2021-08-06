@@ -15,7 +15,7 @@ export const reconstructStylist = (stylist: stylistWithShops): Stylist => ({
   id: stylist.id,
   name: stylist.name,
   shops: stylist.shops.map(shopStylists => ({
-    id: shopStylists.shopID,
+    id: shopStylists.shopId,
     name: shopStylists.shop.shopDetail?.name,
   })),
 })
@@ -43,13 +43,13 @@ export const fetch = async (id: number): Promise<Stylist | null> => {
   return stylist ? reconstructStylist(stylist) : null
 }
 
-export const insertStylist = async (name: string, shopIDs: number[])
+export const insertStylist = async (name: string, shopIds: number[])
 : Promise<Stylist> => {
   const stylist = await prisma.stylist.create({
     data: {
       name,
       shops: {
-        create: shopIDs.map(id => ({
+        create: shopIds.map(id => ({
           shop: {
             connect: { id },
           },
@@ -62,21 +62,21 @@ export const insertStylist = async (name: string, shopIDs: number[])
   return cleanStylist
 }
 
-export const updateStylist = async (id: number, name: string, shopIDsToAdd: number[], shopIDsToRemove: number[])
+export const updateStylist = async (id: number, name: string, shopIdsToAdd: number[], shopIdsToRemove: number[])
 : Promise<Stylist> => {
   let removeQuery
-  if (shopIDsToRemove.length > 0) {
+  if (shopIdsToRemove.length > 0) {
     removeQuery = `
       DELETE
       FROM "ShopStylists"
       WHERE stylist_id = ${id}
-      AND shop_id IN (${shopIDsToRemove.toString()});`
+      AND shop_id IN (${shopIdsToRemove.toString()});`
   }
 
   let shopAddQuery
-  if (shopIDsToAdd.length > 0) {
+  if (shopIdsToAdd.length > 0) {
     shopAddQuery = {
-      create: shopIDsToAdd.map(id => ({
+      create: shopIdsToAdd.map(id => ({
         shop: {
           connect: { id },
         },
@@ -117,29 +117,29 @@ export const deleteStylist = async (id: number): Promise<Stylist> => {
   return cleanStylist
 }
 
-export const fetchStylistsByShopIDs = async (shopIDs: number[])
-: Promise<{ id: number, name: string, shopID:number }[]> => {
+export const fetchStylistsByShopIds = async (shopIds: number[])
+: Promise<{ id: number, name: string, shopId:number }[]> => {
   const query = `
     SELECT st.id, st.name, sp.id as shop_id
     FROM "Stylist" AS st 
     LEFT JOIN "ShopStylists" AS ss ON st.id = ss.stylist_id
     LEFT JOIN "Shop" as sp on sp.id = ss.shop_id
-    WHERE sp.id in (${shopIDs})
+    WHERE sp.id in (${shopIds})
     `
   const data = await prisma.$queryRaw(query)
 
   // convert snakecase to camelcase
   data.forEach((datum: any) => {
-    datum.shopID = datum.shop_id
+    datum.shopId = datum.shop_id
     delete datum.shop_id
   })
   return data
 }
 
-export const fetchStylistsCountByShopIDs = async (shopIDs: number[])
+export const fetchStylistsCountByShopIds = async (shopIds: number[])
 : Promise<{ id: number, count: number }[]> => {
-  const stylists = await fetchStylistsByShopIDs(shopIDs)
-  const finalData = shopIDs.map(id => ({ id, count: stylists.filter(stylist => id === stylist.shopID).length }))
+  const stylists = await fetchStylistsByShopIds(shopIds)
+  const finalData = shopIds.map(id => ({ id, count: stylists.filter(stylist => id === stylist.shopId).length }))
   return finalData
 }
 
@@ -150,8 +150,8 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
   insertStylist,
   updateStylist,
   deleteStylist,
-  fetchStylistsByShopIDs,
-  fetchStylistsCountByShopIDs,
+  fetchStylistsByShopIds,
+  fetchStylistsCountByShopIds,
 }
 
 export default StylistRepository

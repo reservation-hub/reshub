@@ -67,22 +67,22 @@ export const fetch = async (id: number): Promise<Shop | null> => {
 
 export const insertShop = async (
   name: string,
-  areaID: number,
-  prefectureID: number,
-  cityID: number,
+  areaId: number,
+  prefectureId: number,
+  cityId: number,
   address: string,
   phoneNumber: string,
 ): Promise<Shop> => {
   const shop = await prisma.shop.create({
     data: {
       area: {
-        connect: { id: areaID },
+        connect: { id: areaId },
       },
       prefecture: {
-        connect: { id: prefectureID },
+        connect: { id: prefectureId },
       },
       city: {
-        connect: { id: cityID },
+        connect: { id: cityId },
       },
       shopDetail: {
         create: {
@@ -103,18 +103,18 @@ export const insertShop = async (
 export const updateShop = async (
   id: number,
   name: string,
-  areaID: number,
-  prefectureID: number,
-  cityID: number,
+  areaId: number,
+  prefectureId: number,
+  cityId: number,
   address: string,
   phoneNumber: string,
 ): Promise<Shop> => {
   const shop = await prisma.shop.update({
     where: { id },
     data: {
-      area: { connect: { id: areaID } },
-      prefecture: { connect: { id: prefectureID } },
-      city: { connect: { id: cityID } },
+      area: { connect: { id: areaId } },
+      prefecture: { connect: { id: prefectureId } },
+      city: { connect: { id: cityId } },
       shopDetail: {
         update: { name, address, phoneNumber },
       },
@@ -138,12 +138,12 @@ export const deleteShop = async (id: number): Promise<Shop> => {
   return cleanShop
 }
 
-export const fetchValidShopIDs = async (shopIDs: number[]): Promise<number[]> => {
-  const validShopIDs = await prisma.shop.findMany({
-    where: { id: { in: shopIDs } },
+export const fetchValidShopIds = async (shopIds: number[]): Promise<number[]> => {
+  const validShopIds = await prisma.shop.findMany({
+    where: { id: { in: shopIds } },
     select: { id: true },
   })
-  return validShopIDs.map(obj => obj.id)
+  return validShopIds.map(obj => obj.id)
 }
 
 export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket & StylistServiceSocket = {
@@ -153,5 +153,5 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
   insertShop,
   updateShop,
   deleteShop,
-  fetchValidShopIDs,
+  fetchValidShopIds,
 }

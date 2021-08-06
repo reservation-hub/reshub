@@ -5,7 +5,7 @@ const Joi = joi.extend(date)
 
 export const reservationUpsertSchema = Joi.object({
   reservationDate: Joi.date().format('YYYY-MM-DD').utc().required(),
-  shopID: Joi.number().required(),
-  stylistID: Joi.number().required(),
-  userID: Joi.number().required(),
+  shopId: Joi.number().required(),
+  stylistId: Joi.number().required(),
+  userId: Joi.number().required(),
 })

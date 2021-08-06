@@ -10,7 +10,7 @@ import googleSchema from './schemas/google'
 
 export type AuthServiceInterface = {
   createToken(user: Express.User): string,
-  verifyIfUserInTokenIsLoggedIn(authToken: any): Promise<void>,
+  verifyIfUserInTokenIsLoggedIn(authToken: any, headerToken?: string): Promise<void>,
   googleAuthenticate(token: string): Promise<User>,
   hack(): Promise<User>
 }
@@ -41,22 +41,17 @@ export const verifyIfNotLoggedInYet = asyncHandler(async (req, res, next) => {
   const { signedCookies } = req
 
   if (!signedCookies || !signedCookies.authToken) return next()
-
-  await AuthService.verifyIfUserInTokenIsLoggedIn(signedCookies.authToken)
+  let headerToken
+  if (req.get('authorization')) {
+    headerToken = req.get('authorization')?.split(' ')[1]
+  }
+  await AuthService.verifyIfUserInTokenIsLoggedIn(signedCookies.authToken, headerToken)
   return next()
 })
 
 export const googleAuthenticate = asyncHandler(async (req, res, next) => {
-  const {
-    error: schemaError,
-    value: schemaValues,
-  } = googleSchema.validate(req.body, joiOptions)
-
-  if (schemaError) {
-    return { error: schemaError }
-  }
-
-  const user = await AuthService.googleAuthenticate(schemaValues.tokenID)
+  const schemaValues = await googleSchema.validateAsync(req.body, joiOptions)
+  const user = await AuthService.googleAuthenticate(schemaValues.tokenId)
 
   req.user = user
   return next()

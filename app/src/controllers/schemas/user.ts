@@ -7,7 +7,7 @@ export const userInsertSchema = joi.object({
   password: joi.string().trim().alphanum().required(),
   confirm: joi.string().trim().alphanum().required(),
   email: joi.string().email().trim().required(),
-  roleIDs: joi.array().items(joi.number()).min(1).required(),
+  roleIds: joi.array().items(joi.number()).min(1).required(),
   firstNameKanji: joi.string().trim().required(),
   lastNameKanji: joi.string().trim().required(),
   firstNameKana: joi.string().trim().required(),
@@ -18,7 +18,7 @@ export const userInsertSchema = joi.object({
 
 export const userUpdateSchema = joi.object({
   email: joi.string().email().trim().required(),
-  roleIDs: joi.array().items(joi.number()).min(1).required(),
+  roleIds: joi.array().items(joi.number()).min(1).required(),
   firstNameKanji: joi.string().trim().required(),
   lastNameKanji: joi.string().trim().required(),
   firstNameKana: joi.string().trim().required(),
@@ -27,8 +27,8 @@ export const userUpdateSchema = joi.object({
   birthday: joi.date().format('YYYY-MM-DD').required(),
 })
 
-export const userOAuthIDUpsertSchema = joi.object({
-  googleID: joi.string().trim().allow('', null),
-  lineID: joi.string().trim().allow('', null),
-  twitterID: joi.string().trim().allow('', null),
+export const userOAuthIdUpsertSchema = joi.object({
+  googleId: joi.string().trim().allow('', null),
+  lineId: joi.string().trim().allow('', null),
+  twitterId: joi.string().trim().allow('', null),
 })

@@ -13,7 +13,12 @@ import {
 
 export type UserRepositoryInterface = {
   fetchByEmail(email: string): Promise<User | null>,
-  addOAuthID(id: number, provider: string, authID: string): Promise<boolean | null>,
+  addOAuthId(id: number, provider: string, authId: string): Promise<boolean | null>,
+}
+
+export type localAuthenticationQuery = {
+  email: string,
+  password: string,
 }
 
 interface JwtPayload {
@@ -26,7 +31,10 @@ export const createToken = (user: Express.User): string => jwt.sign({ user }, co
   issuer: process.env.RESHUB_URL,
 })
 
-export const verifyIfUserInTokenIsLoggedIn = async (authToken: any): Promise<void> => {
+export const verifyIfUserInTokenIsLoggedIn = async (authToken: any, headerToken?: string): Promise<void> => {
+  if (headerToken && headerToken !== authToken) {
+    throw new InvalidParamsError()
+  }
   const token = jwt.verify(authToken, config.JWT_TOKEN_SECRET) as JwtPayload
   const user = await UserRepository.fetch(token.user.id)
   if (!user) {
@@ -35,10 +43,10 @@ export const verifyIfUserInTokenIsLoggedIn = async (authToken: any): Promise<voi
   throw new UserIsLoggedInError()
 }
 
-export const googleAuthenticate = async (tokenID: string): Promise<User> => {
+export const googleAuthenticate = async (tokenId: string): Promise<User> => {
   const client = new GoogleAuthClient(config.GOOGLE_CLIENT_ID)
   const ticket = await client.verifyIdToken({
-    idToken: tokenID,
+    idToken: tokenId,
     audience: config.GOOGLE_CLIENT_ID,
   })
 
@@ -54,24 +62,24 @@ export const googleAuthenticate = async (tokenID: string): Promise<User> => {
 
   delete user.password
 
-  if (!user.oAuthIDs || !user.oAuthIDs.googleID) {
-    await UserRepository.addOAuthID(user.id, 'google', sub)
+  if (!user.oAuthIds || !user.oAuthIds.googleId) {
+    await UserRepository.addOAuthId(user.id, 'google', sub)
   }
 
   return user
 }
 
-export const authenticateByEmailAndPassword = async (email: string, password: string)
+export const authenticateByEmailAndPassword = async (query: localAuthenticationQuery)
 : Promise<User> => {
-  if (!email || !password) {
+  if (!query.email || !query.password) {
     throw new InvalidParamsError()
   }
 
-  const user = await UserRepository.fetchByEmail(email)
+  const user = await UserRepository.fetchByEmail(query.email)
   if (!user) {
     throw new NotFoundError()
   }
-  if (user.password && !bcrypt.compareSync(password, user.password)) {
+  if (user.password && !bcrypt.compareSync(query.password, user.password)) {
     throw new InvalidParamsError()
   }
 

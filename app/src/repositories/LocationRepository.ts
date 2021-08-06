@@ -4,15 +4,15 @@ import { CommonRepositoryInterface } from './CommonRepository'
 import { Area, Prefecture, City } from '../entities/Location'
 import { LocationRepositoryInterface } from '../services/ShopService'
 
-export const isValidLocation = async (areaID: number, prefectureID: number, cityID: number):
+export const isValidLocation = async (areaId: number, prefectureId: number, cityId: number):
 Promise<boolean> => {
   const count: number = await prisma.city.count({
     where: {
       prefecture: {
-        id: prefectureID,
-        area: { id: areaID },
+        id: prefectureId,
+        area: { id: areaId },
       },
-      id: cityID,
+      id: cityId,
     },
   })
   return count !== 0

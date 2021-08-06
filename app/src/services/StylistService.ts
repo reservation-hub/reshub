@@ -7,18 +7,18 @@ import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
 export type upsertStylistQuery = {
   name: string,
-  shopIDs: number[],
+  shopIds: number[],
 }
 
 export type StylistRepositoryInterface = {
-  insertStylist(name: string, shopIDs: number[]): Promise<Stylist>,
-  updateStylist(id: number, name: string, shopIDsToAdd: number[], shopIDsToRemove: number[])
+  insertStylist(name: string, shopIds: number[]): Promise<Stylist>,
+  updateStylist(id: number, name: string, shopIdsToAdd: number[], shopIdsToRemove: number[])
   :Promise<Stylist>,
   deleteStylist(id: number): Promise<Stylist>,
 }
 
 export type ShopRepositoryInterface = {
-  fetchValidShopIDs(shopIDs: number[]): Promise<number[]>
+  fetchValidShopIds(shopIds: number[]): Promise<number[]>
 }
 
 export const fetchStylistsWithTotalCount = async (query: fetchModelsWithTotalCountQuery)
@@ -37,17 +37,17 @@ export const fetchStylist = async (id: number): Promise<Stylist> => {
 }
 
 export const insertStylist = async (query: upsertStylistQuery): Promise<Stylist> => {
-  const validShopIDs = await ShopRepository.fetchValidShopIDs(query.shopIDs)
-  if (validShopIDs.length === 0) {
+  const validShopIds = await ShopRepository.fetchValidShopIds(query.shopIds)
+  if (validShopIds.length === 0) {
     throw new InvalidParamsError()
   }
 
-  return StylistRepository.insertStylist(query.name, validShopIDs)
+  return StylistRepository.insertStylist(query.name, validShopIds)
 }
 
 export const updateStylist = async (id:number, query: upsertStylistQuery): Promise<Stylist> => {
-  const validShopIDs = await ShopRepository.fetchValidShopIDs(query.shopIDs)
-  if (validShopIDs.length === 0) {
+  const validShopIds = await ShopRepository.fetchValidShopIds(query.shopIds)
+  if (validShopIds.length === 0) {
     throw new InvalidParamsError()
   }
 
@@ -56,15 +56,15 @@ export const updateStylist = async (id:number, query: upsertStylistQuery): Promi
     throw new NotFoundError()
   }
 
-  const stylistShopIDs = stylist.shops.map(shop => shop.id)
-  const shopIDsToAdd = validShopIDs.filter(
-    validShopID => stylistShopIDs.indexOf(validShopID) === -1,
+  const stylistShopIds = stylist.shops.map(shop => shop.id)
+  const shopIdsToAdd = validShopIds.filter(
+    validShopId => stylistShopIds.indexOf(validShopId) === -1,
   )
-  const shopIDsToRemove = stylistShopIDs.filter(
-    ssid => validShopIDs.indexOf(ssid) === -1,
+  const shopIdsToRemove = stylistShopIds.filter(
+    ssid => validShopIds.indexOf(ssid) === -1,
   )
 
-  return StylistRepository.updateStylist(id, query.name, shopIDsToAdd, shopIDsToRemove)
+  return StylistRepository.updateStylist(id, query.name, shopIdsToAdd, shopIdsToRemove)
 }
 
 export const deleteStylist = async (id:number): Promise<Stylist> => {

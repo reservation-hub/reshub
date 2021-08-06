@@ -1,5 +1,5 @@
 export type OAuthIds = {
     id: number,
-    googleID: string | null,
-    facebookID: string | null,
+    googleId: string | null,
+    facebookId: string | null,
 }

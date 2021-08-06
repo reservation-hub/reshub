@@ -12,9 +12,9 @@ export type ShopServiceInterface = {
   insertShop(query: insertShopQuery): Promise<Shop>,
   updateShop(id: number, query: updateShopQuery): Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
-  fetchStylistsCountByShopIDs(shopIDs: number[])
+  fetchStylistsCountByShopIds(shopIds: number[])
     : Promise<{ id: number, count: number }[]>,
-  fetchReservationsCountByShopIDs(shopIDs: number[])
+  fetchReservationsCountByShopIds(shopIds: number[])
     : Promise<{ id: number, count: number }[]>,
 }
 
@@ -25,10 +25,10 @@ export const index = asyncHandler(async (req, res) => {
   const shopsWithCount = await ShopService.fetchShopsWithTotalCount(schemaValues)
   const { data: shops, totalCount } = shopsWithCount
 
-  const shopIDs = shops.map(shop => shop.id)
+  const shopIds = shops.map(shop => shop.id)
 
-  const totalReservationsCount = await ShopService.fetchReservationsCountByShopIDs(shopIDs)
-  const totalStylistsCount = await ShopService.fetchStylistsCountByShopIDs(shopIDs)
+  const totalReservationsCount = await ShopService.fetchReservationsCountByShopIds(shopIds)
+  const totalStylistsCount = await ShopService.fetchStylistsCountByShopIds(shopIds)
 
   // merge data
   const data = shops.map(shop => ({
