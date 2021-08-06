@@ -17,13 +17,13 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 export const index = asyncHandler(async (req, res) => {
   const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
   const reservationsWithcount = await ReservationService.fetchReservationsWithTotalCount(schemaValues)
-  return res.send({ data: reservationsWithcount })
+  return res.send(reservationsWithcount)
 })
 
 export const showReservation = asyncHandler(async (req, res) => {
   const { id } = res.locals
   const reservation = await ReservationService.fetchReservation(id)
-  return res.send({ data: reservation })
+  return res.send(reservation)
 })
 
 // const insertReservation = asyncHandler(async (req, res, next) => {

@@ -43,14 +43,14 @@ export const index = asyncHandler(async (req, res) => {
 export const showShop = asyncHandler(async (req, res) => {
   const { id } = res.locals
   const shop = await ShopService.fetchShop(id)
-  return res.send({ data: shop })
+  return res.send(shop)
 })
 
 export const insertShop = asyncHandler(async (req, res) => {
   const shopInsertValues = await shopUpsertSchema.validateAsync(req.body, joiOptions)
 
   const shop = await ShopService.insertShop(shopInsertValues)
-  return res.send({ data: shop })
+  return res.send(shop)
 })
 
 export const updateShop = asyncHandler(async (req, res) => {
@@ -59,11 +59,11 @@ export const updateShop = asyncHandler(async (req, res) => {
 
   const shop = await ShopService.updateShop(id, shopUpdateValues)
 
-  return res.send({ data: shop })
+  return res.send(shop)
 })
 
 export const deleteShop = asyncHandler(async (req, res) => {
   const { id } = res.locals
   await ShopService.deleteShop(id)
-  return res.send({ data: { message: 'Shop deleted' } })
+  return res.send({ message: 'Shop deleted' })
 })

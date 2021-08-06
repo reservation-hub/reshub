@@ -27,24 +27,24 @@ export const index = asyncHandler(async (req, res) => {
 export const showStylist = asyncHandler(async (req, res) => {
   const { id } = res.locals
   const stylist = await StylistService.fetchStylist(id)
-  return res.send({ data: stylist })
+  return res.send(stylist)
 })
 
 export const insertStylist = asyncHandler(async (req, res) => {
   const schemaValues = await stylistUpsertSchema.validateAsync(req.body, joiOptions)
   const stylist = await StylistService.insertStylist(schemaValues)
-  return res.send({ data: stylist })
+  return res.send(stylist)
 })
 
 export const updateStylist = asyncHandler(async (req, res) => {
   const schemaValues = await stylistUpsertSchema.validateAsync(req.body, joiOptions)
   const { id } = res.locals
   const stylist = await StylistService.updateStylist(id, schemaValues)
-  return res.send({ data: stylist })
+  return res.send(stylist)
 })
 
 export const deleteStylist = asyncHandler(async (req, res) => {
   const { id } = res.locals
   await StylistService.deleteStylist(id)
-  return res.send({ data: { message: 'Stylist deleted' } })
+  return res.send({ message: 'Stylist deleted' })
 })
