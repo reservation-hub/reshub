@@ -42,7 +42,7 @@ export const index = asyncHandler(async (req, res) => {
 export const showUser = asyncHandler(async (req, res) => {
   const { id } = res.locals
   const user = await UserService.fetchUser(id)
-  return res.send({ data: user })
+  return res.send(user)
 })
 
 export const insertUser = asyncHandler(async (req, res) => {
@@ -53,7 +53,7 @@ export const insertUser = asyncHandler(async (req, res) => {
     user.gender = convertDBGenderToEntityGender(user.gender)
   }
 
-  return res.send({ data: user })
+  return res.send(user)
 })
 
 export const updateUser = asyncHandler(async (req, res) => {
@@ -67,11 +67,11 @@ export const updateUser = asyncHandler(async (req, res) => {
     user.gender = convertDBGenderToEntityGender(user.gender)
   }
 
-  return res.send({ data: user })
+  return res.send(user)
 })
 
 export const deleteUser = asyncHandler(async (req, res) => {
   const { id } = res.locals
   await UserService.deleteUserFromAdmin(id)
-  return res.send({ data: { message: 'User deleted' } })
+  return res.send({ message: 'User deleted' })
 })

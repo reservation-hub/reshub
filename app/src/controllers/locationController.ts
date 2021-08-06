@@ -13,17 +13,17 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 export const areaIndex = asyncHandler(async (req, res) => {
   const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
   const value = await LocationService.fetchAreasWithCount(schemaValues)
-  return res.send({ data: value })
+  return res.send(value)
 })
 
 export const prefectureIndex = asyncHandler(async (req, res) => {
   const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
   const value = await LocationService.fetchPrefecturesWithCount(schemaValues)
-  return res.send({ data: value })
+  return res.send(value)
 })
 
 export const cityIndex = asyncHandler(async (req, res) => {
   const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
   const value = await LocationService.fetchCitiesWithCount(schemaValues)
-  return res.send({ data: value })
+  return res.send(value)
 })

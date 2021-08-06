@@ -24,13 +24,13 @@ export const index = asyncHandler(async (req, res) => {
 export const showRole = asyncHandler(async (req, res) => {
   const { id } = res.locals
   const role = await RoleService.fetchRole(id)
-  return res.send({ data: role })
+  return res.send(role)
 })
 
 export const insertRole = asyncHandler(async (req, res) => {
   const roleValues = await roleUpsertSchema.validateAsync(req.body, joiOptions)
   const role = await RoleService.insertRole(roleValues)
-  return res.send({ data: role })
+  return res.send(role)
 })
 
 export const updateRole = asyncHandler(async (req, res) => {
@@ -39,11 +39,11 @@ export const updateRole = asyncHandler(async (req, res) => {
   const { id } = res.locals
 
   const role = await RoleService.updateRole(id, roleValues)
-  return res.send({ data: role })
+  return res.send(role)
 })
 
 export const deleteRole = asyncHandler(async (req, res) => {
   const { id } = res.locals
   await RoleService.deleteRole(id)
-  return res.send({ data: { message: 'Role deleted' } })
+  return res.send({ message: 'Role deleted' })
 })
