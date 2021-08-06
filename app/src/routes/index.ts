@@ -16,7 +16,6 @@ import * as reservationController from '../controllers/reservationController'
 
 import pt from './passport'
 
-// const apiRoutes:Router[] = []
 const router = Router()
 export default router
 
