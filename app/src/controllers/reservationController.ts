@@ -41,8 +41,8 @@ export const showReservation = asyncHandler(async (req, res) => {
 //     error: insertReservationError,
 //     value: reservation,
 //   } = await ReservationRepository.insertReservation(
-//     reservationValues.reservationDate, reservationValues.shopID,
-//     reservationValues.stylistID, reservationValues.userID,
+//     reservationValues.reservationDate, reservationValues.shopId,
+//     reservationValues.stylistId, reservationValues.userId,
 //   )
 
 //   if (insertReservationError) {

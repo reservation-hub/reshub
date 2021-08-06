@@ -18,5 +18,5 @@ export type User = {
   firstNameKana?: string | null,
   birthday?: Date | null,
   gender?: Gender | null,
-  oAuthIDs?: OAuthIds | null,
+  oAuthIds?: OAuthIds | null,
 }

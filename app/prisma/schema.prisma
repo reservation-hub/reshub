@@ -16,7 +16,7 @@ model User {
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
   reservations Reservation[]
-  oAuthIDs     UserOAuthIds?
+  oAuthIds     UserOAuthIds?
   profile      UserProfile?
   roles        UserRoles[]
 }
@@ -29,18 +29,18 @@ model UserProfile {
   lastNameKana   String    @map("last_name_kana") @db.VarChar(255)
   phoneNumber    String?   @map("phone_number") @db.VarChar(15)
   address        String?   @db.VarChar(255)
-  userID         Int       @unique @map("user_id")
+  userId         Int       @unique @map("user_id")
   gender         String?   @db.Char(1)
   birthday       DateTime? @db.Date
-  user           User      @relation(fields: [userID], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserOAuthIds {
   id         Int     @id @default(autoincrement())
-  facebookID String? @unique @map("facebook_id")
-  googleID   String? @unique @map("google_id")
-  userID     Int     @unique @map("user_id")
-  user       User    @relation(fields: [userID], references: [id], onDelete: Cascade)
+  facebookId String? @unique @map("facebook_id")
+  googleId   String? @unique @map("google_id")
+  userId     Int     @unique @map("user_id")
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Role {
@@ -53,10 +53,10 @@ model Role {
 
 model UserRoles {
   id     Int  @id @default(autoincrement())
-  roleID Int  @map("role_id")
-  userID Int  @map("user_id")
-  role   Role @relation(fields: [roleID], references: [id], onDelete: Cascade)
-  user   User @relation(fields: [userID], references: [id], onDelete: Cascade)
+  roleId Int  @map("role_id")
+  userId Int  @map("user_id")
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Area {
@@ -71,8 +71,8 @@ model Prefecture {
   id     Int    @id @default(autoincrement())
   name   String @db.VarChar(32)
   slug   String @unique @db.VarChar(32)
-  areaID Int    @map("area_id")
-  area   Area   @relation(fields: [areaID], references: [id])
+  areaId Int    @map("area_id")
+  area   Area   @relation(fields: [areaId], references: [id])
   cities City[]
   shops  Shop[]
 }
@@ -80,22 +80,22 @@ model Prefecture {
 model City {
   id           Int        @id @default(autoincrement())
   name         String     @db.VarChar(32)
-  prefectureID Int        @map("prefecture_id")
+  prefectureId Int        @map("prefecture_id")
   slug         String     @unique
-  prefecture   Prefecture @relation(fields: [prefectureID], references: [id])
+  prefecture   Prefecture @relation(fields: [prefectureId], references: [id])
   shops        Shop[]
 }
 
 model Shop {
   id           Int            @id @default(autoincrement())
-  areaID       Int            @map("area_id")
-  cityID       Int            @map("city_id")
+  areaId       Int            @map("area_id")
+  cityId       Int            @map("city_id")
   createdAt    DateTime       @default(now()) @map("created_at")
-  prefectureID Int            @map("prefecture_id")
+  prefectureId Int            @map("prefecture_id")
   updatedAt    DateTime       @updatedAt @map("updated_at")
-  area         Area           @relation(fields: [areaID], references: [id])
-  city         City           @relation(fields: [cityID], references: [id])
-  prefecture   Prefecture     @relation(fields: [prefectureID], references: [id])
+  area         Area           @relation(fields: [areaId], references: [id])
+  city         City           @relation(fields: [cityId], references: [id])
+  prefecture   Prefecture     @relation(fields: [prefectureId], references: [id])
   menu         Menu?
   reservations Reservation[]
   shopDetail   ShopDetail?
@@ -104,8 +104,8 @@ model Shop {
 
 model Menu {
   id     Int       @id @default(autoincrement())
-  shopID Int       @unique @map("shop_id")
-  shop   Shop      @relation(fields: [shopID], references: [id])
+  shopId Int       @unique @map("shop_id")
+  shop   Shop      @relation(fields: [shopId], references: [id])
   items  MenuItem?
 }
 
@@ -114,10 +114,10 @@ model MenuItem {
   name        String      @db.VarChar(255)
   description String      @db.VarChar(255)
   price       Int
-  imageID     Int?        @unique @map("image_id")
-  menuID      Int         @unique @map("menu_id")
-  image       ModelImage? @relation(fields: [imageID], references: [id])
-  menu        Menu        @relation(fields: [menuID], references: [id])
+  imageId     Int?        @unique @map("image_id")
+  menuId      Int         @unique @map("menu_id")
+  image       ModelImage? @relation(fields: [imageId], references: [id])
+  menu        Menu        @relation(fields: [menuId], references: [id])
 }
 
 model ShopDetail {
@@ -125,19 +125,19 @@ model ShopDetail {
   name        String       @db.VarChar(255)
   address     String?      @db.VarChar(255)
   phoneNumber String?      @map("phone_number") @db.VarChar(255)
-  shopID      Int          @unique @map("shop_id")
-  shop        Shop         @relation(fields: [shopID], references: [id], onDelete: Cascade)
+  shopId      Int          @unique @map("shop_id")
+  shop        Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
   images      ModelImage[]
 }
 
 model ModelImage {
   id           Int         @id @default(autoincrement())
   imageId      Int         @unique @map("image_id")
-  shopDetailID Int?        @map("shop_detail_id")
-  stylistID    Int?        @unique
+  shopDetailId Int?        @map("shop_detail_id")
+  stylistId    Int?        @unique
   image        Image       @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  shopDetail   ShopDetail? @relation(fields: [shopDetailID], references: [id], onDelete: Cascade)
-  stylist      Stylist?    @relation(fields: [stylistID], references: [id], onDelete: Cascade)
+  shopDetail   ShopDetail? @relation(fields: [shopDetailId], references: [id], onDelete: Cascade)
+  stylist      Stylist?    @relation(fields: [stylistId], references: [id], onDelete: Cascade)
   menuItem     MenuItem?
 }
 
@@ -158,21 +158,21 @@ model Stylist {
 
 model ShopStylists {
   id        Int     @id @default(autoincrement())
-  shopID    Int     @map("shop_id")
-  stylistID Int     @map("stylist_id")
-  shop      Shop    @relation(fields: [shopID], references: [id])
-  stylist   Stylist @relation(fields: [stylistID], references: [id])
+  shopId    Int     @map("shop_id")
+  stylistId Int     @map("stylist_id")
+  shop      Shop    @relation(fields: [shopId], references: [id])
+  stylist   Stylist @relation(fields: [stylistId], references: [id])
 }
 
 model Reservation {
   id              Int      @id @default(autoincrement())
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
-  shopID          Int      @map("shop_id")
-  stylistID       Int      @map("stylist_id")
+  shopId          Int      @map("shop_id")
+  stylistId       Int      @map("stylist_id")
   userId          Int      @map("user_id")
   reservationDate DateTime @map("reservation_date") @db.Timestamp(6)
-  shop            Shop     @relation(fields: [shopID], references: [id], onDelete: Cascade)
-  stylist         Stylist  @relation(fields: [stylistID], references: [id])
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  stylist         Stylist  @relation(fields: [stylistId], references: [id])
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

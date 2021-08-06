@@ -10,9 +10,9 @@ export type ReservationRepositoryInterface = {
 
 export type upsertReservationQuery = {
   reservationDate: Date,
-  shopID: number,
-  stylistID: number,
-  userID: number,
+  shopId: number,
+  stylistId: number,
+  userId: number,
 }
 
 export const fetchReservationsWithTotalCount = async (query: fetchModelsWithTotalCountQuery)

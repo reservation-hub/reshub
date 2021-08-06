@@ -74,10 +74,10 @@ export const fetch = async (id: number): Promise<Reservation | null> => {
   return reservation ? reconstructReservation(reservation) : null
 }
 
-export const fetchReservationsByShopIDs = async (shopIDs: number[])
+export const fetchReservationsByShopIds = async (shopIds: number[])
 : Promise<{ id: number, data: Reservation[] }[]> => {
   const reservations = await prisma.reservation.findMany({
-    where: { shopID: { in: shopIDs } },
+    where: { shopId: { in: shopIds } },
     include: {
       user: { include: { profile: true, roles: { include: { role: true } } } },
       shop: { include: { shopDetail: true } },
@@ -85,18 +85,18 @@ export const fetchReservationsByShopIDs = async (shopIDs: number[])
     },
   })
 
-  const finalData = shopIDs.map(id => ({
+  const finalData = shopIds.map(id => ({
     id,
-    data: reservations.filter(reservation => reservation.shopID === id)
+    data: reservations.filter(reservation => reservation.shopId === id)
       .map(reservation => reconstructReservation(reservation)),
   }))
 
   return finalData
 }
 
-export const fetchReservationsCountByShopIDs = async (shopIDs: number[])
+export const fetchReservationsCountByShopIds = async (shopIds: number[])
 : Promise<{ id: number, count: number }[]> => {
-  const value = await fetchReservationsByShopIDs(shopIDs)
+  const value = await fetchReservationsByShopIds(shopIds)
   const finalData = value.map(item => ({ id: item.id, count: item.data.length }))
   return finalData
 }
@@ -105,26 +105,26 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
   fetchAll,
   totalCount,
   fetch,
-  fetchReservationsByShopIDs,
-  fetchReservationsCountByShopIDs,
+  fetchReservationsByShopIds,
+  fetchReservationsCountByShopIds,
 }
 
 export default ReservationRepository
 
-// async insertReservation(reservationDate, shopID, stylistID, userID) {
+// async insertReservation(reservationDate, shopId, stylistId, userId) {
 //   try {
 //     return {
 //       value: await prisma.reservation.create({
 //         data: {
 //           reservationDate,
 //           shop: {
-//             connect: { id: shopID },
+//             connect: { id: shopId },
 //           },
 //           stylist: {
-//             connect: { id: stylistID },
+//             connect: { id: stylistId },
 //           },
 //           user: {
-//             connect: { id: userID },
+//             connect: { id: userId },
 //           },
 //         },
 //       }),

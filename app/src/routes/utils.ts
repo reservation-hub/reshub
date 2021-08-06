@@ -16,7 +16,7 @@ const idSchema = Joi.object({
   id: Joi.string().pattern(/^[0-9]+$/),
 })
 
-export const parseIntIDMiddleware = (req: Request, res: Response, next: NextFunction): void => {
+export const parseIntIdMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   const { error, value } = idSchema.validate(req.params)
   if (error) {
     return next({ code: 400, message: 'Invalid param value' })

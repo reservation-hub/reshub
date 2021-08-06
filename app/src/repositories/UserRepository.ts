@@ -6,28 +6,28 @@ import { Role } from '../entities/Role'
 import { UserRepositoryInterface as UserServiceSocket } from '../services/UserService'
 import { UserRepositoryInterface as AuthServiceSocket } from '../services/AuthService'
 
-const userWithProfileAndOAuthIDsAndRoles = Prisma.validator<Prisma.UserArgs>()(
-  { include: { profile: true, oAuthIDs: true, roles: { include: { role: true } } } },
+const userWithProfileAndOAuthIdsAndRoles = Prisma.validator<Prisma.UserArgs>()(
+  { include: { profile: true, oAuthIds: true, roles: { include: { role: true } } } },
 )
 
-type userWithProfileAndOAuthIDsAndRoles = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIDsAndRoles>
+type userWithProfileAndOAuthIdsAndRoles = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIdsAndRoles>
 
 type userRoles = {
   id: number,
-  userID: number,
-  roleID: number,
+  userId: number,
+  roleId: number,
   role: Role
 }
 
-export const reconstructUser = (user: userWithProfileAndOAuthIDsAndRoles): User => ({
+export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
   id: user.id,
   email: user.email,
   username: user.username ?? null,
   password: user.password,
-  oAuthIDs: user.oAuthIDs ? {
-    id: user.oAuthIDs.id,
-    googleID: user.oAuthIDs.googleID,
-    facebookID: user.oAuthIDs.facebookID,
+  oAuthIds: user.oAuthIds ? {
+    id: user.oAuthIds.id,
+    googleId: user.oAuthIds.googleId,
+    facebookId: user.oAuthIds.facebookId,
   } : null,
   firstNameKanji: user.profile?.firstNameKanji ?? null,
   lastNameKanji: user.profile?.lastNameKanji ?? null,
@@ -56,7 +56,7 @@ export const fetchAll = async (page = 0, order:any = 'asc'): Promise<User[]> => 
     take: limit,
     include: {
       profile: true,
-      oAuthIDs: true,
+      oAuthIds: true,
       roles: {
         include: { role: true },
       },
@@ -74,7 +74,7 @@ export const fetch = async (id: number): Promise<User | null> => {
     where: { id },
     include: {
       profile: true,
-      oAuthIDs: true,
+      oAuthIds: true,
       roles: {
         include: { role: true },
       },
@@ -86,7 +86,7 @@ export const fetch = async (id: number): Promise<User | null> => {
 export const insertUserWithProfile = async (
   email: string,
   password: string,
-  roleIDs: number[],
+  roleIds: number[],
   lastNameKanji: string,
   firstNameKanji: string,
   lastNameKana: string,
@@ -99,7 +99,7 @@ export const insertUserWithProfile = async (
       email,
       password,
       roles: {
-        create: roleIDs.map(id => ({
+        create: roleIds.map(id => ({
           role: {
             connect: { id },
           },
@@ -118,7 +118,7 @@ export const insertUserWithProfile = async (
     },
     include: {
       profile: true,
-      oAuthIDs: true,
+      oAuthIds: true,
       roles: { include: { role: true } },
     },
   })
@@ -173,7 +173,7 @@ export const updateUserFromAdmin = async (
       password,
     },
     include: {
-      oAuthIDs: true,
+      oAuthIds: true,
       profile: true,
       roles: { include: { role: true } },
     },
@@ -198,7 +198,7 @@ export const deleteUserFromAdmin = async (id: number): Promise<User> => {
   const user = await prisma.user.delete({
     where: { id },
     include: {
-      oAuthIDs: true,
+      oAuthIds: true,
       profile: true,
       roles: { include: { role: true } },
     },
@@ -209,27 +209,31 @@ export const fetchByEmail = async (email: string): Promise<User | null> => {
   const user = await prisma.user.findUnique({
     where: { email },
     include: {
-      oAuthIDs: true,
+      oAuthIds: true,
       profile: true,
       roles: { include: { role: true } },
     },
   })
   return user ? reconstructUser(user) : null
 }
-export const addOAuthID = async (id: number, provider: string, authID: string)
+export const addOAuthId = async (id: number, provider: string, authId: string)
 : Promise<boolean> => {
   const updateQuery = {
     where: { id },
     data: {
-      oAuthIDs: {
-        update: {},
+      oAuthIds: {
+        upsert: {
+          update: {},
+          create: {},
+        },
       },
     },
   }
 
   switch (provider) {
     case 'google':
-      Object.assign(updateQuery.data.oAuthIDs.update, { googleID: authID })
+      Object.assign(updateQuery.data.oAuthIds.upsert.create, { googleId: authId })
+      Object.assign(updateQuery.data.oAuthIds.upsert.update, { googleId: authId })
       break
     default:
   }
@@ -246,7 +250,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
   updateUserFromAdmin,
   deleteUserFromAdmin,
   fetchByEmail,
-  addOAuthID,
+  addOAuthId,
 }
 
 export default UserRepository

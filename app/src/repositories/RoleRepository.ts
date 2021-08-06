@@ -5,11 +5,11 @@ import { RoleRepositoryInterface as RoleServiceSocket } from '../services/RoleSe
 
 import prisma from './prisma'
 
-export const extractValidRoleIDs = async (roleIDs: number[])
+export const extractValidRoleIds = async (roleIds: number[])
   : Promise<number[]> => {
   const validRoles = await prisma.role.findMany({
     where: {
-      id: { in: roleIDs },
+      id: { in: roleIds },
     },
   })
   return validRoles.map(validRole => validRole.id)
@@ -48,7 +48,7 @@ export const updateRole = async (id: number, name: string, description: string, 
 export const deleteRole = async (id: number): Promise<Role> => prisma.role.delete({ where: { id } })
 
 const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket & RoleServiceSocket = {
-  extractValidRoleIDs,
+  extractValidRoleIds,
   fetchAll,
   totalCount,
   fetch,
