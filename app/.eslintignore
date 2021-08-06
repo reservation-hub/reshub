@@ -1,9 +1,6 @@
 node_modules
-areas-db.js
-cities-db.js
-prefec-db.js
-**/API/authStrategies/*
-seed.js
-shopSeeder.js
-test.js
 dist
+*.js
+*/routes.ts
+seedFiles
+@types/*
