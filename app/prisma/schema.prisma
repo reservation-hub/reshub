@@ -12,7 +12,7 @@ model User {
   id           Int           @id @default(autoincrement())
   email        String        @unique @db.VarChar(255)
   username     String?       @db.VarChar(255)
-  password     String?       @db.VarChar(255)
+  password     String        @db.VarChar(255)
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
   reservations Reservation[]
@@ -22,16 +22,17 @@ model User {
 }
 
 model UserProfile {
-  id             Int     @id @default(autoincrement())
-  firstNameKanji String  @map("first_name_kanji") @db.VarChar(255)
-  lastNameKanji  String  @map("last_name_kanji") @db.VarChar(255)
-  firstNameKana  String  @map("first_name_kana") @db.VarChar(255)
-  lastNameKana   String  @map("last_name_kana") @db.VarChar(255)
-  phoneNumber    String? @map("phone_number") @db.VarChar(15)
-  address        String? @db.VarChar(255)
-  userID         Int     @unique @map("user_id")
-  gender         String? @db.Char(1)
-  user           User    @relation(fields: [userID], references: [id], onDelete: Cascade)
+  id             Int       @id @default(autoincrement())
+  firstNameKanji String    @map("first_name_kanji") @db.VarChar(255)
+  lastNameKanji  String    @map("last_name_kanji") @db.VarChar(255)
+  firstNameKana  String    @map("first_name_kana") @db.VarChar(255)
+  lastNameKana   String    @map("last_name_kana") @db.VarChar(255)
+  phoneNumber    String?   @map("phone_number") @db.VarChar(15)
+  address        String?   @db.VarChar(255)
+  userID         Int       @unique @map("user_id")
+  gender         String?   @db.Char(1)
+  birthday       DateTime? @db.Date
+  user           User      @relation(fields: [userID], references: [id], onDelete: Cascade)
 }
 
 model UserOAuthIds {

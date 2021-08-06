@@ -1,4 +1,5 @@
 {
     "watch": ["./"],
-    "ext": "js, json, prisma"
+    "ext": "ts, js, json, prisma",
+    "ignore": "dist/**/*"
 }
