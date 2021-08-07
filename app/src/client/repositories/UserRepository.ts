@@ -1,9 +1,8 @@
 import { Prisma } from '@prisma/client'
-import { User } from "../../entities/User"
-import prisma from "../../repositories/prisma"
+import { User } from '../../entities/User'
+import prisma from '../../repositories/prisma'
 import { Role } from '../../entities/Role'
-import { UserRepositoryInterface } from "../services/SignUpService"
-
+import { UserRepositoryInterface } from '../services/SignUpService'
 
 const userWithProfileAndOAuthIdsAndRoles = Prisma.validator<Prisma.UserArgs>()(
   { include: { profile: true, oAuthIds: true, roles: { include: { role: true } } } },
@@ -19,7 +18,6 @@ type userRoles = {
 }
 
 export const insertUser = async (email: string, username: string, password: string): Promise<User> => {
-  
   const reconstructUser = (create: userWithProfileAndOAuthIdsAndRoles): User => ({
     id: create.id,
     email: create.email,
@@ -34,17 +32,17 @@ export const insertUser = async (email: string, username: string, password: stri
   })
 
   const create = await prisma.user.create({
-    data:{
+    data: {
       email,
       username,
       password,
       roles: {
         create: {
           role: {
-            connect: { slug: "client" }
-          }
-        }
-      }
+            connect: { slug: 'client' },
+          },
+        },
+      },
     },
 
     include: {
@@ -54,11 +52,23 @@ export const insertUser = async (email: string, username: string, password: stri
     },
   })
   const createdUser = reconstructUser(create)
-  return createdUser;
+  return createdUser
 }
 
+const emailIsAvailable = async (email: string): Promise<boolean> => {
+  const emailCount = await prisma.user.count(
+    {
+      where: {
+        email,
+      },
+    },
+  )
+  console.error(emailCount === 0)
+  return emailCount === 0
+}
 const UserRepository: UserRepositoryInterface = {
-  insertUser
+  insertUser,
+  emailIsAvailable,
 }
 
 export default UserRepository

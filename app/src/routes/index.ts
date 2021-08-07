@@ -13,6 +13,7 @@ import * as roleController from '../controllers/roleController'
 import * as shopController from '../controllers/shopController'
 import * as stylistController from '../controllers/stylistController'
 import * as reservationController from '../controllers/reservationController'
+import * as signController from '../client/controllers/signupController'
 
 import pt from './passport'
 
@@ -59,5 +60,8 @@ router.delete('/stylists/:id',
 router.get('/reservations', protectRoute, roleCheck(['admin']), reservationController.index)
 router.get('/reservations/:id',
   protectRoute, roleCheck(['admin']), parseIntIdMiddleware, reservationController.showReservation)
+
+// client api
+router.post('/api/signup', signController.signup)
 
 router.use('/*', (req: Request, res: Response, next: NextFunction) => next({ code: 404, message: 'Bad route' })) // 404s
