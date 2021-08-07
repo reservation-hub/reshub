@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt'
 import { User } from '../../entities/User'
 import { SignUpServiceInterface } from '../controllers/signupController'
 import { InvalidParamsError } from '../../services/Errors/ServiceError'
+import UserRepository from '../repositories/UserRepository'
 
 export type UserRepositoryInterface = {
   insertUser(email: string, username: string, password: string): Promise<User>

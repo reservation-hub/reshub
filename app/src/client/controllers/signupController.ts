@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler'
 
+import { mailController } from './lib/mailController'
 import { signUpSchema } from './schemas/signup'
 import SignUpService, { signUpQuery } from '../services/SignUpService'
 import { User } from '../../entities/User'
