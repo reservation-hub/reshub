@@ -1,8 +1,8 @@
-const nodemailer = require('nodemailer')
-const jwtTokenCreator = require('./jwtTokenCreator')
+import nodemailer from 'nodemailer'
+import { MailServiceInterface } from './SignUpService'
 
-exports.mailController = {
-  mailSender(addr) {
+const MailService: MailServiceInterface = {
+  SendSignupEmail(email: string, token: string) {
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,
@@ -14,19 +14,21 @@ exports.mailController = {
     })
     const info = {
       from: process.env.MAIL_ADDRESS,
-      to: addr,
+      to: email,
       subject: 'elo',
       html: `<h1>Life sucks, dont let your hair suck too.</h1> 
       <br>
       <img src="https://i.pinimg.com/originals/70/9d/7c/709d7c19cb96088d1a59393b134d7a78.gif">
       <br>
       <p>Click on the following link to activate your account</p>
-      <a href = " http://localhost:8080/?tkn=${jwtTokenCreator.create(addr)}" > Your Validation </a>
+      <a href = "${process.env.CLIENT_URL}?tkn=${(token)}" > Your Validation </a>
       `,
     }
     transporter.sendMail(info, (err, data) => {
-      // eslint-disable-next-line no-console
-      console.log(data, err)
+      console.error(err)
+      // todo what to do with the error
     })
   },
 }
+
+export default MailService

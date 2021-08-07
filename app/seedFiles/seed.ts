@@ -46,6 +46,11 @@ const roles = [
     description: 'Administrator role. Can make changes on everything.',
   },
   {
+    name: 'client',
+    slug: 'client',
+    description: 'Client role. Can make profile and reservations.',
+  },
+  {
     name: 'shop staff',
     slug: 'shop_staff',
     description: 'Shop staff user role. Can view shop details connected to the user.',
