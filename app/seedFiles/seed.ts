@@ -214,6 +214,9 @@ const roles = [
               name: 'TEST',
             },
           },
+          menu: {
+            create: {},
+          },
         },
       })
     } catch (e) {

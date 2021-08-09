@@ -38,6 +38,9 @@ import prisma from '../src/repositories/prisma'
               name: 'Test Shop',
             },
           },
+          menu: {
+            create: {},
+          },
         },
       })
     } catch (e) {

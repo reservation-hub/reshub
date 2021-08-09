@@ -4,6 +4,7 @@ import { CommonRepositoryInterface } from './CommonRepository'
 import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
 import { ShopRepositoryInterface as StylistServiceSocket } from '../services/StylistService'
 import { Shop, ShopSchedule } from '../entities/Shop'
+import { MenuItem } from '../entities/Menu'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {
@@ -14,6 +15,16 @@ const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.S
 )
 type shopWithShopDetailsAndAreaAndPrefectureAndCity =
 Prisma.ShopGetPayload<typeof shopWithShopDetailsAndAreaAndPrefectureAndCity>
+
+const shopWithShopDetailsAndLocationAndMenu = Prisma.validator<Prisma.ShopArgs>()(
+  {
+    include: {
+      shopDetail: true, area: true, prefecture: true, city: true, menu: { include: { items: true } },
+    },
+  },
+)
+type shopWithShopDetailsAndLocationAndMenu =
+Prisma.ShopGetPayload<typeof shopWithShopDetailsAndLocationAndMenu>
 
 export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAndCity): Shop => ({
   id: shop.id,
@@ -35,6 +46,37 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
   name: shop.shopDetail?.name ?? null,
   address: shop.shopDetail?.address ?? null,
   phoneNumber: shop.shopDetail?.phoneNumber ?? null,
+})
+
+export const reconstructShopWithMenu = (shop: shopWithShopDetailsAndLocationAndMenu): Shop => ({
+  id: shop.id,
+  area: {
+    id: shop.area.id,
+    name: shop.area.name,
+    slug: shop.area.slug,
+  },
+  prefecture: {
+    id: shop.prefecture.id,
+    name: shop.prefecture.name,
+    slug: shop.prefecture.slug,
+  },
+  city: {
+    id: shop.city.id,
+    name: shop.city.name,
+    slug: shop.city.slug,
+  },
+  name: shop.shopDetail?.name ?? null,
+  address: shop.shopDetail?.address ?? null,
+  phoneNumber: shop.shopDetail?.phoneNumber ?? null,
+  menu: {
+    id: shop.menu!.id,
+    items: shop.menu!.items?.map(item => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      price: item.price,
+    })),
+  },
 })
 
 export const fetchAll = async (page = 0, order: any = 'asc'): Promise<Shop[]> => {
@@ -59,10 +101,10 @@ export const fetch = async (id: number): Promise<Shop | null> => {
   const shop = await prisma.shop.findUnique({
     where: { id },
     include: {
-      shopDetail: true, area: true, prefecture: true, city: true,
+      shopDetail: true, area: true, prefecture: true, city: true, menu: { include: { items: true } },
     },
   })
-  return shop ? reconstructShop(shop) : null
+  return shop ? reconstructShopWithMenu(shop) : null
 }
 
 export const insertShop = async (
@@ -90,6 +132,9 @@ export const insertShop = async (
           address,
           phoneNumber,
         },
+      },
+      menu: {
+        create: {},
       },
     },
     include: {
@@ -146,6 +191,26 @@ export const fetchValidShopIds = async (shopIds: number[]): Promise<number[]> =>
   return validShopIds.map(obj => obj.id)
 }
 
+export const insertMenuItem = async (shopId: number, name: string, description: string, price: number)
+  : Promise<MenuItem> => {
+  const shop = await fetch(shopId)
+  const menuId = shop!.menu!.id
+  return prisma.menuItem.create({
+    data: {
+      name,
+      description,
+      price,
+      menuId,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      price: true,
+    },
+  })
+}
+
 export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket & StylistServiceSocket = {
   fetchAll,
   totalCount,
@@ -173,4 +238,5 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     })
     return shop.shopDetail?.schedule as ShopSchedule
   },
+  insertMenuItem,
 }
