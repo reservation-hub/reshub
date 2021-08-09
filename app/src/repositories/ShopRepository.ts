@@ -3,7 +3,7 @@ import prisma from './prisma'
 import { CommonRepositoryInterface } from './CommonRepository'
 import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
 import { ShopRepositoryInterface as StylistServiceSocket } from '../services/StylistService'
-import { Shop } from '../entities/Shop'
+import { Shop, ShopSchedule } from '../entities/Shop'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {
@@ -154,4 +154,23 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
   updateShop,
   deleteShop,
   fetchValidShopIds,
+  async upsertSchedule(shopId, days, start, end) {
+    const shop = await prisma.shop.update({
+      where: { id: shopId },
+      data: {
+        shopDetail: {
+          update: {
+            schedule: {
+              days,
+              hours: { start, end },
+            },
+          },
+        },
+      },
+      include: {
+        shopDetail: true,
+      },
+    })
+    return shop.shopDetail?.schedule as ShopSchedule
+  },
 }

@@ -14,6 +14,7 @@ export const roleCheck = (roles: string[]) => (req: any, res: any, next: any): v
 
 const idSchema = Joi.object({
   id: Joi.string().pattern(/^[0-9]+$/),
+  shopId: Joi.string().pattern(/^[0-9]+$/),
 })
 
 export const parseIntIdMiddleware = (req: Request, res: Response, next: NextFunction): void => {
@@ -22,5 +23,8 @@ export const parseIntIdMiddleware = (req: Request, res: Response, next: NextFunc
     return next({ code: 400, message: 'Invalid param value' })
   }
   res.locals.id = parseInt(value.id, 10)
+  if (value.shopId) {
+    res.locals.shopId = parseInt(value.shopId, 10)
+  }
   return next()
 }

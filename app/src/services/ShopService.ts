@@ -1,5 +1,5 @@
 import { ShopRepository } from '../repositories/ShopRepository'
-import { Shop } from '../entities/Shop'
+import { Shop, ShopSchedule } from '../entities/Shop'
 import { Reservation } from '../entities/Reservation'
 import { ShopServiceInterface } from '../controllers/shopController'
 import StylistRepository from '../repositories/StylistRepository'
@@ -26,7 +26,9 @@ export type ShopRepositoryInterface = {
     address: string,
     phoneNumber: string,
   ): Promise<Shop>,
-  deleteShop(id: number): Promise<Shop>
+  deleteShop(id: number): Promise<Shop>,
+  upsertSchedule(shopId: number, days: number[], start: string, end: string)
+    : Promise<ShopSchedule>
 }
 
 export type LocationRepositoryInterface = {
@@ -64,84 +66,99 @@ export type updateShopQuery = {
   phoneNumber: string,
 }
 
-export const fetchShopsWithTotalCount = async (query: fetchModelsWithTotalCountQuery)
-  : Promise<{ data: Shop[], totalCount: number }> => {
-  const shops = await ShopRepository.fetchAll(query.page, query.order)
-  const shopsCount = await ShopRepository.totalCount()
-  return { data: shops, totalCount: shopsCount }
+export type upsertScheduleQuery = {
+  days: number[],
+  hours: {
+    start: string,
+    end: string
+  }
 }
 
-export const fetchShop = async (id: number): Promise<Shop> => {
-  const shop = await ShopRepository.fetch(id)
-  if (!shop) {
-    throw new NotFoundError()
-  }
-  return shop
-}
-
-export const insertShop = async (query: insertShopQuery): Promise<Shop> => {
-  const isValidLocation = await LocationRepository.isValidLocation(query.areaId, query.prefectureId, query.cityId)
-  if (!isValidLocation) {
-    throw new InvalidParamsError()
-  }
-
-  return ShopRepository.insertShop(
-    query.name,
-    query.areaId,
-    query.prefectureId,
-    query.cityId,
-    query.address,
-    query.phoneNumber,
-  )
-}
-
-export const updateShop = async (id: number, query: updateShopQuery): Promise<Shop> => {
-  const isValidLocation = await LocationRepository.isValidLocation(query.areaId, query.prefectureId, query.cityId)
-  if (!isValidLocation) {
-    throw new InvalidParamsError()
-  }
-
-  const shop = await ShopRepository.fetch(id)
-  if (!shop) {
-    throw new NotFoundError()
-  }
-
-  return ShopRepository.updateShop(id, query.name, query.areaId, query.prefectureId,
-    query.cityId, query.address, query.phoneNumber)
-}
-
-export const deleteShop = async (id: number): Promise<Shop> => {
-  const shop = await ShopRepository.fetch(id)
-  if (!shop) {
-    throw new NotFoundError()
-  }
-  return ShopRepository.deleteShop(id)
-}
-
-export const fetchStylistsCountByShopIds = async (shopIds: number[])
-: Promise<{ id: number, count: number }[]> => {
-  if (shopIds.length === 0) {
-    return []
-  }
-  return StylistRepository.fetchStylistsCountByShopIds(shopIds)
-}
-
-export const fetchReservationsCountByShopIds = async (shopIds: number[])
-: Promise<{ id: number, count: number }[]> => {
-  if (shopIds.length === 0) {
-    return []
-  }
-  return ReservationRepository.fetchReservationsCountByShopIds(shopIds)
-}
+const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
 export const ShopService: ShopServiceInterface = {
-  fetchShopsWithTotalCount,
-  fetchShop,
-  insertShop,
-  updateShop,
-  deleteShop,
-  fetchStylistsCountByShopIds,
-  fetchReservationsCountByShopIds,
+  async fetchShopsWithTotalCount(query) {
+    const shops = await ShopRepository.fetchAll(query.page, query.order)
+    const shopsCount = await ShopRepository.totalCount()
+    return { data: shops, totalCount: shopsCount }
+  },
+  async fetchShop(id) {
+    const shop = await ShopRepository.fetch(id)
+    if (!shop) {
+      throw new NotFoundError()
+    }
+    return shop
+  },
+  async insertShop(query) {
+    const isValidLocation = await LocationRepository.isValidLocation(query.areaId, query.prefectureId, query.cityId)
+    if (!isValidLocation) {
+      throw new InvalidParamsError()
+    }
+
+    return ShopRepository.insertShop(
+      query.name,
+      query.areaId,
+      query.prefectureId,
+      query.cityId,
+      query.address,
+      query.phoneNumber,
+    )
+  },
+  async updateShop(id, query) {
+    const isValidLocation = await LocationRepository.isValidLocation(query.areaId, query.prefectureId, query.cityId)
+    if (!isValidLocation) {
+      throw new InvalidParamsError()
+    }
+
+    const shop = await ShopRepository.fetch(id)
+    if (!shop) {
+      throw new NotFoundError()
+    }
+
+    return ShopRepository.updateShop(id, query.name, query.areaId, query.prefectureId,
+      query.cityId, query.address, query.phoneNumber)
+  },
+  async deleteShop(id) {
+    const shop = await ShopRepository.fetch(id)
+    if (!shop) {
+      throw new NotFoundError()
+    }
+    return ShopRepository.deleteShop(id)
+  },
+  async fetchStylistsCountByShopIds(shopIds) {
+    if (shopIds.length === 0) {
+      return []
+    }
+    return StylistRepository.fetchStylistsCountByShopIds(shopIds)
+  },
+  async fetchReservationsCountByShopIds(shopIds) {
+    if (shopIds.length === 0) {
+      return []
+    }
+    return ReservationRepository.fetchReservationsCountByShopIds(shopIds)
+  },
+  async upsertSchedule(shopId, query) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      throw new NotFoundError()
+    }
+
+    const startHour = convertToUnixTime(query.hours.start)
+    const endHour = convertToUnixTime(query.hours.end)
+    if (query.days.length === 0 || endHour <= startHour) {
+      throw new InvalidParamsError()
+    }
+
+    const uniqueDays: number[] = query.days.filter((n, i) => query.days.indexOf(n) === i)
+
+    const schedule = await ShopRepository.upsertSchedule(
+      shop.id,
+      uniqueDays,
+      query.hours.start,
+      query.hours.end,
+    )
+    return schedule
+  },
 }
 
 export default ShopService

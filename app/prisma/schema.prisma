@@ -127,6 +127,7 @@ model ShopDetail {
   phoneNumber String?      @map("phone_number") @db.VarChar(255)
   shopId      Int          @unique @map("shop_id")
   shop        Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  schedule    Json?
   images      ModelImage[]
 }
 

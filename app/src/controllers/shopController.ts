@@ -1,9 +1,9 @@
 import asyncHandler from 'express-async-handler'
-import { shopUpsertSchema } from './schemas/shop'
+import { shopScheduleSchema, shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
-import ShopService, { insertShopQuery, updateShopQuery } from '../services/ShopService'
+import ShopService, { insertShopQuery, updateShopQuery, upsertScheduleQuery } from '../services/ShopService'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
-import { Shop } from '../entities/Shop'
+import { Shop, ShopSchedule } from '../entities/Shop'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(query: fetchModelsWithTotalCountQuery)
@@ -16,6 +16,8 @@ export type ShopServiceInterface = {
     : Promise<{ id: number, count: number }[]>,
   fetchReservationsCountByShopIds(shopIds: number[])
     : Promise<{ id: number, count: number }[]>,
+  upsertSchedule(shopId: number, query: upsertScheduleQuery)
+    : Promise<ShopSchedule>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -66,4 +68,11 @@ export const deleteShop = asyncHandler(async (req, res) => {
   const { id } = res.locals
   await ShopService.deleteShop(id)
   return res.send({ message: 'Shop deleted' })
+})
+
+export const insertBusinessDaysAndHours = asyncHandler(async (req, res) => {
+  const schemaValues = await shopScheduleSchema.validateAsync(req.body, joiOptions)
+  const { shopId } = res.locals
+  const schedule = await ShopService.upsertSchedule(shopId, schemaValues)
+  return res.send(schedule)
 })

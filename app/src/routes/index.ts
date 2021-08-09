@@ -49,6 +49,10 @@ router.post('/shops/', protectRoute, roleCheck(['admin']), shopController.insert
 router.patch('/shops/:id', protectRoute, roleCheck(['admin']), parseIntIdMiddleware, shopController.updateShop)
 router.delete('/shops/:id', protectRoute, roleCheck(['admin']), parseIntIdMiddleware, shopController.deleteShop)
 
+// shop schedule
+router.post('/shops/:shopId/schedule',
+  protectRoute, roleCheck(['admin']), parseIntIdMiddleware, shopController.insertBusinessDaysAndHours)
+
 router.get('/stylists', protectRoute, roleCheck(['admin']), stylistController.index)
 router.get('/stylists/:id', protectRoute, roleCheck(['admin']), parseIntIdMiddleware, stylistController.index)
 router.post('/stylists', protectRoute, roleCheck(['admin']), stylistController.insertStylist)
