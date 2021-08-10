@@ -105,7 +105,7 @@ model Shop {
 model Menu {
   id     Int        @id @default(autoincrement())
   items  MenuItem[]
-  shopId Int        @map("shop_id")
+  shopId Int        @unique @map("shop_id")
   Shop   Shop       @relation(fields: [shopId], references: [id])
 }
 

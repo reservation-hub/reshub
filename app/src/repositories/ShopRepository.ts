@@ -4,7 +4,6 @@ import { CommonRepositoryInterface } from './CommonRepository'
 import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
 import { ShopRepositoryInterface as StylistServiceSocket } from '../services/StylistService'
 import { Shop, ShopSchedule } from '../entities/Shop'
-import { MenuItem } from '../entities/Menu'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {
@@ -79,146 +78,112 @@ export const reconstructShopWithMenu = (shop: shopWithShopDetailsAndLocationAndM
   },
 })
 
-export const fetchAll = async (page = 0, order: any = 'asc'): Promise<Shop[]> => {
-  const skipIndex = page > 1 ? (page - 1) * 10 : 0
-  const limit = 10
-  const shops = await prisma.shop.findMany({
-    skip: skipIndex,
-    orderBy: { id: order },
-    take: limit,
-    include: {
-      shopDetail: true, area: true, prefecture: true, city: true,
-    },
-  })
-
-  const cleanShops = shops.map(shop => reconstructShop(shop))
-  return cleanShops
-}
-
-export const totalCount = async (): Promise<number> => prisma.shop.count()
-
-export const fetch = async (id: number): Promise<Shop | null> => {
-  const shop = await prisma.shop.findUnique({
-    where: { id },
-    include: {
-      shopDetail: true, area: true, prefecture: true, city: true, menu: { include: { items: true } },
-    },
-  })
-  return shop ? reconstructShopWithMenu(shop) : null
-}
-
-export const insertShop = async (
-  name: string,
-  areaId: number,
-  prefectureId: number,
-  cityId: number,
-  address: string,
-  phoneNumber: string,
-): Promise<Shop> => {
-  const shop = await prisma.shop.create({
-    data: {
-      area: {
-        connect: { id: areaId },
+export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket & StylistServiceSocket = {
+  async fetchAll(page = 0, order = 'asc') {
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const limit = 10
+    const shops = await prisma.shop.findMany({
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true,
       },
-      prefecture: {
-        connect: { id: prefectureId },
+    })
+
+    const cleanShops = shops.map(shop => reconstructShop(shop))
+    return cleanShops
+  },
+
+  async totalCount() {
+    return prisma.shop.count()
+  },
+
+  async fetch(id) {
+    const shop = await prisma.shop.findUnique({
+      where: { id },
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true, menu: { include: { items: true } },
       },
-      city: {
-        connect: { id: cityId },
-      },
-      shopDetail: {
-        create: {
-          name,
-          address,
-          phoneNumber,
+    })
+    return shop ? reconstructShopWithMenu(shop) : null
+  },
+
+  async insertShop(name, areaId, prefectureId, cityId, address, phoneNumber) {
+    const shop = await prisma.shop.create({
+      data: {
+        area: {
+          connect: { id: areaId },
+        },
+        prefecture: {
+          connect: { id: prefectureId },
+        },
+        city: {
+          connect: { id: cityId },
+        },
+        shopDetail: {
+          create: {
+            name,
+            address,
+            phoneNumber,
+          },
+        },
+        menu: {
+          create: {},
         },
       },
-      menu: {
-        create: {},
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true,
       },
-    },
-    include: {
-      shopDetail: true, area: true, prefecture: true, city: true,
-    },
-  })
-  const cleanShop = reconstructShop(shop)
-  return cleanShop
-}
+    })
+    const cleanShop = reconstructShop(shop)
+    return cleanShop
+  },
 
-export const updateShop = async (
-  id: number,
-  name: string,
-  areaId: number,
-  prefectureId: number,
-  cityId: number,
-  address: string,
-  phoneNumber: string,
-): Promise<Shop> => {
-  const shop = await prisma.shop.update({
-    where: { id },
-    data: {
-      area: { connect: { id: areaId } },
-      prefecture: { connect: { id: prefectureId } },
-      city: { connect: { id: cityId } },
-      shopDetail: {
-        update: { name, address, phoneNumber },
+  async updateShop(id,
+    name,
+    areaId,
+    prefectureId,
+    cityId,
+    address,
+    phoneNumber) {
+    const shop = await prisma.shop.update({
+      where: { id },
+      data: {
+        area: { connect: { id: areaId } },
+        prefecture: { connect: { id: prefectureId } },
+        city: { connect: { id: cityId } },
+        shopDetail: {
+          update: { name, address, phoneNumber },
+        },
       },
-    },
-    include: {
-      shopDetail: true, area: true, prefecture: true, city: true,
-    },
-  })
-  const cleanShop = reconstructShop(shop)
-  return cleanShop
-}
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true,
+      },
+    })
+    const cleanShop = reconstructShop(shop)
+    return cleanShop
+  },
 
-export const deleteShop = async (id: number): Promise<Shop> => {
-  const shop = await prisma.shop.delete({
-    where: { id },
-    include: {
-      shopDetail: true, area: true, prefecture: true, city: true,
-    },
-  })
-  const cleanShop = reconstructShop(shop)
-  return cleanShop
-}
+  async deleteShop(id) {
+    const shop = await prisma.shop.delete({
+      where: { id },
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true,
+      },
+    })
+    const cleanShop = reconstructShop(shop)
+    return cleanShop
+  },
 
-export const fetchValidShopIds = async (shopIds: number[]): Promise<number[]> => {
-  const validShopIds = await prisma.shop.findMany({
-    where: { id: { in: shopIds } },
-    select: { id: true },
-  })
-  return validShopIds.map(obj => obj.id)
-}
+  async fetchValidShopIds(shopIds) {
+    const validShopIds = await prisma.shop.findMany({
+      where: { id: { in: shopIds } },
+      select: { id: true },
+    })
+    return validShopIds.map(obj => obj.id)
+  },
 
-export const insertMenuItem = async (shopId: number, name: string, description: string, price: number)
-  : Promise<MenuItem> => {
-  const shop = await fetch(shopId)
-  const menuId = shop!.menu!.id
-  return prisma.menuItem.create({
-    data: {
-      name,
-      description,
-      price,
-      menuId,
-    },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      price: true,
-    },
-  })
-}
-
-export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket & StylistServiceSocket = {
-  fetchAll,
-  totalCount,
-  fetch,
-  insertShop,
-  updateShop,
-  deleteShop,
-  fetchValidShopIds,
   async upsertSchedule(shopId, days, start, end) {
     const shop = await prisma.shop.update({
       where: { id: shopId },
@@ -238,5 +203,38 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     })
     return shop.shopDetail?.schedule as ShopSchedule
   },
-  insertMenuItem,
+
+  async insertMenuItem(shopId, name, description, price) {
+    const shop = await this.fetch(shopId)
+    const menuId = shop!.menu!.id
+    return prisma.menuItem.create({
+      data: {
+        name,
+        description,
+        price,
+        menuId,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+      },
+    })
+  },
+
+  async updateMenuItem(menuItemId, name, description, price) {
+    return prisma.menuItem.update({
+      where: { id: menuItemId },
+      data: {
+        name, description, price,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+      },
+    })
+  },
 }

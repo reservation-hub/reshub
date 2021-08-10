@@ -30,7 +30,8 @@ export type ShopRepositoryInterface = {
   deleteShop(id: number): Promise<Shop>,
   upsertSchedule(shopId: number, days: number[], start: string, end: string)
     : Promise<ShopSchedule>
-  insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>
+  insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>,
+  updateMenuItem(menuItemId: number, name: string, description: string, price: number): Promise<MenuItem>,
 }
 
 export type LocationRepositoryInterface = {
@@ -89,11 +90,13 @@ export type upsertMenuItemQuery = {
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
 export const ShopService: ShopControllerSocket & MenuControllerSocket = {
+
   async fetchShopsWithTotalCount(query) {
     const shops = await ShopRepository.fetchAll(query.page, query.order)
     const shopsCount = await ShopRepository.totalCount()
     return { data: shops, totalCount: shopsCount }
   },
+
   async fetchShop(id) {
     const shop = await ShopRepository.fetch(id)
     if (!shop) {
@@ -101,6 +104,7 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket = {
     }
     return shop
   },
+
   async insertShop(query) {
     const isValidLocation = await LocationRepository.isValidLocation(query.areaId, query.prefectureId, query.cityId)
     if (!isValidLocation) {
@@ -116,6 +120,7 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket = {
       query.phoneNumber,
     )
   },
+
   async updateShop(id, query) {
     const isValidLocation = await LocationRepository.isValidLocation(query.areaId, query.prefectureId, query.cityId)
     if (!isValidLocation) {
@@ -130,6 +135,7 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket = {
     return ShopRepository.updateShop(id, query.name, query.areaId, query.prefectureId,
       query.cityId, query.address, query.phoneNumber)
   },
+
   async deleteShop(id) {
     const shop = await ShopRepository.fetch(id)
     if (!shop) {
@@ -137,18 +143,21 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket = {
     }
     return ShopRepository.deleteShop(id)
   },
+
   async fetchStylistsCountByShopIds(shopIds) {
     if (shopIds.length === 0) {
       return []
     }
     return StylistRepository.fetchStylistsCountByShopIds(shopIds)
   },
+
   async fetchReservationsCountByShopIds(shopIds) {
     if (shopIds.length === 0) {
       return []
     }
     return ReservationRepository.fetchReservationsCountByShopIds(shopIds)
   },
+
   async upsertSchedule(shopId, query) {
     const shop = await ShopRepository.fetch(shopId)
     if (!shop) {
@@ -171,6 +180,7 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket = {
     )
     return schedule
   },
+
   async insertMenuItem(shopId, query) {
     const shop = await ShopRepository.fetch(shopId)
     if (!shop) {
@@ -179,6 +189,20 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket = {
     const menuItem = await ShopRepository.insertMenuItem(shopId, query.name,
       query.description, query.price)
     return menuItem
+  },
+
+  async updateMenuItem(shopId, menuItemId, query) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      throw new NotFoundError()
+    }
+    const menuItemIdIsValid = shop.menu!.items.findIndex(item => item.id === menuItemId) !== -1
+    if (!menuItemIdIsValid) {
+      throw new NotFoundError()
+    }
+
+    return ShopRepository.updateMenuItem(menuItemId, query.name,
+      query.description, query.price)
   },
 }
 
