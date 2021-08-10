@@ -32,6 +32,7 @@ export type ShopRepositoryInterface = {
     : Promise<ShopSchedule>
   insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>,
   updateMenuItem(menuItemId: number, name: string, description: string, price: number): Promise<MenuItem>,
+  deleteMenuItem(menuItemId: number): Promise<MenuItem>
 }
 
 export type LocationRepositoryInterface = {
@@ -203,6 +204,21 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket = {
 
     return ShopRepository.updateMenuItem(menuItemId, query.name,
       query.description, query.price)
+  },
+
+  async deleteMenuItem(shopId, menuItemId) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      console.error('shop not found')
+      throw new NotFoundError()
+    }
+    const menuItemIdIsValid = shop.menu!.items.findIndex(item => item.id === menuItemId) !== -1
+    if (!menuItemIdIsValid) {
+      console.error('menu item not found')
+      throw new NotFoundError()
+    }
+
+    return ShopRepository.deleteMenuItem(menuItemId)
   },
 }
 
