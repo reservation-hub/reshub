@@ -16,22 +16,17 @@ import apiRoutes from './api'
 const router = Router()
 export default router
 
-// router.use('/api', protectRoute, apiRoutes)
 router.use('/auth', authController)
-
-router.get('/areas', protectRoute, areaController)
-router.get('/prefectures', protectRoute, prefectureController)
-router.get('/cities', protectRoute, cityController)
-
-router.use('/users/', protectRoute, userController)
-
+router.use('/areas', protectRoute, areaController)
+router.use('/prefectures', protectRoute, prefectureController)
+router.use('/cities', protectRoute, cityController)
+router.use('/users', protectRoute, userController)
 router.use('/roles', protectRoute, roleController)
 router.use('/shops', protectRoute, shopController)
-
 router.use('/stylists', protectRoute, stylistController)
 router.use('/reservations', protectRoute, reservationController)
 
 // client api
-router.post('/api/', apiRoutes)
+router.use('/api/', apiRoutes)
 
 router.use('/*', (req: Request, res: Response, next: NextFunction) => next({ code: 404, message: 'Bad route' })) // 404s
