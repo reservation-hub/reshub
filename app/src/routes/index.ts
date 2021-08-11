@@ -14,6 +14,7 @@ import stylistController from '../controllers/stylistController'
 import reservationController from '../controllers/reservationController'
 
 import apiRoutes from './api'
+import { InvalidRouteError } from './error'
 
 const router = Router()
 export default router
@@ -31,4 +32,4 @@ router.use('/reservations', protectRoute, reservationController)
 // client api
 router.use('/api/', apiRoutes)
 
-router.use('/*', (req: Request, res: Response, next: NextFunction) => next({ code: 404, message: 'Bad route' })) // 404s
+router.use('/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404s

@@ -6,10 +6,11 @@ import { ValidationError, ValidationErrorItem } from 'joi'
 import {
   DuplicateModel, InvalidParams, InvalidToken, LoggedIn, NotFound, ServiceError,
 } from './services/Errors/ServiceError'
+import { InvalidRouteError } from './routes/error'
 import { MiddlewareError } from './routes/errors'
 
-export type ResHubError = PrismaClientKnownRequestError
-  | ServiceError | JsonWebTokenError | ValidationError
+export type ResHubError =
+  PrismaClientKnownRequestError | ServiceError | JsonWebTokenError | ValidationError | InvalidRouteError
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const errorHandler: ErrorRequestHandler = (error: ResHubError | MiddlewareError, req, res, next) => {
@@ -71,7 +72,7 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
     return res.status(400).send({ error: { message: error.message } })
   }
 
-  if (error instanceof MiddlewareError) {
+  if (error instanceof InvalidRouteError || error instanceof MiddlewareError) {
     return res.status(error.code).send({ error: { message: error.message } })
   }
 

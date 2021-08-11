@@ -91,6 +91,11 @@ export const insertUserFromAdmin = async (query: insertUserFromAdminQuery): Prom
     throw new InvalidParamsError()
   }
 
+  const duplicate = await UserRepository.fetchByEmail(query.email)
+  if (duplicate) {
+    throw new InvalidParamsError()
+  }
+
   const hash = bcrypt.hashSync(query.password, 10 /* hash rounds */)
 
   const user = await UserRepository.insertUserWithProfile(
