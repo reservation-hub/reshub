@@ -4,7 +4,6 @@ import { CommonRepositoryInterface } from './CommonRepository'
 import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
 import { ShopRepositoryInterface as StylistServiceSocket } from '../services/StylistService'
 import { Shop, ShopSchedule } from '../entities/Shop'
-import { deleteMenuItem } from '../controllers/menuController'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {

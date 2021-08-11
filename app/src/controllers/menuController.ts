@@ -1,4 +1,6 @@
+import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
+import { roleCheck, parseIntIdMiddleware } from '../routes/utils'
 import { MenuItem } from '../entities/Menu'
 import ShopService, { upsertMenuItemQuery } from '../services/ShopService'
 import { menuItemUpsertSchema } from './schemas/menu'
@@ -30,3 +32,12 @@ export const deleteMenuItem = asyncHandler(async (req, res) => {
   const menuItem = await ShopService.deleteMenuItem(shopId, menuItemId)
   return res.send(menuItem)
 })
+
+const routes = Router()
+
+// shop menu
+routes.post('/:shopId/menu', roleCheck(['admin']), parseIntIdMiddleware, insertMenuItem)
+routes.patch('/:shopId/menu/:menuItemId', roleCheck(['admin']), parseIntIdMiddleware, updateMenuItem)
+routes.delete('/:shopId/menu/:menuItemId', roleCheck(['admin']), parseIntIdMiddleware, deleteMenuItem)
+
+export default routes
