@@ -73,7 +73,7 @@ export const hack = asyncHandler(async (req: Request, res: Response, next: NextF
 const routes = Router()
 
 routes.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
-routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('local', { session: false }, login))
+routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('local', { session: false }), login)
 routes.post('/silent_refresh', passport.authenticate('jwt', { session: false }), login)
 routes.get('/logout', passport.authenticate('jwt', { session: false }), logout)
 routes.get('/hack', hack, login)
