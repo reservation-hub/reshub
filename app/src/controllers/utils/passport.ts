@@ -45,7 +45,7 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
   try {
     const user = await UserService.fetchUser(jwtPayload.user.id)
     return done(null, user)
-  } catch (error) { return done(error, null) }
+  } catch (error) { return done(error) }
 }))
 
 // local
@@ -55,9 +55,7 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, async (username, pass
     const schemaValues = await localStrategySchema.validateAsync({ email: username, password }, joiOptions)
     const user = await AuthService.authenticateByEmailAndPassword(schemaValues)
     return done(null, user)
-  } catch (error) {
-    return done(error, null)
-  }
+  } catch (error) { return done(error) }
 }))
 
 export default passport
