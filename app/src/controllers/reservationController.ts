@@ -1,3 +1,4 @@
+import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 // import ReservationService from '../services/ReservationService'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
@@ -5,6 +6,7 @@ import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
 import indexSchema from './schemas/indexSchema'
 import { Reservation } from '../entities/Reservation'
 import ReservationService from '../services/ReservationService'
+import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 
 export type ReservationServiceInterface = {
   fetchReservationsWithTotalCount(query: fetchModelsWithTotalCountQuery)
@@ -25,6 +27,13 @@ export const showReservation = asyncHandler(async (req, res) => {
   const reservation = await ReservationService.fetchReservation(id)
   return res.send(reservation)
 })
+
+const routes = Router()
+
+routes.get('/', roleCheck(['admin']), index)
+routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showReservation)
+
+export default routes
 
 // const insertReservation = asyncHandler(async (req, res, next) => {
 //   const {

@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt'
 import config from '../../config'
 import { User } from '../entities/User'
 import { AuthServiceInterface as AuthControllerSocket } from '../controllers/authController'
-import { AuthServiceInterface as PassportSocket } from '../routes/passport'
+import { AuthServiceInterface as PassportSocket } from '../controllers/utils/passport'
 import UserRepository from '../repositories/UserRepository'
 import {
   InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError,

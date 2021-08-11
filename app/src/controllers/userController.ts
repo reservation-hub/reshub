@@ -1,4 +1,6 @@
+import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
+import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 import {
   userInsertSchema, userUpdateSchema,
 } from './schemas/user'
@@ -75,3 +77,13 @@ export const deleteUser = asyncHandler(async (req, res) => {
   await UserService.deleteUserFromAdmin(id)
   return res.send({ message: 'User deleted' })
 })
+
+const routes = Router()
+
+routes.get('/', roleCheck(['admin']), index)
+routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showUser)
+routes.post('/', roleCheck(['admin']), insertUser)
+routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateUser)
+routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteUser)
+
+export default routes
