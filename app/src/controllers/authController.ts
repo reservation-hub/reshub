@@ -1,8 +1,9 @@
 import {
-  Request, Response, NextFunction, CookieOptions,
+  Request, Response, NextFunction, CookieOptions, Router,
 } from 'express'
 import asyncHandler from 'express-async-handler'
 
+import passport from './utils/passport'
 import config from '../../config'
 import { User } from '../entities/User'
 import AuthService from '../services/AuthService'
@@ -68,3 +69,13 @@ export const hack = asyncHandler(async (req: Request, res: Response, next: NextF
   req.user = user
   return next()
 })
+
+const routes = Router()
+
+routes.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
+routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('local', { session: false }, login))
+routes.post('/silent_refresh', passport.authenticate('jwt', { session: false }), login)
+routes.get('/logout', passport.authenticate('jwt', { session: false }), logout)
+routes.get('/hack', hack, login)
+
+export default routes

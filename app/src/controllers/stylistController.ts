@@ -1,11 +1,11 @@
+import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 import { stylistUpsertSchema } from './schemas/stylist'
 import indexSchema from './schemas/indexSchema'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
 import { Stylist } from '../entities/Stylist'
 import StylistService, { upsertStylistQuery } from '../services/StylistService'
-
-// const ShopRepository = require('../repositories/ShopRepository')
+import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 
 export type StylistServiceInterface = {
   fetchStylistsWithTotalCount(query: fetchModelsWithTotalCountQuery):
@@ -48,3 +48,13 @@ export const deleteStylist = asyncHandler(async (req, res) => {
   await StylistService.deleteStylist(id)
   return res.send({ message: 'Stylist deleted' })
 })
+
+const routes = Router()
+
+routes.get('/', roleCheck(['admin']), index)
+routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showStylist)
+routes.post('/', roleCheck(['admin']), insertStylist)
+routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateStylist)
+routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteStylist)
+
+export default routes

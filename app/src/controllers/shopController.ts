@@ -1,9 +1,11 @@
+import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 import { shopScheduleSchema, shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import ShopService, { insertShopQuery, updateShopQuery, upsertScheduleQuery } from '../services/ShopService'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
 import { Shop, ShopSchedule } from '../entities/Shop'
+import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(query: fetchModelsWithTotalCountQuery)
@@ -76,3 +78,14 @@ export const insertBusinessDaysAndHours = asyncHandler(async (req, res) => {
   const schedule = await ShopService.upsertSchedule(shopId, schemaValues)
   return res.send(schedule)
 })
+
+const routes = Router()
+
+routes.get('/', roleCheck(['admin']), index)
+routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showShop)
+routes.post('/', roleCheck(['admin']), insertShop)
+routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateShop)
+routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteShop)
+routes.post('/:shopId/schedule', roleCheck(['admin']), parseIntIdMiddleware, insertBusinessDaysAndHours)
+
+export default routes

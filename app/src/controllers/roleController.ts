@@ -1,9 +1,11 @@
+import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 import RoleService, { upsertRoleQuery } from '../services/RoleService'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
 import { roleUpsertSchema } from './schemas/role'
 import indexSchema from './schemas/indexSchema'
 import { Role } from '../entities/Role'
+import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 
 export type RoleServiceInterface = {
   fetchRolesWithTotalCount(query: fetchModelsWithTotalCountQuery): Promise<{ data: Role[], totalCount: number }>,
@@ -47,3 +49,13 @@ export const deleteRole = asyncHandler(async (req, res) => {
   await RoleService.deleteRole(id)
   return res.send({ message: 'Role deleted' })
 })
+
+const routes = Router()
+
+routes.get('/', roleCheck(['admin']), index)
+routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showRole)
+routes.post('/', roleCheck(['admin']), insertRole)
+routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateRole)
+routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteRole)
+
+export default routes

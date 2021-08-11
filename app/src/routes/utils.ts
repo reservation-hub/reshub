@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import { Request, Response, NextFunction } from 'express'
-import pt from './passport'
+import pt from '../controllers/utils/passport'
 import { User } from '../entities/User'
 
 export const protectRoute = pt.authenticate('jwt', { session: false })

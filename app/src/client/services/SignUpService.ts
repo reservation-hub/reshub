@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { User } from '../../entities/User'
-import { SignUpServiceInterface } from '../controllers/signupController'
+import { SignUpServiceInterface } from '../controllers/signUpController'
 import { DuplicateModelError, InvalidParamsError } from '../../services/Errors/ServiceError'
 import UserRepository from '../repositories/UserRepository'
 import config from '../../../config'
