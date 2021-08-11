@@ -12,7 +12,7 @@
     "seed-shop": "node seedFiles/shopSeeder.js",
     "lint": "eslint --ignore-path /app/.eslintignore . --ext .ts",
     "migrate": "prisma migrate dev",
-    "db-reset": "yes | prisma migrate reset && node dist/seedFiles/seed.js && node dist/seedFiles/shopSeeder.js"
+    "db-reset": "yes | prisma migrate reset && node dist/seedFiles/seed.js"
   },
   "browser": {
     "crypto": false

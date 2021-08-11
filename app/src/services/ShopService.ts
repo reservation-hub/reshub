@@ -1,12 +1,13 @@
 import { ShopRepository } from '../repositories/ShopRepository'
 import { Shop, ShopSchedule } from '../entities/Shop'
 import { Reservation } from '../entities/Reservation'
-import { ShopServiceInterface } from '../controllers/shopController'
+import { ShopServiceInterface as ShopControllerSocket } from '../controllers/shopController'
+import { ShopServiceInterface as MenuControllerSocket } from '../controllers/menuController'
 import StylistRepository from '../repositories/StylistRepository'
 import ReservationRepository from '../repositories/ReservationRepository'
 import { LocationRepository } from '../repositories/LocationRepository'
-import { fetchModelsWithTotalCountQuery } from './ServiceCommonTypes'
 import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
+import { MenuItem } from '../entities/Menu'
 
 export type ShopRepositoryInterface = {
   insertShop(
@@ -29,6 +30,9 @@ export type ShopRepositoryInterface = {
   deleteShop(id: number): Promise<Shop>,
   upsertSchedule(shopId: number, days: number[], start: string, end: string)
     : Promise<ShopSchedule>
+  insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>,
+  updateMenuItem(menuItemId: number, name: string, description: string, price: number): Promise<MenuItem>,
+  deleteMenuItem(menuItemId: number): Promise<MenuItem>
 }
 
 export type LocationRepositoryInterface = {
@@ -46,6 +50,10 @@ export type ReservationRepositoryInterface = {
     : Promise<{ id: number, data: Reservation[] }[]>,
   fetchReservationsCountByShopIds(shopIds: number[])
     : Promise<{ id: number, count: number }[]>,
+}
+
+export type MenuRepositoryInterface = {
+  insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>
 }
 
 export type insertShopQuery = {
@@ -74,14 +82,22 @@ export type upsertScheduleQuery = {
   }
 }
 
+export type upsertMenuItemQuery = {
+  name: string,
+  description: string,
+  price: number,
+}
+
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
-export const ShopService: ShopServiceInterface = {
+export const ShopService: ShopControllerSocket & MenuControllerSocket = {
+
   async fetchShopsWithTotalCount(query) {
     const shops = await ShopRepository.fetchAll(query.page, query.order)
     const shopsCount = await ShopRepository.totalCount()
     return { data: shops, totalCount: shopsCount }
   },
+
   async fetchShop(id) {
     const shop = await ShopRepository.fetch(id)
     if (!shop) {
@@ -89,6 +105,7 @@ export const ShopService: ShopServiceInterface = {
     }
     return shop
   },
+
   async insertShop(query) {
     const isValidLocation = await LocationRepository.isValidLocation(query.areaId, query.prefectureId, query.cityId)
     if (!isValidLocation) {
@@ -104,6 +121,7 @@ export const ShopService: ShopServiceInterface = {
       query.phoneNumber,
     )
   },
+
   async updateShop(id, query) {
     const isValidLocation = await LocationRepository.isValidLocation(query.areaId, query.prefectureId, query.cityId)
     if (!isValidLocation) {
@@ -118,6 +136,7 @@ export const ShopService: ShopServiceInterface = {
     return ShopRepository.updateShop(id, query.name, query.areaId, query.prefectureId,
       query.cityId, query.address, query.phoneNumber)
   },
+
   async deleteShop(id) {
     const shop = await ShopRepository.fetch(id)
     if (!shop) {
@@ -125,18 +144,21 @@ export const ShopService: ShopServiceInterface = {
     }
     return ShopRepository.deleteShop(id)
   },
+
   async fetchStylistsCountByShopIds(shopIds) {
     if (shopIds.length === 0) {
       return []
     }
     return StylistRepository.fetchStylistsCountByShopIds(shopIds)
   },
+
   async fetchReservationsCountByShopIds(shopIds) {
     if (shopIds.length === 0) {
       return []
     }
     return ReservationRepository.fetchReservationsCountByShopIds(shopIds)
   },
+
   async upsertSchedule(shopId, query) {
     const shop = await ShopRepository.fetch(shopId)
     if (!shop) {
@@ -158,6 +180,45 @@ export const ShopService: ShopServiceInterface = {
       query.hours.end,
     )
     return schedule
+  },
+
+  async insertMenuItem(shopId, query) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      throw new NotFoundError()
+    }
+    const menuItem = await ShopRepository.insertMenuItem(shopId, query.name,
+      query.description, query.price)
+    return menuItem
+  },
+
+  async updateMenuItem(shopId, menuItemId, query) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      throw new NotFoundError()
+    }
+    const menuItemIdIsValid = shop.menu!.items.findIndex(item => item.id === menuItemId) !== -1
+    if (!menuItemIdIsValid) {
+      throw new NotFoundError()
+    }
+
+    return ShopRepository.updateMenuItem(menuItemId, query.name,
+      query.description, query.price)
+  },
+
+  async deleteMenuItem(shopId, menuItemId) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      console.error('shop not found')
+      throw new NotFoundError()
+    }
+    const menuItemIdIsValid = shop.menu!.items.findIndex(item => item.id === menuItemId) !== -1
+    if (!menuItemIdIsValid) {
+      console.error('menu item not found')
+      throw new NotFoundError()
+    }
+
+    return ShopRepository.deleteMenuItem(menuItemId)
   },
 }
 

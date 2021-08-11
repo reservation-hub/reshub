@@ -103,10 +103,10 @@ model Shop {
 }
 
 model Menu {
-  id     Int       @id @default(autoincrement())
-  shopId Int       @unique @map("shop_id")
-  shop   Shop      @relation(fields: [shopId], references: [id])
-  items  MenuItem?
+  id     Int        @id @default(autoincrement())
+  items  MenuItem[]
+  shopId Int        @unique @map("shop_id")
+  Shop   Shop       @relation(fields: [shopId], references: [id])
 }
 
 model MenuItem {
@@ -115,7 +115,7 @@ model MenuItem {
   description String      @db.VarChar(255)
   price       Int
   imageId     Int?        @unique @map("image_id")
-  menuId      Int         @unique @map("menu_id")
+  menuId      Int         @map("menu_id")
   image       ModelImage? @relation(fields: [imageId], references: [id])
   menu        Menu        @relation(fields: [menuId], references: [id])
 }

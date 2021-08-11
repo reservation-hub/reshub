@@ -22,7 +22,7 @@ export type signUpQuery = {
   confirm: string,
 }
 
-export const createSignupToken = (email: string) => (jwt.sign(
+export const createSignupToken = (email: string): string => (jwt.sign(
   { email },
   config.JWT_TOKEN_SECRET,
   {
