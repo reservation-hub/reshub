@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt'
 import UserRepository from '../repositories/UserRepository'
 import RoleRepository from '../repositories/RoleRepository'
 import { User } from '../entities/User'
@@ -20,7 +21,6 @@ export type UserRepositoryInterface = {
   updateUserFromAdmin(
     id: number,
     email: string,
-    password: string,
     lastNameKanji: string,
     firstNameKanji: string,
     lastNameKana: string,
@@ -51,8 +51,6 @@ export type insertUserFromAdminQuery = {
 }
 
 export type updateUserFromAdminQuery = {
-  password: string
-  confirm: string,
   email: string,
   roleIds: number[],
   lastNameKanji: string,
@@ -93,9 +91,11 @@ export const insertUserFromAdmin = async (query: insertUserFromAdminQuery): Prom
     throw new InvalidParamsError()
   }
 
+  const hash = bcrypt.hashSync(query.password, 10 /* hash rounds */)
+
   const user = await UserRepository.insertUserWithProfile(
     query.email,
-    query.password,
+    hash,
     validRoleIds,
     query.lastNameKanji,
     query.firstNameKanji,
@@ -131,7 +131,7 @@ export const updateUserFromAdmin = async (id: number, query: updateUserFromAdmin
   const rolesToRemove = userRoleIds.filter(uuid => validRoleIds.indexOf(uuid) === -1)
 
   const updatedUser = await UserRepository.updateUserFromAdmin(
-    id, query.email, query.password, query.lastNameKanji, query.firstNameKanji,
+    id, query.email, query.lastNameKanji, query.firstNameKanji,
     query.lastNameKana, query.firstNameKana, query.birthday, query.gender,
     rolesToAdd, rolesToRemove,
   )

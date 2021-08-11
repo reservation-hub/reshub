@@ -129,7 +129,6 @@ export const insertUserWithProfile = async (
 export const updateUserFromAdmin = async (
   id: number,
   email: string,
-  password: string,
   lastNameKanji: string,
   firstNameKanji: string,
   lastNameKana: string,
@@ -170,7 +169,6 @@ export const updateUserFromAdmin = async (
       },
       roles: roleAddQuery,
       email,
-      password,
     },
     include: {
       oAuthIds: true,
