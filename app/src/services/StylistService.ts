@@ -6,12 +6,13 @@ import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
 export type upsertStylistQuery = {
   name: string,
-  shopIds: number[],
+  price: number,
+  shopId: number,
 }
 
 export type StylistRepositoryInterface = {
-  insertStylist(name: string, shopIds: number[]): Promise<Stylist>,
-  updateStylist(id: number, name: string, shopIdsToAdd: number[], shopIdsToRemove: number[])
+  insertStylist(name: string, price: number, shopId: number): Promise<Stylist>,
+  updateStylist(id: number, name: string, price: number, shopId: number)
   :Promise<Stylist>,
   deleteStylist(id: number): Promise<Stylist>,
 }
@@ -36,18 +37,18 @@ const StylistService: StylistServiceInterface = {
   },
 
   async insertStylist(query) {
-    const validShopIds = await ShopRepository.fetchValidShopIds(query.shopIds)
-    if (validShopIds.length === 0) {
+    const shop = await ShopRepository.fetch(query.shopId)
+    if (!shop) {
       throw new InvalidParamsError()
     }
 
-    return StylistRepository.insertStylist(query.name, validShopIds)
+    return StylistRepository.insertStylist(query.name, query.price, query.shopId)
   },
 
   async updateStylist(id, query) {
-    const validShopIds = await ShopRepository.fetchValidShopIds(query.shopIds)
-    if (validShopIds.length === 0) {
-      throw new InvalidParamsError()
+    const shop = await ShopRepository.fetch(query.shopId)
+    if (!shop) {
+      throw new NotFoundError()
     }
 
     const stylist = await StylistRepository.fetch(id)
@@ -55,15 +56,7 @@ const StylistService: StylistServiceInterface = {
       throw new NotFoundError()
     }
 
-    const stylistShopIds = stylist.shops.map(shop => shop.id)
-    const shopIdsToAdd = validShopIds.filter(
-      validShopId => stylistShopIds.indexOf(validShopId) === -1,
-    )
-    const shopIdsToRemove = stylistShopIds.filter(
-      ssid => validShopIds.indexOf(ssid) === -1,
-    )
-
-    return StylistRepository.updateStylist(id, query.name, shopIdsToAdd, shopIdsToRemove)
+    return StylistRepository.updateStylist(id, query.name, query.price, query.shopId)
   },
 
   async deleteStylist(id) {

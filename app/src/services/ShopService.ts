@@ -42,7 +42,7 @@ export type LocationRepositoryInterface = {
 
 export type StylistRepositoryInterface = {
   fetchStylistsByShopIds(shopIds: number[])
-    : Promise<{ id: number, name: string, shopId:number }[]>,
+    : Promise<{ id: number, name: string, price: number, shopId:number }[]>,
   fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ id: number, count: number }[]>,
 }
 
@@ -87,6 +87,11 @@ export type upsertMenuItemQuery = {
   name: string,
   description: string,
   price: number,
+}
+
+export type upsertStylistQuery = {
+  name: string,
+  price: number
 }
 
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
@@ -226,6 +231,58 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
     }
 
     return ShopRepository.deleteMenuItem(menuItemId)
+  },
+
+  async insertStylist(shopId, query) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      console.error('shop not found')
+      throw new NotFoundError()
+    }
+
+    const stylist = await StylistRepository.insertStylist(
+      query.name,
+      query.price,
+      shopId,
+    )
+    return stylist
+  },
+
+  async updateStylist(shopId, stylistId, query) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      console.error('shop not found')
+      throw new NotFoundError()
+    }
+
+    const stylist = await StylistRepository.fetch(stylistId)
+    if (!stylist) {
+      console.error('stylist not found')
+      throw new NotFoundError()
+    }
+
+    return StylistRepository.updateStylist(
+      stylistId,
+      query.name,
+      query.price,
+      shopId,
+    )
+  },
+
+  async deleteStylist(shopId, stylistId) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      console.error('shop not found')
+      throw new NotFoundError()
+    }
+
+    const stylist = await StylistRepository.fetch(stylistId)
+    if (!stylist) {
+      console.error('stylist not found')
+      throw new NotFoundError()
+    }
+
+    return StylistRepository.deleteStylist(stylistId)
   },
 }
 

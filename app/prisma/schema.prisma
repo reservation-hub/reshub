@@ -87,19 +87,19 @@ model City {
 }
 
 model Shop {
-  id           Int            @id @default(autoincrement())
-  areaId       Int            @map("area_id")
-  cityId       Int            @map("city_id")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  prefectureId Int            @map("prefecture_id")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
-  area         Area           @relation(fields: [areaId], references: [id])
-  city         City           @relation(fields: [cityId], references: [id])
-  prefecture   Prefecture     @relation(fields: [prefectureId], references: [id])
+  id           Int           @id @default(autoincrement())
+  areaId       Int           @map("area_id")
+  cityId       Int           @map("city_id")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  prefectureId Int           @map("prefecture_id")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  area         Area          @relation(fields: [areaId], references: [id])
+  city         City          @relation(fields: [cityId], references: [id])
+  prefecture   Prefecture    @relation(fields: [prefectureId], references: [id])
   menu         Menu?
   reservations Reservation[]
   shopDetail   ShopDetail?
-  stylists     ShopStylists[]
+  stylists     Stylist[]
 }
 
 model Menu {
@@ -150,19 +150,13 @@ model Image {
 }
 
 model Stylist {
-  id           Int            @id @default(autoincrement())
-  name         String         @db.VarChar(28)
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar(28)
   image        ModelImage?
   reservations Reservation[]
-  shops        ShopStylists[]
-}
-
-model ShopStylists {
-  id        Int     @id @default(autoincrement())
-  shopId    Int     @map("shop_id")
-  stylistId Int     @map("stylist_id")
-  shop      Shop    @relation(fields: [shopId], references: [id])
-  stylist   Stylist @relation(fields: [stylistId], references: [id])
+  price        Int
+  shopId       Int           @map("shop_id")
+  shop         Shop          @relation(fields: [shopId], references: [id])
 }
 
 model Reservation {
