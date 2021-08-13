@@ -17,9 +17,17 @@ export type ShopServiceInterface = {
 const salon = asyncHandler(async (req, res) => {
   const { users, totalCount: userTotalCount } = await UserService.fetchUsersForDashboard()
   const { shops, totalCount: shopTotalCount } = await ShopService.fetchShopsForDashboard()
+  const shopIds = shops.map(shop => shop.id)
+  const stylistCounts = await ShopService.fetchStylistsCountByShopIds(shopIds)
+  const reservationCounts = await ShopService.fetchReservationsCountByShopIds(shopIds)
+  const shopData = shops.map(shop => ({
+    ...shop,
+    reservationsCount: reservationCounts.find(item => item.id === shop.id)?.count,
+    stylistsCount: stylistCounts.find(item => item.id === shop.id)?.count,
+  }))
   return res.send({
     user: { users, totalCount: userTotalCount },
-    shop: { shops, totalCount: shopTotalCount },
+    shop: { shopData, totalCount: shopTotalCount },
   })
 })
 
