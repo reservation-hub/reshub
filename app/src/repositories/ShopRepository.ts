@@ -18,7 +18,12 @@ Prisma.ShopGetPayload<typeof shopWithShopDetailsAndAreaAndPrefectureAndCity>
 const shopWithShopDetailsAndLocationAndMenu = Prisma.validator<Prisma.ShopArgs>()(
   {
     include: {
-      shopDetail: true, area: true, prefecture: true, city: true, menu: { include: { items: true } },
+      shopDetail: true,
+      area: true,
+      prefecture: true,
+      city: true,
+      menu: { include: { items: true } },
+      stylists: true,
     },
   },
 )
@@ -47,7 +52,7 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
   phoneNumber: shop.shopDetail?.phoneNumber ?? null,
 })
 
-export const reconstructShopWithMenu = (shop: shopWithShopDetailsAndLocationAndMenu): Shop => ({
+export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndLocationAndMenu): Shop => ({
   id: shop.id,
   area: {
     id: shop.area.id,
@@ -76,6 +81,7 @@ export const reconstructShopWithMenu = (shop: shopWithShopDetailsAndLocationAndM
       price: item.price,
     })),
   },
+  stylists: shop.stylists,
 })
 
 export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket & StylistServiceSocket = {
@@ -102,10 +108,15 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     const shop = await prisma.shop.findUnique({
       where: { id },
       include: {
-        shopDetail: true, area: true, prefecture: true, city: true, menu: { include: { items: true } },
+        shopDetail: true,
+        area: true,
+        prefecture: true,
+        city: true,
+        menu: { include: { items: true } },
+        stylists: true,
       },
     })
-    return shop ? reconstructShopWithMenu(shop) : null
+    return shop ? reconstructShopWithMenuAndStylists(shop) : null
   },
 
   async insertShop(name, areaId, prefectureId, cityId, address, phoneNumber) {

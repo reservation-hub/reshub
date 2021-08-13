@@ -231,18 +231,17 @@ const roles = [
   const randomShopInt = Math.floor(Math.random() * shopCounts)
   const randomShop = async () => prisma.shop.findFirst({ skip: randomShopInt })
   const stylists = [
-    { name: 'Testarou', shop: await randomShop() },
-    { name: 'Testoko', shop: await randomShop() },
+    { name: 'Testarou', price: 500, shop: await randomShop() },
+    { name: 'Testoko', price: 500, shop: await randomShop() },
   ]
 
   const stylistPromises = stylists.map(async stylist => prisma.stylist.create({
     data: {
       name: stylist.name,
-      shops: {
-        create: {
-          shop: {
-            connect: { id: stylist.shop?.id },
-          },
+      price: stylist.price,
+      shop: {
+        connect: {
+          id: stylist.shop?.id,
         },
       },
     },

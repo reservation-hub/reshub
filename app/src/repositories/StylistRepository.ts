@@ -7,17 +7,18 @@ import { StylistRepositoryInterface as ShopServiceSocket } from '../services/Sho
 import { Stylist } from '../entities/Stylist'
 
 const stylistWithShops = Prisma.validator<Prisma.StylistArgs>()(
-  { include: { shops: { include: { shop: { include: { shopDetail: true } } } } } },
+  { include: { shop: { include: { shopDetail: true } } } },
 )
 type stylistWithShops = Prisma.StylistGetPayload<typeof stylistWithShops>
 
 export const reconstructStylist = (stylist: stylistWithShops): Stylist => ({
   id: stylist.id,
   name: stylist.name,
-  shops: stylist.shops.map(shopStylists => ({
-    id: shopStylists.shopId,
-    name: shopStylists.shop.shopDetail?.name,
-  })),
+  price: stylist.price,
+  shop: {
+    id: stylist.shopId,
+    name: stylist.shop.shopDetail?.name,
+  },
 })
 
 export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopServiceSocket & StylistServiceSocket = {
