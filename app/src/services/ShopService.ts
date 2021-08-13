@@ -3,6 +3,7 @@ import { Shop, ShopSchedule } from '../entities/Shop'
 import { Reservation } from '../entities/Reservation'
 import { ShopServiceInterface as ShopControllerSocket } from '../controllers/shopController'
 import { ShopServiceInterface as MenuControllerSocket } from '../controllers/menuController'
+import { ShopServiceInterface as DashboardControllerSocket } from '../controllers/dashboardController'
 import StylistRepository from '../repositories/StylistRepository'
 import ReservationRepository from '../repositories/ReservationRepository'
 import { LocationRepository } from '../repositories/LocationRepository'
@@ -90,10 +91,16 @@ export type upsertMenuItemQuery = {
 
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
-export const ShopService: ShopControllerSocket & MenuControllerSocket = {
+export const ShopService: ShopControllerSocket & MenuControllerSocket & DashboardControllerSocket = {
+
+  async fetchShopsForDashboard() {
+    const shops = await ShopRepository.fetchAll({ limit: 5 })
+    const shopsCount = await ShopRepository.totalCount()
+    return { shops, totalCount: shopsCount }
+  },
 
   async fetchShopsWithTotalCount(query) {
-    const shops = await ShopRepository.fetchAll(query.page, query.order)
+    const shops = await ShopRepository.fetchAll(query)
     const shopsCount = await ShopRepository.totalCount()
     return { data: shops, totalCount: shopsCount }
   },

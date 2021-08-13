@@ -47,208 +47,202 @@ export const convertEntityGenderToDBGender = (gender: Gender): string => {
   }
 }
 
-export const fetchAll = async (page = 0, order:any = 'asc'): Promise<User[]> => {
-  const skipIndex = page > 1 ? (page - 1) * 10 : 0
-  const limit = 10
-  const users = await prisma.user.findMany({
-    skip: skipIndex,
-    orderBy: { id: order },
-    take: limit,
-    include: {
-      profile: true,
-      oAuthIds: true,
-      roles: {
-        include: { role: true },
+const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & AuthServiceSocket = {
+  async fetchAll({ page = 0, order = 'asc', limit = 10 }) {
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const users = await prisma.user.findMany({
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
+      include: {
+        profile: true,
+        oAuthIds: true,
+        roles: {
+          include: { role: true },
+        },
       },
-    },
-  })
+    })
 
-  const cleanUsers = users.map(user => reconstructUser(user))
+    const cleanUsers = users.map(user => reconstructUser(user))
 
-  return cleanUsers
-}
-export const totalCount = async (): Promise<number> => prisma.user.count()
+    return cleanUsers
+  },
 
-export const fetch = async (id: number): Promise<User | null> => {
-  const user = await prisma.user.findUnique({
-    where: { id },
-    include: {
-      profile: true,
-      oAuthIds: true,
-      roles: {
-        include: { role: true },
+  async fetch(id) {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: {
+        profile: true,
+        oAuthIds: true,
+        roles: {
+          include: { role: true },
+        },
       },
-    },
-  })
-  return user ? reconstructUser(user) : null
-}
+    })
+    return user ? reconstructUser(user) : null
+  },
 
-export const insertUserWithProfile = async (
-  email: string,
-  password: string,
-  roleIds: number[],
-  lastNameKanji: string,
-  firstNameKanji: string,
-  lastNameKana: string,
-  firstNameKana: string,
-  birthday: string,
-  gender: string,
-): Promise<User> => {
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password,
-      roles: {
-        create: roleIds.map(id => ({
+  async totalCount() {
+    return prisma.user.count()
+  },
+
+  async insertUserWithProfile(
+    email,
+    password,
+    roleIds,
+    lastNameKanji,
+    firstNameKanji,
+    lastNameKana,
+    firstNameKana,
+    birthday,
+    gender,
+  ) {
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password,
+        roles: {
+          create: roleIds.map(id => ({
+            role: {
+              connect: { id },
+            },
+          })),
+        },
+        profile: {
+          create: {
+            lastNameKanji,
+            firstNameKanji,
+            lastNameKana,
+            firstNameKana,
+            birthday,
+            gender: convertEntityGenderToDBGender(gender),
+          },
+        },
+      },
+      include: {
+        profile: true,
+        oAuthIds: true,
+        roles: { include: { role: true } },
+      },
+    })
+    const cleanUser = reconstructUser(user)
+    return cleanUser
+  },
+
+  async updateUserFromAdmin(
+    id,
+    email,
+    lastNameKanji,
+    firstNameKanji,
+    lastNameKana,
+    firstNameKana,
+    birthday,
+    gender,
+    rolesToAdd,
+    rolesToRemove,
+  ) {
+    let removeQuery
+    if (rolesToRemove.length > 0) {
+      removeQuery = `DELETE from "UserRoles" WHERE user_id = ${id} AND role_id IN (${rolesToRemove.toString()});`
+    }
+
+    let roleAddQuery
+    if (rolesToAdd.length > 0) {
+      roleAddQuery = {
+        create: rolesToAdd.map(id => ({
           role: {
             connect: { id },
           },
         })),
-      },
-      profile: {
-        create: {
-          lastNameKanji,
-          firstNameKanji,
-          lastNameKana,
-          firstNameKana,
-          birthday,
-          gender: convertEntityGenderToDBGender(gender),
-        },
-      },
-    },
-    include: {
-      profile: true,
-      oAuthIds: true,
-      roles: { include: { role: true } },
-    },
-  })
-  const cleanUser = reconstructUser(user)
-  return cleanUser
-}
-
-export const updateUserFromAdmin = async (
-  id: number,
-  email: string,
-  lastNameKanji: string,
-  firstNameKanji: string,
-  lastNameKana: string,
-  firstNameKana: string,
-  birthday: string,
-  gender: string,
-  rolesToAdd: number[],
-  rolesToRemove: number[],
-):Promise<User> => {
-  let removeQuery
-  if (rolesToRemove.length > 0) {
-    removeQuery = `DELETE from "UserRoles" WHERE user_id = ${id} AND role_id IN (${rolesToRemove.toString()});`
-  }
-
-  let roleAddQuery
-  if (rolesToAdd.length > 0) {
-    roleAddQuery = {
-      create: rolesToAdd.map(id => ({
-        role: {
-          connect: { id },
-        },
-      })),
+      }
     }
-  }
 
-  const updateQuery = {
-    where: { id },
-    data: {
-      profile: {
-        update: {
-          firstNameKanji,
-          lastNameKanji,
-          firstNameKana,
-          lastNameKana,
-          birthday,
-          gender: convertEntityGenderToDBGender(gender),
+    const updateQuery = {
+      where: { id },
+      data: {
+        profile: {
+          update: {
+            firstNameKanji,
+            lastNameKanji,
+            firstNameKana,
+            lastNameKana,
+            birthday,
+            gender: convertEntityGenderToDBGender(gender),
+          },
         },
+        roles: roleAddQuery,
+        email,
       },
-      roles: roleAddQuery,
-      email,
-    },
-    include: {
-      oAuthIds: true,
-      profile: true,
-      roles: { include: { role: true } },
-    },
-  }
+      include: {
+        oAuthIds: true,
+        profile: true,
+        roles: { include: { role: true } },
+      },
+    }
 
-  // execute
-  if (removeQuery) {
-    const transactionResult = await prisma.$transaction([
-      prisma.$queryRaw(removeQuery),
-      prisma.user.update(updateQuery),
-    ])
-    const cleanUser = reconstructUser(transactionResult[1])
+    // execute
+    if (removeQuery) {
+      const transactionResult = await prisma.$transaction([
+        prisma.$queryRaw(removeQuery),
+        prisma.user.update(updateQuery),
+      ])
+      const cleanUser = reconstructUser(transactionResult[1])
+      return cleanUser
+    }
+
+    const user = await prisma.user.update(updateQuery)
+    const cleanUser = reconstructUser(user)
     return cleanUser
-  }
+  },
 
-  const user = await prisma.user.update(updateQuery)
-  const cleanUser = reconstructUser(user)
-  return cleanUser
-}
+  async deleteUserFromAdmin(id) {
+    const user = await prisma.user.delete({
+      where: { id },
+      include: {
+        oAuthIds: true,
+        profile: true,
+        roles: { include: { role: true } },
+      },
+    })
+    return reconstructUser(user)
+  },
 
-export const deleteUserFromAdmin = async (id: number): Promise<User> => {
-  const user = await prisma.user.delete({
-    where: { id },
-    include: {
-      oAuthIds: true,
-      profile: true,
-      roles: { include: { role: true } },
-    },
-  })
-  return reconstructUser(user)
-}
-export const fetchByEmail = async (email: string): Promise<User | null> => {
-  const user = await prisma.user.findUnique({
-    where: { email },
-    include: {
-      oAuthIds: true,
-      profile: true,
-      roles: { include: { role: true } },
-    },
-  })
-  return user ? reconstructUser(user) : null
-}
-export const addOAuthId = async (id: number, provider: string, authId: string)
-: Promise<boolean> => {
-  const updateQuery = {
-    where: { id },
-    data: {
-      oAuthIds: {
-        upsert: {
-          update: {},
-          create: {},
+  async fetchByEmail(email) {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        oAuthIds: true,
+        profile: true,
+        roles: { include: { role: true } },
+      },
+    })
+    return user ? reconstructUser(user) : null
+  },
+
+  async addOAuthId(id, provider, authId) {
+    const updateQuery = {
+      where: { id },
+      data: {
+        oAuthIds: {
+          upsert: {
+            update: {},
+            create: {},
+          },
         },
       },
-    },
-  }
+    }
 
-  switch (provider) {
-    case 'google':
-      Object.assign(updateQuery.data.oAuthIds.upsert.create, { googleId: authId })
-      Object.assign(updateQuery.data.oAuthIds.upsert.update, { googleId: authId })
-      break
-    default:
-  }
+    switch (provider) {
+      case 'google':
+        Object.assign(updateQuery.data.oAuthIds.upsert.create, { googleId: authId })
+        Object.assign(updateQuery.data.oAuthIds.upsert.update, { googleId: authId })
+        break
+      default:
+    }
 
-  const user = await prisma.user.update(updateQuery)
-  return !!user
-}
-
-const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & AuthServiceSocket = {
-  fetchAll,
-  fetch,
-  totalCount,
-  insertUserWithProfile,
-  updateUserFromAdmin,
-  deleteUserFromAdmin,
-  fetchByEmail,
-  addOAuthId,
+    const user = await prisma.user.update(updateQuery)
+    return !!user
+  },
 }
 
 export default UserRepository

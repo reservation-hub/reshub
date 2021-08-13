@@ -79,9 +79,8 @@ export const reconstructShopWithMenu = (shop: shopWithShopDetailsAndLocationAndM
 })
 
 export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket & StylistServiceSocket = {
-  async fetchAll(page = 0, order = 'asc') {
+  async fetchAll({ page = 0, order = 'asc' as any, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
-    const limit = 10
     const shops = await prisma.shop.findMany({
       skip: skipIndex,
       orderBy: { id: order },

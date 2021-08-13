@@ -10,7 +10,7 @@ import AuthService from '../services/AuthService'
 import googleSchema from './schemas/google'
 
 export type AuthServiceInterface = {
-  createToken(user: Express.User): string,
+  createToken(user: Express.User): Promise<string>,
   verifyIfUserInTokenIsLoggedIn(authToken: any, headerToken?: string): Promise<void>,
   googleAuthenticate(token: string): Promise<User>,
   hack(): Promise<User>
