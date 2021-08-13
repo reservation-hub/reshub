@@ -42,7 +42,7 @@ export type LocationRepositoryInterface = {
 
 export type StylistRepositoryInterface = {
   fetchStylistsByShopIds(shopIds: number[])
-    : Promise<{ id: number, name: string, shopId:number }[]>,
+    : Promise<{ id: number, name: string, price: number, shopId:number }[]>,
   fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ id: number, count: number }[]>,
 }
 

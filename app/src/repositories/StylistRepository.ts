@@ -28,7 +28,7 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
       skip: skipIndex,
       orderBy: { id: order },
       take: limit,
-      include: { shops: { include: { shop: { include: { shopDetail: true } } } } },
+      include: { shop: { include: { shopDetail: true } } },
     })
     const cleanStylists = stylists.map(stylist => reconstructStylist(stylist))
     return cleanStylists
@@ -41,70 +41,36 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
   async fetch(id) {
     const stylist = await prisma.stylist.findUnique({
       where: { id },
-      include: { shops: { include: { shop: { include: { shopDetail: true } } } } },
+      include: { shop: { include: { shopDetail: true } } },
     })
     return stylist ? reconstructStylist(stylist) : null
   },
 
-  async insertStylist(name, shopIds) {
+  async insertStylist(name, price, shopId) {
     const stylist = await prisma.stylist.create({
       data: {
         name,
-        shops: {
-          create: shopIds.map(id => ({
-            shop: {
-              connect: { id },
-            },
-          })),
+        price,
+        shop: {
+          connect: { id: shopId },
         },
       },
-      include: { shops: { include: { shop: { include: { shopDetail: true } } } } },
+      include: { shop: { include: { shopDetail: true } } },
     })
     const cleanStylist = reconstructStylist(stylist)
     return cleanStylist
   },
 
-  async updateStylist(id, name, shopIdsToAdd, shopIdsToRemove) {
-    let removeQuery
-    if (shopIdsToRemove.length > 0) {
-      removeQuery = `
-        DELETE
-        FROM "ShopStylists"
-        WHERE stylist_id = ${id}
-        AND shop_id IN (${shopIdsToRemove.toString()});`
-    }
-
-    let shopAddQuery
-    if (shopIdsToAdd.length > 0) {
-      shopAddQuery = {
-        create: shopIdsToAdd.map(id => ({
-          shop: {
-            connect: { id },
-          },
-        })),
-      }
-    }
-
-    const updateQuery = {
+  async updateStylist(id, name, price, shopId) {
+    const stylist = await prisma.stylist.update({
       where: { id },
       data: {
         name,
-        shops: shopAddQuery,
+        price,
+        shop: { connect: { id: shopId } },
       },
-      include: { shops: { include: { shop: { include: { shopDetail: true } } } } },
-    }
-
-    // execute
-    if (removeQuery) {
-      const transactionResult = await prisma.$transaction([
-        prisma.$queryRaw(removeQuery),
-        prisma.stylist.update(updateQuery),
-      ])
-      const cleanStylist = reconstructStylist(transactionResult[1])
-      return cleanStylist
-    }
-
-    const stylist = await prisma.stylist.update(updateQuery)
+      include: { shop: { include: { shopDetail: true } } },
+    })
     const cleanStylist = reconstructStylist(stylist)
     return cleanStylist
   },
@@ -112,28 +78,24 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
   async deleteStylist(id) {
     const stylist = await prisma.stylist.delete({
       where: { id },
-      include: { shops: { include: { shop: { include: { shopDetail: true } } } } },
+      include: { shop: { include: { shopDetail: true } } },
     })
     const cleanStylist = reconstructStylist(stylist)
     return cleanStylist
   },
 
   async fetchStylistsByShopIds(shopIds) {
-    const query = `
-    SELECT st.id, st.name, sp.id as shop_id
-    FROM "Stylist" AS st 
-    LEFT JOIN "ShopStylists" AS ss ON st.id = ss.stylist_id
-    LEFT JOIN "Shop" as sp on sp.id = ss.shop_id
-    WHERE sp.id in (${shopIds})
-    `
-    const data = await prisma.$queryRaw(query)
-
-    // convert snakecase to camelcase
-    data.forEach((datum: any) => {
-      datum.shopId = datum.shop_id
-      delete datum.shop_id
+    const stylists = await prisma.stylist.findMany({
+      where: { shopId: { in: shopIds } },
+      include: { shop: { include: { shopDetail: true } } },
     })
-    return data
+    const cleanStylists = stylists.map(stylist => ({
+      id: stylist.id,
+      name: stylist.name,
+      price: stylist.price,
+      shopId: stylist.shopId,
+    }))
+    return cleanStylists
   },
 
   async fetchStylistsCountByShopIds(shopIds) {

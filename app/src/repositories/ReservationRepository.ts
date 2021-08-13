@@ -10,7 +10,7 @@ const reservationWithUserAndStylistAndShopWithoutLocation = Prisma.validator<Pri
     include: {
       user: { include: { profile: true, roles: { include: { role: true } } } },
       shop: { include: { shopDetail: true } },
-      stylist: { include: { shops: { include: { shop: true } } } },
+      stylist: { include: { shop: true } },
     },
   },
 )
@@ -28,7 +28,8 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
   stylist: {
     id: reservation.stylist.id,
     name: reservation.stylist.name,
-    shops: reservation.stylist.shops.map(shop => shop.shop),
+    price: reservation.stylist.price,
+    shop: reservation.stylist.shop,
   },
   user: {
     id: reservation.user.id,
@@ -51,7 +52,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
       include: {
         user: { include: { profile: true, roles: { include: { role: true } } } },
         shop: { include: { shopDetail: true } },
-        stylist: { include: { shops: { include: { shop: true } } } },
+        stylist: { include: { shop: true } },
       },
     })
 
@@ -70,7 +71,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
       include: {
         user: { include: { profile: true, roles: { include: { role: true } } } },
         shop: { include: { shopDetail: true } },
-        stylist: { include: { shops: { include: { shop: true } } } },
+        stylist: { include: { shop: true } },
       },
     })
     return reservation ? reconstructReservation(reservation) : null
@@ -82,7 +83,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
       include: {
         user: { include: { profile: true, roles: { include: { role: true } } } },
         shop: { include: { shopDetail: true } },
-        stylist: { include: { shops: { include: { shop: true } } } },
+        stylist: { include: { shop: true } },
       },
     })
 
