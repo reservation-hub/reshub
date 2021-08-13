@@ -41,72 +41,66 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
   },
 })
 
-export const fetchAll = async (page = 0, order: any = 'asc'): Promise<Reservation[]> => {
-  const skipIndex = page > 1 ? (page - 1) * 10 : 0
-  const limit = 10
-  const reservations = await prisma.reservation.findMany({
-    skip: skipIndex,
-    orderBy: { id: order },
-    take: limit,
-    include: {
-      user: { include: { profile: true, roles: { include: { role: true } } } },
-      shop: { include: { shopDetail: true } },
-      stylist: { include: { shops: { include: { shop: true } } } },
-    },
-  })
-
-  const cleanReservations = reservations.map(r => reconstructReservation(r))
-
-  return cleanReservations
-}
-
-export const totalCount = async (): Promise<number> => prisma.reservation.count()
-
-export const fetch = async (id: number): Promise<Reservation | null> => {
-  const reservation = await prisma.reservation.findUnique({
-    where: { id },
-    include: {
-      user: { include: { profile: true, roles: { include: { role: true } } } },
-      shop: { include: { shopDetail: true } },
-      stylist: { include: { shops: { include: { shop: true } } } },
-    },
-  })
-  return reservation ? reconstructReservation(reservation) : null
-}
-
-export const fetchReservationsByShopIds = async (shopIds: number[])
-: Promise<{ id: number, data: Reservation[] }[]> => {
-  const reservations = await prisma.reservation.findMany({
-    where: { shopId: { in: shopIds } },
-    include: {
-      user: { include: { profile: true, roles: { include: { role: true } } } },
-      shop: { include: { shopDetail: true } },
-      stylist: { include: { shops: { include: { shop: true } } } },
-    },
-  })
-
-  const finalData = shopIds.map(id => ({
-    id,
-    data: reservations.filter(reservation => reservation.shopId === id)
-      .map(reservation => reconstructReservation(reservation)),
-  }))
-
-  return finalData
-}
-
-export const fetchReservationsCountByShopIds = async (shopIds: number[])
-: Promise<{ id: number, count: number }[]> => {
-  const value = await fetchReservationsByShopIds(shopIds)
-  const finalData = value.map(item => ({ id: item.id, count: item.data.length }))
-  return finalData
-}
-
 const ReservationRepository: CommonRepositoryInterface<Reservation> & ReservationServiceSocket & ShopServiceSocket = {
-  fetchAll,
-  totalCount,
-  fetch,
-  fetchReservationsByShopIds,
-  fetchReservationsCountByShopIds,
+  async fetchAll({ page = 0, order = 'asc' as any, limit = 10 }) {
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const reservations = await prisma.reservation.findMany({
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
+      include: {
+        user: { include: { profile: true, roles: { include: { role: true } } } },
+        shop: { include: { shopDetail: true } },
+        stylist: { include: { shops: { include: { shop: true } } } },
+      },
+    })
+
+    const cleanReservations = reservations.map(r => reconstructReservation(r))
+
+    return cleanReservations
+  },
+
+  async totalCount() {
+    return prisma.reservation.count()
+  },
+
+  async fetch(id) {
+    const reservation = await prisma.reservation.findUnique({
+      where: { id },
+      include: {
+        user: { include: { profile: true, roles: { include: { role: true } } } },
+        shop: { include: { shopDetail: true } },
+        stylist: { include: { shops: { include: { shop: true } } } },
+      },
+    })
+    return reservation ? reconstructReservation(reservation) : null
+  },
+
+  async fetchReservationsByShopIds(shopIds) {
+    const reservations = await prisma.reservation.findMany({
+      where: { shopId: { in: shopIds } },
+      include: {
+        user: { include: { profile: true, roles: { include: { role: true } } } },
+        shop: { include: { shopDetail: true } },
+        stylist: { include: { shops: { include: { shop: true } } } },
+      },
+    })
+
+    const finalData = shopIds.map(id => ({
+      id,
+      data: reservations.filter(reservation => reservation.shopId === id)
+        .map(reservation => reconstructReservation(reservation)),
+    }))
+
+    return finalData
+  },
+
+  async fetchReservationsCountByShopIds(shopIds) {
+    const value = await this.fetchReservationsByShopIds(shopIds)
+    const finalData = value.map(item => ({ id: item.id, count: item.data.length }))
+    return finalData
+  },
+
 }
 
 export default ReservationRepository

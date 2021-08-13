@@ -8,25 +8,26 @@ import {
 export type LocationQuery = {
   page: number,
   order: any,
+  limit: number,
 }
 
 export type LocationResponse = { data: Area[] | Prefecture[] | City[], totalCount: number }
 
 export const fetchAreasWithCount = async (query: LocationQuery) : Promise<LocationResponse> => {
   const areaCount = await AreaRepository.totalCount()
-  const areas = await AreaRepository.fetchAll(query.page, query.order)
+  const areas = await AreaRepository.fetchAll(query)
   return { data: areas, totalCount: areaCount }
 }
 
 export const fetchPrefecturesWithCount = async (query: LocationQuery) : Promise<LocationResponse> => {
   const prefectureCount = await PrefectureRepository.totalCount()
-  const prefectures = await PrefectureRepository.fetchAll(query.page, query.order)
+  const prefectures = await PrefectureRepository.fetchAll(query)
   return { data: prefectures, totalCount: prefectureCount }
 }
 
 export const fetchCitiesWithCount = async (query: LocationQuery) : Promise<LocationResponse> => {
   const cityCount = await CityRepository.totalCount()
-  const cities = await CityRepository.fetchAll(query.page, query.order)
+  const cities = await CityRepository.fetchAll(query)
   return { data: cities, totalCount: cityCount }
 }
 

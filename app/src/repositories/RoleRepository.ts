@@ -15,10 +15,9 @@ export const extractValidRoleIds = async (roleIds: number[])
   return validRoles.map(validRole => validRole.id)
 }
 
-export const fetchAll = async (page = 0, order: any = 'asc')
+export const fetchAll = async ({ page = 0, order = 'asc' as any, limit = 10 })
   : Promise<Role[]> => {
   const skipIndex = page > 1 ? (page - 1) * 10 : 0
-  const limit = 10
   return prisma.role.findMany({
     skip: skipIndex,
     orderBy: { id: order },

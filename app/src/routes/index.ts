@@ -4,6 +4,7 @@ import {
 
 import { protectRoute } from './utils'
 
+import dashboardController from '../controllers/dashboardController'
 import { areaController, prefectureController, cityController } from '../controllers/locationController'
 import authController from '../controllers/authController'
 import userController from '../controllers/userController'
@@ -20,6 +21,7 @@ const router = Router()
 export default router
 
 router.use('/auth', authController)
+router.use('/dashboard', protectRoute, dashboardController)
 router.use('/areas', protectRoute, areaController)
 router.use('/prefectures', protectRoute, prefectureController)
 router.use('/cities', protectRoute, cityController)

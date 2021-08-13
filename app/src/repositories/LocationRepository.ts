@@ -21,9 +21,8 @@ Promise<boolean> => {
 export const LocationRepository: LocationRepositoryInterface = { isValidLocation }
 
 export const AreaRepository:CommonRepositoryInterface<Area> = {
-  async fetchAll(page, order) {
+  async fetchAll({ page = 1, order = 'asc' as any, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
-    const limit = 10
     return prisma.area.findMany({
       skip: skipIndex,
       orderBy: { id: order },
@@ -41,9 +40,8 @@ export const AreaRepository:CommonRepositoryInterface<Area> = {
 }
 
 export const PrefectureRepository:CommonRepositoryInterface<Prefecture> = {
-  async fetchAll(page = 0, order: any = 'asc') {
+  async fetchAll({ page = 0, order = 'asc' as any, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
-    const limit = 10
     return prisma.prefecture.findMany({
       skip: skipIndex,
       orderBy: { id: order },
@@ -61,9 +59,8 @@ export const PrefectureRepository:CommonRepositoryInterface<Prefecture> = {
 }
 
 export const CityRepository:CommonRepositoryInterface<City> = {
-  async fetchAll(page = 0, order: any = 'asc') {
+  async fetchAll({ page = 0, order = 'asc' as any, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
-    const limit = 10
     return prisma.city.findMany({
       skip: skipIndex,
       orderBy: { id: order },
