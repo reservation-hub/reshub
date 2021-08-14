@@ -8,8 +8,8 @@ import {
   updateShopQuery,
   insertStylistQuery,
   updateStylistQuery,
+  deleteStylistQuery,
   upsertScheduleQuery,
-  deleteStylist,
 } from '../request-response-types/ShopService'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
 import { Shop, ShopSchedule } from '../entities/Shop'
@@ -35,7 +35,7 @@ export type ShopServiceInterface = {
     : Promise<Stylist>
   updateStylist(query: updateStylistQuery)
     : Promise<Stylist>
-  deleteStylist(query: deleteStylist)
+  deleteStylist(query: deleteStylistQuery)
     : Promise<Stylist>
 }
 
