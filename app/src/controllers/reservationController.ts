@@ -1,24 +1,27 @@
 import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
-// import { reservationUpsertSchema } from './schemas/reservation'
+import { reservationUpsertSchema } from './schemas/reservation'
 import indexSchema from './schemas/indexSchema'
 import { Reservation } from '../entities/Reservation'
 import ReservationService from '../services/ReservationService'
-// import { insertReservationQuery, updateReservationQuery } from '../request-response-types/ReservationService'
+import { insertReservationQuery, updateReservationQuery } from '../request-response-types/ReservationService'
 import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 
 export type ReservationServiceInterface = {
   fetchReservationsWithTotalCount(query: fetchModelsWithTotalCountQuery)
     : Promise<{ data: Reservation[], totalCount: number }>,
   fetchReservation(id: number): Promise<Reservation>,
+  insertReservation(query: insertReservationQuery): Promise<Reservation>,
+  updateReservation(query: updateReservationQuery): Promise<Reservation>,
+  deleteReservation(id: number): Promise<Reservation>,
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 export const index = asyncHandler(async (req, res) => {
-  const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
-  const reservationsWithcount = await ReservationService.fetchReservationsWithTotalCount(schemaValues)
+  const params = await indexSchema.validateAsync(req.query, joiOptions)
+  const reservationsWithcount = await ReservationService.fetchReservationsWithTotalCount(params)
   return res.send(reservationsWithcount)
 })
 
@@ -28,35 +31,31 @@ export const showReservation = asyncHandler(async (req, res) => {
   return res.send(reservation)
 })
 
+const insertReservation = asyncHandler(async (req, res) => {
+  const params = await reservationUpsertSchema.validateAsync(req.body, joiOptions)
+  const reservation = await ReservationService.insertReservation(params)
+  return res.send(reservation)
+})
+
+const updateReservation = asyncHandler(async (req, res) => {
+  const params = await reservationUpsertSchema.validateAsync(req.body, joiOptions)
+  const { id } = res.locals
+  const reservation = await ReservationService.updateReservation({ id, params })
+  return res.send(reservation)
+})
+
+const deleteReservation = asyncHandler(async (req, res) => {
+  const { id } = res.locals
+  await ReservationService.deleteReservation(id)
+  return res.send({ message: 'Reservation deleted' })
+})
+
 const routes = Router()
 
 routes.get('/', roleCheck(['admin']), index)
 routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showReservation)
+routes.post('/', roleCheck(['admin']), insertReservation)
+routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateReservation)
+routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteReservation)
 
 export default routes
-
-// const insertReservation = asyncHandler(async (req, res, next) => {
-//   const {
-//     error: reservationSchemaError,
-//     value: reservationValues,
-//   } = reservationUpsertSchema.validateAsync(req.body, joiOptions)
-
-//   if (reservationSchemaError) {
-//     return next({ code: 400, message: 'Invalid input values', error: reservationSchemaError })
-//   }
-
-//   // TODO validate if shop, stylist, or user is valid
-//   const {
-//     error: insertReservationError,
-//     value: reservation,
-//   } = await ReservationRepository.insertReservation(
-//     reservationValues.reservationDate, reservationValues.shopId,
-//     reservationValues.stylistId, reservationValues.userId,
-//   )
-
-//   if (insertReservationError) {
-//     return next({ code: 400, message: 'Invalid input values', error: insertReservationError })
-//   }
-
-//   return res.send({ data: reservation })
-// })

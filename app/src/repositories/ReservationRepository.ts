@@ -102,30 +102,67 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
     return finalData
   },
 
+  async insertReservation(reservationDate, userId, shopId, stylistId) {
+    const reservation = await prisma.reservation.create({
+      data: {
+        reservationDate,
+        shop: {
+          connect: { id: shopId },
+        },
+        stylist: {
+          connect: { id: stylistId },
+        },
+        user: {
+          connect: { id: userId },
+        },
+      },
+      include: {
+        user: { include: { profile: true, roles: { include: { role: true } } } },
+        shop: { include: { shopDetail: true } },
+        stylist: { include: { shop: true } },
+      },
+    })
+    const cleanReservation = reconstructReservation(reservation)
+    return cleanReservation
+  },
+
+  async updateReservation(id, reservationDate, userId, shopId, stylistId) {
+    const reservation = await prisma.reservation.update({
+      where: { id },
+      data: {
+        reservationDate,
+        shop: {
+          connect: { id: shopId },
+        },
+        stylist: {
+          connect: { id: stylistId },
+        },
+        user: {
+          connect: { id: userId },
+        },
+      },
+      include: {
+        user: { include: { profile: true, roles: { include: { role: true } } } },
+        shop: { include: { shopDetail: true } },
+        stylist: { include: { shop: true } },
+      },
+    })
+    const cleanReservation = reconstructReservation(reservation)
+    return cleanReservation
+  },
+
+  async deleteReservation(id) {
+    const reservation = await prisma.reservation.delete({
+      where: { id },
+      include: {
+        user: { include: { profile: true, roles: { include: { role: true } } } },
+        shop: { include: { shopDetail: true } },
+        stylist: { include: { shop: true } },
+      },
+    })
+    const cleanReservation = reconstructReservation(reservation)
+    return cleanReservation
+  },
 }
 
 export default ReservationRepository
-
-// async insertReservation(reservationDate, shopId, stylistId, userId) {
-//   try {
-//     return {
-//       value: await prisma.reservation.create({
-//         data: {
-//           reservationDate,
-//           shop: {
-//             connect: { id: shopId },
-//           },
-//           stylist: {
-//             connect: { id: stylistId },
-//           },
-//           user: {
-//             connect: { id: userId },
-//           },
-//         },
-//       }),
-//     }
-//   } catch (error) {
-//     console.error(`Exception : ${error}`)
-//     return { error, value: null }
-//   }
-// },
