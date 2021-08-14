@@ -15,18 +15,12 @@ export type UserRepositoryInterface = {
   fetchByEmail(email: string): Promise<User | null>,
   addOAuthId(id: number, provider: string, authId: string): Promise<boolean | null>,
 }
-
-export type localAuthenticationQuery = {
-  email: string,
-  password: string,
-}
-
 interface JwtPayload {
   user: User
 }
 
 const AuthService: AuthControllerSocket & PassportSocket = {
-  async createToken(user) {
+  createToken(user) {
     return jwt.sign({ user }, config.JWT_TOKEN_SECRET, {
       audience: 'http://localhost:8080',
       expiresIn: '1d',
@@ -72,16 +66,16 @@ const AuthService: AuthControllerSocket & PassportSocket = {
     return user
   },
 
-  async authenticateByEmailAndPassword(query) {
-    if (!query.email || !query.password) {
+  async authenticateByEmailAndPassword({ email, password }) {
+    if (!email || !password) {
       throw new InvalidParamsError()
     }
 
-    const user = await UserRepository.fetchByEmail(query.email)
+    const user = await UserRepository.fetchByEmail(email)
     if (!user) {
       throw new NotFoundError()
     }
-    if (user.password && !bcrypt.compareSync(query.password, user.password)) {
+    if (user.password && !bcrypt.compareSync(password, user.password)) {
       throw new InvalidParamsError()
     }
 

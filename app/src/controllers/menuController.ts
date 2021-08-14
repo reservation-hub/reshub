@@ -2,34 +2,35 @@ import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
 import { roleCheck, parseIntIdMiddleware } from '../routes/utils'
 import { MenuItem } from '../entities/Menu'
-import ShopService, { upsertMenuItemQuery } from '../services/ShopService'
+import ShopService from '../services/ShopService'
+import { deleteMenuItemQuery, insertMenuItemQuery, updateMenuItemQuery } from '../request-response-types/ShopService'
 import { menuItemUpsertSchema } from './schemas/menu'
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 export type ShopServiceInterface = {
-  insertMenuItem(shopId: number, query: upsertMenuItemQuery): Promise<MenuItem>,
-  updateMenuItem(shopId: number, menuItemId: number, query: upsertMenuItemQuery): Promise<MenuItem>
-  deleteMenuItem(shopId: number, menuItemId: number): Promise<MenuItem>
+  insertMenuItem(query: insertMenuItemQuery): Promise<MenuItem>,
+  updateMenuItem(query: updateMenuItemQuery): Promise<MenuItem>
+  deleteMenuItem(query: deleteMenuItemQuery): Promise<MenuItem>
 }
 
 export const insertMenuItem = asyncHandler(async (req, res) => {
-  const schemaValues = await menuItemUpsertSchema.validateAsync(req.body, joiOptions)
+  const params = await menuItemUpsertSchema.validateAsync(req.body, joiOptions)
   const { shopId } = res.locals
-  const menuItem = await ShopService.insertMenuItem(shopId, schemaValues)
+  const menuItem = await ShopService.insertMenuItem({ shopId, params })
   return res.send(menuItem)
 })
 
 export const updateMenuItem = asyncHandler(async (req, res) => {
-  const schemaValues = await menuItemUpsertSchema.validateAsync(req.body, joiOptions)
+  const params = await menuItemUpsertSchema.validateAsync(req.body, joiOptions)
   const { shopId, menuItemId } = res.locals
-  const menuItem = await ShopService.updateMenuItem(shopId, menuItemId, schemaValues)
+  const menuItem = await ShopService.updateMenuItem({ shopId, menuItemId, params })
   return res.send(menuItem)
 })
 
 export const deleteMenuItem = asyncHandler(async (req, res) => {
   const { shopId, menuItemId } = res.locals
-  const menuItem = await ShopService.deleteMenuItem(shopId, menuItemId)
+  const menuItem = await ShopService.deleteMenuItem({ shopId, menuItemId })
   return res.send(menuItem)
 })
 

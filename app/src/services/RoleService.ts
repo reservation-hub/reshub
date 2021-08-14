@@ -3,7 +3,7 @@ import RoleRepository from '../repositories/RoleRepository'
 import { RoleServiceInterface } from '../controllers/roleController'
 import { DuplicateModelError, NotFoundError } from './Errors/ServiceError'
 
-export type upsertRoleQuery = {
+export type upsertRoleparams = {
   name: string,
   description: string,
   slug: string,
@@ -18,8 +18,8 @@ export type RoleRepositoryInterface = {
 }
 
 const RoleService: RoleServiceInterface = {
-  async fetchRolesWithTotalCount(query) {
-    const roles = await RoleRepository.fetchAll(query)
+  async fetchRolesWithTotalCount(params) {
+    const roles = await RoleRepository.fetchAll(params)
     const roleCounts = await RoleRepository.totalCount()
     return { data: roles, totalCount: roleCounts }
   },
@@ -32,20 +32,20 @@ const RoleService: RoleServiceInterface = {
     return role
   },
 
-  async insertRole(query) {
-    const duplicate = await RoleRepository.fetchBySlug(query.slug)
+  async insertRole(params) {
+    const duplicate = await RoleRepository.fetchBySlug(params.slug)
     if (duplicate) {
       throw new DuplicateModelError()
     }
-    return RoleRepository.insertRole(query.name, query.description, query.slug)
+    return RoleRepository.insertRole(params.name, params.description, params.slug)
   },
 
-  async updateRole(id, query) {
+  async updateRole({ id, params }) {
     const role = await RoleRepository.fetch(id)
     if (!role) {
       throw new NotFoundError()
     }
-    return RoleRepository.updateRole(id, query.name, query.description, query.slug)
+    return RoleRepository.updateRole(id, params.name, params.description, params.slug)
   },
 
   async deleteRole(id) {
