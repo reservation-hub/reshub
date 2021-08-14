@@ -5,20 +5,20 @@ import {
   userInsertSchema, userUpdateSchema,
 } from './schemas/user'
 import indexSchema from './schemas/indexSchema'
-import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
-import UserService, {
-  insertUserFromAdminQuery,
-  updateUserFromAdminQuery,
-} from '../services/UserService'
+import {
+  fetchModelsWithTotalCountQuery, fetchModelsWithTotalCountResponse,
+} from '../request-response-types/ServiceCommonTypes'
+import { insertUserFromAdminQuery, updateUserFromAdminQuery } from '../request-response-types/UserService'
+import UserService from '../services/UserService'
 import {
   User, Female, Male, Gender,
 } from '../entities/User'
 
 export type UserServiceInterface = {
-  fetchUsersWithTotalCount(query: fetchModelsWithTotalCountQuery): Promise<{ data: User[], totalCount: number }>,
+  fetchUsersWithTotalCount(query: fetchModelsWithTotalCountQuery): Promise<fetchModelsWithTotalCountResponse<User>>,
   fetchUser(id: number): Promise<User>,
   insertUserFromAdmin(query: insertUserFromAdminQuery): Promise<User>,
-  updateUserFromAdmin(id: number, query: updateUserFromAdminQuery): Promise<User>,
+  updateUserFromAdmin(query: updateUserFromAdminQuery): Promise<User>,
   deleteUserFromAdmin(id: number): Promise<User>,
 }
 
@@ -48,9 +48,9 @@ export const showUser = asyncHandler(async (req, res) => {
 })
 
 export const insertUser = asyncHandler(async (req, res) => {
-  const userValues = await userInsertSchema.validateAsync(req.body, joiOptions)
+  const params = await userInsertSchema.validateAsync(req.body, joiOptions)
 
-  const user = await UserService.insertUserFromAdmin(userValues)
+  const user = await UserService.insertUserFromAdmin(params)
   if (user.gender) {
     user.gender = convertDBGenderToEntityGender(user.gender)
   }
@@ -59,11 +59,11 @@ export const insertUser = asyncHandler(async (req, res) => {
 })
 
 export const updateUser = asyncHandler(async (req, res) => {
-  const userValues = await userUpdateSchema.validateAsync(req.body, joiOptions)
+  const params = await userUpdateSchema.validateAsync(req.body, joiOptions)
 
   const { id } = res.locals
 
-  const user = await UserService.updateUserFromAdmin(id, userValues)
+  const user = await UserService.updateUserFromAdmin({ id, params })
 
   if (user.gender) {
     user.gender = convertDBGenderToEntityGender(user.gender)

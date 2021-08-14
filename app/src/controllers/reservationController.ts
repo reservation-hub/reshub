@@ -1,11 +1,11 @@
 import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
-// import ReservationService from '../services/ReservationService'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
 // import { reservationUpsertSchema } from './schemas/reservation'
 import indexSchema from './schemas/indexSchema'
 import { Reservation } from '../entities/Reservation'
 import ReservationService from '../services/ReservationService'
+// import { insertReservationQuery, updateReservationQuery } from '../request-response-types/ReservationService'
 import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 
 export type ReservationServiceInterface = {

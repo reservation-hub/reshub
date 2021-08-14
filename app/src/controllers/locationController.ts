@@ -13,20 +13,20 @@ export type LocationServiceInterface = {
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const areaIndex = asyncHandler(async (req, res) => {
-  const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
-  const value = await LocationService.fetchAreasWithCount(schemaValues)
+  const params = await indexSchema.validateAsync(req.query, joiOptions)
+  const value = await LocationService.fetchAreasWithCount(params)
   return res.send(value)
 })
 
 const prefectureIndex = asyncHandler(async (req, res) => {
-  const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
-  const value = await LocationService.fetchPrefecturesWithCount(schemaValues)
+  const params = await indexSchema.validateAsync(req.query, joiOptions)
+  const value = await LocationService.fetchPrefecturesWithCount(params)
   return res.send(value)
 })
 
 const cityIndex = asyncHandler(async (req, res) => {
-  const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
-  const value = await LocationService.fetchCitiesWithCount(schemaValues)
+  const params = await indexSchema.validateAsync(req.query, joiOptions)
+  const value = await LocationService.fetchCitiesWithCount(params)
   return res.send(value)
 })
 

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
-import RoleService, { upsertRoleQuery } from '../services/RoleService'
+import RoleService from '../services/RoleService'
+import { insertRoleQuery, updateRoleQuery } from '../request-response-types/RoleService'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
 import { roleUpsertSchema } from './schemas/role'
 import indexSchema from './schemas/indexSchema'
@@ -10,8 +11,8 @@ import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 export type RoleServiceInterface = {
   fetchRolesWithTotalCount(query: fetchModelsWithTotalCountQuery): Promise<{ data: Role[], totalCount: number }>,
   fetchRole(id: number): Promise<Role>,
-  insertRole(query: upsertRoleQuery): Promise<Role>,
-  updateRole(id: number, query: upsertRoleQuery): Promise<Role>,
+  insertRole(query: insertRoleQuery): Promise<Role>,
+  updateRole(query: updateRoleQuery): Promise<Role>,
   deleteRole(id: number): Promise<Role>,
 }
 
@@ -30,17 +31,17 @@ export const showRole = asyncHandler(async (req, res) => {
 })
 
 export const insertRole = asyncHandler(async (req, res) => {
-  const roleValues = await roleUpsertSchema.validateAsync(req.body, joiOptions)
-  const role = await RoleService.insertRole(roleValues)
+  const params = await roleUpsertSchema.validateAsync(req.body, joiOptions)
+  const role = await RoleService.insertRole(params)
   return res.send(role)
 })
 
 export const updateRole = asyncHandler(async (req, res) => {
-  const roleValues = await roleUpsertSchema.validateAsync(req.body, joiOptions)
+  const params = await roleUpsertSchema.validateAsync(req.body, joiOptions)
 
   const { id } = res.locals
 
-  const role = await RoleService.updateRole(id, roleValues)
+  const role = await RoleService.updateRole({ id, params })
   return res.send(role)
 })
 

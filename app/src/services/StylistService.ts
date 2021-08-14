@@ -4,7 +4,7 @@ import { StylistServiceInterface } from '../controllers/stylistController'
 import { ShopRepository } from '../repositories/ShopRepository'
 import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
-export type upsertStylistQuery = {
+export type upsertStylistparams = {
   name: string,
   price: number,
   shopId: number,
@@ -22,8 +22,8 @@ export type ShopRepositoryInterface = {
 }
 
 const StylistService: StylistServiceInterface = {
-  async fetchStylistsWithTotalCount(query) {
-    const stylists = await StylistRepository.fetchAll(query)
+  async fetchStylistsWithTotalCount(params) {
+    const stylists = await StylistRepository.fetchAll(params)
     const stylistCounts = await StylistRepository.totalCount()
     return { data: stylists, totalCount: stylistCounts }
   },
@@ -36,17 +36,17 @@ const StylistService: StylistServiceInterface = {
     return stylist
   },
 
-  async insertStylist(query) {
-    const shop = await ShopRepository.fetch(query.shopId)
+  async insertStylist(params) {
+    const shop = await ShopRepository.fetch(params.shopId)
     if (!shop) {
       throw new InvalidParamsError()
     }
 
-    return StylistRepository.insertStylist(query.name, query.price, query.shopId)
+    return StylistRepository.insertStylist(params.name, params.price, params.shopId)
   },
 
-  async updateStylist(id, query) {
-    const shop = await ShopRepository.fetch(query.shopId)
+  async updateStylist({ id, params }) {
+    const shop = await ShopRepository.fetch(params.shopId)
     if (!shop) {
       throw new NotFoundError()
     }
@@ -56,7 +56,7 @@ const StylistService: StylistServiceInterface = {
       throw new NotFoundError()
     }
 
-    return StylistRepository.updateStylist(id, query.name, query.price, query.shopId)
+    return StylistRepository.updateStylist(id, params.name, params.price, params.shopId)
   },
 
   async deleteStylist(id) {
