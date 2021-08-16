@@ -40,6 +40,9 @@ export type RoleRepositoryInterface = {
 const UserService: UserControllerSocket & DashboardControllerSocket = {
   async fetchUsersForDashboard() {
     const users = await UserRepository.fetchAll({ limit: 5 })
+    users.forEach(user => {
+      delete user.password
+    })
     const totalCount = await UserRepository.totalCount()
     return { users, totalCount }
   },
