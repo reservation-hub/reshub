@@ -2,7 +2,6 @@ import { Prisma } from '@prisma/client'
 import prisma from './prisma'
 import { CommonRepositoryInterface } from './CommonRepository'
 import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
-import { ShopRepositoryInterface as StylistServiceSocket } from '../services/StylistService'
 import { Shop, ShopSchedule } from '../entities/Shop'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
@@ -84,7 +83,7 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
   stylists: shop.stylists,
 })
 
-export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket & StylistServiceSocket = {
+export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket = {
   async fetchAll({ page = 0, order = 'asc' as any, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const shops = await prisma.shop.findMany({

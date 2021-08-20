@@ -11,7 +11,6 @@ import userController from '../controllers/userController'
 import shopController from '../controllers/shopController'
 import menuController from '../controllers/menuController'
 import roleController from '../controllers/roleController'
-import stylistController from '../controllers/stylistController'
 import reservationController from '../controllers/reservationController'
 
 import apiRoutes from './api'
@@ -28,7 +27,6 @@ router.use('/cities', protectRoute, cityController)
 router.use('/users', protectRoute, userController)
 router.use('/roles', protectRoute, roleController)
 router.use('/shops', protectRoute, shopController, menuController)
-router.use('/stylists', protectRoute, stylistController)
 router.use('/reservations', protectRoute, reservationController)
 
 // client api

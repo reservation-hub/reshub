@@ -9,6 +9,7 @@ import ReservationRepository from '../repositories/ReservationRepository'
 import { LocationRepository } from '../repositories/LocationRepository'
 import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 import { MenuItem } from '../entities/Menu'
+import { Stylist } from '../entities/Stylist'
 
 export type ShopRepositoryInterface = {
   insertShop(
@@ -34,6 +35,7 @@ export type ShopRepositoryInterface = {
   insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>,
   updateMenuItem(menuItemId: number, name: string, description: string, price: number): Promise<MenuItem>,
   deleteMenuItem(menuItemId: number): Promise<MenuItem>
+  fetchValidShopIds(shopIds: number[]): Promise<number[]>
 }
 
 export type LocationRepositoryInterface = {
@@ -41,6 +43,10 @@ export type LocationRepositoryInterface = {
 }
 
 export type StylistRepositoryInterface = {
+  insertStylist(name: string, price: number, shopId: number): Promise<Stylist>,
+  updateStylist(id: number, name: string, price: number, shopId: number)
+  :Promise<Stylist>,
+  deleteStylist(id: number): Promise<Stylist>,
   fetchStylistsByShopIds(shopIds: number[])
     : Promise<{ id: number, name: string, price: number, shopId:number }[]>,
   fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ id: number, count: number }[]>,
