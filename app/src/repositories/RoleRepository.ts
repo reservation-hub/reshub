@@ -5,56 +5,57 @@ import { RoleRepositoryInterface as RoleServiceSocket } from '../services/RoleSe
 
 import prisma from './prisma'
 
-export const extractValidRoleIds = async (roleIds: number[])
-  : Promise<number[]> => {
-  const validRoles = await prisma.role.findMany({
-    where: {
-      id: { in: roleIds },
-    },
-  })
-  return validRoles.map(validRole => validRole.id)
-}
-
-export const fetchAll = async ({ page = 0, order = 'asc' as any, limit = 10 })
-  : Promise<Role[]> => {
-  const skipIndex = page > 1 ? (page - 1) * 10 : 0
-  return prisma.role.findMany({
-    skip: skipIndex,
-    orderBy: { id: order },
-    take: limit,
-  })
-}
-
-export const totalCount = async (): Promise<number> => prisma.role.count()
-
-export const fetch = async (id: number): Promise<Role | null> => prisma.role.findUnique({
-  where: { id },
-})
-
-export const fetchBySlug = async (slug: string): Promise<Role | null> => prisma.role.findUnique({ where: { slug } })
-
-export const insertRole = async (name: string, description: string, slug: string)
-: Promise<Role> => prisma.role.create({ data: { name, description, slug } })
-
-export const updateRole = async (id: number, name: string, description: string, slug: string)
-: Promise<Role> => prisma.role.update({
-  where: { id },
-  data: {
-    name, description, slug,
-  },
-})
-
-export const deleteRole = async (id: number): Promise<Role> => prisma.role.delete({ where: { id } })
-
 const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket & RoleServiceSocket = {
-  extractValidRoleIds,
-  fetchAll,
-  totalCount,
-  fetch,
-  fetchBySlug,
-  insertRole,
-  updateRole,
-  deleteRole,
+
+  async extractValidRoleIds(roleIds) {
+    const validRoles = await prisma.role.findMany({
+      where: {
+        id: { in: roleIds },
+      },
+    })
+    return validRoles.map(validRole => validRole.id)
+  },
+
+  async fetchAll({ page = 0, order = 'asc' as any, limit = 10 }) {
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    return prisma.role.findMany({
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
+    })
+  },
+
+  async totalCount() {
+    return prisma.role.count()
+  },
+
+  async fetch(id) {
+    return prisma.role.findUnique({
+      where: { id },
+    })
+  },
+
+  async fetchBySlug(slug) {
+    return prisma.role.findUnique({ where: { slug } })
+  },
+
+  async insertRole(name, description, slug) {
+    return prisma.role.create({ data: { name, description, slug } })
+  },
+
+  async updateRole(id, name, description, slug) {
+    return prisma.role.update({
+      where: { id },
+      data: {
+        name, description, slug,
+      },
+    })
+  },
+
+  async deleteRole(id) {
+    return prisma.role.delete({ where: { id } })
+  },
+
 }
 
 export default RoleRepository
