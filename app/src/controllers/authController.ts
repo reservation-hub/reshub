@@ -8,6 +8,7 @@ import config from '../../config'
 import { User } from '../entities/User'
 import AuthService from '../services/AuthService'
 import googleSchema from './schemas/google'
+import { UnknownServerError } from '../routes/errors'
 
 export type AuthServiceInterface = {
   createToken(user: Express.User): string,
@@ -18,9 +19,11 @@ export type AuthServiceInterface = {
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
-export const login = asyncHandler(async (req, res, next) => {
+export const login = asyncHandler(async (req, res) => {
   const { user } = req
-  if (!user) return next({ code: 500 })
+  if (!user) {
+    throw new UnknownServerError()
+  }
 
   // トークン生成
   const cookieOptions: CookieOptions = {
@@ -31,7 +34,6 @@ export const login = asyncHandler(async (req, res, next) => {
     signed: true,
   }
   const token = AuthService.createToken(user)
-  if (!token) return next({ code: 500 })
 
   // クッキーを設定
   res.cookie('authToken', token, cookieOptions)
@@ -73,9 +75,9 @@ export const hack = asyncHandler(async (req: Request, res: Response, next: NextF
 const routes = Router()
 
 routes.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
-routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('local', { session: false }), login)
-routes.post('/silent_refresh', passport.authenticate('jwt', { session: false }), login)
-routes.get('/logout', passport.authenticate('jwt', { session: false }), logout)
+routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('admin-local', { session: false }), login)
+routes.post('/silent_refresh', passport.authenticate('admin-jwt', { session: false }), login)
+routes.get('/logout', passport.authenticate('admin-jwt', { session: false }), logout)
 routes.get('/hack', hack, login)
 
 export default routes

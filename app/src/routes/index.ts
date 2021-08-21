@@ -2,7 +2,7 @@ import {
   Request, Response, NextFunction, Router,
 } from 'express'
 
-import { protectRoute } from './utils'
+import { protectAdminRoute } from './utils'
 
 import dashboardController from '../controllers/dashboardController'
 import { areaController, prefectureController, cityController } from '../controllers/locationController'
@@ -20,14 +20,14 @@ const router = Router()
 export default router
 
 router.use('/auth', authController)
-router.use('/dashboard', protectRoute, dashboardController)
-router.use('/areas', protectRoute, areaController)
-router.use('/prefectures', protectRoute, prefectureController)
-router.use('/cities', protectRoute, cityController)
-router.use('/users', protectRoute, userController)
-router.use('/roles', protectRoute, roleController)
-router.use('/shops', protectRoute, shopController, menuController)
-router.use('/reservations', protectRoute, reservationController)
+router.use('/dashboard', protectAdminRoute, dashboardController)
+router.use('/areas', protectAdminRoute, areaController)
+router.use('/prefectures', protectAdminRoute, prefectureController)
+router.use('/cities', protectAdminRoute, cityController)
+router.use('/users', protectAdminRoute, userController)
+router.use('/roles', protectAdminRoute, roleController)
+router.use('/shops', protectAdminRoute, shopController, menuController)
+router.use('/reservations', protectAdminRoute, reservationController)
 
 // client api
 router.use('/api/', apiRoutes)

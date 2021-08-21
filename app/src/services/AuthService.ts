@@ -8,7 +8,7 @@ import { AuthServiceInterface as AuthControllerSocket } from '../controllers/aut
 import { AuthServiceInterface as PassportSocket } from '../controllers/utils/passport'
 import UserRepository from '../repositories/UserRepository'
 import {
-  InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError,
+  InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError, AuthenticationError,
 } from './Errors/ServiceError'
 
 export type UserRepositoryInterface = {
@@ -30,7 +30,7 @@ const AuthService: AuthControllerSocket & PassportSocket = {
 
   async verifyIfUserInTokenIsLoggedIn(authToken, headerToken?) {
     if (headerToken && headerToken !== authToken) {
-      throw new InvalidParamsError()
+      throw new AuthenticationError()
     }
     const token = jwt.verify(authToken, config.JWT_TOKEN_SECRET) as JwtPayload
     const user = await UserRepository.fetch(token.user.id)

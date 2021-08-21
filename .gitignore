@@ -5,3 +5,4 @@ app/client/build
 rh-*
 .devcontainer
 app/dist
+.vscode
