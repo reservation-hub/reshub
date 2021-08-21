@@ -1,6 +1,7 @@
 type MiddlewareErrorCode = number
 export const InvalidParams: MiddlewareErrorCode = 400
 export const Unauthorized: MiddlewareErrorCode = 403
+export const ServerError: MiddlewareErrorCode = 500
 
 export class MiddlewareError extends Error {
   constructor(message: string, code: MiddlewareErrorCode) {
@@ -12,6 +13,11 @@ export class MiddlewareError extends Error {
   code: MiddlewareErrorCode
 }
 
+export class UnknownServerError extends MiddlewareError {
+  constructor() {
+    super('Unknown Server Error', ServerError)
+  }
+}
 export class InvalidParamsError extends MiddlewareError {
   constructor() {
     super('Invalid parameters', InvalidParams)

@@ -4,12 +4,20 @@ import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
 import AuthService from '../../services/AuthService'
 import UserService from '../../services/UserService'
+import ClientAuthService from '../../client/services/AuthService'
 import { User } from '../../entities/User'
+import { localStrategySchema as apiLocalStrategySchema } from '../../client/controllers/schemas/auth'
 import { localStrategySchema } from '../schemas/auth'
 import { localAuthenticationQuery } from '../../request-response-types/AuthService'
+import { localAuthenticationQuery as clientLocalAuthenticationQuery }
+  from '../../request-response-types/client/AuthService'
 
 export type AuthServiceInterface = {
   authenticateByEmailAndPassword(query: localAuthenticationQuery): Promise<User>
+}
+
+export type APIAuthServiceInterface = {
+  authenticateByUsernameAndPassword(query: clientLocalAuthenticationQuery): Promise<User>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -51,7 +59,15 @@ passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
 
 // local
 
-passport.use(new LocalStrategy({ usernameField: 'email' }, async (username, password, done) => {
+passport.use('client-local', new LocalStrategy(async (username, password, done) => {
+  try {
+    const schemaValues = await apiLocalStrategySchema.validateAsync({ username, password }, joiOptions)
+    const user = await ClientAuthService.authenticateByUsernameAndPassword(schemaValues)
+    return done(null, user)
+  } catch (error) { return done(error) }
+}))
+
+passport.use('admin-local', new LocalStrategy({ usernameField: 'email' }, async (username, password, done) => {
   try {
     const schemaValues = await localStrategySchema.validateAsync({ email: username, password }, joiOptions)
     const user = await AuthService.authenticateByEmailAndPassword(schemaValues)
