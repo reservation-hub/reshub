@@ -1,10 +1,18 @@
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 import config from '../../../config'
 import { APIAuthServiceInterface } from '../../controllers/utils/passport'
-import { InvalidParamsError } from '../../services/Errors/ServiceError'
+import { InvalidParamsError, NotFoundError } from '../../services/Errors/ServiceError'
 import { AuthServiceInterface as AuthControllerSocket } from '../controllers/authController'
+import { User } from '../../entities/User'
+import UserRepository from '../repositories/UserRepository'
+
+export type UserRepositoryInterface = {
+  fetchByUsername(username: string): Promise<User | null>
+}
 
 const AuthService: APIAuthServiceInterface & AuthControllerSocket = {
+
   createToken(user) {
     return jwt.sign({ user }, config.JWT_TOKEN_SECRET, {
       audience: 'http://localhost:3000',
@@ -12,23 +20,25 @@ const AuthService: APIAuthServiceInterface & AuthControllerSocket = {
       issuer: process.env.RESHUB_URL,
     })
   },
-  async authenticateByUsernameAndPassword(query) {
-    const dummyUser = {
-      id: 1,
-      username: 'eugenesinamban',
-      email: 'eugene.sinamban@gmail.com',
-      password: 'testtest',
-      roles: [{
-        name: 'admin', id: 1, description: '', slug: 'admin',
-      }],
-    }
-    if (query.password !== dummyUser.password) {
-      // eslint-disable-next-line no-console
-      console.log(query.password, dummyUser.password)
+
+  async authenticateByUsernameAndPassword({ username, password }) {
+    if (!username || !password) {
       throw new InvalidParamsError()
     }
-    return dummyUser
+
+    const user = await UserRepository.fetchByUsername(username)
+    if (!user) {
+      throw new NotFoundError()
+    }
+    if (user.password && !bcrypt.compareSync(password, user.password)) {
+      throw new InvalidParamsError()
+    }
+
+    delete user.password
+
+    return user
   },
+
 }
 
 export default AuthService
