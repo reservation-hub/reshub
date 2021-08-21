@@ -29,20 +29,28 @@ const cookieExtractor = (req: Request) => {
   if (req.get('authorization')) {
     headerToken = req.get('authorization')?.split(' ')[1]
   }
+  // eslint-disable-next-line no-console
+  console.log(headerToken, 'header token')
   if (!headerToken) return null
 
   let authToken
   if (req.signedCookies) {
     authToken = req.signedCookies.authToken
   }
+  // eslint-disable-next-line no-console
+  console.log(authToken, 'authToken')
   if (!authToken) return null
+  // eslint-disable-next-line no-console
+  console.log(authToken === headerToken)
   if (req && authToken && headerToken && authToken === headerToken) {
+    // eslint-disable-next-line no-console
+    console.log('return authToken')
     return authToken
   }
   return null
 }
 
-const jwtOptions = {
+const jwtOptionsAdmin = {
   jwtFromRequest: cookieExtractor,
   secretOrKey: process.env.JWT_TOKEN_SECRET,
   audience: 'http://localhost:8080',
@@ -50,12 +58,23 @@ const jwtOptions = {
   issuer: process.env.RESHUB_URL,
 }
 
-passport.use(new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
+const jwtOptionsClient = {
+  jwtFromRequest: cookieExtractor,
+  secretOrKey: process.env.JWT_TOKEN_SECRET,
+  audience: 'http://localhost:3000',
+  expiresIn: '30d',
+  issuer: process.env.RESHUB_URL,
+}
+
+const jwtStrategyLogic = async (jwtPayload: any, done: any) => {
   try {
     const user = await UserService.fetchUser(jwtPayload.user.id)
     return done(null, user)
   } catch (error) { return done(error) }
-}))
+}
+
+passport.use('admin-jwt', new JWTStrategy(jwtOptionsAdmin, jwtStrategyLogic))
+passport.use('client-jwt', new JWTStrategy(jwtOptionsClient, jwtStrategyLogic))
 
 // local
 

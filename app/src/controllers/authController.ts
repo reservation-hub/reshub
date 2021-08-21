@@ -19,7 +19,7 @@ export type AuthServiceInterface = {
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
-export const login = asyncHandler(async (req, res, next) => {
+export const login = asyncHandler(async (req, res) => {
   const { user } = req
   if (!user) {
     throw new UnknownServerError()
@@ -76,8 +76,8 @@ const routes = Router()
 
 routes.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
 routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('admin-local', { session: false }), login)
-routes.post('/silent_refresh', passport.authenticate('jwt', { session: false }), login)
-routes.get('/logout', passport.authenticate('jwt', { session: false }), logout)
+routes.post('/silent_refresh', passport.authenticate('admin-jwt', { session: false }), login)
+routes.get('/logout', passport.authenticate('admin-jwt', { session: false }), logout)
 routes.get('/hack', hack, login)
 
 export default routes

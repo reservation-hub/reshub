@@ -1,4 +1,6 @@
-import { Router, CookieOptions } from 'express'
+import {
+  Router, CookieOptions, Request, Response,
+} from 'express'
 import asyncHandler from 'express-async-handler'
 import AuthService from '../services/AuthService'
 import { verifyIfNotLoggedInYet } from '../../controllers/authController'
@@ -31,8 +33,15 @@ const login = asyncHandler(async (req, res) => {
   return res.send({ user, token })
 })
 
+export const logout = (req: Request, res: Response): void => {
+  res.clearCookie('authToken')
+  res.send('Logged out successfully!')
+}
+
 const routes = Router()
 
 routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('client-local', { session: false }), login)
+routes.post('/silent_refresh', passport.authenticate('client-jwt', { session: false }), login)
+routes.get('/logout', passport.authenticate('client-jwt', { session: false }), logout)
 
 export default routes

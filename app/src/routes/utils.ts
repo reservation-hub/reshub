@@ -4,7 +4,7 @@ import pt from '../controllers/utils/passport'
 import { User } from '../entities/User'
 import { UnauthorizedError } from './errors'
 
-export const protectRoute = pt.authenticate('jwt', { session: false })
+export const protectRoute = pt.authenticate('admin-jwt', { session: false })
 export const roleCheck = (roles: string[]) => (req: any, res: any, next: any): void => {
   const { user }: { user: User } = req
   if (!user.roles) return next(new UnauthorizedError())

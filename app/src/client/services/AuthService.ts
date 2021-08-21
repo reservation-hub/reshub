@@ -23,6 +23,8 @@ const AuthService: APIAuthServiceInterface & AuthControllerSocket = {
       }],
     }
     if (query.password !== dummyUser.password) {
+      // eslint-disable-next-line no-console
+      console.log(query.password, dummyUser.password)
       throw new InvalidParamsError()
     }
     return dummyUser
