@@ -89,7 +89,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
       validRoleIds,
       params.lastNameKanji,
       params.firstNameKanji,
-      params.firstNameKanji,
+      params.lastNameKana,
       params.firstNameKana,
       params.birthday,
       params.gender,
