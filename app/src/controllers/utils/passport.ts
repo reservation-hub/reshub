@@ -29,22 +29,14 @@ const cookieExtractor = (req: Request) => {
   if (req.get('authorization')) {
     headerToken = req.get('authorization')?.split(' ')[1]
   }
-  // eslint-disable-next-line no-console
-  console.log(headerToken, 'header token')
   if (!headerToken) return null
 
   let authToken
   if (req.signedCookies) {
     authToken = req.signedCookies.authToken
   }
-  // eslint-disable-next-line no-console
-  console.log(authToken, 'authToken')
   if (!authToken) return null
-  // eslint-disable-next-line no-console
-  console.log(authToken === headerToken)
   if (req && authToken && headerToken && authToken === headerToken) {
-    // eslint-disable-next-line no-console
-    console.log('return authToken')
     return authToken
   }
   return null
