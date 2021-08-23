@@ -249,6 +249,25 @@ const roles = [
 
   await Promise.all(stylistPromises)
 
+  console.log('running reservation seeder')
+  const randomStylist = await prisma.stylist.findFirst()
+  const reservations = [
+    { date: new Date('2021-09-01') },
+    { date: new Date('2021-09-02') },
+    { date: new Date('2021-09-03') },
+    { date: new Date('2021-09-04') },
+  ]
+  const reservationPromises = reservations.map(reservation => prisma.reservation.create({
+    data: {
+      reservationDate: reservation.date,
+      stylistId: randomStylist!.id,
+      shopId: randomStylist!.shopId,
+      userId: 1,
+    },
+  }))
+
+  await Promise.all(reservationPromises)
+
   console.log('seed done')
   process.exit()
 })()
