@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client'
 
 import prisma from './prisma'
-import { CommonRepositoryInterface } from './CommonRepository'
+import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { StylistRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
 import { Stylist } from '../entities/Stylist'
 
@@ -21,7 +21,7 @@ export const reconstructStylist = (stylist: stylistWithShops): Stylist => ({
 })
 
 export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopServiceSocket = {
-  async fetchAll({ page = 0, order = 'asc' as any, limit = 10 }) {
+  async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const stylists = await prisma.stylist.findMany({
       skip: skipIndex,
