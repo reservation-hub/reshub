@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client'
 import prisma from './prisma'
-import { CommonRepositoryInterface } from './CommonRepository'
+import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { Female, Gender, User } from '../entities/User'
 import { Role } from '../entities/Role'
 import { UserRepositoryInterface as UserServiceSocket } from '../services/UserService'
@@ -48,7 +48,7 @@ export const convertEntityGenderToDBGender = (gender: Gender): string => {
 }
 
 const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & AuthServiceSocket = {
-  async fetchAll({ page = 0, order = 'asc', limit = 10 }) {
+  async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const users = await prisma.user.findMany({
       skip: skipIndex,

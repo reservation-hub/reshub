@@ -3,7 +3,7 @@ import prisma from './prisma'
 import { Reservation } from '../entities/Reservation'
 import { ReservationRepositoryInterface as ReservationServiceSocket } from '../services/ReservationService'
 import { ReservationRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
-import { CommonRepositoryInterface } from './CommonRepository'
+import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 const reservationWithUserAndStylistAndShopWithoutLocation = Prisma.validator<Prisma.ReservationArgs>()(
   {
@@ -43,7 +43,7 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
 })
 
 const ReservationRepository: CommonRepositoryInterface<Reservation> & ReservationServiceSocket & ShopServiceSocket = {
-  async fetchAll({ page = 0, order = 'asc' as any, limit = 10 }) {
+  async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const reservations = await prisma.reservation.findMany({
       skip: skipIndex,

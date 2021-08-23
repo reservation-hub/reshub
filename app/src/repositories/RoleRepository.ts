@@ -1,5 +1,5 @@
 import { Role } from '../entities/Role'
-import { CommonRepositoryInterface } from './CommonRepository'
+import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { RoleRepositoryInterface as UserServiceSocket } from '../services/UserService'
 import { RoleRepositoryInterface as RoleServiceSocket } from '../services/RoleService'
 
@@ -16,7 +16,7 @@ const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket & RoleS
     return validRoles.map(validRole => validRole.id)
   },
 
-  async fetchAll({ page = 0, order = 'asc' as any, limit = 10 }) {
+  async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     return prisma.role.findMany({
       skip: skipIndex,

@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client'
 import prisma from './prisma'
-import { CommonRepositoryInterface } from './CommonRepository'
+import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
 import { Shop, ShopSchedule } from '../entities/Shop'
 
@@ -84,7 +84,7 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
 })
 
 export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket = {
-  async fetchAll({ page = 0, order = 'asc' as any, limit = 10 }) {
+  async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const shops = await prisma.shop.findMany({
       skip: skipIndex,
