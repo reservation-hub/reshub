@@ -46,9 +46,9 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
     name: shop.city.name,
     slug: shop.city.slug,
   },
-  name: shop.shopDetail?.name ?? null,
-  address: shop.shopDetail?.address ?? null,
-  phoneNumber: shop.shopDetail?.phoneNumber ?? null,
+  name: shop.shopDetail?.name,
+  address: shop.shopDetail?.address,
+  phoneNumber: shop.shopDetail?.phoneNumber,
 })
 
 export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndLocationAndMenu): Shop => ({
@@ -68,9 +68,9 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
     name: shop.city.name,
     slug: shop.city.slug,
   },
-  name: shop.shopDetail?.name ?? null,
-  address: shop.shopDetail?.address ?? null,
-  phoneNumber: shop.shopDetail?.phoneNumber ?? null,
+  name: shop.shopDetail?.name,
+  address: shop.shopDetail?.address,
+  phoneNumber: shop.shopDetail?.phoneNumber,
   menu: {
     id: shop.menu!.id,
     items: shop.menu!.items?.map(item => ({

@@ -10,10 +10,8 @@ import {
 } from '../request-response-types/ServiceCommonTypes'
 import { insertUserFromAdminQuery, updateUserFromAdminQuery } from '../request-response-types/UserService'
 import UserService from '../services/UserService'
-import {
-  User, Female, Male, Gender,
-} from '../entities/User'
 import { searchSchema } from './schemas/search'
+import { User } from '../entities/User'
 
 export type UserServiceInterface = {
   fetchUsersWithTotalCount(query: fetchModelsWithTotalCountQuery): Promise<fetchModelsWithTotalCountResponse<User>>,
@@ -25,15 +23,6 @@ export type UserServiceInterface = {
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
-
-const convertDBGenderToEntityGender = (gender: string): Gender => {
-  switch (gender) {
-    case '1':
-      return Female
-    default:
-      return Male
-  }
-}
 
 export const searchUser = asyncHandler(async (req, res) => {
   const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
@@ -60,9 +49,6 @@ export const insertUser = asyncHandler(async (req, res) => {
   const params = await userInsertSchema.validateAsync(req.body, joiOptions)
 
   const user = await UserService.insertUserFromAdmin(params)
-  if (user.gender) {
-    user.gender = convertDBGenderToEntityGender(user.gender)
-  }
 
   return res.send(user)
 })
@@ -73,10 +59,6 @@ export const updateUser = asyncHandler(async (req, res) => {
   const { id } = res.locals
 
   const user = await UserService.updateUserFromAdmin({ id, params })
-
-  if (user.gender) {
-    user.gender = convertDBGenderToEntityGender(user.gender)
-  }
 
   return res.send(user)
 })

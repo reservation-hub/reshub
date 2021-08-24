@@ -1,7 +1,9 @@
 import { Prisma } from '@prisma/client'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
-import { Female, Gender, User } from '../entities/User'
+import {
+  Female, Male, Gender, User,
+} from '../entities/User'
 import { Role } from '../entities/Role'
 import { UserRepositoryInterface as UserServiceSocket } from '../services/UserService'
 import { UserRepositoryInterface as AuthServiceSocket } from '../services/AuthService'
@@ -19,25 +21,6 @@ type userRoles = {
   role: Role
 }
 
-export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
-  id: user.id,
-  email: user.email,
-  username: user.username ?? null,
-  password: user.password,
-  oAuthIds: user.oAuthIds ? {
-    id: user.oAuthIds.id,
-    googleId: user.oAuthIds.googleId,
-    facebookId: user.oAuthIds.facebookId,
-  } : null,
-  firstNameKanji: user.profile?.firstNameKanji ?? null,
-  lastNameKanji: user.profile?.lastNameKanji ?? null,
-  firstNameKana: user.profile?.firstNameKana ?? null,
-  lastNameKana: user.profile?.lastNameKana ?? null,
-  roles: user.roles.map((role: userRoles) => role.role),
-  birthday: user.profile?.birthday ?? null,
-  gender: user.profile?.gender ?? null,
-})
-
 export const convertEntityGenderToDBGender = (gender: Gender): string => {
   switch (gender) {
     case Female:
@@ -46,6 +29,34 @@ export const convertEntityGenderToDBGender = (gender: Gender): string => {
       return '0'
   }
 }
+
+const convertDBGenderToEntityGender = (gender: string): Gender => {
+  switch (gender) {
+    case '1':
+      return Female
+    default:
+      return Male
+  }
+}
+
+export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
+  id: user.id,
+  email: user.email,
+  username: user.username,
+  password: user.password,
+  oAuthIds: user.oAuthIds ? {
+    id: user.oAuthIds.id,
+    googleId: user.oAuthIds.googleId,
+    facebookId: user.oAuthIds.facebookId,
+  } : null,
+  firstNameKanji: user.profile?.firstNameKanji,
+  lastNameKanji: user.profile?.lastNameKanji,
+  firstNameKana: user.profile?.firstNameKana,
+  lastNameKana: user.profile?.lastNameKana,
+  roles: user.roles.map((role: userRoles) => role.role),
+  birthday: user.profile?.birthday,
+  gender: user.profile?.gender ? convertDBGenderToEntityGender(user.profile?.gender) : null,
+})
 
 const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & AuthServiceSocket = {
   async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
