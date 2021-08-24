@@ -7,6 +7,9 @@ import { Reservation } from '../entities/Reservation'
 import ReservationService from '../services/ReservationService'
 import { insertReservationQuery, updateReservationQuery } from '../request-response-types/ReservationService'
 import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
+import { searchSchema } from './schemas/search'
+import { User } from '../entities/User'
+import { searchRoles } from './roleController'
 
 export type ReservationServiceInterface = {
   fetchReservationsWithTotalCount(query: fetchModelsWithTotalCountQuery)
@@ -15,6 +18,7 @@ export type ReservationServiceInterface = {
   insertReservation(query: insertReservationQuery): Promise<Reservation>,
   updateReservation(query: updateReservationQuery): Promise<Reservation>,
   deleteReservation(id: number): Promise<Reservation>,
+  searchReservations(keyword: string): Promise<User[]>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -37,6 +41,13 @@ const insertReservation = asyncHandler(async (req, res) => {
   return res.send(reservation)
 })
 
+export const searchReservations = asyncHandler(async (req, res) => {
+  const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
+  const reservation = await ReservationService.searchReservations(searchValues.keyword)
+
+  return res.send({ data: reservation })
+})
+
 const updateReservation = asyncHandler(async (req, res) => {
   const params = await reservationUpsertSchema.validateAsync(req.body, joiOptions)
   const { id } = res.locals
@@ -55,6 +66,7 @@ const routes = Router()
 routes.get('/', roleCheck(['admin']), index)
 routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showReservation)
 routes.post('/', roleCheck(['admin']), insertReservation)
+routes.post('/search', searchReservations)
 routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateReservation)
 routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteReservation)
 

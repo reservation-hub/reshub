@@ -1,3 +1,5 @@
+import { isRef } from 'joi'
+import { ShopDetail } from '@prisma/client'
 import { ShopRepository } from '../repositories/ShopRepository'
 import { Shop, ShopSchedule } from '../entities/Shop'
 import { Reservation } from '../entities/Reservation'
@@ -36,6 +38,7 @@ export type ShopRepositoryInterface = {
   updateMenuItem(menuItemId: number, name: string, description: string, price: number): Promise<MenuItem>,
   deleteMenuItem(menuItemId: number): Promise<MenuItem>
   fetchValidShopIds(shopIds: number[]): Promise<number[]>
+  searchShops(keyword: string): Promise<ShopDetail[]>,
 }
 
 export type LocationRepositoryInterface = {
@@ -125,7 +128,10 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
     }
     return ShopRepository.deleteShop(id)
   },
-
+  async searchShops(keyword) {
+    const shops = await ShopRepository.searchShops(keyword)
+    return shops
+  },
   async fetchStylistsCountByShopIds(shopIds) {
     if (shopIds.length === 0) {
       return []

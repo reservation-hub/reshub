@@ -17,6 +17,8 @@ import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 import { shopStylistUpsertSchema } from './schemas/stylist'
 import { Stylist } from '../entities/Stylist'
 import { fetchModelsWithTotalCountResponse } from '../request-response-types/ServiceCommonTypes'
+import { ShopDetail } from '.prisma/client'
+import { searchSchema } from './schemas/search'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(query: fetchModelsWithTotalCountQuery)
@@ -37,6 +39,7 @@ export type ShopServiceInterface = {
     : Promise<Stylist>
   deleteStylist(query: deleteStylistQuery)
     : Promise<Stylist>
+  searchShops(keyword: string): Promise<ShopDetail[]>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -60,11 +63,17 @@ const index = asyncHandler(async (req, res) => {
 
   return res.send({ data, totalCount })
 })
-
 const showShop = asyncHandler(async (req, res) => {
   const { id } = res.locals
   const shop = await ShopService.fetchShop(id)
   return res.send(shop)
+})
+
+export const searchShops = asyncHandler(async (req, res) => {
+  const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
+  const shop = await ShopService.searchShops(searchValues.keyword)
+
+  return res.send({ data: shop })
 })
 
 const insertShop = asyncHandler(async (req, res) => {
@@ -121,6 +130,7 @@ const routes = Router()
 routes.get('/', roleCheck(['admin']), index)
 routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showShop)
 routes.post('/', roleCheck(['admin']), insertShop)
+routes.post('/search', searchShops)
 routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateShop)
 routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteShop)
 routes.post('/:shopId/schedule', roleCheck(['admin']), parseIntIdMiddleware, insertBusinessDaysAndHours)
