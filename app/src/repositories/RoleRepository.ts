@@ -29,6 +29,14 @@ const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket & RoleS
     return prisma.role.count()
   },
 
+  async searchRoles(keyword) {
+    const rolesResult = await prisma.role.findMany({
+      where: {
+        name: { contains: keyword },
+      },
+    })
+    return rolesResult
+  },
   async fetch(id) {
     return prisma.role.findUnique({
       where: { id },

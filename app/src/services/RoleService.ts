@@ -15,6 +15,7 @@ export type RoleRepositoryInterface = {
   updateRole(id: number, name: string, description: string, slug: string)
   : Promise<Role>,
   deleteRole(id: number): Promise<Role>,
+  searchRoles(keyword: string): Promise<Role[]>
 }
 
 const RoleService: RoleServiceInterface = {
@@ -38,6 +39,12 @@ const RoleService: RoleServiceInterface = {
       throw new DuplicateModelError()
     }
     return RoleRepository.insertRole(params.name, params.description, params.slug)
+  },
+
+  async searchRoles(keyword) {
+    const roles = await RoleRepository.searchRoles(keyword)
+    console.error(keyword)
+    return roles
   },
 
   async updateRole({ id, params }) {

@@ -6,6 +6,7 @@ import { ShopRepository } from '../repositories/ShopRepository'
 import StylistRepository from '../repositories/StylistRepository'
 import { insertReservationQuery } from '../request-response-types/ReservationService'
 import { Reservation } from '../entities/Reservation'
+import { User } from '../entities/User'
 
 export type ReservationRepositoryInterface = {
   insertReservation(reservationDate: Date, userId: number, shopId: number, stylistId?: number)
@@ -13,6 +14,7 @@ export type ReservationRepositoryInterface = {
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
     stylistId?: number): Promise<Reservation>,
   deleteReservation(id: number): Promise<Reservation>,
+  searchReservations(keyword: string): Promise<User[]>
 }
 
 const ReservationService: ReservationServiceInterface = {
@@ -31,6 +33,10 @@ const ReservationService: ReservationServiceInterface = {
     return reservation
   },
 
+  async searchReservations(keyword) {
+    const reservations = await ReservationRepository.searchReservations(keyword)
+    return reservations
+  },
   async insertReservation(params: insertReservationQuery) {
     let stylist
     const user = await UserRepository.fetch(params.userId)

@@ -218,6 +218,18 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
     return reconstructUser(user)
   },
 
+  async searchUser(keyword) {
+    const usersResult = await prisma.user.findMany({
+      where: { OR: [{ email: { contains: keyword } }, { username: { contains: keyword } }] },
+      include: {
+        oAuthIds: true,
+        profile: true,
+        roles: { include: { role: true } },
+      },
+    })
+    const users = usersResult.map(user => reconstructUser(user))
+    return users
+  },
   async fetchByEmail(email) {
     const user = await prisma.user.findUnique({
       where: { email },

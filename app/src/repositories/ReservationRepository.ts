@@ -1,9 +1,11 @@
 import { Prisma } from '@prisma/client'
+import { collapseTextChangeRangesAcrossMultipleVersions } from 'typescript'
 import prisma from './prisma'
 import { Reservation } from '../entities/Reservation'
 import { ReservationRepositoryInterface as ReservationServiceSocket } from '../services/ReservationService'
 import { ReservationRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
+import { searchReservations } from '../controllers/reservationController'
 
 const reservationWithUserAndStylistAndShopWithoutLocation = Prisma.validator<Prisma.ReservationArgs>()(
   {
@@ -75,6 +77,24 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
       },
     })
     return reservation ? reconstructReservation(reservation) : null
+  },
+
+  async searchReservations(keyword) {
+    const userIds = await prisma.$queryRaw('SELECT id FROM "User" WHERE (username ILIKE $1 or email ILIKE $2)',
+      `${keyword}%`,
+      `${keyword}%`)
+
+    let mappedIds = userIds.map((obj: any) => obj.id)
+    if (mappedIds.length === 0) {
+      mappedIds = [0]
+    }
+    const reservations = await prisma.$queryRaw(`SELECT s.name,r.reservation_date,st.name,st.price,u.email 
+    FROM "Reservation" AS r 
+    INNER JOIN "ShopDetail" AS s ON s.id = r.shop_id
+    INNER JOIN "Stylist" AS st ON st.id = r.stylist_id
+    INNER JOIN "User" AS u ON u.id = r.user_id
+    WHERE r.user_id IN (${mappedIds})`)
+    return reservations
   },
 
   async fetchReservationsByShopIds(shopIds) {

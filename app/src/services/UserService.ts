@@ -30,7 +30,8 @@ export type UserRepositoryInterface = {
     rolesToAdd: number[],
     rolesToRemove: number[],
   ): Promise<User>,
-  deleteUserFromAdmin(id: number): Promise<User>
+  deleteUserFromAdmin(id: number): Promise<User>,
+  searchUser(keyword: string): Promise<User[]>,
 }
 
 export type RoleRepositoryInterface = {
@@ -54,6 +55,14 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
     })
     const usersCount = await UserRepository.totalCount()
     return { values: users, totalCount: usersCount }
+  },
+
+  async searchUser(keyword) {
+    const users = await UserRepository.searchUser(keyword)
+    users.forEach(user => {
+      delete user.password
+    })
+    return users
   },
 
   async fetchUser(id) {

@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, ShopDetail } from '@prisma/client'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
@@ -148,7 +148,6 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     const cleanShop = reconstructShop(shop)
     return cleanShop
   },
-
   async updateShop(id,
     name,
     areaId,
@@ -172,6 +171,10 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     })
     const cleanShop = reconstructShop(shop)
     return cleanShop
+  },
+  async searchShops(keyword) {
+    const shopsResult = await prisma.$queryRaw('SELECT * FROM "ShopDetail" WHERE (name ILIKE $1)', `${keyword}%`)
+    return shopsResult
   },
 
   async deleteShop(id) {

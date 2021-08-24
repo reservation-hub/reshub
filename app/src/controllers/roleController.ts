@@ -7,6 +7,8 @@ import { roleUpsertSchema } from './schemas/role'
 import indexSchema from './schemas/indexSchema'
 import { Role } from '../entities/Role'
 import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
+import { searchSchema } from './schemas/search'
+import { searchShops } from './shopController'
 
 export type RoleServiceInterface = {
   fetchRolesWithTotalCount(query: fetchModelsWithTotalCountQuery): Promise<{ data: Role[], totalCount: number }>,
@@ -14,6 +16,7 @@ export type RoleServiceInterface = {
   insertRole(query: insertRoleQuery): Promise<Role>,
   updateRole(query: updateRoleQuery): Promise<Role>,
   deleteRole(id: number): Promise<Role>,
+  searchRoles(keyword: string): Promise<Role[]>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -36,6 +39,13 @@ export const insertRole = asyncHandler(async (req, res) => {
   return res.send(role)
 })
 
+export const searchRoles = asyncHandler(async (req, res) => {
+  const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
+  const role = await RoleService.searchRoles(searchValues.keyword)
+
+  return res.send({ data: role })
+})
+
 export const updateRole = asyncHandler(async (req, res) => {
   const params = await roleUpsertSchema.validateAsync(req.body, joiOptions)
 
@@ -56,6 +66,7 @@ const routes = Router()
 routes.get('/', roleCheck(['admin']), index)
 routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showRole)
 routes.post('/', roleCheck(['admin']), insertRole)
+routes.post('/search', searchRoles)
 routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateRole)
 routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteRole)
 
