@@ -1,11 +1,12 @@
 import Joi from 'joi'
 import { Request, Response, NextFunction } from 'express'
-import pt from '../controllers/utils/passport'
+import pt from '../middlewares/passport'
 import { User } from '../entities/User'
 import { UnauthorizedError } from './errors'
 
 export const protectAdminRoute = pt.authenticate('admin-jwt', { session: false })
 export const protectClientRoute = pt.authenticate('client-jwt', { session: false })
+
 export const roleCheck = (roles: string[]) => (req: any, res: any, next: any): void => {
   const { user }: { user: User } = req
   if (!user.roles) return next(new UnauthorizedError())

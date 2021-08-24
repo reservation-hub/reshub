@@ -1,14 +1,21 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import config from '../../../config'
-import { APIAuthServiceInterface } from '../../controllers/utils/passport'
-import { InvalidParamsError, NotFoundError } from '../../services/Errors/ServiceError'
+import { APIAuthServiceInterface } from '../../middlewares/passport'
+import {
+  InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError,
+} from '../../services/Errors/ServiceError'
 import { AuthServiceInterface as AuthControllerSocket } from '../controllers/authController'
 import { User } from '../../entities/User'
 import UserRepository from '../repositories/UserRepository'
 
 export type UserRepositoryInterface = {
+  fetch(id: number): Promise<User | null>
   fetchByUsername(username: string): Promise<User | null>
+}
+
+interface JwtPayload {
+  user: User
 }
 
 const AuthService: APIAuthServiceInterface & AuthControllerSocket = {
@@ -39,6 +46,17 @@ const AuthService: APIAuthServiceInterface & AuthControllerSocket = {
     return user
   },
 
+  async verifyIfUserInTokenIsLoggedIn(authToken, headerToken?) {
+    if (headerToken && headerToken !== authToken) {
+      throw new AuthenticationError()
+    }
+    const token = jwt.verify(authToken, config.JWT_TOKEN_SECRET) as JwtPayload
+    const user = await UserRepository.fetch(token.user.id)
+    if (!user) {
+      throw new NotFoundError()
+    }
+    throw new UserIsLoggedInError()
+  },
 }
 
 export default AuthService

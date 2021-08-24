@@ -32,6 +32,15 @@ const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
 })
 
 const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
+
+  async fetch(id) {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: { profile: true, oAuthIds: true, roles: { include: { role: true } } },
+    })
+    return user ? reconstructUser(user) : null
+  },
+
   async insertUser(email, username, password) {
     const create = await prisma.user.create({
       data: {
@@ -56,6 +65,7 @@ const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
     const createdUser = reconstructUser(create)
     return createdUser
   },
+
   async emailIsAvailable(email) {
     const emailCount = await prisma.user.count(
       {
@@ -67,6 +77,7 @@ const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
     console.error(emailCount === 0)
     return emailCount === 0
   },
+
   async fetchByUsername(username) {
     const user = await prisma.user.findUnique({
       where: { username },
@@ -74,6 +85,7 @@ const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
     })
     return user ? reconstructUser(user) : null
   },
+
 }
 
 export default UserRepository
