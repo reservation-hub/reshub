@@ -3,13 +3,13 @@ import {
 } from 'express'
 import asyncHandler from 'express-async-handler'
 import AuthService from '../services/AuthService'
-import { verifyIfNotLoggedInYet } from '../../controllers/authController'
 import { UnknownServerError } from '../../routes/errors'
-import passport from '../../controllers/utils/passport'
+import passport from '../../middlewares/passport'
 import config from '../../../config'
 
 export type AuthServiceInterface = {
   createToken(user: Express.User): string
+  verifyIfUserInTokenIsLoggedIn(authToken: any, headerToken?: string): Promise<void>
 }
 
 const login = asyncHandler(async (req, res) => {
@@ -31,6 +31,18 @@ const login = asyncHandler(async (req, res) => {
   // クッキーを設定
   res.cookie('authToken', token, cookieOptions)
   return res.send({ user, token })
+})
+
+export const verifyIfNotLoggedInYet = asyncHandler(async (req, res, next) => {
+  const { signedCookies } = req
+
+  if (!signedCookies || !signedCookies.authToken) return next()
+  let headerToken
+  if (req.get('authorization')) {
+    headerToken = req.get('authorization')?.split(' ')[1]
+  }
+  await AuthService.verifyIfUserInTokenIsLoggedIn(signedCookies.authToken, headerToken)
+  return next()
 })
 
 export const logout = (req: Request, res: Response): void => {

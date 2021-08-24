@@ -3,7 +3,7 @@ import {
 } from 'express'
 import asyncHandler from 'express-async-handler'
 
-import passport from './utils/passport'
+import passport from '../middlewares/passport'
 import config from '../../config'
 import { User } from '../entities/User'
 import AuthService from '../services/AuthService'

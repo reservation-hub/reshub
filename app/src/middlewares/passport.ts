@@ -2,15 +2,15 @@ import { Request } from 'express'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
-import AuthService from '../../services/AuthService'
-import UserService from '../../services/UserService'
-import ClientAuthService from '../../client/services/AuthService'
-import { User } from '../../entities/User'
-import { localStrategySchema as apiLocalStrategySchema } from '../../client/controllers/schemas/auth'
-import { localStrategySchema } from '../schemas/auth'
-import { localAuthenticationQuery } from '../../request-response-types/AuthService'
+import AuthService from '../services/AuthService'
+import UserService from '../services/UserService'
+import ClientAuthService from '../client/services/AuthService'
+import { User } from '../entities/User'
+import { localStrategySchema as apiLocalStrategySchema } from '../client/controllers/schemas/auth'
+import { localStrategySchema } from '../controllers/schemas/auth'
+import { localAuthenticationQuery } from '../request-response-types/AuthService'
 import { localAuthenticationQuery as clientLocalAuthenticationQuery }
-  from '../../request-response-types/client/AuthService'
+  from '../request-response-types/client/AuthService'
 
 export type AuthServiceInterface = {
   authenticateByEmailAndPassword(query: localAuthenticationQuery): Promise<User>
@@ -29,22 +29,14 @@ const cookieExtractor = (req: Request) => {
   if (req.get('authorization')) {
     headerToken = req.get('authorization')?.split(' ')[1]
   }
-  // eslint-disable-next-line no-console
-  console.log(headerToken, 'header token')
   if (!headerToken) return null
 
   let authToken
   if (req.signedCookies) {
     authToken = req.signedCookies.authToken
   }
-  // eslint-disable-next-line no-console
-  console.log(authToken, 'authToken')
   if (!authToken) return null
-  // eslint-disable-next-line no-console
-  console.log(authToken === headerToken)
   if (req && authToken && headerToken && authToken === headerToken) {
-    // eslint-disable-next-line no-console
-    console.log('return authToken')
     return authToken
   }
   return null
