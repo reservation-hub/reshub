@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt'
 
 import config from '../../config'
 import { User } from '../entities/User'
-import { AuthServiceInterface as AuthControllerSocket, silentRefreshParamsCheck } from '../controllers/authController'
+import { AuthServiceInterface as AuthControllerSocket } from '../controllers/authController'
 import { AuthServiceInterface as PassportSocket } from '../middlewares/passport'
 import UserRepository from '../repositories/UserRepository'
 import {
@@ -44,7 +44,6 @@ const AuthService: AuthControllerSocket & PassportSocket = {
     if (!(!authToken && !headerToken && refreshToken)) {
       throw new AuthorizationError()
     }
-    // it doesnt have
   },
 
   async googleAuthenticate(tokenId) {

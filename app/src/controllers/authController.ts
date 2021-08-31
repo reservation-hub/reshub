@@ -63,10 +63,10 @@ export const refreshLogin = asyncHandler(async (req, res) => {
 export const verifyIfNotLoggedInYet = asyncHandler(async (req, res, next) => {
   const { signedCookies } = req
 
-  // in the case login has not occured checks
-  if (!signedCookies && !signedCookies.authToken && !signedCookies.refreshToken) return next()
+  // in the case login has not occurred checks
+  if (!signedCookies || !signedCookies.authToken) return next()
 
-  // in the case login has occured
+  // in the case login has occurred
   let headerToken
   if (req.get('authorization')) {
     headerToken = req.get('authorization')?.split(' ')[1]
