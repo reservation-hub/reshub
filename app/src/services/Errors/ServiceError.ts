@@ -5,7 +5,7 @@ export const InvalidParams: ServiceErrorCode = 2
 export const DuplicateModel: ServiceErrorCode = 3
 export const LoggedIn: ServiceErrorCode = 4
 export const Authentication: ServiceErrorCode = 5
-
+export const Authorization: ServiceErrorCode = 6
 export class ServiceError extends Error {
   constructor(message: string, code: ServiceErrorCode) {
     super(message)
@@ -49,5 +49,11 @@ export class UserIsLoggedInError extends ServiceError {
 export class AuthenticationError extends ServiceError {
   constructor() {
     super('User authentication failed', Authentication)
+  }
+}
+
+export class AuthorizationError extends ServiceError {
+  constructor() {
+    super('User not Authorized', Authorization)
   }
 }

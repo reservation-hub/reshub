@@ -74,7 +74,6 @@ const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
         },
       },
     )
-    console.error(emailCount === 0)
     return emailCount === 0
   },
 
