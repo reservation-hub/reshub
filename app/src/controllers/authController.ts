@@ -3,6 +3,7 @@ import {
 } from 'express'
 import asyncHandler from 'express-async-handler'
 
+import { signedCookies } from 'cookie-parser'
 import passport from '../middlewares/passport'
 import config from '../../config'
 import { User } from '../entities/User'
@@ -11,8 +12,9 @@ import googleSchema from './schemas/google'
 import { UnknownServerError } from '../routes/errors'
 
 export type AuthServiceInterface = {
-  createToken(user: Express.User): string,
-  verifyIfUserInTokenIsLoggedIn(authToken: any, headerToken?: string): Promise<void>,
+  createToken(user: Express.User, expiresIn: string): string,
+  verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>,
+  silentRefreshTokenChecks(authToken: string, refreshToken: string, headerToken?: string): Promise<void>,
   googleAuthenticate(token: string): Promise<User>,
   hack(): Promise<User>
 }
@@ -30,12 +32,30 @@ export const login = asyncHandler(async (req, res) => {
     httpOnly: config.NODE_ENV === 'production',
     secure: config.NODE_ENV === 'production',
     sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 1000 * 60 * 60 * 12,
+    maxAge: 1000 * 60 * 60 * 24,
     signed: true,
   }
-  const token = AuthService.createToken(user)
-
+  const token = AuthService.createToken(user, '1d')
+  const refreshToken = AuthService.createToken(user, '30d')
   // クッキーを設定
+  res.cookie('authToken', token, cookieOptions)
+  res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 1000 * 60 * 60 * 24 * 30 })
+  return res.send({ user, token })
+})
+
+export const refreshLogin = asyncHandler(async (req, res) => {
+  const { user } = req
+  if (!user) {
+    throw new UnknownServerError()
+  }
+  const cookieOptions: CookieOptions = {
+    httpOnly: config.NODE_ENV === 'production',
+    secure: config.NODE_ENV === 'production',
+    sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 1000 * 60 * 60 * 24,
+    signed: true,
+  }
+  const token = AuthService.createToken(user, '1d')
   res.cookie('authToken', token, cookieOptions)
   return res.send({ user, token })
 })
@@ -43,12 +63,26 @@ export const login = asyncHandler(async (req, res) => {
 export const verifyIfNotLoggedInYet = asyncHandler(async (req, res, next) => {
   const { signedCookies } = req
 
-  if (!signedCookies || !signedCookies.authToken) return next()
+  // in the case login has not occured checks
+  if (!signedCookies && !signedCookies.authToken && !signedCookies.refreshToken) return next()
+
+  // in the case login has occured
   let headerToken
   if (req.get('authorization')) {
     headerToken = req.get('authorization')?.split(' ')[1]
   }
   await AuthService.verifyIfUserInTokenIsLoggedIn(signedCookies.authToken, headerToken)
+  return next()
+})
+
+export const silentRefreshParamsCheck = asyncHandler(async (req, res, next) => {
+  const { signedCookies } = req
+
+  let headerToken
+  if (req.get('authorization')) {
+    headerToken = req.get('authorization')?.split(' ')[1]
+  }
+  await AuthService.silentRefreshTokenChecks(signedCookies.authToken, signedCookies.refreshToken, headerToken)
   return next()
 })
 
@@ -76,7 +110,8 @@ const routes = Router()
 
 routes.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
 routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('admin-local', { session: false }), login)
-routes.post('/silent_refresh', passport.authenticate('admin-jwt', { session: false }), login)
+routes.post('/silent_refresh', silentRefreshParamsCheck,
+  passport.authenticate('refresh-jwt', { session: false }), login)
 routes.get('/logout', passport.authenticate('admin-jwt', { session: false }), logout)
 routes.get('/hack', hack, login)
 

@@ -28,7 +28,6 @@ router.use('/users', protectAdminRoute, userController)
 router.use('/roles', protectAdminRoute, roleController)
 router.use('/shops', protectAdminRoute, shopController, menuController)
 router.use('/reservations', protectAdminRoute, reservationController)
-
 // client api
 router.use('/api/', apiRoutes)
 

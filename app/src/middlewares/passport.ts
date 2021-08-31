@@ -2,6 +2,7 @@ import { Request } from 'express'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
+import { isRef } from 'joi'
 import AuthService from '../services/AuthService'
 import UserService from '../services/UserService'
 import ClientAuthService from '../client/services/AuthService'
@@ -42,6 +43,22 @@ const cookieExtractor = (req: Request) => {
   return null
 }
 
+const refreshCookieExtractor = (req: Request) => {
+  let refreshToken
+  if (req.signedCookies) {
+    refreshToken = req.signedCookies.refreshToken
+  }
+  return refreshToken
+}
+
+const jwtOptionsRefresh = {
+  jwtFromRequest: refreshCookieExtractor,
+  secretOrKey: process.env.JWT_TOKEN_SECRET,
+  audience: 'http://localhost:8080',
+  expiresIn: '30d',
+  issuer: process.env.RESHUB_URL,
+}
+
 const jwtOptionsAdmin = {
   jwtFromRequest: cookieExtractor,
   secretOrKey: process.env.JWT_TOKEN_SECRET,
@@ -67,7 +84,7 @@ const jwtStrategyLogic = async (jwtPayload: any, done: any) => {
 
 passport.use('admin-jwt', new JWTStrategy(jwtOptionsAdmin, jwtStrategyLogic))
 passport.use('client-jwt', new JWTStrategy(jwtOptionsClient, jwtStrategyLogic))
-
+passport.use('refresh-jwt', new JWTStrategy(jwtOptionsRefresh, jwtStrategyLogic))
 // local
 
 passport.use('client-local', new LocalStrategy(async (username, password, done) => {

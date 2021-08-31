@@ -4,11 +4,11 @@ import bcrypt from 'bcrypt'
 
 import config from '../../config'
 import { User } from '../entities/User'
-import { AuthServiceInterface as AuthControllerSocket } from '../controllers/authController'
+import { AuthServiceInterface as AuthControllerSocket, silentRefreshParamsCheck } from '../controllers/authController'
 import { AuthServiceInterface as PassportSocket } from '../middlewares/passport'
 import UserRepository from '../repositories/UserRepository'
 import {
-  InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError, AuthenticationError,
+  InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError, AuthenticationError, AuthorizationError,
 } from './Errors/ServiceError'
 
 export type UserRepositoryInterface = {
@@ -20,10 +20,10 @@ interface JwtPayload {
 }
 
 const AuthService: AuthControllerSocket & PassportSocket = {
-  createToken(user) {
+  createToken(user, expiresIn) {
     return jwt.sign({ user }, config.JWT_TOKEN_SECRET, {
       audience: 'http://localhost:8080',
-      expiresIn: '1d',
+      expiresIn,
       issuer: process.env.RESHUB_URL,
     })
   },
@@ -38,6 +38,13 @@ const AuthService: AuthControllerSocket & PassportSocket = {
       throw new NotFoundError()
     }
     throw new UserIsLoggedInError()
+  },
+
+  async silentRefreshTokenChecks(authToken, refreshToken, headerToken?) {
+    if (!(!authToken && !headerToken && refreshToken)) {
+      throw new AuthorizationError()
+    }
+    // it doesnt have
   },
 
   async googleAuthenticate(tokenId) {
