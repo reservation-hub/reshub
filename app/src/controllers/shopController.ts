@@ -55,13 +55,13 @@ const index = asyncHandler(async (req, res) => {
   const totalStylistsCount = await ShopService.fetchStylistsCountByShopIds(shopIds)
 
   // merge data
-  const data: Shop[] = shops.map(shop => ({
+  const values: Shop[] = shops.map(shop => ({
     ...shop,
     reservationsCount: totalReservationsCount.find(item => item.id === shop.id)?.count,
     stylistsCount: totalStylistsCount.find(item => item.id === shop.id)?.count,
   }))
 
-  return res.send({ data, totalCount })
+  return res.send({ values, totalCount })
 })
 const showShop = asyncHandler(async (req, res) => {
   const { id } = res.locals
