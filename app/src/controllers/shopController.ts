@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import asyncHandler from 'express-async-handler'
-import { shopScheduleSchema, shopUpsertSchema } from './schemas/shop'
+import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import ShopService from '../services/ShopService'
 import {
@@ -9,10 +9,9 @@ import {
   insertStylistQuery,
   updateStylistQuery,
   deleteStylistQuery,
-  upsertScheduleQuery,
 } from '../request-response-types/ShopService'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
-import { Shop, ShopSchedule } from '../entities/Shop'
+import { Shop } from '../entities/Shop'
 import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 import { shopStylistUpsertSchema } from './schemas/stylist'
 import { Stylist } from '../entities/Stylist'
@@ -31,8 +30,6 @@ export type ShopServiceInterface = {
     : Promise<{ id: number, count: number }[]>,
   fetchReservationsCountByShopIds(shopIds: number[])
     : Promise<{ id: number, count: number }[]>,
-  upsertSchedule(query: upsertScheduleQuery)
-    : Promise<ShopSchedule>
   insertStylist(query: insertStylistQuery)
     : Promise<Stylist>
   updateStylist(query: updateStylistQuery)
@@ -98,13 +95,6 @@ const deleteShop = asyncHandler(async (req, res) => {
   return res.send({ message: 'Shop deleted' })
 })
 
-const insertBusinessDaysAndHours = asyncHandler(async (req, res) => {
-  const params = await shopScheduleSchema.validateAsync(req.body, joiOptions)
-  const { shopId } = res.locals
-  const schedule = await ShopService.upsertSchedule({ shopId, params })
-  return res.send(schedule)
-})
-
 const insertStylist = asyncHandler(async (req, res) => {
   const params = await shopStylistUpsertSchema.validateAsync(req.body, joiOptions)
   const { shopId } = res.locals
@@ -133,7 +123,6 @@ routes.post('/', roleCheck(['admin']), insertShop)
 routes.post('/search', searchShops)
 routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateShop)
 routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteShop)
-routes.post('/:shopId/schedule', roleCheck(['admin']), parseIntIdMiddleware, insertBusinessDaysAndHours)
 routes.post('/:shopId/stylist', roleCheck(['admin']), parseIntIdMiddleware, insertStylist)
 routes.patch('/:shopId/stylist/:id', roleCheck(['admin']), parseIntIdMiddleware, updateStylist)
 routes.delete('/:shopId/stylist/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteStylist)
