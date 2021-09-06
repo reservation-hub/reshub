@@ -21,10 +21,8 @@ export type ShopRepositoryInterface = {
     address: string,
     phoneNumber: string,
     days: number[],
-    hours: {
-      start: number,
-      end: number,
-    }
+    startTime: string,
+    endTime: string,
   ): Promise<Shop>,
   updateShop(
     id: number,
@@ -35,10 +33,9 @@ export type ShopRepositoryInterface = {
     address: string,
     phoneNumber: string,
     days: number[],
-    hours: {
-      start: number,
-      end: number,
-    }
+    startTime: string,
+    endTime: string,
+
   ): Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
   upsertSchedule(shopId: number, days: number[], start: string, end: string)
@@ -102,12 +99,14 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
   async insertShop(params) {
     const isValidLocation = await LocationRepository.isValidLocation(params.areaId, params.prefectureId, params.cityId)
     if (!isValidLocation) {
+      console.error('location')
       throw new InvalidParamsError()
     }
 
-    const startHour = convertToUnixTime(params.hours.start)
-    const endHour = convertToUnixTime(params.hours.end)
+    const startHour = convertToUnixTime(params.startTime)
+    const endHour = convertToUnixTime(params.endTime)
     if (params.days.length === 0 || endHour <= startHour) {
+      console.error('dates')
       throw new InvalidParamsError()
     }
 
@@ -121,7 +120,8 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       params.address,
       params.phoneNumber,
       uniqueDays,
-      { start: startHour, end: endHour },
+      params.startTime,
+      params.endTime,
     )
   },
 
@@ -136,8 +136,8 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       throw new NotFoundError()
     }
 
-    const startHour = convertToUnixTime(params.hours.start)
-    const endHour = convertToUnixTime(params.hours.end)
+    const startHour = convertToUnixTime(params.startTime)
+    const endHour = convertToUnixTime(params.endTime)
     if (params.days.length === 0 || endHour <= startHour) {
       throw new InvalidParamsError()
     }
@@ -153,7 +153,8 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       params.address,
       params.phoneNumber,
       uniqueDays,
-      { start: startHour, end: endHour },
+      params.startTime,
+      params.endTime,
     )
   },
 
