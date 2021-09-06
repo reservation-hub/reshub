@@ -35,6 +35,9 @@ export const AreaRepository:CommonRepositoryInterface<Area> = {
   async fetch(id) {
     return prisma.area.findUnique({
       where: { id },
+      include: {
+        prefectures: true,
+      },
     })
   },
 }
@@ -54,6 +57,9 @@ export const PrefectureRepository:CommonRepositoryInterface<Prefecture> = {
   async fetch(id) {
     return prisma.prefecture.findUnique({
       where: { id },
+      include: {
+        cities: true,
+      },
     })
   },
 }
