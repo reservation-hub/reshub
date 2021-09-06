@@ -20,6 +20,9 @@ export type ShopRepositoryInterface = {
     cityId: number,
     address: string,
     phoneNumber: string,
+    days: number[],
+    startTime: string,
+    endTime: string,
   ): Promise<Shop>,
   updateShop(
     id: number,
@@ -29,6 +32,10 @@ export type ShopRepositoryInterface = {
     cityId: number,
     address: string,
     phoneNumber: string,
+    days: number[],
+    startTime: string,
+    endTime: string,
+
   ): Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
   upsertSchedule(shopId: number, days: number[], start: string, end: string)
@@ -92,8 +99,18 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
   async insertShop(params) {
     const isValidLocation = await LocationRepository.isValidLocation(params.areaId, params.prefectureId, params.cityId)
     if (!isValidLocation) {
+      console.error('location')
       throw new InvalidParamsError()
     }
+
+    const startHour = convertToUnixTime(params.startTime)
+    const endHour = convertToUnixTime(params.endTime)
+    if (params.days.length === 0 || endHour <= startHour) {
+      console.error('dates')
+      throw new InvalidParamsError()
+    }
+
+    const uniqueDays: number[] = params.days.filter((n, i) => params.days.indexOf(n) === i)
 
     return ShopRepository.insertShop(
       params.name,
@@ -102,6 +119,9 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       params.cityId,
       params.address,
       params.phoneNumber,
+      uniqueDays,
+      params.startTime,
+      params.endTime,
     )
   },
 
@@ -116,8 +136,26 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       throw new NotFoundError()
     }
 
-    return ShopRepository.updateShop(id, params.name, params.areaId, params.prefectureId,
-      params.cityId, params.address, params.phoneNumber)
+    const startHour = convertToUnixTime(params.startTime)
+    const endHour = convertToUnixTime(params.endTime)
+    if (params.days.length === 0 || endHour <= startHour) {
+      throw new InvalidParamsError()
+    }
+
+    const uniqueDays: number[] = params.days.filter((n, i) => params.days.indexOf(n) === i)
+
+    return ShopRepository.updateShop(
+      id,
+      params.name,
+      params.areaId,
+      params.prefectureId,
+      params.cityId,
+      params.address,
+      params.phoneNumber,
+      uniqueDays,
+      params.startTime,
+      params.endTime,
+    )
   },
 
   async deleteShop(id) {
@@ -143,29 +181,6 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       return []
     }
     return ReservationRepository.fetchReservationsCountByShopIds(shopIds)
-  },
-
-  async upsertSchedule({ shopId, params }) {
-    const shop = await ShopRepository.fetch(shopId)
-    if (!shop) {
-      throw new NotFoundError()
-    }
-
-    const startHour = convertToUnixTime(params.hours.start)
-    const endHour = convertToUnixTime(params.hours.end)
-    if (params.days.length === 0 || endHour <= startHour) {
-      throw new InvalidParamsError()
-    }
-
-    const uniqueDays: number[] = params.days.filter((n, i) => params.days.indexOf(n) === i)
-
-    const schedule = await ShopRepository.upsertSchedule(
-      shop.id,
-      uniqueDays,
-      params.hours.start,
-      params.hours.end,
-    )
-    return schedule
   },
 
   async insertMenuItem({ shopId, params }) {

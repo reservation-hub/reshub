@@ -49,6 +49,7 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
   name: shop.shopDetail?.name,
   address: shop.shopDetail?.address,
   phoneNumber: shop.shopDetail?.phoneNumber,
+  schedule: shop.shopDetail?.schedule as ShopSchedule,
 })
 
 export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndLocationAndMenu): Shop => ({
@@ -71,6 +72,7 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
   name: shop.shopDetail?.name,
   address: shop.shopDetail?.address,
   phoneNumber: shop.shopDetail?.phoneNumber,
+  schedule: shop.shopDetail?.schedule as ShopSchedule,
   menu: {
     id: shop.menu!.id,
     items: shop.menu!.items?.map(item => ({
@@ -118,7 +120,15 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     return shop ? reconstructShopWithMenuAndStylists(shop) : null
   },
 
-  async insertShop(name, areaId, prefectureId, cityId, address, phoneNumber) {
+  async insertShop(name,
+    areaId,
+    prefectureId,
+    cityId,
+    address,
+    phoneNumber,
+    days,
+    startTime,
+    endTime) {
     const shop = await prisma.shop.create({
       data: {
         area: {
@@ -135,6 +145,11 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
             name,
             address,
             phoneNumber,
+            schedule: {
+              days,
+              startTime,
+              endTime,
+            },
           },
         },
         menu: {
@@ -154,7 +169,10 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     prefectureId,
     cityId,
     address,
-    phoneNumber) {
+    phoneNumber,
+    days,
+    startTime,
+    endTime) {
     const shop = await prisma.shop.update({
       where: { id },
       data: {
@@ -162,7 +180,16 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         prefecture: { connect: { id: prefectureId } },
         city: { connect: { id: cityId } },
         shopDetail: {
-          update: { name, address, phoneNumber },
+          update: {
+            name,
+            address,
+            phoneNumber,
+            schedule: {
+              days,
+              startTime,
+              endTime,
+            },
+          },
         },
       },
       include: {
