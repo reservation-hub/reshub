@@ -18,8 +18,8 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const areaIndex = asyncHandler(async (req, res) => {
   const params = await indexSchema.validateAsync(req.query, joiOptions)
-  const value = await LocationService.fetchAreasWithCount(params)
-  return res.send(value)
+  const { data: values, totalCount } = await LocationService.fetchAreasWithCount(params)
+  return res.send({ values, totalCount })
 })
 
 const showArea = asyncHandler(async (req, res) => {
@@ -30,8 +30,8 @@ const showArea = asyncHandler(async (req, res) => {
 
 const prefectureIndex = asyncHandler(async (req, res) => {
   const params = await indexSchema.validateAsync(req.query, joiOptions)
-  const value = await LocationService.fetchPrefecturesWithCount(params)
-  return res.send(value)
+  const { data: values, totalCount } = await LocationService.fetchPrefecturesWithCount(params)
+  return res.send({ values, totalCount })
 })
 
 const showPrefecture = asyncHandler(async (req, res) => {
@@ -42,8 +42,8 @@ const showPrefecture = asyncHandler(async (req, res) => {
 
 const cityIndex = asyncHandler(async (req, res) => {
   const params = await indexSchema.validateAsync(req.query, joiOptions)
-  const value = await LocationService.fetchCitiesWithCount(params)
-  return res.send(value)
+  const { data: values, totalCount } = await LocationService.fetchCitiesWithCount(params)
+  return res.send({ values, totalCount })
 })
 
 const showCity = asyncHandler(async (req, res) => {
