@@ -3,7 +3,6 @@ import {
 } from 'express'
 import asyncHandler from 'express-async-handler'
 
-import { signedCookies } from 'cookie-parser'
 import passport from '../middlewares/passport'
 import config from '../../config'
 import { User } from '../entities/User'
