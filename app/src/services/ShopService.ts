@@ -23,6 +23,7 @@ export type ShopRepositoryInterface = {
     days: number[],
     startTime: string,
     endTime: string,
+    details: string,
   ): Promise<Shop>,
   updateShop(
     id: number,
@@ -35,7 +36,7 @@ export type ShopRepositoryInterface = {
     days: number[],
     startTime: string,
     endTime: string,
-
+    details: string,
   ): Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
   upsertSchedule(shopId: number, days: number[], start: string, end: string)
@@ -105,6 +106,8 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
 
     const startHour = convertToUnixTime(params.startTime)
     const endHour = convertToUnixTime(params.endTime)
+    // eslint-disable-next-line no-console
+    console.log(startHour, endHour)
     if (params.days.length === 0 || endHour <= startHour) {
       console.error('dates')
       throw new InvalidParamsError()
@@ -122,6 +125,7 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       uniqueDays,
       params.startTime,
       params.endTime,
+      params.details,
     )
   },
 
@@ -155,6 +159,7 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       uniqueDays,
       params.startTime,
       params.endTime,
+      params.details,
     )
   },
 

@@ -50,6 +50,7 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
   address: shop.shopDetail?.address,
   phoneNumber: shop.shopDetail?.phoneNumber,
   schedule: shop.shopDetail?.schedule as ShopSchedule,
+  details: shop.shopDetail?.details,
 })
 
 export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndLocationAndMenu): Shop => ({
@@ -73,6 +74,7 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
   address: shop.shopDetail?.address,
   phoneNumber: shop.shopDetail?.phoneNumber,
   schedule: shop.shopDetail?.schedule as ShopSchedule,
+  details: shop.shopDetail?.details,
   menu: {
     id: shop.menu!.id,
     items: shop.menu!.items?.map(item => ({
@@ -128,7 +130,8 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     phoneNumber,
     days,
     startTime,
-    endTime) {
+    endTime,
+    details) {
     const shop = await prisma.shop.create({
       data: {
         area: {
@@ -150,6 +153,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
               startTime,
               endTime,
             },
+            details,
           },
         },
         menu: {
@@ -172,7 +176,8 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     phoneNumber,
     days,
     startTime,
-    endTime) {
+    endTime,
+    details) {
     const shop = await prisma.shop.update({
       where: { id },
       data: {
@@ -189,6 +194,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
               startTime,
               endTime,
             },
+            details,
           },
         },
       },
