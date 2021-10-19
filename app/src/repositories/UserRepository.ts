@@ -9,17 +9,10 @@ import { UserRepositoryInterface as UserServiceSocket } from '../services/UserSe
 import { UserRepositoryInterface as AuthServiceSocket } from '../services/AuthService'
 
 const userWithProfileAndOAuthIdsAndRoles = Prisma.validator<Prisma.UserArgs>()(
-  { include: { profile: true, oAuthIds: true, roles: { include: { role: true } } } },
+  { include: { profile: true, oAuthIds: true, role: true } },
 )
 
 type userWithProfileAndOAuthIdsAndRoles = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIdsAndRoles>
-
-type userRoles = {
-  id: number,
-  userId: number,
-  roleId: number,
-  role: Role
-}
 
 export const convertEntityGenderToDBGender = (gender: Gender): string => {
   switch (gender) {
@@ -53,7 +46,7 @@ export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User 
   lastNameKanji: user.profile?.lastNameKanji,
   firstNameKana: user.profile?.firstNameKana,
   lastNameKana: user.profile?.lastNameKana,
-  roles: user.roles.map((role: userRoles) => role.role),
+  role: user.role!,
   birthday: user.profile?.birthday,
   gender: user.profile?.gender ? convertDBGenderToEntityGender(user.profile?.gender) : null,
 })
@@ -68,9 +61,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
       include: {
         profile: true,
         oAuthIds: true,
-        roles: {
-          include: { role: true },
-        },
+        role: true,
       },
     })
 
@@ -85,9 +76,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
       include: {
         profile: true,
         oAuthIds: true,
-        roles: {
-          include: { role: true },
-        },
+        role: true,
       },
     })
     return user ? reconstructUser(user) : null
@@ -100,7 +89,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
   async insertUserWithProfile(
     email,
     password,
-    roleIds,
+    roleId,
     lastNameKanji,
     firstNameKanji,
     lastNameKana,
@@ -112,12 +101,8 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
       data: {
         email,
         password,
-        roles: {
-          create: roleIds.map(id => ({
-            role: {
-              connect: { id },
-            },
-          })),
+        role: {
+          connect: { id: roleId },
         },
         profile: {
           create: {
@@ -133,7 +118,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
       include: {
         profile: true,
         oAuthIds: true,
-        roles: { include: { role: true } },
+        role: true,
       },
     })
     const cleanUser = reconstructUser(user)
@@ -143,32 +128,15 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
   async updateUserFromAdmin(
     id,
     email,
+    roleId,
     lastNameKanji,
     firstNameKanji,
     lastNameKana,
     firstNameKana,
     birthday,
     gender,
-    rolesToAdd,
-    rolesToRemove,
   ) {
-    let removeQuery
-    if (rolesToRemove.length > 0) {
-      removeQuery = `DELETE from "UserRoles" WHERE user_id = ${id} AND role_id IN (${rolesToRemove.toString()});`
-    }
-
-    let roleAddQuery
-    if (rolesToAdd.length > 0) {
-      roleAddQuery = {
-        create: rolesToAdd.map(id => ({
-          role: {
-            connect: { id },
-          },
-        })),
-      }
-    }
-
-    const updateQuery = {
+    const user = await prisma.user.update({
       where: { id },
       data: {
         profile: {
@@ -181,27 +149,15 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
             gender: convertEntityGenderToDBGender(gender),
           },
         },
-        roles: roleAddQuery,
+        role: { connect: { id: roleId } },
         email,
       },
       include: {
         oAuthIds: true,
         profile: true,
-        roles: { include: { role: true } },
+        role: true,
       },
-    }
-
-    // execute
-    if (removeQuery) {
-      const transactionResult = await prisma.$transaction([
-        prisma.$queryRaw(removeQuery),
-        prisma.user.update(updateQuery),
-      ])
-      const cleanUser = reconstructUser(transactionResult[1])
-      return cleanUser
-    }
-
-    const user = await prisma.user.update(updateQuery)
+    })
     const cleanUser = reconstructUser(user)
     return cleanUser
   },
@@ -212,7 +168,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
       include: {
         oAuthIds: true,
         profile: true,
-        roles: { include: { role: true } },
+        role: true,
       },
     })
     return reconstructUser(user)
@@ -224,7 +180,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
       include: {
         oAuthIds: true,
         profile: true,
-        roles: { include: { role: true } },
+        role: true,
       },
     })
     const users = usersResult.map(user => reconstructUser(user))
@@ -236,7 +192,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
       include: {
         oAuthIds: true,
         profile: true,
-        roles: { include: { role: true } },
+        role: true,
       },
     })
     return user ? reconstructUser(user) : null

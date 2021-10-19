@@ -98,13 +98,9 @@ const roles = [
               lastNameKana: admin.lastNameKana,
             },
           },
-          roles: {
-            create: {
-              role: {
-                connect: {
-                  id: adminRole?.id,
-                },
-              },
+          role: {
+            connect: {
+              id: adminRole?.id,
             },
           },
         },

@@ -7,7 +7,7 @@ export const userInsertSchema = joi.object({
   password: joi.string().trim().alphanum().required(),
   confirm: joi.string().trim().alphanum().required(),
   email: joi.string().email().trim().required(),
-  roleIds: joi.array().items(joi.number()).min(1).required(),
+  roleId: joi.number().required(),
   firstNameKanji: joi.string().trim().required(),
   lastNameKanji: joi.string().trim().required(),
   firstNameKana: joi.string().trim().required(),
@@ -18,7 +18,7 @@ export const userInsertSchema = joi.object({
 
 export const userUpdateSchema = joi.object({
   email: joi.string().email().trim().required(),
-  roleIds: joi.array().items(joi.number()).min(1).required(),
+  roleId: joi.number().required(),
   firstNameKanji: joi.string().trim().required(),
   lastNameKanji: joi.string().trim().required(),
   firstNameKana: joi.string().trim().required(),

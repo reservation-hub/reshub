@@ -1,24 +1,16 @@
 import { Prisma } from '@prisma/client'
 import { User } from '../../entities/User'
 import prisma from '../../repositories/prisma'
-import { Role } from '../../entities/Role'
 import { UserRepositoryInterface } from '../services/SignUpService'
 import { UserRepositoryInterface as AuthServiceSocket } from '../services/AuthService'
 
-const userWithProfileAndOAuthIdsAndRoles = Prisma.validator<Prisma.UserArgs>()(
-  { include: { profile: true, oAuthIds: true, roles: { include: { role: true } } } },
+const userWithProfileAndOAuthIdsAndRole = Prisma.validator<Prisma.UserArgs>()(
+  { include: { profile: true, oAuthIds: true, role: true } },
 )
 
-type userWithProfileAndOAuthIdsAndRoles = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIdsAndRoles>
+type userWithProfileAndOAuthIdsAndRole = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIdsAndRole>
 
-type userRoles = {
-  id: number,
-  userId: number,
-  roleId: number,
-  role: Role
-}
-
-const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
+const reconstructUser = (user: userWithProfileAndOAuthIdsAndRole): User => ({
   id: user.id,
   email: user.email,
   username: user.username ?? null,
@@ -28,7 +20,7 @@ const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
     googleId: user.oAuthIds.googleId,
     facebookId: user.oAuthIds.facebookId,
   } : null,
-  roles: user.roles.map((role: userRoles) => role.role),
+  role: user.role!,
 })
 
 const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
@@ -36,7 +28,7 @@ const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
   async fetch(id) {
     const user = await prisma.user.findUnique({
       where: { id },
-      include: { profile: true, oAuthIds: true, roles: { include: { role: true } } },
+      include: { profile: true, oAuthIds: true, role: true },
     })
     return user ? reconstructUser(user) : null
   },
@@ -47,19 +39,15 @@ const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
         email,
         username,
         password,
-        roles: {
-          create: {
-            role: {
-              connect: { slug: 'client' },
-            },
-          },
+        role: {
+          connect: { slug: 'client' },
         },
       },
 
       include: {
         profile: true,
         oAuthIds: true,
-        roles: { include: { role: true } },
+        role: true,
       },
     })
     const createdUser = reconstructUser(create)
@@ -80,7 +68,7 @@ const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
   async fetchByUsername(username) {
     const user = await prisma.user.findUnique({
       where: { username },
-      include: { profile: true, oAuthIds: true, roles: { include: { role: true } } },
+      include: { profile: true, oAuthIds: true, role: true },
     })
     return user ? reconstructUser(user) : null
   },

@@ -8,7 +8,7 @@ import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 const reservationWithUserAndStylistAndShopWithoutLocation = Prisma.validator<Prisma.ReservationArgs>()(
   {
     include: {
-      user: { include: { profile: true, roles: { include: { role: true } } } },
+      user: { include: { profile: true, role: true } },
       shop: { include: { shopDetail: true } },
       stylist: { include: { shop: true } },
     },
@@ -38,7 +38,7 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
     firstNameKanji: reservation.user.profile?.firstNameKanji,
     lastNameKana: reservation.user.profile?.firstNameKana,
     firstNameKana: reservation.user.profile?.firstNameKana,
-    roles: reservation.user.roles.map(role => role.role),
+    role: reservation.user.role!,
   },
 })
 
@@ -50,7 +50,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
       orderBy: { id: order },
       take: limit,
       include: {
-        user: { include: { profile: true, roles: { include: { role: true } } } },
+        user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
       },
@@ -69,7 +69,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
     const reservation = await prisma.reservation.findUnique({
       where: { id },
       include: {
-        user: { include: { profile: true, roles: { include: { role: true } } } },
+        user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
       },
@@ -99,7 +99,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
     const reservations = await prisma.reservation.findMany({
       where: { shopId: { in: shopIds } },
       include: {
-        user: { include: { profile: true, roles: { include: { role: true } } } },
+        user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
       },
@@ -135,7 +135,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
         },
       },
       include: {
-        user: { include: { profile: true, roles: { include: { role: true } } } },
+        user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
       },
@@ -160,7 +160,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
         },
       },
       include: {
-        user: { include: { profile: true, roles: { include: { role: true } } } },
+        user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
       },
@@ -173,7 +173,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
     const reservation = await prisma.reservation.delete({
       where: { id },
       include: {
-        user: { include: { profile: true, roles: { include: { role: true } } } },
+        user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
       },
