@@ -10,7 +10,7 @@ export type UserRepositoryInterface = {
   insertUserWithProfile(
     email: string,
     password: string,
-    roleIds: number[],
+    roleId: number,
     lastNameKanji: string,
     firstNameKanji: string,
     lastNameKana: string,
@@ -21,20 +21,20 @@ export type UserRepositoryInterface = {
   updateUserFromAdmin(
     id: number,
     email: string,
+    roleId: number,
     lastNameKanji: string,
     firstNameKanji: string,
     lastNameKana: string,
     firstNameKana: string,
     birthday: string,
     gender: string,
-    rolesToAdd: number[],
-    rolesToRemove: number[],
   ): Promise<User>,
   deleteUserFromAdmin(id: number): Promise<User>,
   searchUser(keyword: string): Promise<User[]>,
 }
 
 export type RoleRepositoryInterface = {
+  isValidRole(id: number): Promise<boolean>,
   extractValidRoleIds(roleIds: number[]): Promise<number[]>
 }
 
@@ -76,12 +76,12 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
   },
 
   async insertUserFromAdmin(params) {
-    if (params.password !== params.confirm || params.roleIds?.length === 0) {
+    if (params.password !== params.confirm) {
       throw new InvalidParamsError()
     }
 
-    const validRoleIds = await RoleRepository.extractValidRoleIds(params.roleIds)
-    if (validRoleIds.length === 0) {
+    const isValidRole = await RoleRepository.isValidRole(params.roleId)
+    if (!isValidRole) {
       throw new InvalidParamsError()
     }
 
@@ -95,7 +95,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
     const user = await UserRepository.insertUserWithProfile(
       params.email,
       hash,
-      validRoleIds,
+      params.roleId,
       params.lastNameKanji,
       params.firstNameKanji,
       params.lastNameKana,
@@ -110,12 +110,8 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
   },
 
   async updateUserFromAdmin({ id, params }) {
-    if (params.roleIds.length === 0) {
-      throw new InvalidParamsError()
-    }
-
-    const validRoleIds = await RoleRepository.extractValidRoleIds(params.roleIds)
-    if (validRoleIds.length === 0) {
+    const isValidRole = await RoleRepository.isValidRole(params.roleId)
+    if (!isValidRole) {
       throw new InvalidParamsError()
     }
 
@@ -124,14 +120,9 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
 
-    const userRoleIds = user.roles.map(role => role.id)
-    const rolesToAdd = validRoleIds.filter(validRoleId => userRoleIds.indexOf(validRoleId) === -1)
-    const rolesToRemove = userRoleIds.filter(uuid => validRoleIds.indexOf(uuid) === -1)
-
     const updatedUser = await UserRepository.updateUserFromAdmin(
-      id, params.email, params.lastNameKanji, params.firstNameKanji,
+      id, params.email, params.roleId, params.lastNameKanji, params.firstNameKanji,
       params.lastNameKana, params.firstNameKana, params.birthday, params.gender,
-      rolesToAdd, rolesToRemove,
     )
 
     delete updatedUser.password

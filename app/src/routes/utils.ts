@@ -9,8 +9,8 @@ export const protectClientRoute = pt.authenticate('client-jwt', { session: false
 
 export const roleCheck = (roles: string[]) => (req: any, res: any, next: any): void => {
   const { user }: { user: User } = req
-  if (!user.roles) return next(new UnauthorizedError())
-  const authorized: boolean = user.roles.filter(ur => roles.includes(ur.name)).length > 0
+  if (!user.role) return next(new UnauthorizedError())
+  const authorized: boolean = roles.includes(user.role.name)
   if (!authorized) return next(new UnauthorizedError())
   return next()
 }

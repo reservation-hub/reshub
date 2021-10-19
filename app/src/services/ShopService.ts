@@ -106,8 +106,6 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
 
     const startHour = convertToUnixTime(params.startTime)
     const endHour = convertToUnixTime(params.endTime)
-    // eslint-disable-next-line no-console
-    console.log(startHour, endHour)
     if (params.days.length === 0 || endHour <= startHour) {
       console.error('dates')
       throw new InvalidParamsError()

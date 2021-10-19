@@ -7,6 +7,13 @@ import prisma from './prisma'
 
 const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket & RoleServiceSocket = {
 
+  async isValidRole(id) {
+    const role = await prisma.role.findUnique({
+      where: { id },
+    })
+    return role !== null
+  },
+
   async extractValidRoleIds(roleIds) {
     const validRoles = await prisma.role.findMany({
       where: {
