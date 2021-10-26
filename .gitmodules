@@ -10,3 +10,6 @@
 [submodule "app/src/request-response-types"]
 	path = app/src/request-response-types
 	url = git@github.com:reservation-hub/request-response-types.git
+[submodule "docker-elk"]
+	path = docker-elk
+	url = git@github.com:deviantony/docker-elk.git

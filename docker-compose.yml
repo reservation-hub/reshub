@@ -50,3 +50,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
     env_file:
       - reshub-deploy/.env.dev
+networks:
+  es-net:
+    driver: bridge
+

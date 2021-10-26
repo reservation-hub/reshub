@@ -119,7 +119,7 @@ const routes = Router()
 
 routes.get('/', roleCheck(['admin']), index)
 routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showShop)
-routes.post('/', roleCheck(['admin']), insertShop)
+routes.post('/', insertShop)
 routes.post('/search', searchShops)
 routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateShop)
 routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteShop)
