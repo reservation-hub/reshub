@@ -50,28 +50,29 @@ const refreshCookieExtractor = (req: Request) => {
   return refreshToken
 }
 
-const jwtOptionsRefresh = {
-  jwtFromRequest: refreshCookieExtractor,
+const commonJwtOptions = {
+  jwtFromRequest: cookieExtractor,
   secretOrKey: process.env.JWT_TOKEN_SECRET,
+  issuer: process.env.RESHUB_URL,
+}
+
+const jwtOptionsRefresh = {
+  ...commonJwtOptions,
+  jwtFromRequest: refreshCookieExtractor,
   audience: 'http://localhost:8080',
   expiresIn: '30d',
-  issuer: process.env.RESHUB_URL,
 }
 
 const jwtOptionsAdmin = {
-  jwtFromRequest: cookieExtractor,
-  secretOrKey: process.env.JWT_TOKEN_SECRET,
+  ...commonJwtOptions,
   audience: 'http://localhost:8080',
   expiresIn: '1d',
-  issuer: process.env.RESHUB_URL,
 }
 
 const jwtOptionsClient = {
-  jwtFromRequest: cookieExtractor,
-  secretOrKey: process.env.JWT_TOKEN_SECRET,
+  ...commonJwtOptions,
   audience: 'http://localhost:3000',
   expiresIn: '30d',
-  issuer: process.env.RESHUB_URL,
 }
 
 const jwtStrategyLogic = async (jwtPayload: any, done: any) => {

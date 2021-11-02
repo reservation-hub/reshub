@@ -10,7 +10,9 @@ export const protectClientRoute = pt.authenticate('client-jwt', { session: false
 export const roleCheck = (roles: string[]) => (req: any, res: any, next: any): void => {
   const { user }: { user: User } = req
   if (!user.role) return next(new UnauthorizedError())
-  const authorized: boolean = roles.includes(user.role.name)
+  const authorized: boolean = roles.includes(user.role.slug)
+  // eslint-disable-next-line
+  console.log(user.role.name, roles)
   if (!authorized) return next(new UnauthorizedError())
   return next()
 }
