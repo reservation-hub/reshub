@@ -77,6 +77,7 @@ services:
   logstash:
     build:
       context: .
+      dockerfile: elk/logstash/Dockerfile
       args:
         ELK_VERSION: "7.15.0"
     volumes:
