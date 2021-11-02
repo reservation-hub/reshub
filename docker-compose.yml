@@ -55,12 +55,12 @@ services:
   elasticsearch:
     build:
       context: .
-      dockerfile: elk/elasticsearch/Dockerfile
+      dockerfile: ./elk/elasticsearch/Dockerfile
       args:
         ELK_VERSION: "7.15.0"
     volumes:
       - type: bind
-        source: elk/elasticsearch/config/elasticsearch.yml
+        source: ./elk/elasticsearch/config/elasticsearch.yml
         target: /usr/share/elasticsearch/config/elasticsearch.yml
         read_only: true
       - elasticsearch:/usr/share/elasticsearch/data
@@ -77,16 +77,16 @@ services:
   logstash:
     build:
       context: .
-      dockerfile: elk/logstash/Dockerfile
+      dockerfile: ./elk/logstash/Dockerfile
       args:
         ELK_VERSION: "7.15.0"
     volumes:
       - type: bind
-        source: elk/logstash/config/logstash.yml
+        source: ./elk/logstash/config/logstash.yml
         target: /usr/share/logstash/config/logstash.yml
         read_only: true
       - type: bind
-        source: elk/logstash/pipeline
+        source: ./elk/logstash/pipeline
         target: /usr/share/logstash/pipeline
         read_only: true
     ports:

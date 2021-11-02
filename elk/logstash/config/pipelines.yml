@@ -1,3 +1,15 @@
 - pipeline.id: city
   path.config: "/usr/share/logstash/pipeline/city.conf"
   pipeline.workers: 2
+
+- pipeline.id: area
+  path.config: "/usr/share/logstash/pipeline/area.conf"
+  pipeline.workers: 2
+
+- pipeline.id: prefecture
+  path.config: "/usr/share/logstash/pipeline/prefecture.conf"
+  pipeline.workers: 2
+
+- pipeline.id: shop
+  path.config: "/usr/share/logstash/pipeline/shop.conf"
+  pipeline.workers: 2
