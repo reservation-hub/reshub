@@ -90,8 +90,13 @@ const AuthService: AuthControllerSocket & PassportSocket = {
     return user
   },
 
-  async hack() {
-    const user = await UserRepository.fetchByEmail('eugene.sinamban@gmail.com')
+  async hack(role) {
+    let user
+    if (role === 'staff') {
+      user = await UserRepository.fetchByEmail('staff@staff.com')
+    } else {
+      user = await UserRepository.fetchByEmail('eugene.sinamban@gmail.com')
+    }
     if (!user) {
       throw new NotFoundError()
     }

@@ -2,7 +2,7 @@ import {
   Request, Response, NextFunction, Router,
 } from 'express'
 
-import { protectAdminRoute } from './utils'
+import { protectAdminRoute, roleCheck } from './utils'
 
 import dashboardController from '../controllers/dashboardController'
 import { areaController, prefectureController, cityController } from '../controllers/locationController'
@@ -20,15 +20,15 @@ const router = Router()
 export default router
 
 router.use('/auth', authController)
-router.use('/dashboard', protectAdminRoute, dashboardController)
-router.use('/areas', protectAdminRoute, areaController)
-router.use('/prefectures', protectAdminRoute, prefectureController)
-router.use('/cities', protectAdminRoute, cityController)
-router.use('/users', protectAdminRoute, userController)
-router.use('/roles', protectAdminRoute, roleController)
-router.use('/shops', protectAdminRoute, shopController, menuController)
-router.use('/reservations', protectAdminRoute, reservationController)
+router.use('/dashboard', protectAdminRoute, roleCheck(['admin', 'shop_staff']), dashboardController)
+router.use('/areas', protectAdminRoute, roleCheck(['admin']), areaController)
+router.use('/prefectures', protectAdminRoute, roleCheck(['admin']), prefectureController)
+router.use('/cities', protectAdminRoute, roleCheck(['admin']), cityController)
+router.use('/users', protectAdminRoute, roleCheck(['admin']), userController)
+router.use('/roles', protectAdminRoute, roleCheck(['admin']), roleController)
+router.use('/shops', protectAdminRoute, roleCheck(['admin', 'shop_staff']), shopController, menuController)
+router.use('/reservations', protectAdminRoute, roleCheck(['admin', 'shop_staff']), reservationController)
 // client api
-router.use('/api/', apiRoutes)
+router.use('/api/', roleCheck(['client']), apiRoutes)
 
 router.use('/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404s
