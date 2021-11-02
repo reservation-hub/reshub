@@ -15,7 +15,7 @@ export type AuthServiceInterface = {
   verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>,
   silentRefreshTokenChecks(authToken: string, refreshToken: string, headerToken?: string): Promise<void>,
   googleAuthenticate(token: string): Promise<User>,
-  hack(): Promise<User>
+  hack(role?: string): Promise<User>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -105,6 +105,12 @@ export const hack = asyncHandler(async (req: Request, res: Response, next: NextF
   return next()
 })
 
+export const staffHack = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const user = await AuthService.hack('staff')
+  req.user = user
+  return next()
+})
+
 const routes = Router()
 
 routes.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
@@ -113,5 +119,6 @@ routes.post('/silent_refresh', silentRefreshParamsCheck,
   passport.authenticate('refresh-jwt', { session: false }), login)
 routes.get('/logout', passport.authenticate('admin-jwt', { session: false }), logout)
 routes.get('/hack', hack, login)
+routes.get('/hack_staff', staffHack, login)
 
 export default routes
