@@ -55,6 +55,7 @@ services:
   elasticsearch:
     build:
       context: .
+      dockerfile: elk/elasticsearch/Dockerfile
       args:
         ELK_VERSION: "7.15.0"
     volumes:
@@ -80,11 +81,11 @@ services:
         ELK_VERSION: "7.15.0"
     volumes:
       - type: bind
-        source: ./elk/logstash/config/logstash.yml
+        source: elk/logstash/config/logstash.yml
         target: /usr/share/logstash/config/logstash.yml
         read_only: true
       - type: bind
-        source: ./elk/logstash/pipeline
+        source: elk/logstash/pipeline
         target: /usr/share/logstash/pipeline
         read_only: true
     ports:
@@ -98,17 +99,19 @@ services:
       - elasticsearch
 
   kibana:
-    build:
-      context: .
-      args:
-        ELK_VERSION: "7.15.0"
+    image: docker.elastic.co/kibana/kibana:7.15.0
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: changeme
     volumes:
       - type: bind
         source: ./elk/kibana/config/kibana.yml
         target: /usr/share/kibana/config/kibana.yml
         read_only: true
     ports:
-      - "5601:5601"
+      - 5601:5601
     depends_on:
       - elasticsearch
 
