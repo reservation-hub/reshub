@@ -53,3 +53,11 @@ rh-db-restore <ファイル名>
 ### 環境設定
 
 - http://localhost:8090
+
+
+### elasticsearchを立ち上げ
+
+```bash
+rh-el
+rh-kib # kibana
+```

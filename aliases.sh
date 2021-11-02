@@ -14,7 +14,9 @@ alias db-seed-shop="docker-compose exec server npm run seed-shop"
 alias db-reset="docker-compose exec server npm run db-reset"
 alias db-studio="docker-compose exec server node_modules/.bin/prisma studio"
 alias rh-test="docker-compose exec server node seedFiles/test.js"
-
+alias rh-el="docker-compose build logstash && docker-compose up logstash"
+alias rh-del="docker-compose build logstash && docker-compose up -d logstash"
+alias rh-kib="docker-compose build kibana && docker-compose up -d kibana"
 # db back up
 function rh-db-backup() {
   if [ -z "$1" ]; then
