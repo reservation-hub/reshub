@@ -30,7 +30,7 @@ const login = asyncHandler(async (req, res) => {
 
   // クッキーを設定
   res.cookie('authToken', token, cookieOptions)
-  return res.send({ user, token })
+  res.send({ user, token })
 })
 
 export const verifyIfNotLoggedInYet = asyncHandler(async (req, res, next) => {

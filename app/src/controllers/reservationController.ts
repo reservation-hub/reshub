@@ -25,39 +25,39 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 export const index = asyncHandler(async (req, res) => {
   const params = await indexSchema.validateAsync(req.query, joiOptions)
   const reservationsWithcount = await ReservationService.fetchReservationsWithTotalCount(params)
-  return res.send(reservationsWithcount)
+  res.send(reservationsWithcount)
 })
 
 export const showReservation = asyncHandler(async (req, res) => {
   const { id } = res.locals
   const reservation = await ReservationService.fetchReservation(id)
-  return res.send(reservation)
+  res.send(reservation)
 })
 
 const insertReservation = asyncHandler(async (req, res) => {
   const params = await reservationUpsertSchema.validateAsync(req.body, joiOptions)
   const reservation = await ReservationService.insertReservation(params)
-  return res.send(reservation)
+  res.send(reservation)
 })
 
 export const searchReservations = asyncHandler(async (req, res) => {
   const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
   const reservation = await ReservationService.searchReservations(searchValues.keyword)
 
-  return res.send({ data: reservation })
+  res.send({ data: reservation })
 })
 
 const updateReservation = asyncHandler(async (req, res) => {
   const params = await reservationUpsertSchema.validateAsync(req.body, joiOptions)
   const { id } = res.locals
   const reservation = await ReservationService.updateReservation({ id, params })
-  return res.send(reservation)
+  res.send(reservation)
 })
 
 const deleteReservation = asyncHandler(async (req, res) => {
   const { id } = res.locals
   await ReservationService.deleteReservation(id)
-  return res.send({ message: 'Reservation deleted' })
+  res.send({ message: 'Reservation deleted' })
 })
 
 const routes = Router()
