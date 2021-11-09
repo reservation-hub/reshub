@@ -1,5 +1,6 @@
-import { Router } from 'express'
-import asyncHandler from 'express-async-handler'
+import {
+  Router, Response, Request, NextFunction,
+} from 'express'
 import { roleCheck, parseIntIdMiddleware } from '../routes/utils'
 import { MenuItem } from '../entities/Menu'
 import ShopService from '../services/ShopService'
@@ -14,25 +15,31 @@ export type ShopServiceInterface = {
   deleteMenuItem(query: deleteMenuItemQuery): Promise<MenuItem>
 }
 
-export const insertMenuItem = asyncHandler(async (req, res) => {
-  const params = await menuItemUpsertSchema.validateAsync(req.body, joiOptions)
-  const { shopId } = res.locals
-  const menuItem = await ShopService.insertMenuItem({ shopId, params })
-  res.send(menuItem)
-})
+export const insertMenuItem = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await menuItemUpsertSchema.validateAsync(req.body, joiOptions)
+    const { shopId } = res.locals
+    const menuItem = await ShopService.insertMenuItem({ shopId, params })
+    return res.send(menuItem)
+  } catch (e) { return next(e) }
+}
 
-export const updateMenuItem = asyncHandler(async (req, res) => {
-  const params = await menuItemUpsertSchema.validateAsync(req.body, joiOptions)
-  const { shopId, menuItemId } = res.locals
-  const menuItem = await ShopService.updateMenuItem({ shopId, menuItemId, params })
-  res.send(menuItem)
-})
+export const updateMenuItem = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await menuItemUpsertSchema.validateAsync(req.body, joiOptions)
+    const { shopId, menuItemId } = res.locals
+    const menuItem = await ShopService.updateMenuItem({ shopId, menuItemId, params })
+    return res.send(menuItem)
+  } catch (e) { return next(e) }
+}
 
-export const deleteMenuItem = asyncHandler(async (req, res) => {
-  const { shopId, menuItemId } = res.locals
-  const menuItem = await ShopService.deleteMenuItem({ shopId, menuItemId })
-  res.send(menuItem)
-})
+export const deleteMenuItem = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { shopId, menuItemId } = res.locals
+    const menuItem = await ShopService.deleteMenuItem({ shopId, menuItemId })
+    return res.send(menuItem)
+  } catch (e) { return next(e) }
+}
 
 const routes = Router()
 

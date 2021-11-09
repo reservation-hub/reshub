@@ -1,5 +1,6 @@
-import { Router } from 'express'
-import asyncHandler from 'express-async-handler'
+import {
+  Router, Request, Response, NextFunction,
+} from 'express'
 import RoleService from '../services/RoleService'
 import { insertRoleQuery, updateRoleQuery } from '../request-response-types/RoleService'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
@@ -20,45 +21,57 @@ export type RoleServiceInterface = {
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
-export const index = asyncHandler(async (req, res) => {
-  const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
-  const rolesWithCount = await RoleService.fetchRolesWithTotalCount(schemaValues)
-  res.send(rolesWithCount)
-})
+export const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
+    const rolesWithCount = await RoleService.fetchRolesWithTotalCount(schemaValues)
+    return res.send(rolesWithCount)
+  } catch (e) { return next(e) }
+}
 
-export const showRole = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  const role = await RoleService.fetchRole(id)
-  res.send(role)
-})
+export const showRole = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { id } = res.locals
+    const role = await RoleService.fetchRole(id)
+    return res.send(role)
+  } catch (e) { return next(e) }
+}
 
-export const insertRole = asyncHandler(async (req, res) => {
-  const params = await roleUpsertSchema.validateAsync(req.body, joiOptions)
-  const role = await RoleService.insertRole(params)
-  res.send(role)
-})
+export const insertRole = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await roleUpsertSchema.validateAsync(req.body, joiOptions)
+    const role = await RoleService.insertRole(params)
+    return res.send(role)
+  } catch (e) { return next(e) }
+}
 
-export const searchRoles = asyncHandler(async (req, res) => {
-  const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
-  const role = await RoleService.searchRoles(searchValues.keyword)
+export const searchRoles = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
+    const role = await RoleService.searchRoles(searchValues.keyword)
 
-  res.send({ data: role })
-})
+    return res.send({ data: role })
+  } catch (e) { return next(e) }
+}
 
-export const updateRole = asyncHandler(async (req, res) => {
-  const params = await roleUpsertSchema.validateAsync(req.body, joiOptions)
+export const updateRole = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await roleUpsertSchema.validateAsync(req.body, joiOptions)
 
-  const { id } = res.locals
+    const { id } = res.locals
 
-  const role = await RoleService.updateRole({ id, params })
-  res.send(role)
-})
+    const role = await RoleService.updateRole({ id, params })
+    return res.send(role)
+  } catch (e) { return next(e) }
+}
 
-export const deleteRole = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  await RoleService.deleteRole(id)
-  res.send({ message: 'Role deleted' })
-})
+export const deleteRole = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { id } = res.locals
+    await RoleService.deleteRole(id)
+    return res.send({ message: 'Role deleted' })
+  } catch (e) { return next(e) }
+}
 
 const routes = Router()
 
