@@ -12,8 +12,6 @@ export type LocationQuery = {
   limit: number,
 }
 
-export type LocationResponse = { data: Area[] | Prefecture[] | City[], totalCount: number }
-
 const LocationService: LocationServiceInterface = {
 
   async fetchAreasWithCount(query) {
