@@ -17,7 +17,7 @@ export const signUp = asyncHandler(async (req, res) => {
   const userValues = await signUpSchema.validateAsync(req.body, joiOptions)
 
   const user = await SignUpService.signUpUser(userValues)
-  return res.send({ data: user })
+  res.send({ data: user })
 })
 
 const routes = Router()

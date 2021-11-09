@@ -18,20 +18,20 @@ export const insertMenuItem = asyncHandler(async (req, res) => {
   const params = await menuItemUpsertSchema.validateAsync(req.body, joiOptions)
   const { shopId } = res.locals
   const menuItem = await ShopService.insertMenuItem({ shopId, params })
-  return res.send(menuItem)
+  res.send(menuItem)
 })
 
 export const updateMenuItem = asyncHandler(async (req, res) => {
   const params = await menuItemUpsertSchema.validateAsync(req.body, joiOptions)
   const { shopId, menuItemId } = res.locals
   const menuItem = await ShopService.updateMenuItem({ shopId, menuItemId, params })
-  return res.send(menuItem)
+  res.send(menuItem)
 })
 
 export const deleteMenuItem = asyncHandler(async (req, res) => {
   const { shopId, menuItemId } = res.locals
   const menuItem = await ShopService.deleteMenuItem({ shopId, menuItemId })
-  return res.send(menuItem)
+  res.send(menuItem)
 })
 
 const routes = Router()

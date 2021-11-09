@@ -58,26 +58,26 @@ const index = asyncHandler(async (req, res) => {
     stylistsCount: totalStylistsCount.find(item => item.id === shop.id)?.count,
   }))
 
-  return res.send({ values, totalCount })
+  res.send({ values, totalCount })
 })
 const showShop = asyncHandler(async (req, res) => {
   const { id } = res.locals
   const shop = await ShopService.fetchShop(id)
-  return res.send(shop)
+  res.send(shop)
 })
 
 export const searchShops = asyncHandler(async (req, res) => {
   const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
   const shop = await ShopService.searchShops(searchValues.keyword)
 
-  return res.send({ data: shop })
+  res.send({ data: shop })
 })
 
 const insertShop = asyncHandler(async (req, res) => {
   const shopInsertValues = await shopUpsertSchema.validateAsync(req.body, joiOptions)
 
   const shop = await ShopService.insertShop(shopInsertValues)
-  return res.send(shop)
+  res.send(shop)
 })
 
 const updateShop = asyncHandler(async (req, res) => {
@@ -86,33 +86,33 @@ const updateShop = asyncHandler(async (req, res) => {
 
   const shop = await ShopService.updateShop({ id, params })
 
-  return res.send(shop)
+  res.send(shop)
 })
 
 const deleteShop = asyncHandler(async (req, res) => {
   const { id } = res.locals
   await ShopService.deleteShop(id)
-  return res.send({ message: 'Shop deleted' })
+  res.send({ message: 'Shop deleted' })
 })
 
 const insertStylist = asyncHandler(async (req, res) => {
   const params = await shopStylistUpsertSchema.validateAsync(req.body, joiOptions)
   const { shopId } = res.locals
   const stylist = await ShopService.insertStylist({ shopId, params })
-  return res.send(stylist)
+  res.send(stylist)
 })
 
 const updateStylist = asyncHandler(async (req, res) => {
   const params = await shopStylistUpsertSchema.validateAsync(req.body, joiOptions)
   const { shopId, id } = res.locals
   const stylist = await ShopService.updateStylist({ shopId, stylistId: id, params })
-  return res.send(stylist)
+  res.send(stylist)
 })
 
 const deleteStylist = asyncHandler(async (req, res) => {
   const { shopId, id } = res.locals
   const stylist = await ShopService.deleteStylist({ shopId, stylistId: id })
-  return res.send(stylist)
+  res.send(stylist)
 })
 
 const routes = Router()

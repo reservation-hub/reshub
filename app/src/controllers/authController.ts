@@ -39,7 +39,7 @@ export const login = asyncHandler(async (req, res) => {
   // クッキーを設定
   res.cookie('authToken', token, cookieOptions)
   res.cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 1000 * 60 * 60 * 24 * 30 })
-  return res.send({ user, token })
+  res.send({ user, token })
 })
 
 export const refreshLogin = asyncHandler(async (req, res) => {
@@ -56,7 +56,7 @@ export const refreshLogin = asyncHandler(async (req, res) => {
   }
   const token = AuthService.createToken(user, '1d')
   res.cookie('authToken', token, cookieOptions)
-  return res.send({ user, token })
+  res.send({ user, token })
 })
 
 export const verifyIfNotLoggedInYet = asyncHandler(async (req, res, next) => {
