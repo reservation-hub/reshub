@@ -1,5 +1,6 @@
-import { Router } from 'express'
-import asyncHandler from 'express-async-handler'
+import {
+  Router, Response, Request, NextFunction,
+} from 'express'
 
 import { signUpSchema } from './schemas/signup'
 import SignUpService, { signUpQuery } from '../services/SignUpService'
@@ -13,12 +14,13 @@ export type SignUpServiceInterface = {
 }
 
 // validate the signUp values with joi schema
-export const signUp = asyncHandler(async (req, res) => {
-  const userValues = await signUpSchema.validateAsync(req.body, joiOptions)
-
-  const user = await SignUpService.signUpUser(userValues)
-  res.send({ data: user })
-})
+export const signUp = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const userValues = await signUpSchema.validateAsync(req.body, joiOptions)
+    const user = await SignUpService.signUpUser(userValues)
+    return res.send({ data: user })
+  } catch (e) { return next(e) }
+}
 
 const routes = Router()
 

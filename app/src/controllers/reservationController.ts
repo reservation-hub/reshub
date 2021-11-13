@@ -1,5 +1,6 @@
-import { Router } from 'express'
-import asyncHandler from 'express-async-handler'
+import {
+  Router, Request, Response, NextFunction,
+} from 'express'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
 import { reservationUpsertSchema } from './schemas/reservation'
 import indexSchema from './schemas/indexSchema'
@@ -22,43 +23,56 @@ export type ReservationServiceInterface = {
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
-export const index = asyncHandler(async (req, res) => {
-  const params = await indexSchema.validateAsync(req.query, joiOptions)
-  const reservationsWithcount = await ReservationService.fetchReservationsWithTotalCount(params)
-  res.send(reservationsWithcount)
-})
+export const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await indexSchema.validateAsync(req.query, joiOptions)
+    const reservationsWithcount = await ReservationService.fetchReservationsWithTotalCount(params)
+    return res.send(reservationsWithcount)
+  } catch (e) { return next(e) }
+}
 
-export const showReservation = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  const reservation = await ReservationService.fetchReservation(id)
-  res.send(reservation)
-})
+export const showReservation = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { id } = res.locals
+    const reservation = await ReservationService.fetchReservation(id)
+    return res.send(reservation)
+  } catch (e) { return next(e) }
+}
 
-const insertReservation = asyncHandler(async (req, res) => {
-  const params = await reservationUpsertSchema.validateAsync(req.body, joiOptions)
-  const reservation = await ReservationService.insertReservation(params)
-  res.send(reservation)
-})
+const insertReservation = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await reservationUpsertSchema.validateAsync(req.body, joiOptions)
+    const reservation = await ReservationService.insertReservation(params)
+    return res.send(reservation)
+  } catch (e) { return next(e) }
+}
 
-export const searchReservations = asyncHandler(async (req, res) => {
-  const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
-  const reservation = await ReservationService.searchReservations(searchValues.keyword)
+export const searchReservations = async (req: Request, res: Response, next: NextFunction)
+  : Promise<Response | void> => {
+  try {
+    const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
+    const reservation = await ReservationService.searchReservations(searchValues.keyword)
 
-  res.send({ data: reservation })
-})
+    return res.send({ data: reservation })
+  } catch (e) { return next(e) }
+}
 
-const updateReservation = asyncHandler(async (req, res) => {
-  const params = await reservationUpsertSchema.validateAsync(req.body, joiOptions)
-  const { id } = res.locals
-  const reservation = await ReservationService.updateReservation({ id, params })
-  res.send(reservation)
-})
+const updateReservation = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await reservationUpsertSchema.validateAsync(req.body, joiOptions)
+    const { id } = res.locals
+    const reservation = await ReservationService.updateReservation({ id, params })
+    return res.send(reservation)
+  } catch (e) { return next(e) }
+}
 
-const deleteReservation = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  await ReservationService.deleteReservation(id)
-  res.send({ message: 'Reservation deleted' })
-})
+const deleteReservation = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { id } = res.locals
+    await ReservationService.deleteReservation(id)
+    return res.send({ message: 'Reservation deleted' })
+  } catch (e) { return next(e) }
+}
 
 const routes = Router()
 

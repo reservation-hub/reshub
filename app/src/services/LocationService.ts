@@ -1,6 +1,4 @@
 import { LocationServiceInterface } from '../controllers/locationController'
-import { Area, Prefecture, City } from '../entities/Location'
-
 import {
   AreaRepository, CityRepository, PrefectureRepository,
 } from '../repositories/LocationRepository'
@@ -11,8 +9,6 @@ export type LocationQuery = {
   order: any,
   limit: number,
 }
-
-export type LocationResponse = { data: Area[] | Prefecture[] | City[], totalCount: number }
 
 const LocationService: LocationServiceInterface = {
 

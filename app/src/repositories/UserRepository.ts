@@ -4,7 +4,6 @@ import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import {
   Female, Male, Gender, User,
 } from '../entities/User'
-import { Role } from '../entities/Role'
 import { UserRepositoryInterface as UserServiceSocket } from '../services/UserService'
 import { UserRepositoryInterface as AuthServiceSocket } from '../services/AuthService'
 

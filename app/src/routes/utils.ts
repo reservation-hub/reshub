@@ -7,8 +7,8 @@ import { UnauthorizedError } from './errors'
 export const protectAdminRoute = pt.authenticate('admin-jwt', { session: false })
 export const protectClientRoute = pt.authenticate('client-jwt', { session: false })
 
-export const roleCheck = (roles: string[]) => (req: any, res: any, next: any): void => {
-  const { user }: { user: User } = req
+export const roleCheck = (roles: string[]) => (req: Request, res: Response, next: NextFunction): void => {
+  const user = req.user as User
   if (!user.role) return next(new UnauthorizedError())
   const authorized: boolean = roles.includes(user.role.slug)
   if (!authorized) return next(new UnauthorizedError())

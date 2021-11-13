@@ -1,66 +1,56 @@
-import { Router } from 'express'
-import asyncHandler from 'express-async-handler'
-import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
-import LocationService, { LocationQuery, LocationResponse } from '../services/LocationService'
+import LocationService from '../services/LocationService'
 import indexSchema from './schemas/indexSchema'
 import { Area, Prefecture, City } from '../entities/Location'
+import { LocationQuery } from '../request-response-types/Location'
+import { AreaControllerInterface, CityControllerInterface, PrefectureControllerInterface }
+  from '../controller-adapter/Location'
 
 export type LocationServiceInterface = {
-  fetchAreasWithCount(query: LocationQuery): Promise<LocationResponse>,
+  fetchAreasWithCount(query: LocationQuery): Promise<{ data: Area[], totalCount: number }>,
   fetchArea(id: number): Promise<Area>,
-  fetchPrefecturesWithCount(query: LocationQuery): Promise<LocationResponse>,
+  fetchPrefecturesWithCount(query: LocationQuery): Promise<{ data: Prefecture[], totalCount: number}>,
   fetchPrefecture(id: number): Promise<Prefecture>,
-  fetchCitiesWithCount(query: LocationQuery): Promise<LocationResponse>,
+  fetchCitiesWithCount(query: LocationQuery): Promise<{ data: City[], totalCount: number }>,
   fetchCity(id: number): Promise<City>,
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
-const areaIndex = asyncHandler(async (req, res) => {
-  const params = await indexSchema.validateAsync(req.query, joiOptions)
-  const { data: values, totalCount } = await LocationService.fetchAreasWithCount(params)
-  return res.send({ values, totalCount })
-})
+export const AreaController : AreaControllerInterface = {
+  async areaIndex(query) {
+    const params = await indexSchema.validateAsync(query, joiOptions)
+    const { data: values, totalCount } = await LocationService.fetchAreasWithCount(params)
+    return { values, totalCount }
+  },
 
-const showArea = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  const area = await LocationService.fetchArea(id)
-  return res.send(area)
-})
+  async showArea(id) {
+    const area = await LocationService.fetchArea(id)
+    return area
+  },
+}
 
-const prefectureIndex = asyncHandler(async (req, res) => {
-  const params = await indexSchema.validateAsync(req.query, joiOptions)
-  const { data: values, totalCount } = await LocationService.fetchPrefecturesWithCount(params)
-  return res.send({ values, totalCount })
-})
+export const PrefectureController : PrefectureControllerInterface = {
+  async prefectureIndex(query) {
+    const params = await indexSchema.validateAsync(query, joiOptions)
+    const { data: values, totalCount } = await LocationService.fetchPrefecturesWithCount(params)
+    return { values, totalCount }
+  },
 
-const showPrefecture = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  const prefecture = await LocationService.fetchPrefecture(id)
-  return res.send(prefecture)
-})
+  async showPrefecture(id) {
+    const prefecture = await LocationService.fetchPrefecture(id)
+    return prefecture
+  },
+}
 
-const cityIndex = asyncHandler(async (req, res) => {
-  const params = await indexSchema.validateAsync(req.query, joiOptions)
-  const { data: values, totalCount } = await LocationService.fetchCitiesWithCount(params)
-  return res.send({ values, totalCount })
-})
+export const CityController : CityControllerInterface = {
+  async cityIndex(query) {
+    const params = await indexSchema.validateAsync(query, joiOptions)
+    const { data: values, totalCount } = await LocationService.fetchCitiesWithCount(params)
+    return { values, totalCount }
+  },
 
-const showCity = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  const city = await LocationService.fetchCity(id)
-  return res.send(city)
-})
-
-export const areaController = Router()
-export const prefectureController = Router()
-export const cityController = Router()
-
-areaController.get('/', roleCheck(['admin']), areaIndex)
-areaController.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showArea)
-
-prefectureController.get('/', roleCheck(['admin']), prefectureIndex)
-prefectureController.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showPrefecture)
-
-cityController.get('/', roleCheck(['admin']), cityIndex)
-cityController.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showCity)
+  async showCity(id) {
+    const city = await LocationService.fetchCity(id)
+    return city
+  },
+}

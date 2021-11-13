@@ -1,5 +1,6 @@
-import { Router } from 'express'
-import asyncHandler from 'express-async-handler'
+import {
+  Router, Request, Response, NextFunction,
+} from 'express'
 import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import ShopService from '../services/ShopService'
@@ -41,79 +42,97 @@ export type ShopServiceInterface = {
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
-const index = asyncHandler(async (req, res) => {
-  const params = await indexSchema.validateAsync(req.query, joiOptions)
-  const shopsWithCount = await ShopService.fetchShopsWithTotalCount(params)
-  const { values: shops, totalCount } = shopsWithCount
+const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await indexSchema.validateAsync(req.query, joiOptions)
+    const shopsWithCount = await ShopService.fetchShopsWithTotalCount(params)
+    const { values: shops, totalCount } = shopsWithCount
 
-  const shopIds = shops.map(shop => shop.id)
+    const shopIds = shops.map(shop => shop.id)
 
-  const totalReservationsCount = await ShopService.fetchReservationsCountByShopIds(shopIds)
-  const totalStylistsCount = await ShopService.fetchStylistsCountByShopIds(shopIds)
+    const totalReservationsCount = await ShopService.fetchReservationsCountByShopIds(shopIds)
+    const totalStylistsCount = await ShopService.fetchStylistsCountByShopIds(shopIds)
 
-  // merge data
-  const values: Shop[] = shops.map(shop => ({
-    ...shop,
-    reservationsCount: totalReservationsCount.find(item => item.id === shop.id)?.count,
-    stylistsCount: totalStylistsCount.find(item => item.id === shop.id)?.count,
-  }))
+    // merge data
+    const values: Shop[] = shops.map(shop => ({
+      ...shop,
+      reservationsCount: totalReservationsCount.find(item => item.id === shop.id)?.count,
+      stylistsCount: totalStylistsCount.find(item => item.id === shop.id)?.count,
+    }))
 
-  res.send({ values, totalCount })
-})
-const showShop = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  const shop = await ShopService.fetchShop(id)
-  res.send(shop)
-})
+    return res.send({ values, totalCount })
+  } catch (e) { return next(e) }
+}
 
-export const searchShops = asyncHandler(async (req, res) => {
-  const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
-  const shop = await ShopService.searchShops(searchValues.keyword)
+const showShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { id } = res.locals
+    const shop = await ShopService.fetchShop(id)
+    return res.send(shop)
+  } catch (e) { return next(e) }
+}
 
-  res.send({ data: shop })
-})
+export const searchShops = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
+    const shop = await ShopService.searchShops(searchValues.keyword)
+    return res.send({ data: shop })
+  } catch (e) { return next(e) }
+}
 
-const insertShop = asyncHandler(async (req, res) => {
-  const shopInsertValues = await shopUpsertSchema.validateAsync(req.body, joiOptions)
+const insertShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const shopInsertValues = await shopUpsertSchema.validateAsync(req.body, joiOptions)
 
-  const shop = await ShopService.insertShop(shopInsertValues)
-  res.send(shop)
-})
+    const shop = await ShopService.insertShop(shopInsertValues)
+    return res.send(shop)
+  } catch (e) { return next(e) }
+}
 
-const updateShop = asyncHandler(async (req, res) => {
-  const params = await shopUpsertSchema.validateAsync(req.body, joiOptions)
-  const { id } = res.locals
+const updateShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await shopUpsertSchema.validateAsync(req.body, joiOptions)
+    const { id } = res.locals
 
-  const shop = await ShopService.updateShop({ id, params })
+    const shop = await ShopService.updateShop({ id, params })
 
-  res.send(shop)
-})
+    return res.send(shop)
+  } catch (e) { return next(e) }
+}
 
-const deleteShop = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  await ShopService.deleteShop(id)
-  res.send({ message: 'Shop deleted' })
-})
+const deleteShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { id } = res.locals
+    await ShopService.deleteShop(id)
+    return res.send({ message: 'Shop deleted' })
+  } catch (e) { return next(e) }
+}
 
-const insertStylist = asyncHandler(async (req, res) => {
-  const params = await shopStylistUpsertSchema.validateAsync(req.body, joiOptions)
-  const { shopId } = res.locals
-  const stylist = await ShopService.insertStylist({ shopId, params })
-  res.send(stylist)
-})
+const insertStylist = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await shopStylistUpsertSchema.validateAsync(req.body, joiOptions)
+    const { shopId } = res.locals
+    const stylist = await ShopService.insertStylist({ shopId, params })
+    return res.send(stylist)
+  } catch (e) { return next(e) }
+}
 
-const updateStylist = asyncHandler(async (req, res) => {
-  const params = await shopStylistUpsertSchema.validateAsync(req.body, joiOptions)
-  const { shopId, id } = res.locals
-  const stylist = await ShopService.updateStylist({ shopId, stylistId: id, params })
-  res.send(stylist)
-})
+const updateStylist = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await shopStylistUpsertSchema.validateAsync(req.body, joiOptions)
+    const { shopId, id } = res.locals
+    const stylist = await ShopService.updateStylist({ shopId, stylistId: id, params })
+    return res.send(stylist)
+  } catch (e) { return next(e) }
+}
 
-const deleteStylist = asyncHandler(async (req, res) => {
-  const { shopId, id } = res.locals
-  const stylist = await ShopService.deleteStylist({ shopId, stylistId: id })
-  res.send(stylist)
-})
+const deleteStylist = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { shopId, id } = res.locals
+    const stylist = await ShopService.deleteStylist({ shopId, stylistId: id })
+    return res.send(stylist)
+  } catch (e) { return next(e) }
+}
 
 const routes = Router()
 

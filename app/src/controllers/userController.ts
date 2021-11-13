@@ -1,5 +1,6 @@
-import { Router } from 'express'
-import asyncHandler from 'express-async-handler'
+import {
+  Router, Request, Response, NextFunction,
+} from 'express'
 import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 import {
   userInsertSchema, userUpdateSchema,
@@ -24,50 +25,62 @@ export type UserServiceInterface = {
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
-export const searchUser = asyncHandler(async (req, res) => {
-  const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
-  const user = await UserService.searchUser(searchValues.keyword)
+export const searchUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const searchValues = await searchSchema.validateAsync(req.body, joiOptions)
+    const user = await UserService.searchUser(searchValues.keyword)
 
-  res.send({ data: user })
-})
+    return res.send({ data: user })
+  } catch (e) { return next(e) }
+}
 
-export const index = asyncHandler(async (req, res) => {
-  const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
+export const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const schemaValues = await indexSchema.validateAsync(req.query, joiOptions)
 
-  const usersWithCount = await UserService.fetchUsersWithTotalCount(schemaValues)
+    const usersWithCount = await UserService.fetchUsersWithTotalCount(schemaValues)
 
-  res.send(usersWithCount)
-})
+    return res.send(usersWithCount)
+  } catch (e) { return next(e) }
+}
 
-export const showUser = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  const user = await UserService.fetchUser(id)
-  res.send(user)
-})
+export const showUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { id } = res.locals
+    const user = await UserService.fetchUser(id)
+    return res.send(user)
+  } catch (e) { return next(e) }
+}
 
-export const insertUser = asyncHandler(async (req, res) => {
-  const params = await userInsertSchema.validateAsync(req.body, joiOptions)
+export const insertUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await userInsertSchema.validateAsync(req.body, joiOptions)
 
-  const user = await UserService.insertUserFromAdmin(params)
+    const user = await UserService.insertUserFromAdmin(params)
 
-  res.send(user)
-})
+    return res.send(user)
+  } catch (e) { return next(e) }
+}
 
-export const updateUser = asyncHandler(async (req, res) => {
-  const params = await userUpdateSchema.validateAsync(req.body, joiOptions)
+export const updateUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const params = await userUpdateSchema.validateAsync(req.body, joiOptions)
 
-  const { id } = res.locals
+    const { id } = res.locals
 
-  const user = await UserService.updateUserFromAdmin({ id, params })
+    const user = await UserService.updateUserFromAdmin({ id, params })
 
-  res.send(user)
-})
+    return res.send(user)
+  } catch (e) { return next(e) }
+}
 
-export const deleteUser = asyncHandler(async (req, res) => {
-  const { id } = res.locals
-  await UserService.deleteUserFromAdmin(id)
-  res.send({ message: 'User deleted' })
-})
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { id } = res.locals
+    await UserService.deleteUserFromAdmin(id)
+    return res.send({ message: 'User deleted' })
+  } catch (e) { return next(e) }
+}
 
 const routes = Router()
 

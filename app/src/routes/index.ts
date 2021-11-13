@@ -4,8 +4,8 @@ import {
 
 import { protectAdminRoute, roleCheck } from './utils'
 
-import dashboardController from '../controllers/dashboardController'
-import { areaController, prefectureController, cityController } from '../controllers/locationController'
+import dashboardController from '../controller-adapter/Dashboard'
+import LocationController from '../controller-adapter/Location'
 import authController from '../controllers/authController'
 import userController from '../controllers/userController'
 import shopController from '../controllers/shopController'
@@ -20,10 +20,8 @@ const router = Router()
 export default router
 
 router.use('/auth', authController)
+router.use('/', protectAdminRoute, roleCheck(['admin']), LocationController)
 router.use('/dashboard', protectAdminRoute, roleCheck(['admin', 'shop_staff']), dashboardController)
-router.use('/areas', protectAdminRoute, roleCheck(['admin']), areaController)
-router.use('/prefectures', protectAdminRoute, roleCheck(['admin']), prefectureController)
-router.use('/cities', protectAdminRoute, roleCheck(['admin']), cityController)
 router.use('/users', protectAdminRoute, roleCheck(['admin']), userController)
 router.use('/roles', protectAdminRoute, roleCheck(['admin']), roleController)
 router.use('/shops', protectAdminRoute, roleCheck(['admin', 'shop_staff']), shopController, menuController)
