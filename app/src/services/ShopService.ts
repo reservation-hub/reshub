@@ -13,30 +13,13 @@ import { Stylist } from '../entities/Stylist'
 
 export type ShopRepositoryInterface = {
   insertShop(
-    name: string,
-    areaId: number,
-    prefectureId: number,
-    cityId: number,
-    address: string,
-    phoneNumber: string,
-    days: number[],
-    startTime: string,
-    endTime: string,
-    details: string,
+    name: string, areaId: number, prefectureId: number, cityId: number, address: string,
+    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string,
   ): Promise<Shop>,
   updateShop(
-    id: number,
-    name: string,
-    areaId: number,
-    prefectureId: number,
-    cityId: number,
-    address: string,
-    phoneNumber: string,
-    days: number[],
-    startTime: string,
-    endTime: string,
-    details: string,
-  ): Promise<Shop>,
+    id: number, name: string, areaId: number, prefectureId: number, cityId: number, address: string,
+    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string
+    ): Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
   upsertSchedule(shopId: number, days: number[], start: string, end: string)
     : Promise<ShopSchedule>
@@ -96,38 +79,31 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
     return shop
   },
 
-  async insertShop(params) {
-    const isValidLocation = await LocationRepository.isValidLocation(params.areaId, params.prefectureId, params.cityId)
+  async insertShop(name, areaId, prefectureId, cityId, address, phoneNumber, days, startTime, endTime, details) {
+    const isValidLocation = await LocationRepository.isValidLocation(areaId, prefectureId, cityId)
     if (!isValidLocation) {
       console.error('location')
       throw new InvalidParamsError()
     }
 
-    const startHour = convertToUnixTime(params.startTime)
-    const endHour = convertToUnixTime(params.endTime)
-    if (params.days.length === 0 || endHour <= startHour) {
+    const startHour = convertToUnixTime(startTime)
+    const endHour = convertToUnixTime(endTime)
+    if (days.length === 0 || endHour <= startHour) {
       console.error('dates')
       throw new InvalidParamsError()
     }
 
-    const uniqueDays: number[] = params.days.filter((n, i) => params.days.indexOf(n) === i)
+    const uniqueDays: number[] = days.filter((n, i) => days.indexOf(n) === i)
 
     return ShopRepository.insertShop(
-      params.name,
-      params.areaId,
-      params.prefectureId,
-      params.cityId,
-      params.address,
-      params.phoneNumber,
-      uniqueDays,
-      params.startTime,
-      params.endTime,
-      params.details,
+      name, areaId, prefectureId, cityId, address,
+      phoneNumber, uniqueDays, startTime, endTime, details,
     )
   },
 
-  async updateShop({ id, params }) {
-    const isValidLocation = await LocationRepository.isValidLocation(params.areaId, params.prefectureId, params.cityId)
+  async updateShop(id, name, areaId, prefectureId, cityId, address,
+    phoneNumber, days, startTime, endTime, details) {
+    const isValidLocation = await LocationRepository.isValidLocation(areaId, prefectureId, cityId)
     if (!isValidLocation) {
       throw new InvalidParamsError()
     }
@@ -137,26 +113,18 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       throw new NotFoundError()
     }
 
-    const startHour = convertToUnixTime(params.startTime)
-    const endHour = convertToUnixTime(params.endTime)
-    if (params.days.length === 0 || endHour <= startHour) {
+    const startHour = convertToUnixTime(startTime)
+    const endHour = convertToUnixTime(endTime)
+    if (days.length === 0 || endHour <= startHour) {
       throw new InvalidParamsError()
     }
 
-    const uniqueDays: number[] = params.days.filter((n, i) => params.days.indexOf(n) === i)
+    const uniqueDays: number[] = days.filter((n, i) => days.indexOf(n) === i)
 
     return ShopRepository.updateShop(
       id,
-      params.name,
-      params.areaId,
-      params.prefectureId,
-      params.cityId,
-      params.address,
-      params.phoneNumber,
-      uniqueDays,
-      params.startTime,
-      params.endTime,
-      params.details,
+      name, areaId, prefectureId, cityId, address,
+      phoneNumber, uniqueDays, startTime, endTime, details,
     )
   },
 
@@ -224,22 +192,18 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
     return ShopRepository.deleteMenuItem(menuItemId)
   },
 
-  async insertStylist({ shopId, params }) {
+  async insertStylist(shopId, name, price) {
     const shop = await ShopRepository.fetch(shopId)
     if (!shop) {
       console.error('shop not found')
       throw new NotFoundError()
     }
 
-    const stylist = await StylistRepository.insertStylist(
-      params.name,
-      params.price,
-      shopId,
-    )
+    const stylist = await StylistRepository.insertStylist(name, price, shopId)
     return stylist
   },
 
-  async updateStylist({ shopId, stylistId, params }) {
+  async updateStylist(shopId, stylistId, name, price) {
     const shop = await ShopRepository.fetch(shopId)
     if (!shop) {
       console.error('shop not found')
@@ -252,15 +216,10 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       throw new NotFoundError()
     }
 
-    return StylistRepository.updateStylist(
-      stylistId,
-      params.name,
-      params.price,
-      shopId,
-    )
+    return StylistRepository.updateStylist(stylistId, name, price, shopId)
   },
 
-  async deleteStylist({ shopId, stylistId }) {
+  async deleteStylist(shopId, stylistId) {
     const shop = await ShopRepository.fetch(shopId)
     if (!shop) {
       console.error('shop not found')
