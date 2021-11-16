@@ -36,25 +36,25 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
       default:
         code = 500
     }
-    res.status(code).send({ error: { message: error.message } })
+    return res.status(code).send({ error: { message: error.message } })
   }
   // prisma errors
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === 'P2002') {
-      res.status(400).send({
+      return res.status(400).send({
         error: { message: error.message },
       })
     }
 
     if (error.code === 'P2025') {
       // code 404 エラー
-      res.status(404).send({ error: { message: error.message } })
+      return res.status(404).send({ error: { message: error.message } })
     }
 
     if (error.code[0] === 'P') {
-      res.status(500).send({ error: { message: 'Server Error' } })
+      return res.status(500).send({ error: { message: 'Server Error' } })
     }
-    res.status(400).send({ error: { message: error.message } })
+    return res.status(400).send({ error: { message: error.message } })
   }
 
   if (error instanceof ValidationError) {
@@ -65,16 +65,16 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
       console.log(item.path)
     })
     const keys = error.details.map((e: ValidationErrorItem) => e.path.toString())
-    res.status(400).send({ error: { keys, message: 'Invalid values error' } })
+    return res.status(400).send({ error: { keys, message: 'Invalid values error' } })
   }
 
   if (error instanceof JsonWebTokenError) {
-    res.status(400).send({ error: { message: error.message } })
+    return res.status(400).send({ error: { message: error.message } })
   }
 
   if (error instanceof InvalidRouteError || error instanceof MiddlewareError) {
-    res.status(error.code).send({ error: { message: error.message } })
+    return res.status(error.code).send({ error: { message: error.message } })
   }
 
-  res.status(500).send({ error: { message: 'Internal Server Error' } })
+  return res.status(500).send({ error: { message: 'Internal Server Error' } })
 }

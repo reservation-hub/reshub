@@ -69,8 +69,6 @@ const ShopController: ShopControllerInterface = {
   },
 
   async insert(query) {
-    // eslint-disable-next-line no-console
-    console.log('query : ', query)
     const shopInsertValues = await shopUpsertSchema.validateAsync(query, joiOptions)
     const shop = await ShopService.insertShop(shopInsertValues)
     return shop
