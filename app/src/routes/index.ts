@@ -8,9 +8,8 @@ import dashboardController from '../controller-adapter/Dashboard'
 import LocationController from '../controller-adapter/Location'
 import authController from '../controllers/authController'
 import userController from '../controllers/userController'
-import shopController from '../controllers/shopController'
+import shopController from '../controller-adapter/Shop'
 import menuController from '../controllers/menuController'
-import roleController from '../controllers/roleController'
 import reservationController from '../controllers/reservationController'
 
 import apiRoutes from './api'
@@ -23,7 +22,6 @@ router.use('/auth', authController)
 router.use('/', protectAdminRoute, roleCheck(['admin']), LocationController)
 router.use('/dashboard', protectAdminRoute, roleCheck(['admin', 'shop_staff']), dashboardController)
 router.use('/users', protectAdminRoute, roleCheck(['admin']), userController)
-router.use('/roles', protectAdminRoute, roleCheck(['admin']), roleController)
 router.use('/shops', protectAdminRoute, roleCheck(['admin', 'shop_staff']), shopController, menuController)
 router.use('/reservations', protectAdminRoute, roleCheck(['admin', 'shop_staff']), reservationController)
 // client api

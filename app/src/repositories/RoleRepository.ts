@@ -1,11 +1,10 @@
 import { Role } from '../entities/Role'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { RoleRepositoryInterface as UserServiceSocket } from '../services/UserService'
-import { RoleRepositoryInterface as RoleServiceSocket } from '../services/RoleService'
 
 import prisma from './prisma'
 
-const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket & RoleServiceSocket = {
+const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket = {
 
   async isValidRole(id) {
     const role = await prisma.role.findUnique({
@@ -36,39 +35,10 @@ const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket & RoleS
     return prisma.role.count()
   },
 
-  async searchRoles(keyword) {
-    const rolesResult = await prisma.role.findMany({
-      where: {
-        name: { contains: keyword },
-      },
-    })
-    return rolesResult
-  },
   async fetch(id) {
     return prisma.role.findUnique({
       where: { id },
     })
-  },
-
-  async fetchBySlug(slug) {
-    return prisma.role.findUnique({ where: { slug } })
-  },
-
-  async insertRole(name, description, slug) {
-    return prisma.role.create({ data: { name, description, slug } })
-  },
-
-  async updateRole(id, name, description, slug) {
-    return prisma.role.update({
-      where: { id },
-      data: {
-        name, description, slug,
-      },
-    })
-  },
-
-  async deleteRole(id) {
-    return prisma.role.delete({ where: { id } })
   },
 
 }

@@ -23,8 +23,8 @@ export type CityControllerInterface = {
 
 const areaIndex = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order, limit } = req.query
-    return res.send(await AreaController.areaIndex({ page, order, limit }))
+    const { page, order } = req.query
+    return res.send(await AreaController.areaIndex({ page, order }))
   } catch (e) { return next(e) }
 }
 
@@ -37,8 +37,8 @@ const showArea = async (req: Request, res: Response, next: NextFunction) : Promi
 
 const prefectureIndex = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order, limit } = req.query
-    return res.send(await PrefectureController.prefectureIndex({ page, order, limit }))
+    const { page, order } = req.query
+    return res.send(await PrefectureController.prefectureIndex({ page, order }))
   } catch (e) { return next(e) }
 }
 
@@ -51,8 +51,8 @@ const showPrefecture = async (req: Request, res: Response, next: NextFunction) :
 
 const cityIndex = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order, limit } = req.query
-    return res.send(await CityController.cityIndex({ page, order, limit }))
+    const { page, order } = req.query
+    return res.send(await CityController.cityIndex({ page, order }))
   } catch (e) { return next(e) }
 }
 
