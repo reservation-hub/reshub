@@ -88,7 +88,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
   async insertUserWithProfile(
     email,
     password,
-    roleId,
+    roleSlug,
     lastNameKanji,
     firstNameKanji,
     lastNameKana,
@@ -101,7 +101,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
         email,
         password,
         role: {
-          connect: { id: roleId },
+          connect: { slug: roleSlug },
         },
         profile: {
           create: {
@@ -127,7 +127,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
   async updateUserFromAdmin(
     id,
     email,
-    roleId,
+    roleSlug,
     lastNameKanji,
     firstNameKanji,
     lastNameKana,
@@ -148,7 +148,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
             gender: convertEntityGenderToDBGender(gender),
           },
         },
-        role: { connect: { id: roleId } },
+        role: { connect: { slug: roleSlug } },
         email,
       },
       include: {

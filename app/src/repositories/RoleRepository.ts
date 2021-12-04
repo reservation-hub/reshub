@@ -6,20 +6,20 @@ import prisma from './prisma'
 
 const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket = {
 
-  async isValidRole(id) {
+  async isValidRole(slug) {
     const role = await prisma.role.findUnique({
-      where: { id },
+      where: { slug },
     })
     return role !== null
   },
 
-  async extractValidRoleIds(roleIds) {
+  async extractValidRoleSlugs(roleSlugs) {
     const validRoles = await prisma.role.findMany({
       where: {
-        id: { in: roleIds },
+        slug: { in: roleSlugs },
       },
     })
-    return validRoles.map(validRole => validRole.id)
+    return validRoles.map(validRole => validRole.slug)
   },
 
   async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {

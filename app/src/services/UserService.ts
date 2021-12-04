@@ -10,7 +10,7 @@ export type UserRepositoryInterface = {
   insertUserWithProfile(
     email: string,
     password: string,
-    roleId: number,
+    roleSlug: string,
     lastNameKanji: string,
     firstNameKanji: string,
     lastNameKana: string,
@@ -21,7 +21,7 @@ export type UserRepositoryInterface = {
   updateUserFromAdmin(
     id: number,
     email: string,
-    roleId: number,
+    roleSlug: string,
     lastNameKanji: string,
     firstNameKanji: string,
     lastNameKana: string,
@@ -34,8 +34,8 @@ export type UserRepositoryInterface = {
 }
 
 export type RoleRepositoryInterface = {
-  isValidRole(id: number): Promise<boolean>,
-  extractValidRoleIds(roleIds: number[]): Promise<number[]>
+  isValidRole(slug: string): Promise<boolean>,
+  extractValidRoleSlugs(roleSlugs: string[]): Promise<string[]>
 }
 
 const UserService: UserControllerSocket & DashboardControllerSocket = {
@@ -80,7 +80,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
       throw new InvalidParamsError()
     }
 
-    const isValidRole = await RoleRepository.isValidRole(params.roleId)
+    const isValidRole = await RoleRepository.isValidRole(params.roleSlug)
     if (!isValidRole) {
       throw new InvalidParamsError()
     }
@@ -95,7 +95,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
     const user = await UserRepository.insertUserWithProfile(
       params.email,
       hash,
-      params.roleId,
+      params.roleSlug,
       params.lastNameKanji,
       params.firstNameKanji,
       params.lastNameKana,
@@ -110,7 +110,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
   },
 
   async updateUserFromAdmin({ id, params }) {
-    const isValidRole = await RoleRepository.isValidRole(params.roleId)
+    const isValidRole = await RoleRepository.isValidRole(params.roleSlug)
     if (!isValidRole) {
       throw new InvalidParamsError()
     }
@@ -121,7 +121,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
     }
 
     const updatedUser = await UserRepository.updateUserFromAdmin(
-      id, params.email, params.roleId, params.lastNameKanji, params.firstNameKanji,
+      id, params.email, params.roleSlug, params.lastNameKanji, params.firstNameKanji,
       params.lastNameKana, params.firstNameKana, params.birthday, params.gender,
     )
 
