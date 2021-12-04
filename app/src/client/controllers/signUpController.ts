@@ -4,8 +4,8 @@ import {
 
 import { signUpSchema } from './schemas/signup'
 import SignUpService, { signUpQuery } from '../services/SignUpService'
-import { User } from '../../entities/User'
-import { verifyIfNotLoggedInYet } from '../../controllers/authController'
+import { User } from '../@entities/User'
+import { verifyIfNotLoggedInYet } from '../@controllers/authController'
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 

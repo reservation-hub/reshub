@@ -1,7 +1,7 @@
 import Joi from 'joi'
 import { Request, Response, NextFunction } from 'express'
-import pt from '../middlewares/passport'
-import { User } from '../entities/User'
+import pt from '@middlewares/passport'
+import { User } from '@entities/User'
 import { UnauthorizedError } from './errors'
 
 export const protectAdminRoute = pt.authenticate('admin-jwt', { session: false })

@@ -1,10 +1,10 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-import { roleCheck } from '../routes/utils'
-import dashboardController from '../controllers/dashboardController'
+import dashboardController from '@controllers/dashboardController'
+import { User } from '@entities/User'
+import { roleCheck } from '@routes/utils'
 import { salonIndexAdminResponse, salonIndexShopStaffResponse } from '../request-response-types/Dashboard'
-import { User } from '../entities/User'
 
 export type DashboardControllerInterface = {
   salon(user: User) : Promise<salonIndexAdminResponse | salonIndexShopStaffResponse>

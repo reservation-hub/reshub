@@ -3,7 +3,7 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 
-import config from '../config'
+import config from './config'
 import routes from './routes'
 import { errorHandler } from './errorHandler'
 

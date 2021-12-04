@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client'
+import { Reservation } from '@entities/Reservation'
 import prisma from './prisma'
-import { Reservation } from '../entities/Reservation'
 import { ReservationRepositoryInterface as ReservationServiceSocket } from '../services/ReservationService'
 import { ReservationRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'

@@ -1,8 +1,8 @@
 import { Prisma } from '@prisma/client'
+import { Stylist } from '@entities/Stylist'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { StylistRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
-import { Stylist } from '../entities/Stylist'
 
 const stylistWithShops = Prisma.validator<Prisma.StylistArgs>()(
   { include: { shop: { include: { shopDetail: true } } } },

@@ -1,4 +1,4 @@
-import { LocationServiceInterface } from '../controllers/locationController'
+import { LocationServiceInterface } from '@controllers/locationController'
 import {
   AreaRepository, CityRepository, PrefectureRepository,
 } from '../repositories/LocationRepository'

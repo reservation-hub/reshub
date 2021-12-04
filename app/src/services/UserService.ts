@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt'
+import { UserServiceInterface as UserControllerSocket } from '@controllers/userController'
+import { UserServiceInterface as DashboardControllerSocket } from '@controllers/dashboardController'
+import { User } from '@entities/User'
 import UserRepository from '../repositories/UserRepository'
 import RoleRepository from '../repositories/RoleRepository'
-import { User } from '../entities/User'
-import { UserServiceInterface as UserControllerSocket } from '../controllers/userController'
-import { UserServiceInterface as DashboardControllerSocket } from '../controllers/dashboardController'
 import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
 export type UserRepositoryInterface = {

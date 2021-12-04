@@ -1,4 +1,4 @@
-import { Role } from '../entities/Role'
+import { Role } from '@entities/Role'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { RoleRepositoryInterface as UserServiceSocket } from '../services/UserService'
 

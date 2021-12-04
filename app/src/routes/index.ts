@@ -2,15 +2,15 @@ import {
   Request, Response, NextFunction, Router,
 } from 'express'
 
+import authController from '@controllers/authController'
+import userController from '@controllers/userController'
+import menuController from '@controllers/menuController'
+import reservationController from '@controllers/reservationController'
 import { protectAdminRoute, roleCheck } from './utils'
 
 import dashboardController from '../controller-adapter/Dashboard'
 import LocationController from '../controller-adapter/Location'
-import authController from '../controllers/authController'
-import userController from '../controllers/userController'
 import shopController from '../controller-adapter/Shop'
-import menuController from '../controllers/menuController'
-import reservationController from '../controllers/reservationController'
 
 import apiRoutes from './api'
 import { InvalidRouteError } from './error'

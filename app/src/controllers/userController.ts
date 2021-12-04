@@ -1,7 +1,8 @@
 import {
   Router, Request, Response, NextFunction,
 } from 'express'
-import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
+import { User } from '@entities/User'
+import { parseIntIdMiddleware, roleCheck } from '@routes/utils'
 import {
   userInsertSchema, userUpdateSchema,
 } from './schemas/user'
@@ -12,7 +13,6 @@ import {
 import { insertUserFromAdminQuery, updateUserFromAdminQuery } from '../request-response-types/UserService'
 import UserService from '../services/UserService'
 import { searchSchema } from './schemas/search'
-import { User } from '../entities/User'
 
 export type UserServiceInterface = {
   fetchUsersWithTotalCount(query: fetchModelsWithTotalCountQuery): Promise<fetchModelsWithTotalCountResponse<User>>,

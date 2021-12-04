@@ -1,15 +1,15 @@
+import { ShopServiceInterface as ShopControllerSocket } from '@controllers/shopController'
+import { ShopServiceInterface as MenuControllerSocket } from '@controllers/menuController'
+import { ShopServiceInterface as DashboardControllerSocket } from '@controllers/dashboardController'
+import { Shop, ShopSchedule } from '@entities/Shop'
+import { Reservation } from '@entities/Reservation'
+import { MenuItem } from '@entities/Menu'
+import { Stylist } from '@entities/Stylist'
 import { ShopRepository } from '../repositories/ShopRepository'
-import { Shop, ShopSchedule } from '../entities/Shop'
-import { Reservation } from '../entities/Reservation'
-import { ShopServiceInterface as ShopControllerSocket } from '../controllers/shopController'
-import { ShopServiceInterface as MenuControllerSocket } from '../controllers/menuController'
-import { ShopServiceInterface as DashboardControllerSocket } from '../controllers/dashboardController'
 import StylistRepository from '../repositories/StylistRepository'
 import ReservationRepository from '../repositories/ReservationRepository'
 import { LocationRepository } from '../repositories/LocationRepository'
 import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
-import { MenuItem } from '../entities/Menu'
-import { Stylist } from '../entities/Stylist'
 
 export type ShopRepositoryInterface = {
   insertShop(

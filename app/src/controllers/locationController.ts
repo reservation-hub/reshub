@@ -1,6 +1,6 @@
+import { Area, Prefecture, City } from '@entities/Location'
 import LocationService from '../services/LocationService'
 import indexSchema from './schemas/indexSchema'
-import { Area, Prefecture, City } from '../entities/Location'
 import { LocationQuery } from '../request-response-types/Location'
 import { AreaControllerInterface, CityControllerInterface, PrefectureControllerInterface }
   from '../controller-adapter/Location'
