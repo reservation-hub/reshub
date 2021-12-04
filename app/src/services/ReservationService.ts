@@ -1,4 +1,5 @@
 import { ReservationServiceInterface } from '../controllers/reservationController'
+import { ReservationServiceInterface as DashboardControllerSocker } from '../controllers/dashboardController'
 import ReservationRepository from '../repositories/ReservationRepository'
 import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 import UserRepository from '../repositories/UserRepository'
@@ -14,10 +15,11 @@ export type ReservationRepositoryInterface = {
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
     stylistId?: number): Promise<Reservation>,
   deleteReservation(id: number): Promise<Reservation>,
-  searchReservations(keyword: string): Promise<User[]>
+  searchReservations(keyword: string): Promise<User[]>,
+  fetchShopsReservations(shopIds: number[]): Promise<Reservation[]>
 }
 
-const ReservationService: ReservationServiceInterface = {
+const ReservationService: ReservationServiceInterface & DashboardControllerSocker = {
   async fetchReservationsWithTotalCount(params) {
     const reservations = await ReservationRepository.fetchAll(params)
     const reservationCounts = await ReservationRepository.totalCount()
@@ -112,6 +114,12 @@ const ReservationService: ReservationServiceInterface = {
     }
 
     return ReservationRepository.deleteReservation(id)
+  },
+
+  async fetchShopsReservations(shops) {
+    const shopIds = shops.map(s => s.id)
+    const reservations = await ReservationRepository.fetchShopsReservations(shopIds)
+    return reservations
   },
 }
 

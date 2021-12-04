@@ -19,11 +19,11 @@ const router = Router()
 export default router
 
 router.use('/auth', authController)
-router.use('/', protectAdminRoute, roleCheck(['admin']), LocationController)
 router.use('/dashboard', protectAdminRoute, roleCheck(['admin', 'shop_staff']), dashboardController)
-router.use('/users', protectAdminRoute, roleCheck(['admin']), userController)
 router.use('/shops', protectAdminRoute, roleCheck(['admin', 'shop_staff']), shopController, menuController)
 router.use('/reservations', protectAdminRoute, roleCheck(['admin', 'shop_staff']), reservationController)
+router.use('/users', protectAdminRoute, roleCheck(['admin']), userController)
+router.use('/', protectAdminRoute, roleCheck(['admin']), LocationController)
 // client api
 router.use('/api/', roleCheck(['client']), apiRoutes)
 
