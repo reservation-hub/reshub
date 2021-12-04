@@ -79,6 +79,7 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
     return StylistRepository.fetchStylistsByShopIds(shopIds)
   },
 
+  // TODO: implement popular menus
   // async fetchShopsPopularMenus(shops) {
   //   const shopIds = shops.map(s => s.id)
   //   return ShopRepository.fetchShopsPopularMenus(shopIds)

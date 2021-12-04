@@ -50,7 +50,7 @@ const salonIndexForShopStaff = async (user: User) => {
   const stylists = await ShopService.fetchShopsStylists(shops)
 
   // popular menu
-  // const popularMenus = await ShopService.fetchShopsPopularMenus(shops)
+  // TODO: implement
   return {
     shops, shopTotalCount, stylists, reservations,
   }
