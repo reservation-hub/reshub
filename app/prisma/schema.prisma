@@ -20,6 +20,7 @@ model User {
   profile      UserProfile?
   role         Role?         @relation(fields: [roleId], references: [id])
   roleId       Int?
+  shopUser     ShopUser?
 }
 
 model UserProfile {
@@ -93,6 +94,7 @@ model Shop {
   reservations Reservation[]
   shopDetail   ShopDetail?
   stylists     Stylist[]
+  shopUser     ShopUser?
 }
 
 model Menu {
@@ -111,6 +113,14 @@ model MenuItem {
   menuId      Int         @map("menu_id")
   image       ModelImage? @relation(fields: [imageId], references: [id])
   menu        Menu        @relation(fields: [menuId], references: [id])
+}
+
+model ShopUser {
+  id     Int  @id @default(autoincrement())
+  shopId Int  @unique @map("shop_id")
+  userId Int  @unique @map("user_id")
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shop   Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
 }
 
 model ShopDetail {

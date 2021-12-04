@@ -14,12 +14,12 @@ import { Stylist } from '../entities/Stylist'
 export type ShopRepositoryInterface = {
   insertShop(
     name: string, areaId: number, prefectureId: number, cityId: number, address: string,
-    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string,
-  ): Promise<Shop>,
+    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string)
+    : Promise<Shop>,
   updateShop(
     id: number, name: string, areaId: number, prefectureId: number, cityId: number, address: string,
-    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string
-    ): Promise<Shop>,
+    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string)
+    : Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
   upsertSchedule(shopId: number, days: number[], start: string, end: string)
     : Promise<ShopSchedule>
@@ -28,6 +28,9 @@ export type ShopRepositoryInterface = {
   deleteMenuItem(menuItemId: number): Promise<MenuItem>
   fetchValidShopIds(shopIds: number[]): Promise<number[]>
   searchShops(keyword: string): Promise<Shop[]>,
+  fetchUserShops(userId: number): Promise<Shop[]>
+  fetchUserShopsCount(userId: number): Promise<number>
+  // fetchShopsPopularMenus(shopIds: number[]): Promise<MenuItem[]>
 }
 
 export type LocationRepositoryInterface = {
@@ -37,7 +40,7 @@ export type LocationRepositoryInterface = {
 export type StylistRepositoryInterface = {
   insertStylist(name: string, price: number, shopId: number): Promise<Stylist>,
   updateStylist(id: number, name: string, price: number, shopId: number)
-  :Promise<Stylist>,
+    :Promise<Stylist>,
   deleteStylist(id: number): Promise<Stylist>,
   fetchStylistsByShopIds(shopIds: number[])
     : Promise<{ id: number, name: string, price: number, shopId:number }[]>,
@@ -64,6 +67,23 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
     const shopsCount = await ShopRepository.totalCount()
     return { shops, totalCount: shopsCount }
   },
+
+  async fetchShopsForDashboardForShopStaff(user) {
+    const shops = await ShopRepository.fetchUserShops(user.id)
+    const totalCount = await ShopRepository.fetchUserShopsCount(user.id)
+    return { shops, totalCount }
+  },
+
+  async fetchShopsStylists(shops) {
+    const shopIds = shops.map(s => s.id)
+    return StylistRepository.fetchStylistsByShopIds(shopIds)
+  },
+
+  // TODO: implement popular menus
+  // async fetchShopsPopularMenus(shops) {
+  //   const shopIds = shops.map(s => s.id)
+  //   return ShopRepository.fetchShopsPopularMenus(shopIds)
+  // },
 
   async fetchShopsWithTotalCount(params) {
     const shops = await ShopRepository.fetchAll(params)

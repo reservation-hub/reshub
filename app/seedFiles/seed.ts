@@ -272,6 +272,20 @@ const roles = [
     count--
   }
 
+  console.log('running menu item seeder')
+  const menus = await prisma.menu.findMany()
+  const menuIds = menus.map(m => m.id)
+  const menuItemPromises = menuIds.map(async id => prisma.menuItem.create({
+    data: {
+      name: 'test',
+      description: 'test',
+      price: 500,
+      menuId: id,
+    },
+  }))
+
+  await Promise.all(menuItemPromises)
+
   console.log('running stylist seeder')
   const shopCounts = await prisma.shop.count()
   const randomShopInt = Math.floor(Math.random() * shopCounts)

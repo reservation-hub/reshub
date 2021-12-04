@@ -181,6 +181,19 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
     const cleanReservation = reconstructReservation(reservation)
     return cleanReservation
   },
+
+  async fetchShopsReservations(shopIds) {
+    const reservations = await prisma.reservation.findMany({
+      where: { id: { in: shopIds } },
+      include: {
+        user: { include: { profile: true, role: true } },
+        shop: { include: { shopDetail: true } },
+        stylist: { include: { shop: true } },
+      },
+    })
+    const cleanReservations = reservations.map(r => reconstructReservation(r))
+    return cleanReservations
+  },
 }
 
 export default ReservationRepository

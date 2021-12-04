@@ -286,4 +286,21 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
   async deleteMenuItem(menuItemId) {
     return prisma.menuItem.delete({ where: { id: menuItemId } })
   },
+
+  async fetchUserShops(userId) {
+    return prisma.shop.findMany({
+      where: {
+        shopUser: { userId },
+      },
+    })
+  },
+
+  async fetchUserShopsCount(userId) {
+    return prisma.shop.count({
+      where: {
+        shopUser: { userId },
+      },
+    })
+  },
+
 }
