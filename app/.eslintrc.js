@@ -31,6 +31,7 @@ module.exports = {
     'arrow-spacing': 'error',
     'generator-star-spacing': 'error',
     'import/extensions': 'off',
+    'import/no-unresolved': 'off',
     'import/prefer-default-export': 'off',
     'max-classes-per-file': 'off',
     'max-len': ['error', { code: 120 }],

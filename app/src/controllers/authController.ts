@@ -2,12 +2,12 @@ import {
   Request, Response, NextFunction, CookieOptions, Router,
 } from 'express'
 
-import passport from '../middlewares/passport'
-import config from '../../config'
-import { User } from '../entities/User'
-import AuthService from '../services/AuthService'
+import passport from '@middlewares/passport'
+import { User } from '@entities/User'
+import AuthService from '@services/AuthService'
+import { UnknownServerError } from '@routes/errors'
+import config from '@/config'
 import googleSchema from './schemas/google'
-import { UnknownServerError } from '../routes/errors'
 
 export type AuthServiceInterface = {
   createToken(user: Express.User, expiresIn: string): string,

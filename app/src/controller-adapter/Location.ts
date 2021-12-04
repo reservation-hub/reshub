@@ -1,10 +1,10 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-import { Area, Prefecture, City } from '../entities/Location'
+import { AreaController, CityController, PrefectureController } from '@controllers/locationController'
+import { Area, Prefecture, City } from '@entities/Location'
+import { roleCheck, parseIntIdMiddleware } from '@routes/utils'
 import { LocationQuery, LocationResponse } from '../request-response-types/Location'
-import { roleCheck, parseIntIdMiddleware } from '../routes/utils'
-import { AreaController, CityController, PrefectureController } from '../controllers/locationController'
 
 export type AreaControllerInterface = {
   areaIndex(query: LocationQuery) : Promise<LocationResponse>,

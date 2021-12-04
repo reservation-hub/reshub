@@ -1,8 +1,8 @@
 import {
   Router, Response, Request, NextFunction,
 } from 'express'
-import { roleCheck, parseIntIdMiddleware } from '../routes/utils'
-import { MenuItem } from '../entities/Menu'
+import { MenuItem } from '@entities/Menu'
+import { roleCheck, parseIntIdMiddleware } from '@routes/utils'
 import ShopService from '../services/ShopService'
 import { deleteMenuItemQuery, insertMenuItemQuery, updateMenuItemQuery } from '../request-response-types/ShopService'
 import { menuItemUpsertSchema } from './schemas/menu'

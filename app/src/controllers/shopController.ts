@@ -1,13 +1,13 @@
 import {
   Request, Response, NextFunction,
 } from 'express'
+import { Shop } from '@entities/Shop'
+import { Stylist } from '@entities/Stylist'
 import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import ShopService from '../services/ShopService'
 import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
-import { Shop } from '../entities/Shop'
 import { shopStylistUpsertSchema } from './schemas/stylist'
-import { Stylist } from '../entities/Stylist'
 import { fetchModelsWithTotalCountResponse } from '../request-response-types/ServiceCommonTypes'
 import { searchSchema } from './schemas/search'
 import { ShopControllerInterface } from '../controller-adapter/Shop'

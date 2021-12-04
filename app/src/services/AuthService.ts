@@ -2,10 +2,10 @@ import jwt from 'jsonwebtoken'
 import { OAuth2Client as GoogleAuthClient, TokenPayload } from 'google-auth-library'
 import bcrypt from 'bcrypt'
 
-import config from '../../config'
-import { User } from '../entities/User'
-import { AuthServiceInterface as AuthControllerSocket } from '../controllers/authController'
-import { AuthServiceInterface as PassportSocket } from '../middlewares/passport'
+import { AuthServiceInterface as PassportSocket } from '@middlewares/passport'
+import { AuthServiceInterface as AuthControllerSocket } from '@controllers/authController'
+import { User } from '@entities/User'
+import config from '../config'
 import UserRepository from '../repositories/UserRepository'
 import {
   InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError, AuthenticationError, AuthorizationError,

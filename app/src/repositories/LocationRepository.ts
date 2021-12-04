@@ -1,7 +1,7 @@
+import { Area, Prefecture, City } from '@entities/Location'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
-import { Area, Prefecture, City } from '../entities/Location'
 import { LocationRepositoryInterface } from '../services/ShopService'
 
 export const isValidLocation = async (areaId: number, prefectureId: number, cityId: number):

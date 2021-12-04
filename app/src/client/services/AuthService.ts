@@ -1,12 +1,12 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import config from '../../../config'
-import { APIAuthServiceInterface } from '../../middlewares/passport'
+import { AuthServiceInterface as AuthControllerSocket } from '@controllers/authController'
+import config from '../../config'
+import { APIAuthServiceInterface } from '../@middlewares/passport'
 import {
   InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError,
 } from '../../services/Errors/ServiceError'
-import { AuthServiceInterface as AuthControllerSocket } from '../controllers/authController'
-import { User } from '../../entities/User'
+import { User } from '../@entities/User'
 import UserRepository from '../repositories/UserRepository'
 
 export type UserRepositoryInterface = {

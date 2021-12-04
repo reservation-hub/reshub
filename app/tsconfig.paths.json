@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+      "baseUrl": "./src",
+      "paths": {
+        "@/*": [
+          "./*"
+        ],
+        "@entities/*": [
+          "entities/*"
+        ],
+        "@middlewares/*": [
+          "middlewares/*"
+        ],
+        "@controllers/*": [
+          "controllers/*"
+        ],
+        "@repositories/*": [
+          "repositories/*"
+        ],
+        "@services/*": [
+          "services/*"
+        ],
+        "@controller-adapter/*": [
+          "controller-adapter/*"
+        ],
+        "@client/*": [
+          "client/*"
+        ],
+        "@routes/*": [
+          "routes/*"
+        ]
+      }
+    }
+  }

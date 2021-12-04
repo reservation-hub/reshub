@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import { User } from '../../entities/User'
+import { User } from '../@entities/User'
 import prisma from '../../repositories/prisma'
 import { UserRepositoryInterface } from '../services/SignUpService'
 import { UserRepositoryInterface as AuthServiceSocket } from '../services/AuthService'

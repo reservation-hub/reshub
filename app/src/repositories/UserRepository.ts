@@ -1,9 +1,9 @@
 import { Prisma } from '@prisma/client'
-import prisma from './prisma'
-import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import {
   Female, Male, Gender, User,
-} from '../entities/User'
+} from '@entities/User'
+import prisma from './prisma'
+import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { UserRepositoryInterface as UserServiceSocket } from '../services/UserService'
 import { UserRepositoryInterface as AuthServiceSocket } from '../services/AuthService'
 

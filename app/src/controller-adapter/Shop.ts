@@ -1,7 +1,8 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-import ShopController from '../controllers/shopController'
+import ShopController from '@controllers/shopController'
+import { parseIntIdMiddleware, roleCheck } from '@routes/utils'
 import {
   deleteShopQuery,
   deleteStylistQuery,
@@ -14,7 +15,6 @@ import {
   shopsResponse,
   shopsWithCountQuery, stylistResponse, updateShopQuery, updateStylistQuery,
 } from '../request-response-types/Shop'
-import { parseIntIdMiddleware, roleCheck } from '../routes/utils'
 
 export type ShopControllerInterface = {
   index(query: shopsWithCountQuery) : Promise<shopsResponse>
