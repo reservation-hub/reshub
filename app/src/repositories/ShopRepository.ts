@@ -303,4 +303,19 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     })
   },
 
+  async shopIsOwnedByUser(userId, shopId) {
+    const shop = await prisma.shopUser.findUnique({
+      where: { userId, shopId },
+    })
+    return !!shop
+  },
+
+  async assignShopToStaff(userId, shopId) {
+    await prisma.shopUser.create({
+      data: {
+        userId, shopId,
+      },
+    })
+  },
+
 }

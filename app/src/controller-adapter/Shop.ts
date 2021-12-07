@@ -15,16 +15,17 @@ import {
   shopsResponse,
   shopsWithCountQuery, stylistResponse, updateShopQuery, updateStylistQuery,
 } from '@request-response-types/Shop'
+import { User } from '@entities/User'
 
 export type ShopControllerInterface = {
   index(query: shopsWithCountQuery) : Promise<shopsResponse>
-  show(query: shopQuery) : Promise<shopResponse>
-  insert(query: insertShopQuery) : Promise<shopResponse>
-  update(query: updateShopQuery) : Promise<shopResponse>
-  delete(query: deleteShopQuery) : Promise<{ message: string }>
-  insertStylist(query: insertStylistQuery) : Promise<stylistResponse>
-  updateStylist(query: updateStylistQuery) : Promise<stylistResponse>
-  deleteStylist(query: deleteStylistQuery) : Promise<stylistResponse>
+  show(user: User, query: shopQuery) : Promise<shopResponse>
+  insert(user: User, query: insertShopQuery) : Promise<shopResponse>
+  update(user: User, query: updateShopQuery) : Promise<shopResponse>
+  delete(user: User, query: deleteShopQuery) : Promise<{ message: string }>
+  insertStylist(user: User, query: insertStylistQuery) : Promise<stylistResponse>
+  updateStylist(user: User, query: updateStylistQuery) : Promise<stylistResponse>
+  deleteStylist(user: User, query: deleteStylistQuery) : Promise<stylistResponse>
   searchShops(query: shopSearchQuery): Promise<shopSearchResponse>
 }
 
@@ -38,29 +39,33 @@ const index = async (req: Request, res: Response, next: NextFunction) : Promise<
 const showShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { id } = res.locals
-    return res.send(await ShopController.show({ id }))
+    const user = req.user as User
+    return res.send(await ShopController.show(user, { id }))
   } catch (e) { return next(e) }
 }
 
 const insertShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body } = req
-    return res.send(await ShopController.insert(body))
+    const user = req.user as User
+    return res.send(await ShopController.insert(user, body))
   } catch (e) { return next(e) }
 }
 
 const updateShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body: params } = req
+    const user = req.user as User
     const { id } = res.locals
-    return res.send(await ShopController.update({ id, params }))
+    return res.send(await ShopController.update(user, { id, params }))
   } catch (e) { return next(e) }
 }
 
 const deleteShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
+    const user = req.user as User
     const { id } = res.locals
-    return res.send(await ShopController.delete({ id }))
+    return res.send(await ShopController.delete(user, { id }))
   } catch (e) { return next(e) }
 }
 
@@ -68,7 +73,8 @@ const insertStylist = async (req: Request, res: Response, next: NextFunction) : 
   try {
     const { shopId } = res.locals
     const { body: params } = req
-    return res.send(await ShopController.insertStylist({ shopId, params }))
+    const user = req.user as User
+    return res.send(await ShopController.insertStylist(user, { shopId, params }))
   } catch (e) { return next(e) }
 }
 
@@ -76,14 +82,16 @@ const updateStylist = async (req: Request, res: Response, next: NextFunction) : 
   try {
     const { shopId, stylistId } = res.locals
     const { body: params } = req
-    return res.send(await ShopController.updateStylist({ shopId, stylistId, params }))
+    const user = req.user as User
+    return res.send(await ShopController.updateStylist(user, { shopId, stylistId, params }))
   } catch (e) { return next(e) }
 }
 
 const deleteStylist = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { shopId, stylistId } = res.locals
-    return res.send(await ShopController.deleteStylist({ shopId, stylistId }))
+    const user = req.user as User
+    return res.send(await ShopController.deleteStylist(user, { shopId, stylistId }))
   } catch (e) { return next(e) }
 }
 

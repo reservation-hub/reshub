@@ -31,6 +31,8 @@ export type ShopRepositoryInterface = {
   fetchUserShops(userId: number): Promise<Shop[]>
   fetchUserShopsCount(userId: number): Promise<number>
   // fetchShopsPopularMenus(shopIds: number[]): Promise<MenuItem[]>
+  shopIsOwnedByUser(userId: number, id: number): Promise<boolean>
+  assignShopToStaff(userId: number, id: number): void
 }
 
 export type LocationRepositoryInterface = {
@@ -253,6 +255,30 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
     }
 
     return StylistRepository.deleteStylist(stylistId)
+  },
+
+  // staff logic
+
+  async fetchStaffShop(user, id) {
+    if (!ShopRepository.shopIsOwnedByUser(user.id, id)) {
+      console.error('Shop is not owned by user')
+      throw new InvalidParamsError()
+    }
+    const shop = await ShopRepository.fetch(id)
+    if (!shop) {
+      console.error('Shop is not found')
+      throw new NotFoundError()
+    }
+    return shop
+  },
+
+  async insertStaffShop(user, name, areaId, prefectureId, cityId, address,
+    phoneNumber, days, startTime, endTime, details) {
+    const shop = await this.insertShop(name, areaId, prefectureId, cityId, address,
+      phoneNumber, days, startTime, endTime, details)
+
+    ShopRepository.assignShopToStaff(user.id, shop.id)
+    return shop
   },
 }
 
