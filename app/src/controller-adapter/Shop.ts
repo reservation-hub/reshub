@@ -25,7 +25,7 @@ export type ShopControllerInterface = {
   delete(user: User, query: deleteShopQuery) : Promise<{ message: string }>
   insertStylist(user: User, query: insertStylistQuery) : Promise<stylistResponse>
   updateStylist(user: User, query: updateStylistQuery) : Promise<stylistResponse>
-  deleteStylist(user: User, query: deleteStylistQuery) : Promise<stylistResponse>
+  deleteStylist(user: User, query: deleteStylistQuery) : Promise<{ message: string }>
   searchShops(query: shopSearchQuery): Promise<shopSearchResponse>
 }
 

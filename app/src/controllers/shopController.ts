@@ -40,6 +40,7 @@ export type ShopServiceInterface = {
   deleteStaffShop(user: User, id: number): Promise<Shop>
   insertStylistByShopStaff(user: User, shopId: number, name: string, price: number): Promise<Stylist>
   updateStylistByShopStaff(user: User, shopId: number, stylistId: number, name: string, price: number): Promise<Stylist>
+  deleteStylistByShopStaff(user: User, shopId: number, stylistId: number): Promise<Stylist>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -152,8 +153,12 @@ const ShopController: ShopControllerInterface = {
 
   async deleteStylist(user, query) {
     const { shopId, stylistId } = query
-    const stylist = await ShopService.deleteStylist(shopId, stylistId)
-    return stylist
+    if (user.role.slug === 'shop_staff') {
+      await ShopService.deleteStylistByShopStaff(user, shopId, stylistId)
+    } else {
+      await ShopService.deleteStylist(shopId, stylistId)
+    }
+    return { message: 'stylist deleted' }
   },
 
   async searchShops(query) {

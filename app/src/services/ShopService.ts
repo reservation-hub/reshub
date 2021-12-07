@@ -316,6 +316,15 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
     }
     return this.updateStylist(shopId, stylistId, name, price)
   },
+
+  async deleteStylistByShopStaff(user, shopId, stylistId) {
+    if (!await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+    return this.deleteStylist(shopId, stylistId)
+  },
+
 }
 
 export default ShopService
