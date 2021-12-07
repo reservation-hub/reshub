@@ -6,18 +6,17 @@ import { ValidationError, ValidationErrorItem } from 'joi'
 import {
   DuplicateModel, InvalidParams, InvalidToken, LoggedIn, NotFound, ServiceError,
 } from './services/Errors/ServiceError'
-import { InvalidRouteError } from './routes/error'
-import { MiddlewareError } from './routes/errors'
+import { MiddlewareError, InvalidRouteError } from './routes/errors'
 
 export type ResHubError =
-  PrismaClientKnownRequestError | ServiceError | JsonWebTokenError | ValidationError | InvalidRouteError
+  PrismaClientKnownRequestError | ServiceError | ValidationError | InvalidRouteError
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const errorHandler: ErrorRequestHandler = (error: ResHubError | MiddlewareError, req, res, next) => {
+export const errorHandler: ErrorRequestHandler = (error: ResHubError | MiddlewareError,
+  req, res, next) => {
   console.error('error: ', error)
-  if (error instanceof ServiceError) {
+  if (error.name === 'ServiceError') {
     console.error('is service error')
-
     let code: number
     switch (error.code) {
       case InvalidParams:
@@ -72,7 +71,7 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
     return res.status(400).send({ error: { message: error.message } })
   }
 
-  if (error instanceof InvalidRouteError || error instanceof MiddlewareError) {
+  if (error.name === 'InvalidRouteError' || error.name === 'MiddlewareError') {
     return res.status(error.code).send({ error: { message: error.message } })
   }
 
