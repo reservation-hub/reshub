@@ -3,13 +3,13 @@ import {
 } from 'express'
 
 import authController from '@controllers/authController'
-import userController from '@controllers/userController'
 import menuController from '@controllers/menuController'
 import reservationController from '@controllers/reservationController'
 
 import dashboardController from '@controller-adapter/Dashboard'
 import LocationController from '@controller-adapter/Location'
 import shopController from '@controller-adapter/Shop'
+import userController from '@controller-adapter/User'
 import { protectAdminRoute, roleCheck } from './utils'
 
 import apiRoutes from './api'
