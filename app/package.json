@@ -5,7 +5,7 @@
   "repository": "https://github.com/reservation-hub/reshub",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon --legacy-watch --exec 'npm run lint && npm run build && node -r tsconfig-paths/register -r ts-node/register dist/src/main.js'",
+    "serve": "nodemon --legacy-watch --exec 'npm run lint && npm run build && node -r tsconfig-paths/register -r ts-node/register dist/main.js'",
     "start": "node main.js",
     "seed": "node seedFiles/seed.js",
     "build": "tsc",
