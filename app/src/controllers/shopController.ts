@@ -34,6 +34,9 @@ export type ShopServiceInterface = {
   insertStaffShop(user: User, name: string, areaId: number, prefectureId: number,
     cityId: number, address: string, phoneNumber: string,
     days: number[], startTime: string, endTime: string, details: string): Promise<Shop>
+  updateStaffShop(user: User, id: number, name: string, areaId: number, prefectureId: number, cityId: number,
+    address: string, phoneNumber: string, days: number[], startTime: string, endTime: string, details: string)
+    : Promise<Shop>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -95,9 +98,15 @@ const ShopController: ShopControllerInterface = {
       days, startTime, endTime, details,
     } = await shopUpsertSchema.validateAsync(query.params, joiOptions)
     const { id } = query
+    let shop
 
-    const shop = await ShopService.updateShop(id, name, areaId, prefectureId, cityId, address,
-      phoneNumber, days, startTime, endTime, details)
+    if (user.role.slug === 'shop_staff') {
+      shop = await ShopService.updateStaffShop(user, id, name, areaId, prefectureId, cityId,
+        address, phoneNumber, days, startTime, endTime, details)
+    } else {
+      shop = await ShopService.updateShop(id, name, areaId, prefectureId, cityId, address,
+        phoneNumber, days, startTime, endTime, details)
+    }
 
     return shop
   },

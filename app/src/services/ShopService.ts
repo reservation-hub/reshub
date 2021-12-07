@@ -260,7 +260,7 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
   // staff logic
 
   async fetchStaffShop(user, id) {
-    if (!ShopRepository.shopIsOwnedByUser(user.id, id)) {
+    if (!await ShopRepository.shopIsOwnedByUser(user.id, id)) {
       console.error('Shop is not owned by user')
       throw new InvalidParamsError()
     }
@@ -278,6 +278,18 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
       phoneNumber, days, startTime, endTime, details)
 
     ShopRepository.assignShopToStaff(user.id, shop.id)
+    return shop
+  },
+
+  async updateStaffShop(user, id, name, areaId, prefectureId, cityId, address,
+    phoneNumber, days, startTime, endTime, details) {
+    if (!await ShopRepository.shopIsOwnedByUser(user.id, id)) {
+      console.error('Shop is not owned by user')
+      throw new InvalidParamsError()
+    }
+    const shop = await this.updateShop(id, name, areaId, prefectureId, cityId, address,
+      phoneNumber, days, startTime, endTime, details)
+
     return shop
   },
 }

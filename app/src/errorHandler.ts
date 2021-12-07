@@ -10,14 +10,14 @@ import { InvalidRouteError } from './routes/error'
 import { MiddlewareError } from './routes/errors'
 
 export type ResHubError =
-  PrismaClientKnownRequestError | ServiceError | JsonWebTokenError | ValidationError | InvalidRouteError
+  PrismaClientKnownRequestError | ServiceError | ValidationError | InvalidRouteError
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const errorHandler: ErrorRequestHandler = (error: ResHubError | MiddlewareError, req, res, next) => {
+export const errorHandler: ErrorRequestHandler = (error: ResHubError | MiddlewareError,
+  req, res, next) => {
   console.error('error: ', error)
-  if (error instanceof ServiceError) {
+  if (error.name === 'ServiceError') {
     console.error('is service error')
-
     let code: number
     switch (error.code) {
       case InvalidParams:

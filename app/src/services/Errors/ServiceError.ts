@@ -9,8 +9,9 @@ export const Authorization: ServiceErrorCode = 6
 export class ServiceError extends Error {
   constructor(message: string, code: ServiceErrorCode) {
     super(message)
-    this.code = code
     Object.setPrototypeOf(this, ServiceError.prototype)
+    this.name = 'ServiceError'
+    this.code = code
   }
 
   code: ServiceErrorCode
