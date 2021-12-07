@@ -4,16 +4,19 @@ import {
 import ShopController from '@controllers/shopController'
 import { parseIntIdMiddleware, roleCheck } from '@routes/utils'
 import {
+  deleteMenuItemQuery,
   deleteShopQuery,
   deleteStylistQuery,
+  insertMenuItemQuery,
   insertShopQuery,
   insertStylistQuery,
+  menuResponse,
   shopQuery,
   shopResponse,
   shopSearchQuery,
   shopSearchResponse,
   shopsResponse,
-  shopsWithCountQuery, stylistResponse, updateShopQuery, updateStylistQuery,
+  shopsWithCountQuery, stylistResponse, updateMenuItemQuery, updateShopQuery, updateStylistQuery,
 } from '@request-response-types/Shop'
 import { User } from '@entities/User'
 
@@ -27,6 +30,9 @@ export type ShopControllerInterface = {
   updateStylist(user: User, query: updateStylistQuery) : Promise<stylistResponse>
   deleteStylist(user: User, query: deleteStylistQuery) : Promise<{ message: string }>
   searchShops(query: shopSearchQuery): Promise<shopSearchResponse>
+  insertMenuItem(user: User, query: insertMenuItemQuery): Promise<menuResponse>
+  updateMenuItem(user: User, query: updateMenuItemQuery): Promise<menuResponse>
+  deleteMenuItem(user: User, query: deleteMenuItemQuery): Promise<{ message: string }>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -102,6 +108,32 @@ const searchShops = async (req: Request, res: Response, next: NextFunction) : Pr
   } catch (e) { return next(e) }
 }
 
+const insertMenuItem = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { body: params } = req
+    const { shopId } = res.locals
+    const user = req.user as User
+    return res.send(await ShopController.insertMenuItem(user, { shopId, params }))
+  } catch (e) { return next(e) }
+}
+
+const updateMenuItem = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { body: params } = req
+    const { shopId, menuItemId } = res.locals
+    const user = req.user as User
+    return res.send(await ShopController.updateMenuItem(user, { shopId, menuItemId, params }))
+  } catch (e) { return next(e) }
+}
+
+const deleteMenuItem = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { shopId, menuItemId } = res.locals
+    const user = req.user as User
+    return res.send(await ShopController.deleteMenuItem(user, { shopId, menuItemId }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.get('/', roleCheck(['admin']), index)
@@ -113,5 +145,8 @@ routes.delete('/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, 
 routes.post('/:shopId/stylist', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, insertStylist)
 routes.patch('/:shopId/stylist/:stylistId', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, updateStylist)
 routes.delete('/:shopId/stylist/:stylistId', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, deleteStylist)
+routes.post('/:shopId/menu', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, insertMenuItem)
+routes.patch('/:shopId/menu/:menuItemId', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, updateMenuItem)
+routes.delete('/:shopId/menu/:menuItemId', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, deleteMenuItem)
 
 export default routes

@@ -5,10 +5,12 @@ import { fetchModelsWithTotalCountQuery } from '@services/ServiceCommonTypes'
 import { fetchModelsWithTotalCountResponse } from '@request-response-types/ServiceCommonTypes'
 import { ShopControllerInterface } from '@controller-adapter/Shop'
 import { User } from '@entities/User'
+import { MenuItem } from '@entities/Menu'
 import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import { shopStylistUpsertSchema } from './schemas/stylist'
 import { searchSchema } from './schemas/search'
+import { menuItemUpsertSchema } from './schemas/menu'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(query: fetchModelsWithTotalCountQuery)
@@ -41,6 +43,15 @@ export type ShopServiceInterface = {
   insertStylistByShopStaff(user: User, shopId: number, name: string, price: number): Promise<Stylist>
   updateStylistByShopStaff(user: User, shopId: number, stylistId: number, name: string, price: number): Promise<Stylist>
   deleteStylistByShopStaff(user: User, shopId: number, stylistId: number): Promise<Stylist>
+  insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>,
+  insertMenuItemByShopStaff(user: User, shopId: number, name: string, description: string, price: number)
+  : Promise<MenuItem>,
+  updateMenuItem(shopId: number, menuItemId: number, name: string, description: string, price: number)
+  : Promise<MenuItem>
+  updateMenuItemByShopStaff(user: User, shopId: number, menuItemId: number, name: string,
+    description: string, price: number): Promise<MenuItem>
+  deleteMenuItem(shopId: number, menuItemId: number): Promise<MenuItem>
+  deleteMenuItemByShopStaff(user: User, shopId: number, menuItemId: number): Promise<MenuItem>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -166,6 +177,41 @@ const ShopController: ShopControllerInterface = {
     const shops = await ShopService.searchShops(searchValues.keyword)
     return shops
   },
+
+  async insertMenuItem(user, query) {
+    const { name, description, price } = await menuItemUpsertSchema.validateAsync(query.params, joiOptions)
+    const { shopId } = query
+    let menuItem
+    if (user.role.slug === 'shop_staff') {
+      menuItem = await ShopService.insertMenuItemByShopStaff(user, shopId, name, description, price)
+    } else {
+      menuItem = await ShopService.insertMenuItem(shopId, name, description, price)
+    }
+    return menuItem
+  },
+
+  async updateMenuItem(user, query) {
+    const { name, description, price } = await menuItemUpsertSchema.validateAsync(query.params, joiOptions)
+    const { shopId, menuItemId } = query
+    let menuItem
+    if (user.role.slug === 'shop_staff') {
+      menuItem = await ShopService.updateMenuItemByShopStaff(user, shopId, menuItemId, name, description, price)
+    } else {
+      menuItem = await ShopService.updateMenuItem(shopId, menuItemId, name, description, price)
+    }
+    return menuItem
+  },
+
+  async deleteMenuItem(user, query) {
+    const { shopId, menuItemId } = query
+    if (user.role.slug === 'shop_staff') {
+      await ShopService.deleteMenuItemByShopStaff(user, shopId, menuItemId)
+    } else {
+      await ShopService.deleteMenuItem(shopId, menuItemId)
+    }
+    return { message: 'menu item deleted' }
+  },
+
 }
 
 export default ShopController
