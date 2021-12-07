@@ -4,11 +4,11 @@ import {
 import { Reservation } from '@entities/Reservation'
 import { User } from '@entities/User'
 import { parseIntIdMiddleware, roleCheck } from '@routes/utils'
-import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
+import { insertReservationQuery, updateReservationQuery } from '@request-response-types/ReservationService'
+import { fetchModelsWithTotalCountQuery } from '@services/ServiceCommonTypes'
+import ReservationService from '@services/ReservationService'
 import { reservationUpsertSchema } from './schemas/reservation'
 import indexSchema from './schemas/indexSchema'
-import ReservationService from '../services/ReservationService'
-import { insertReservationQuery, updateReservationQuery } from '../request-response-types/ReservationService'
 import { searchSchema } from './schemas/search'
 
 export type ReservationServiceInterface = {

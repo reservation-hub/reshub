@@ -6,7 +6,7 @@ import passport from '@middlewares/passport'
 import { User } from '@entities/User'
 import AuthService from '@services/AuthService'
 import { UnknownServerError } from '@routes/errors'
-import config from '@/config'
+import config from '../config'
 import googleSchema from './schemas/google'
 
 export type AuthServiceInterface = {

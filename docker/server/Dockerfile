@@ -2,8 +2,6 @@ FROM node:14
 
 WORKDIR /app
 
-COPY ./app/config .
-COPY ./app/config .
 COPY ./app/prisma .
 COPY ./app/seedFiles .
 COPY ./app/src .

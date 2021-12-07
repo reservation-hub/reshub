@@ -3,8 +3,8 @@ import {
 } from 'express'
 import { MenuItem } from '@entities/Menu'
 import { roleCheck, parseIntIdMiddleware } from '@routes/utils'
-import ShopService from '../services/ShopService'
-import { deleteMenuItemQuery, insertMenuItemQuery, updateMenuItemQuery } from '../request-response-types/ShopService'
+import { deleteMenuItemQuery, insertMenuItemQuery, updateMenuItemQuery } from '@request-response-types/ShopService'
+import ShopService from '@services/ShopService'
 import { menuItemUpsertSchema } from './schemas/menu'
 
 const joiOptions = { abortEarly: false, stripUnknown: true }

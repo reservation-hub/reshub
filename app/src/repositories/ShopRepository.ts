@@ -1,8 +1,8 @@
 import { Prisma } from '@prisma/client'
 import { Shop, ShopSchedule } from '@entities/Shop'
+import { ShopRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
-import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {

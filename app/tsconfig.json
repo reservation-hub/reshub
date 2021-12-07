@@ -1,13 +1,19 @@
 {
-  "extends": "./tsconfig.paths.json",
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
   "compilerOptions": {
-
+    "baseUrl": "./",
+    "paths": {
+      // "@/*": ["src/*"],
+      "@entities/*": ["src/entities/*"],
+      "@services/*": ["src/services/*"],
+      "@repositories/*": ["src/repositories/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@config/*": ["src/config/*"],
+      "@client/*": ["src/client/*"],
+      "@routes/*": ["src/routes/*"],
+      "@request-response-types/*": ["src/request-response-types/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@controller-adapter/*": ["src/controller-adapter/*"]
+    },
     /* Basic Options */
     "target": "es5",                                /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017', 'ES2018', 'ES2019', 'ES2020', 'ES2021', or 'ESNEXT'. */
     "module": "commonjs",                           /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', 'es2020', or 'ESNext'. */
@@ -22,7 +28,7 @@
 
     /* Strict Type-Checking Options */
     "strict": true,                                 /* Enable all strict type-checking options. */
-    "typeRoots": ["./@types", "./node_modules/@types", "./node_modules/@prisma"],                        /* List of folders to include type definitions from. */
+    "typeRoots": ["@types", "node_modules/@types", "node_modules/@prisma"],                        /* List of folders to include type definitions from. */
     "allowSyntheticDefaultImports": true,        /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */
     "esModuleInterop": true,                        /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
 
@@ -33,8 +39,5 @@
     /* Advanced Options */
     "skipLibCheck": true,                           /* Skip type checking of declaration files. */
     "forceConsistentCasingInFileNames": true,        /* Disallow inconsistently-cased references to the same file. */
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "noFallthroughCasesInSwitch": true
   }
 }

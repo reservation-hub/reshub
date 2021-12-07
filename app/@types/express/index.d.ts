@@ -1,4 +1,6 @@
-export declare module 'express' {
+import 'express'
+
+declare module 'express' {
 
   interface Request {
     query: {

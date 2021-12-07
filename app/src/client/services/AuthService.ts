@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import { AuthServiceInterface as AuthControllerSocket } from '@controllers/authController'
-import config from '../../config'
-import { APIAuthServiceInterface } from '../@middlewares/passport'
+import { AuthServiceInterface as AuthControllerSocket } from '@client/controllers/authController'
+import { APIAuthServiceInterface } from '@middlewares/passport'
+import { User } from '@entities/User'
+import UserRepository from '@client/repositories/UserRepository'
 import {
   InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError,
-} from '../../services/Errors/ServiceError'
-import { User } from '../@entities/User'
-import UserRepository from '../repositories/UserRepository'
+} from '@services/Errors/ServiceError'
+import config from '../../config'
 
 export type UserRepositoryInterface = {
   fetch(id: number): Promise<User | null>

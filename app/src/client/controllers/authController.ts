@@ -1,9 +1,9 @@
 import {
   Router, CookieOptions, Request, Response, NextFunction,
 } from 'express'
-import AuthService from '../services/AuthService'
-import { UnknownServerError } from '../@routes/errors'
-import passport from '../@middlewares/passport'
+import { UnknownServerError } from '@routes/errors'
+import passport from '@middlewares/passport'
+import AuthService from '@client/services/AuthService'
 import config from '../../config'
 
 export type AuthServiceInterface = {

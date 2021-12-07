@@ -3,14 +3,14 @@ import {
 } from 'express'
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
+import ShopService from '@services/ShopService'
+import { fetchModelsWithTotalCountQuery } from '@services/ServiceCommonTypes'
+import { fetchModelsWithTotalCountResponse } from '@request-response-types/ServiceCommonTypes'
+import { ShopControllerInterface } from '@controller-adapter/Shop'
 import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
-import ShopService from '../services/ShopService'
-import { fetchModelsWithTotalCountQuery } from '../services/ServiceCommonTypes'
 import { shopStylistUpsertSchema } from './schemas/stylist'
-import { fetchModelsWithTotalCountResponse } from '../request-response-types/ServiceCommonTypes'
 import { searchSchema } from './schemas/search'
-import { ShopControllerInterface } from '../controller-adapter/Shop'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(query: fetchModelsWithTotalCountQuery)
