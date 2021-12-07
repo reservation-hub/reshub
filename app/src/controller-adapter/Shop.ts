@@ -111,7 +111,7 @@ routes.post('/search', searchShops)
 routes.patch('/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, updateShop)
 routes.delete('/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, deleteShop)
 routes.post('/:shopId/stylist', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, insertStylist)
-routes.patch('/:shopId/stylist/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, updateStylist)
-routes.delete('/:shopId/stylist/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, deleteStylist)
+routes.patch('/:shopId/stylist/:stylistId', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, updateStylist)
+routes.delete('/:shopId/stylist/:stylistId', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, deleteStylist)
 
 export default routes

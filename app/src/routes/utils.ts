@@ -18,6 +18,7 @@ export const roleCheck = (roles: string[]) => (req: Request, res: Response, next
 const idSchema = Joi.object({
   id: Joi.string().pattern(/^[0-9]+$/),
   shopId: Joi.string().pattern(/^[0-9]+$/),
+  stylistId: Joi.string().pattern(/^[0-9]+$/),
   menuItemId: Joi.string().pattern(/^[0-9]+$/),
 })
 
@@ -31,6 +32,9 @@ export const parseIntIdMiddleware = async (req: Request, res: Response, next: Ne
   }
   if (ids.menuItemId) {
     res.locals.menuItemId = parseInt(ids.menuItemId, 10)
+  }
+  if (ids.stylistId) {
+    res.locals.stylistId = parseInt(ids.stylistId, 10)
   }
   return next()
 }

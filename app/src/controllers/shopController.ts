@@ -39,6 +39,7 @@ export type ShopServiceInterface = {
     : Promise<Shop>
   deleteStaffShop(user: User, id: number): Promise<Shop>
   insertStylistByShopStaff(user: User, shopId: number, name: string, price: number): Promise<Stylist>
+  updateStylistByShopStaff(user: User, shopId: number, stylistId: number, name: string, price: number): Promise<Stylist>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -140,7 +141,12 @@ const ShopController: ShopControllerInterface = {
   async updateStylist(user, query) {
     const { name, price } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId, stylistId } = query
-    const stylist = await ShopService.updateStylist(shopId, stylistId, name, price)
+    let stylist
+    if (user.role.slug === 'shop_staff') {
+      stylist = await ShopService.updateStylistByShopStaff(user, shopId, stylistId, name, price)
+    } else {
+      stylist = await ShopService.updateStylist(shopId, stylistId, name, price)
+    }
     return stylist
   },
 
