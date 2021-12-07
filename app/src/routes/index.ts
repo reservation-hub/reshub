@@ -13,7 +13,7 @@ import userController from '@controller-adapter/User'
 import { protectAdminRoute, roleCheck } from './utils'
 
 import apiRoutes from './api'
-import { InvalidRouteError } from './error'
+import { InvalidRouteError } from './errors'
 
 const router = Router()
 export default router

@@ -6,8 +6,7 @@ import { ValidationError, ValidationErrorItem } from 'joi'
 import {
   DuplicateModel, InvalidParams, InvalidToken, LoggedIn, NotFound, ServiceError,
 } from './services/Errors/ServiceError'
-import { InvalidRouteError } from './routes/error'
-import { MiddlewareError } from './routes/errors'
+import { MiddlewareError, InvalidRouteError } from './routes/errors'
 
 export type ResHubError =
   PrismaClientKnownRequestError | ServiceError | ValidationError | InvalidRouteError
@@ -72,7 +71,7 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
     return res.status(400).send({ error: { message: error.message } })
   }
 
-  if (error instanceof InvalidRouteError || error instanceof MiddlewareError) {
+  if (error.name === 'InvalidRouteError' || error.name === 'MiddlewareError') {
     return res.status(error.code).send({ error: { message: error.message } })
   }
 

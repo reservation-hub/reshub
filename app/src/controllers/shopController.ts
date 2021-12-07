@@ -38,6 +38,7 @@ export type ShopServiceInterface = {
     address: string, phoneNumber: string, days: number[], startTime: string, endTime: string, details: string)
     : Promise<Shop>
   deleteStaffShop(user: User, id: number): Promise<Shop>
+  insertStylistByShopStaff(user: User, shopId: number, name: string, price: number): Promise<Stylist>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -125,7 +126,14 @@ const ShopController: ShopControllerInterface = {
   async insertStylist(user, query) {
     const { name, price } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId } = query
-    const stylist = await ShopService.insertStylist(shopId, name, price)
+    let stylist
+
+    if (user.role.slug === 'shop_staff') {
+      stylist = await ShopService.insertStylistByShopStaff(user, shopId, name, price)
+    } else {
+      stylist = await ShopService.insertStylist(shopId, name, price)
+    }
+
     return stylist
   },
 

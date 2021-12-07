@@ -9,7 +9,7 @@ import { ShopRepository } from '@repositories/ShopRepository'
 import StylistRepository from '@repositories/StylistRepository'
 import ReservationRepository from '@repositories/ReservationRepository'
 import { LocationRepository } from '@repositories/LocationRepository'
-import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
+import { AuthorizationError, InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
 export type ShopRepositoryInterface = {
   insertShop(
@@ -260,14 +260,14 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
   // staff logic
 
   async fetchStaffShop(user, id) {
-    if (!await ShopRepository.shopIsOwnedByUser(user.id, id)) {
-      console.error('Shop is not owned by user')
-      throw new InvalidParamsError()
-    }
     const shop = await ShopRepository.fetch(id)
     if (!shop) {
       console.error('Shop is not found')
       throw new NotFoundError()
+    }
+    if (!await ShopRepository.shopIsOwnedByUser(user.id, id)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
     }
     return shop
   },
@@ -285,7 +285,7 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
     phoneNumber, days, startTime, endTime, details) {
     if (!await ShopRepository.shopIsOwnedByUser(user.id, id)) {
       console.error('Shop is not owned by user')
-      throw new InvalidParamsError()
+      throw new AuthorizationError()
     }
     const shop = await this.updateShop(id, name, areaId, prefectureId, cityId, address,
       phoneNumber, days, startTime, endTime, details)
@@ -296,9 +296,17 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
   async deleteStaffShop(user, id) {
     if (!await ShopRepository.shopIsOwnedByUser(user.id, id)) {
       console.error('Shop is not owned by user')
-      throw new InvalidParamsError()
+      throw new AuthorizationError()
     }
     return this.deleteShop(id)
+  },
+
+  async insertStylistByShopStaff(user, shopId, name, price) {
+    if (!await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+    return this.insertStylist(shopId, name, price)
   },
 }
 
