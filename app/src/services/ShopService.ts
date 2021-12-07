@@ -292,6 +292,14 @@ export const ShopService: ShopControllerSocket & MenuControllerSocket & Dashboar
 
     return shop
   },
+
+  async deleteStaffShop(user, id) {
+    if (!await ShopRepository.shopIsOwnedByUser(user.id, id)) {
+      console.error('Shop is not owned by user')
+      throw new InvalidParamsError()
+    }
+    return this.deleteShop(id)
+  },
 }
 
 export default ShopService

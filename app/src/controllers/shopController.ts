@@ -37,6 +37,7 @@ export type ShopServiceInterface = {
   updateStaffShop(user: User, id: number, name: string, areaId: number, prefectureId: number, cityId: number,
     address: string, phoneNumber: string, days: number[], startTime: string, endTime: string, details: string)
     : Promise<Shop>
+  deleteStaffShop(user: User, id: number): Promise<Shop>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -113,7 +114,11 @@ const ShopController: ShopControllerInterface = {
 
   async delete(user, query) {
     const { id } = query
-    await ShopService.deleteShop(id)
+    if (user.role.slug === 'shop_staff') {
+      await ShopService.deleteStaffShop(user, id)
+    } else {
+      await ShopService.deleteShop(id)
+    }
     return { message: 'Shop deleted' }
   },
 
