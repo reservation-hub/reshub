@@ -1,7 +1,7 @@
 import { LocationServiceInterface } from '@controllers/locationController'
 import {
   AreaRepository, CityRepository, PrefectureRepository,
-} from '../repositories/LocationRepository'
+} from '@repositories/LocationRepository'
 import { NotFoundError } from './Errors/ServiceError'
 
 export type LocationQuery = {

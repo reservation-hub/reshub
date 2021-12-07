@@ -14,7 +14,7 @@ import {
   shopSearchResponse,
   shopsResponse,
   shopsWithCountQuery, stylistResponse, updateShopQuery, updateStylistQuery,
-} from '../request-response-types/Shop'
+} from '@request-response-types/Shop'
 
 export type ShopControllerInterface = {
   index(query: shopsWithCountQuery) : Promise<shopsResponse>

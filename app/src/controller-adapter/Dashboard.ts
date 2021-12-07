@@ -4,7 +4,7 @@ import {
 import dashboardController from '@controllers/dashboardController'
 import { User } from '@entities/User'
 import { roleCheck } from '@routes/utils'
-import { salonIndexAdminResponse, salonIndexShopStaffResponse } from '../request-response-types/Dashboard'
+import { salonIndexAdminResponse, salonIndexShopStaffResponse } from '@request-response-types/Dashboard'
 
 export type DashboardControllerInterface = {
   salon(user: User) : Promise<salonIndexAdminResponse | salonIndexShopStaffResponse>

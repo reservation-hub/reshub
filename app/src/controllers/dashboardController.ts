@@ -2,11 +2,11 @@ import { Reservation } from '@entities/Reservation'
 import { Shop } from '@entities/Shop'
 import { User } from '@entities/User'
 import { Stylist } from '@entities/Stylist'
-import ReservationService from '../services/ReservationService'
-import ShopService from '../services/ShopService'
-import UserService from '../services/UserService'
+import ReservationService from '@services/ReservationService'
+import ShopService from '@services/ShopService'
+import UserService from '@services/UserService'
 
-import { DashboardControllerInterface } from '../controller-adapter/Dashboard'
+import { DashboardControllerInterface } from '@controller-adapter/Dashboard'
 
 export type UserServiceInterface = {
   fetchUsersForDashboard(): Promise<{ users: User[], totalCount: number }>

@@ -2,12 +2,12 @@ import { ReservationServiceInterface } from '@controllers/reservationController'
 import { ReservationServiceInterface as DashboardControllerSocker } from '@controllers/dashboardController'
 import { Reservation } from '@entities/Reservation'
 import { User } from '@entities/User'
-import ReservationRepository from '../repositories/ReservationRepository'
+import { insertReservationQuery } from '@request-response-types/ReservationService'
+import ReservationRepository from '@repositories/ReservationRepository'
+import UserRepository from '@repositories/UserRepository'
+import { ShopRepository } from '@repositories/ShopRepository'
+import StylistRepository from '@repositories/StylistRepository'
 import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
-import UserRepository from '../repositories/UserRepository'
-import { ShopRepository } from '../repositories/ShopRepository'
-import StylistRepository from '../repositories/StylistRepository'
-import { insertReservationQuery } from '../request-response-types/ReservationService'
 
 export type ReservationRepositoryInterface = {
   insertReservation(reservationDate: Date, userId: number, shopId: number, stylistId?: number)

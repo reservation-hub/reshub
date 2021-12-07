@@ -1,9 +1,9 @@
 import { Area, Prefecture, City } from '@entities/Location'
-import LocationService from '../services/LocationService'
-import indexSchema from './schemas/indexSchema'
-import { LocationQuery } from '../request-response-types/Location'
+import LocationService from '@services/LocationService'
+import { LocationQuery } from '@request-response-types/Location'
 import { AreaControllerInterface, CityControllerInterface, PrefectureControllerInterface }
-  from '../controller-adapter/Location'
+  from '@controller-adapter/Location'
+import indexSchema from './schemas/indexSchema'
 
 export type LocationServiceInterface = {
   fetchAreasWithCount(query: LocationQuery): Promise<{ data: Area[], totalCount: number }>,

@@ -1,6 +1,6 @@
 import { Role } from '@entities/Role'
+import { RoleRepositoryInterface as UserServiceSocket } from '@services/UserService'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
-import { RoleRepositoryInterface as UserServiceSocket } from '../services/UserService'
 
 import prisma from './prisma'
 

@@ -4,14 +4,14 @@ import {
 import { User } from '@entities/User'
 import { parseIntIdMiddleware, roleCheck } from '@routes/utils'
 import {
+  fetchModelsWithTotalCountQuery, fetchModelsWithTotalCountResponse,
+} from '@request-response-types/ServiceCommonTypes'
+import { insertUserFromAdminQuery, updateUserFromAdminQuery } from '@request-response-types/UserService'
+import UserService from '@services/UserService'
+import {
   userInsertSchema, userUpdateSchema,
 } from './schemas/user'
 import indexSchema from './schemas/indexSchema'
-import {
-  fetchModelsWithTotalCountQuery, fetchModelsWithTotalCountResponse,
-} from '../request-response-types/ServiceCommonTypes'
-import { insertUserFromAdminQuery, updateUserFromAdminQuery } from '../request-response-types/UserService'
-import UserService from '../services/UserService'
 import { searchSchema } from './schemas/search'
 
 export type UserServiceInterface = {
