@@ -2,7 +2,6 @@ import { Reservation } from '@entities/Reservation'
 import { Shop } from '@entities/Shop'
 import { User } from '@entities/User'
 import { Stylist } from '@entities/Stylist'
-import ReservationService from '@services/ReservationService'
 import ShopService from '@services/ShopService'
 import UserService from '@services/UserService'
 
@@ -17,9 +16,6 @@ export type ShopServiceInterface = {
   fetchShopsForDashboardForShopStaff(user: User): Promise<{ shops: Shop[], totalCount: number }>
   fetchShopsStylists(shops: Shop[]): Promise<Stylist[]>
   // fetchShopsPopularMenus(shops: Shop[]): Promise<MenuItem[]>
-}
-
-export type ReservationServiceInterface = {
   fetchShopsReservations(shops: Shop[]): Promise<Reservation[]>
 }
 
@@ -44,7 +40,7 @@ const salonIndexForAdmin = async () => {
 const salonIndexForShopStaff = async (user: User) => {
   const { shops, totalCount: shopTotalCount } = await ShopService.fetchShopsForDashboardForShopStaff(user)
   // reservations
-  const reservations = await ReservationService.fetchShopsReservations(shops)
+  const reservations = await ShopService.fetchShopsReservations(shops)
 
   // stylists
   const stylists = await ShopService.fetchShopsStylists(shops)

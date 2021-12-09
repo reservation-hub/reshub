@@ -143,7 +143,7 @@ const insertReservation = async (req: Request, res: Response, next: NextFunction
     const { body: params } = req
     const { shopId } = res.locals
     const user = req.user as User
-    return res.send(ShopController.insertReservation(user, { shopId, params }))
+    return res.send(await ShopController.insertReservation(user, { shopId, params }))
   } catch (e) { return next(e) }
 }
 
@@ -152,7 +152,7 @@ const updateReservation = async (req: Request, res: Response, next: NextFunction
     const { body: params } = req
     const { shopId, reservationId } = res.locals
     const user = req.user as User
-    return res.send(ShopController.updateReservation(user, { shopId, reservationId, params }))
+    return res.send(await ShopController.updateReservation(user, { shopId, reservationId, params }))
   } catch (e) { return next(e) }
 }
 
@@ -160,7 +160,7 @@ const deleteReservation = async (req: Request, res: Response, next: NextFunction
   try {
     const { shopId, reservationId } = res.locals
     const user = req.user as User
-    return res.send(ShopController.deleteReservation(user, { shopId, reservationId }))
+    return res.send(await ShopController.deleteReservation(user, { shopId, reservationId }))
   } catch (e) { return next(e) }
 }
 

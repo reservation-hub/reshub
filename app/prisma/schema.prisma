@@ -168,10 +168,10 @@ model Reservation {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
   shopId          Int      @map("shop_id")
-  stylistId       Int      @map("stylist_id")
+  stylistId       Int?     @map("stylist_id")
   userId          Int      @map("user_id")
   reservationDate DateTime @map("reservation_date") @db.Timestamp(6)
   shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  stylist         Stylist  @relation(fields: [stylistId], references: [id])
+  stylist         Stylist? @relation(fields: [stylistId], references: [id])
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
