@@ -38,7 +38,7 @@ export const parseIntIdMiddleware = async (req: Request, res: Response, next: Ne
     res.locals.stylistId = parseInt(ids.stylistId, 10)
   }
   if (ids.reservationId) {
-    res.locals.reservationID = parseInt(ids.reservationId, 10)
+    res.locals.reservationId = parseInt(ids.reservationId, 10)
   }
   return next()
 }

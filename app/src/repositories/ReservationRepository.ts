@@ -143,9 +143,9 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         shop: {
           connect: { id: shopId },
         },
-        stylist: {
+        stylist: stylistId ? {
           connect: { id: stylistId },
-        },
+        } : undefined,
         user: {
           connect: { id: userId },
         },
