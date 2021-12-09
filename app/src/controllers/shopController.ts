@@ -1,8 +1,10 @@
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
 import ShopService from '@services/ShopService'
-import { fetchModelsWithTotalCountQuery } from '@services/ServiceCommonTypes'
-import { fetchModelsWithTotalCountResponse } from '@request-response-types/ServiceCommonTypes'
+import {
+  fetchModelsWithTotalCountQuery,
+  fetchModelsWithTotalCountResponse,
+} from '@request-response-types/ServiceCommonTypes'
 import { ShopControllerInterface } from '@controller-adapter/Shop'
 import { User } from '@entities/User'
 import { MenuItem } from '@entities/Menu'
@@ -212,6 +214,26 @@ const ShopController: ShopControllerInterface = {
     return { message: 'menu item deleted' }
   },
 
+  async showReservations(user, query) {
+    const { shopId } = query
+    if (user.role.slug === 'shop_staff') {
+      // await
+    } else {
+
+    }
+  },
+
+  async insertReservation(user, query) {
+
+  },
+
+  async updateReservation(user, query) {
+
+  },
+
+  async deleteReservation(user, query) {
+
+  },
 }
 
 export default ShopController

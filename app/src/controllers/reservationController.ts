@@ -5,7 +5,7 @@ import { Reservation } from '@entities/Reservation'
 import { User } from '@entities/User'
 import { parseIntIdMiddleware, roleCheck } from '@routes/utils'
 import { insertReservationQuery, updateReservationQuery } from '@request-response-types/ReservationService'
-import { fetchModelsWithTotalCountQuery } from '@services/ServiceCommonTypes'
+import { fetchModelsWithTotalCountQuery } from '@request-response-types/ServiceCommonTypes'
 import ReservationService from '@services/ReservationService'
 import { reservationUpsertSchema } from './schemas/reservation'
 import indexSchema from './schemas/indexSchema'
@@ -26,8 +26,8 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 export const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const params = await indexSchema.validateAsync(req.query, joiOptions)
-    const reservationsWithcount = await ReservationService.fetchReservationsWithTotalCount(params)
-    return res.send(reservationsWithcount)
+    const reservationsWithCount = await ReservationService.fetchReservationsWithTotalCount(params)
+    return res.send(reservationsWithCount)
   } catch (e) { return next(e) }
 }
 

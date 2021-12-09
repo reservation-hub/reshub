@@ -34,20 +34,20 @@ const convertDBGenderToEntityGender = (gender: string): Gender => {
 export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
   id: user.id,
   email: user.email,
-  username: user.username,
+  username: user.username ?? undefined,
   password: user.password,
   oAuthIds: user.oAuthIds ? {
     id: user.oAuthIds.id,
     googleId: user.oAuthIds.googleId,
     facebookId: user.oAuthIds.facebookId,
-  } : null,
+  } : undefined,
   firstNameKanji: user.profile?.firstNameKanji,
   lastNameKanji: user.profile?.lastNameKanji,
   firstNameKana: user.profile?.firstNameKana,
   lastNameKana: user.profile?.lastNameKana,
   role: user.role!,
-  birthday: user.profile?.birthday,
-  gender: user.profile?.gender ? convertDBGenderToEntityGender(user.profile?.gender) : null,
+  birthday: user.profile!.birthday ?? undefined,
+  gender: user.profile!.gender ? convertDBGenderToEntityGender(user.profile!.gender) : undefined,
 })
 
 const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & AuthServiceSocket = {

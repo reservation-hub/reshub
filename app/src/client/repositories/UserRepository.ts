@@ -13,13 +13,13 @@ type userWithProfileAndOAuthIdsAndRole = Prisma.UserGetPayload<typeof userWithPr
 const reconstructUser = (user: userWithProfileAndOAuthIdsAndRole): User => ({
   id: user.id,
   email: user.email,
-  username: user.username ?? null,
+  username: user.username ?? undefined,
   password: user.password,
   oAuthIds: user.oAuthIds ? {
     id: user.oAuthIds.id,
     googleId: user.oAuthIds.googleId,
     facebookId: user.oAuthIds.facebookId,
-  } : null,
+  } : undefined,
   role: user.role!,
 })
 

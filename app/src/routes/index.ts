@@ -3,7 +3,7 @@ import {
 } from 'express'
 
 import authController from '@controllers/authController'
-import reservationController from '@controllers/reservationController'
+// import reservationController from '@controllers/reservationController'
 
 import dashboardController from '@controller-adapter/Dashboard'
 import LocationController from '@controller-adapter/Location'
@@ -20,7 +20,7 @@ export default router
 router.use('/auth', authController)
 router.use('/dashboard', protectAdminRoute, roleCheck(['admin', 'shop_staff']), dashboardController)
 router.use('/shops', protectAdminRoute, roleCheck(['admin', 'shop_staff']), shopController)
-router.use('/reservations', protectAdminRoute, roleCheck(['admin', 'shop_staff']), reservationController)
+// router.use('/reservations', protectAdminRoute, roleCheck(['admin', 'shop_staff']), reservationController)
 router.use('/users', protectAdminRoute, roleCheck(['admin']), userController)
 router.use('/', protectAdminRoute, roleCheck(['admin', 'shop_staff']), LocationController)
 // client api

@@ -47,10 +47,10 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
     slug: shop.city.slug,
   },
   name: shop.shopDetail?.name,
-  address: shop.shopDetail?.address,
-  phoneNumber: shop.shopDetail?.phoneNumber,
+  address: shop.shopDetail?.address ?? undefined,
+  phoneNumber: shop.shopDetail?.phoneNumber ?? undefined,
   schedule: shop.shopDetail?.schedule as ShopSchedule,
-  details: shop.shopDetail?.details,
+  details: shop.shopDetail?.details ?? undefined,
 })
 
 export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndLocationAndMenu): Shop => ({
@@ -71,10 +71,10 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
     slug: shop.city.slug,
   },
   name: shop.shopDetail?.name,
-  address: shop.shopDetail?.address,
-  phoneNumber: shop.shopDetail?.phoneNumber,
+  address: shop.shopDetail!.address ?? undefined,
+  phoneNumber: shop.shopDetail!.phoneNumber ?? undefined,
   schedule: shop.shopDetail?.schedule as ShopSchedule,
-  details: shop.shopDetail?.details,
+  details: shop.shopDetail!.details ?? undefined,
   menu: {
     id: shop.menu!.id,
     items: shop.menu!.items?.map(item => ({
