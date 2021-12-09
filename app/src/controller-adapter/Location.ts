@@ -65,11 +65,11 @@ const showCity = async (req: Request, res: Response, next: NextFunction) : Promi
 
 const routes = Router()
 
-routes.get('/areas', roleCheck(['admin']), areaIndex)
-routes.get('/areas/:id', roleCheck(['admin']), parseIntIdMiddleware, showArea)
-routes.get('/prefectures', roleCheck(['admin']), prefectureIndex)
-routes.get('/prefectures/:id', roleCheck(['admin']), parseIntIdMiddleware, showPrefecture)
-routes.get('/cities', roleCheck(['admin']), cityIndex)
-routes.get('/cities/:id', roleCheck(['admin']), parseIntIdMiddleware, showCity)
+routes.get('/areas', roleCheck(['admin', 'shop_staff']), areaIndex)
+routes.get('/areas/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, showArea)
+routes.get('/prefectures', roleCheck(['admin', 'shop_staff']), prefectureIndex)
+routes.get('/prefectures/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, showPrefecture)
+routes.get('/cities', roleCheck(['admin', 'shop_staff']), cityIndex)
+routes.get('/cities/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, showCity)
 
 export default routes

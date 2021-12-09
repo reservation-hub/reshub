@@ -22,7 +22,7 @@ router.use('/dashboard', protectAdminRoute, roleCheck(['admin', 'shop_staff']), 
 router.use('/shops', protectAdminRoute, roleCheck(['admin', 'shop_staff']), shopController)
 router.use('/reservations', protectAdminRoute, roleCheck(['admin', 'shop_staff']), reservationController)
 router.use('/users', protectAdminRoute, roleCheck(['admin']), userController)
-router.use('/', protectAdminRoute, roleCheck(['admin']), LocationController)
+router.use('/', protectAdminRoute, roleCheck(['admin', 'shop_staff']), LocationController)
 // client api
 router.use('/api/', roleCheck(['client']), apiRoutes)
 
