@@ -1,16 +1,20 @@
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
 import ShopService from '@services/ShopService'
-import { fetchModelsWithTotalCountQuery } from '@services/ServiceCommonTypes'
-import { fetchModelsWithTotalCountResponse } from '@request-response-types/ServiceCommonTypes'
+import {
+  fetchModelsWithTotalCountQuery,
+  fetchModelsWithTotalCountResponse,
+} from '@request-response-types/ServiceCommonTypes'
 import { ShopControllerInterface } from '@controller-adapter/Shop'
 import { User } from '@entities/User'
 import { MenuItem } from '@entities/Menu'
+import { Reservation } from '@entities/Reservation'
 import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import { shopStylistUpsertSchema } from './schemas/stylist'
 import { searchSchema } from './schemas/search'
 import { menuItemUpsertSchema } from './schemas/menu'
+import { reservationUpsertSchema } from './schemas/reservation'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(query: fetchModelsWithTotalCountQuery)
@@ -45,13 +49,26 @@ export type ShopServiceInterface = {
   deleteStylistByShopStaff(user: User, shopId: number, stylistId: number): Promise<Stylist>
   insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>,
   insertMenuItemByShopStaff(user: User, shopId: number, name: string, description: string, price: number)
-  : Promise<MenuItem>,
+    : Promise<MenuItem>,
   updateMenuItem(shopId: number, menuItemId: number, name: string, description: string, price: number)
-  : Promise<MenuItem>
+    : Promise<MenuItem>
   updateMenuItemByShopStaff(user: User, shopId: number, menuItemId: number, name: string,
     description: string, price: number): Promise<MenuItem>
   deleteMenuItem(shopId: number, menuItemId: number): Promise<MenuItem>
   deleteMenuItemByShopStaff(user: User, shopId: number, menuItemId: number): Promise<MenuItem>
+  fetchShopReservations(shopId: number): Promise<Reservation[]>
+  fetchShopReservationsByShopStaff(user: User, shopId: number): Promise<Reservation[]>
+  insertReservation(shopId: number, reservationDate: Date, userId: number, stylistId?: number)
+    : Promise<Reservation>
+  insertReservationByShopStaff(user: User, shopId: number, reservationDate: Date, userId: number, stylistId?: number)
+    : Promise<Reservation>
+  updateReservation(shopId: number, reservationId: number, reservationDate: Date, userId: number, stylistId?: number)
+    : Promise<Reservation>
+  updateReservationByShopStaff(user: User, shopId: number, reservationId: number,
+    reservationDate: Date, userId: number, stylistId?: number)
+    : Promise<Reservation>
+  deleteReservation(reservationId: number): Promise<Reservation>
+  deleteReservationByShopStaff(user: User, shopId: number, reservationId: number): Promise<Reservation>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -212,6 +229,51 @@ const ShopController: ShopControllerInterface = {
     return { message: 'menu item deleted' }
   },
 
+  async showReservations(user, query) {
+    const { shopId } = query
+    let reservations
+    if (user.role.slug === 'shop_staff') {
+      reservations = await ShopService.fetchShopReservationsByShopStaff(user, shopId)
+    } else {
+      reservations = await ShopService.fetchShopReservations(shopId)
+    }
+    return reservations
+  },
+
+  async insertReservation(user, query) {
+    const { reservationDate, userId, stylistId } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
+    const { shopId } = query
+    let reservation
+    if (user.role.slug === 'shop_staff') {
+      reservation = await ShopService.insertReservationByShopStaff(user, shopId, reservationDate, userId, stylistId)
+    } else {
+      reservation = await ShopService.insertReservation(shopId, reservationDate, userId, stylistId)
+    }
+    return reservation
+  },
+
+  async updateReservation(user, query) {
+    const { reservationDate, userId, stylistId } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
+    const { shopId, reservationId } = query
+    let reservation
+    if (user.role.slug === 'shop_staff') {
+      reservation = await ShopService.updateReservationByShopStaff(user, shopId, reservationId,
+        reservationDate, userId, stylistId)
+    } else {
+      reservation = await ShopService.updateReservation(shopId, reservationId, reservationDate, userId, stylistId)
+    }
+    return reservation
+  },
+
+  async deleteReservation(user, query) {
+    const { shopId, reservationId } = query
+    if (user.role.slug === 'shop_staff') {
+      await ShopService.deleteReservationByShopStaff(user, shopId, reservationId)
+    } else {
+      await ShopService.deleteReservation(reservationId)
+    }
+    return { message: 'Reservation deleted' }
+  },
 }
 
 export default ShopController

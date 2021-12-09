@@ -20,6 +20,7 @@ const idSchema = Joi.object({
   shopId: Joi.string().pattern(/^[0-9]+$/),
   stylistId: Joi.string().pattern(/^[0-9]+$/),
   menuItemId: Joi.string().pattern(/^[0-9]+$/),
+  reservationId: Joi.string().pattern(/^[0-9]+$/),
 })
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -35,6 +36,9 @@ export const parseIntIdMiddleware = async (req: Request, res: Response, next: Ne
   }
   if (ids.stylistId) {
     res.locals.stylistId = parseInt(ids.stylistId, 10)
+  }
+  if (ids.reservationId) {
+    res.locals.reservationId = parseInt(ids.reservationId, 10)
   }
   return next()
 }

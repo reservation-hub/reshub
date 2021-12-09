@@ -8,6 +8,7 @@ import { ShopRepository } from '@repositories/ShopRepository'
 import StylistRepository from '@repositories/StylistRepository'
 import ReservationRepository from '@repositories/ReservationRepository'
 import { LocationRepository } from '@repositories/LocationRepository'
+import UserRepository from '@repositories/UserRepository'
 import { AuthorizationError, InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
 export type ShopRepositoryInterface = {
@@ -49,10 +50,17 @@ export type StylistRepositoryInterface = {
 }
 
 export type ReservationRepositoryInterface = {
+  insertReservation(reservationDate: Date, userId: number, shopId: number, stylistId?: number)
+    : Promise<Reservation>
+  updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
+    stylistId?: number): Promise<Reservation>
+  deleteReservation(id: number): Promise<Reservation>
   fetchReservationsByShopIds(shopIds: number[])
-    : Promise<{ id: number, data: Reservation[] }[]>,
+    : Promise<{ id: number, data: Reservation[] }[]>
   fetchReservationsCountByShopIds(shopIds: number[])
-    : Promise<{ id: number, count: number }[]>,
+    : Promise<{ id: number, count: number }[]>
+  fetchShopsReservations(shopIds: number[]): Promise<Reservation[]>
+  fetchShopReservations(shopId: number): Promise<Reservation[]>
 }
 
 export type MenuRepositoryInterface = {
@@ -348,6 +356,123 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return this.deleteMenuItem(shopId, menuItemId)
   },
 
+  async fetchShopsReservations(shops) {
+    const shopIds = shops.map(s => s.id)
+    const reservations = await ReservationRepository.fetchShopsReservations(shopIds)
+    return reservations
+  },
+
+  async fetchShopReservations(shopId) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      console.error('shop not found')
+      throw new NotFoundError()
+    }
+    return ReservationRepository.fetchShopReservations(shopId)
+  },
+
+  async fetchShopReservationsByShopStaff(user, shopId) {
+    if (!await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+    return ReservationRepository.fetchShopReservations(shopId)
+  },
+
+  async insertReservation(shopId, reservationDate, userId, stylistId?) {
+    let stylist
+    const user = await UserRepository.fetch(userId)
+    const shop = await ShopRepository.fetch(shopId)
+    if (stylistId) {
+      stylist = await StylistRepository.fetch(stylistId)
+    }
+    if (!user || !shop || (stylistId && !stylist)) {
+      console.error('user | shop | stylist does not exist')
+      throw new NotFoundError()
+    }
+
+    if (stylistId && !shop.stylists?.find(stylist => stylist.id === stylistId)) {
+      console.error('Stylist does not exist in shop')
+      throw new InvalidParamsError()
+    }
+
+    const dateObj = new Date(reservationDate)
+    if (dateObj < new Date()) {
+      console.error('Invalid date, earlier than today')
+      throw new InvalidParamsError()
+    }
+    return ReservationRepository.insertReservation(reservationDate, userId, shopId, stylistId)
+  },
+
+  async insertReservationByShopStaff(user, shopId, reservationDate, userId, stylistId) {
+    if (!await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+    return this.insertReservation(shopId, reservationDate, userId, stylistId)
+  },
+
+  async updateReservation(shopId, reservationId, reservationDate, userId, stylistId) {
+    const reservation = await ReservationRepository.fetch(reservationId)
+    if (!reservation) {
+      throw new NotFoundError()
+    }
+
+    let stylist
+    const user = await UserRepository.fetch(userId)
+    const shop = await ShopRepository.fetch(shopId)
+    if (stylistId) {
+      stylist = await StylistRepository.fetch(stylistId)
+    }
+    if (!user || !shop || (stylistId && !stylist)) {
+      console.error('user | shop | stylist does not exist')
+      throw new NotFoundError()
+    }
+
+    if (stylistId && !shop.stylists?.find(stylist => stylist.id === stylistId)) {
+      console.error('Stylist does not exist in shop')
+      throw new InvalidParamsError()
+    }
+
+    const dateObj = new Date(reservationDate)
+    if (dateObj < new Date()) {
+      console.error('Invalid date, earlier than today')
+      throw new InvalidParamsError()
+    }
+
+    return ReservationRepository.updateReservation(
+      reservationId,
+      reservationDate,
+      userId,
+      shopId,
+      stylistId,
+    )
+  },
+
+  async updateReservationByShopStaff(user, shopId, reservationId, reservationDate, userId, stylistId) {
+    if (!await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+    return this.updateReservation(shopId, reservationId, reservationDate, userId, stylistId)
+  },
+
+  async deleteReservation(reservationId) {
+    const reservation = await ReservationRepository.fetch(reservationId)
+    if (!reservation) {
+      throw new NotFoundError()
+    }
+
+    return ReservationRepository.deleteReservation(reservationId)
+  },
+
+  async deleteReservationByShopStaff(user, shopId, reservationId) {
+    if (!await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+    return this.deleteReservation(reservationId)
+  },
 }
 
 export default ShopService
