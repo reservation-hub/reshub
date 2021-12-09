@@ -111,15 +111,19 @@ export const logout = (req: Request, res: Response): void => {
 
 // HACK test endpoint to get token and header
 export const hack = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
-  const user = await AuthService.hack()
-  req.user = user
-  return next()
+  try {
+    const user = await AuthService.hack()
+    req.user = user
+    return next()
+  } catch (e) { return next(e) }
 }
 
 export const staffHack = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
-  const user = await AuthService.hack('staff')
-  req.user = user
-  return next()
+  try {
+    const user = await AuthService.hack('staff')
+    req.user = user
+    return next()
+  } catch (e) { return next(e) }
 }
 
 const routes = Router()
