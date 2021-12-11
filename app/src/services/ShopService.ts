@@ -94,9 +94,16 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
   //   return ShopRepository.fetchShopsPopularMenus(shopIds)
   // },
 
-  async fetchShopsWithTotalCount(params) {
-    const shops = await ShopRepository.fetchAll(params)
-    const shopsCount = await ShopRepository.totalCount()
+  async fetchShopsWithTotalCount(user, params) {
+    let shops
+    let shopsCount
+    if (user.role.slug === 'shop_staff') {
+      shops = await ShopRepository.fetchUserShops(user.id)
+      shopsCount = await ShopRepository.fetchUserShopsCount(user.id)
+    } else {
+      shops = await ShopRepository.fetchAll(params)
+      shopsCount = await ShopRepository.totalCount()
+    }
     return { values: shops, totalCount: shopsCount }
   },
 
@@ -129,14 +136,10 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
     const uniqueDays: number[] = days.filter((n, i) => days.indexOf(n) === i)
 
-    // eslint-disable-next-line no-console
-    console.log('before shop insert by repository')
     const shop = await ShopRepository.insertShop(
       name, areaId, prefectureId, cityId, address,
       phoneNumber, uniqueDays, startTime, endTime, details,
     )
-    // eslint-disable-next-line no-console
-    console.log('before assignment')
     if (user.role.slug === 'shop_staff') {
       await ShopRepository.assignShopToStaff(user.id, shop.id)
     }

@@ -17,7 +17,7 @@ import { menuItemUpsertSchema } from './schemas/menu'
 import { reservationUpsertSchema } from './schemas/reservation'
 
 export type ShopServiceInterface = {
-  fetchShopsWithTotalCount(query: fetchModelsWithTotalCountQuery)
+  fetchShopsWithTotalCount(user: User, query: fetchModelsWithTotalCountQuery)
     : Promise<fetchModelsWithTotalCountResponse<Shop>>,
   fetchShop(user: User, id: number): Promise<Shop>,
   insertShop(user: User, name: string, areaId: number, prefectureId: number,
@@ -55,9 +55,9 @@ export type ShopServiceInterface = {
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const ShopController: ShopControllerInterface = {
-  async index(query) {
+  async index(user, query) {
     const params = await indexSchema.validateAsync(query, joiOptions)
-    const shopsWithCount = await ShopService.fetchShopsWithTotalCount(params)
+    const shopsWithCount = await ShopService.fetchShopsWithTotalCount(user, params)
     const { values: shops, totalCount } = shopsWithCount
 
     const shopIds = shops.map(shop => shop.id)
@@ -85,8 +85,6 @@ const ShopController: ShopControllerInterface = {
       name, areaId, prefectureId, cityId, address,
       phoneNumber, days, startTime, endTime, details,
     } = await shopUpsertSchema.validateAsync(query, joiOptions)
-    // eslint-disable-next-line no-console
-    console.log('before shop insert')
     return ShopService.insertShop(user,
       name, areaId, prefectureId, cityId, address,
       phoneNumber, days, startTime, endTime, details)

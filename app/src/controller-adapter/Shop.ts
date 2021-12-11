@@ -2,7 +2,7 @@ import {
   Request, Response, NextFunction, Router,
 } from 'express'
 import ShopController from '@controllers/shopController'
-import { parseIntIdMiddleware, roleCheck } from '@routes/utils'
+import { parseIntIdMiddleware } from '@routes/utils'
 import {
   deleteMenuItemQuery, deleteShopQuery, deleteShopReservationQuery, deleteStylistQuery,
   insertMenuItemQuery, insertShopQuery, insertShopReservationQuery, insertStylistQuery,
@@ -13,7 +13,7 @@ import {
 import { User } from '@entities/User'
 
 export type ShopControllerInterface = {
-  index(query: shopsWithCountQuery) : Promise<shopsResponse>
+  index(user: User, query: shopsWithCountQuery) : Promise<shopsResponse>
   show(user: User, query: shopQuery) : Promise<shopResponse>
   insert(user: User, query: insertShopQuery) : Promise<shopResponse>
   update(user: User, query: updateShopQuery) : Promise<shopResponse>
@@ -34,7 +34,8 @@ export type ShopControllerInterface = {
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { page, order } = req.query
-    return res.send(await ShopController.index({ page, order }))
+    const user = req.user as User
+    return res.send(await ShopController.index(user, { page, order }))
   } catch (e) { return next(e) }
 }
 
@@ -167,29 +168,27 @@ const deleteReservation = async (req: Request, res: Response, next: NextFunction
 const routes = Router()
 
 // shop routes
-routes.get('/', roleCheck(['admin']), index)
-routes.get('/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, showShop)
-routes.post('/', roleCheck(['admin', 'shop_staff']), insertShop)
-routes.patch('/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, updateShop)
-routes.delete('/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, deleteShop)
+routes.get('/', index)
+routes.get('/:id', parseIntIdMiddleware, showShop)
+routes.post('/', insertShop)
+routes.patch('/:id', parseIntIdMiddleware, updateShop)
+routes.delete('/:id', parseIntIdMiddleware, deleteShop)
 routes.post('/search', searchShops)
 
 // stylist routes
-routes.post('/:shopId/stylist', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, insertStylist)
-routes.patch('/:shopId/stylist/:stylistId', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, updateStylist)
-routes.delete('/:shopId/stylist/:stylistId', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, deleteStylist)
+routes.post('/:shopId/stylist', parseIntIdMiddleware, insertStylist)
+routes.patch('/:shopId/stylist/:stylistId', parseIntIdMiddleware, updateStylist)
+routes.delete('/:shopId/stylist/:stylistId', parseIntIdMiddleware, deleteStylist)
 
 // menu routes
-routes.post('/:shopId/menu', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, insertMenuItem)
-routes.patch('/:shopId/menu/:menuItemId', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, updateMenuItem)
-routes.delete('/:shopId/menu/:menuItemId', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, deleteMenuItem)
+routes.post('/:shopId/menu', parseIntIdMiddleware, insertMenuItem)
+routes.patch('/:shopId/menu/:menuItemId', parseIntIdMiddleware, updateMenuItem)
+routes.delete('/:shopId/menu/:menuItemId', parseIntIdMiddleware, deleteMenuItem)
 
 // reservation routes
-routes.get('/:shopId/reservation', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, showReservations)
-routes.post('/:shopId/reservation', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, insertReservation)
-routes.patch('/:shopId/reservation/:reservationId', roleCheck(['admin', 'shop_staff']),
-  parseIntIdMiddleware, updateReservation)
-routes.delete('/:shopId/reservation/:reservationId', roleCheck(['admin', 'shop_staff']),
-  parseIntIdMiddleware, deleteReservation)
+routes.get('/:shopId/reservation', parseIntIdMiddleware, showReservations)
+routes.post('/:shopId/reservation', parseIntIdMiddleware, insertReservation)
+routes.patch('/:shopId/reservation/:reservationId', parseIntIdMiddleware, updateReservation)
+routes.delete('/:shopId/reservation/:reservationId', parseIntIdMiddleware, deleteReservation)
 
 export default routes

@@ -288,11 +288,20 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
   },
 
   async fetchUserShops(userId) {
-    return prisma.shop.findMany({
+    const shops = await prisma.shop.findMany({
       where: {
         shopUser: { userId },
       },
+      include: {
+        shopDetail: true,
+        area: true,
+        prefecture: true,
+        city: true,
+        menu: { include: { items: true } },
+        stylists: true,
+      },
     })
+    return shops.map(s => reconstructShopWithMenuAndStylists(s))
   },
 
   async fetchUserShopsCount(userId) {
