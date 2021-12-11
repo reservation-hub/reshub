@@ -59,10 +59,6 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
   if (error instanceof ValidationError) {
     // Joi Validation エラー処理
     console.error(error)
-    error.details.forEach(item => {
-      // eslint-disable-next-line no-console
-      console.log(item.path)
-    })
     const keys = error.details.map((e: ValidationErrorItem) => e.path.toString())
     return res.status(400).send({ error: { keys, message: 'Invalid values error' } })
   }
