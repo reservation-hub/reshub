@@ -3,6 +3,7 @@ import { Shop, ShopSchedule } from '@entities/Shop'
 import { ShopRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
+import { convertReservationStatus } from './ReservationRepository'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {
@@ -23,6 +24,7 @@ const shopWithShopDetailsAndLocationAndMenu = Prisma.validator<Prisma.ShopArgs>(
       city: true,
       menu: { include: { items: true } },
       stylists: true,
+      reservations: { include: { user: { include: { role: true } }, stylist: true } },
     },
   },
 )
@@ -85,6 +87,17 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
     })),
   },
   stylists: shop.stylists,
+  reservations: shop.reservations.map(r => ({
+    id: r.id,
+    reservationDate: r.reservationDate,
+    user: {
+      id: r.user.id,
+      email: r.user.email,
+      role: r.user!.role!,
+    },
+    status: convertReservationStatus(r.status),
+    stylist: r.stylist ?? undefined,
+  })),
 })
 
 export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket = {
@@ -117,6 +130,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         city: true,
         menu: { include: { items: true } },
         stylists: true,
+        reservations: { include: { user: { include: { role: true } }, stylist: true } },
       },
     })
     return shop ? reconstructShopWithMenuAndStylists(shop) : null
@@ -299,6 +313,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         city: true,
         menu: { include: { items: true } },
         stylists: true,
+        reservations: { include: { user: { include: { role: true } }, stylist: true } },
       },
     })
     return shops.map(s => reconstructShopWithMenuAndStylists(s))

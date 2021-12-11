@@ -1,18 +1,19 @@
-import { Prisma } from '@prisma/client'
-import { Reservation } from '@entities/Reservation'
+import { Prisma, ReservationStatus as PrismaReservationStatus } from '@prisma/client'
+import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
-// const reservationWithoutStylist = Prisma.validator<Prisma.ReservationArgs>()(
-//   {
-//     include: {
-//       user: { include: { profile: true, role: true } },
-//       shop: { include: { shopDetail: true } },
-//     },
-//   },
-// )
-// type reservationWithoutStylist = Prisma.ReservationGetPayload<typeof reservationWithoutStylist>
+export const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
+  switch (status) {
+    case PrismaReservationStatus.CANCELLED:
+      return ReservationStatus.CANCELLED
+    case PrismaReservationStatus.COMPLETED:
+      return ReservationStatus.COMPLETED
+    default:
+      return ReservationStatus.RESERVED
+  }
+}
 
 const reservationWithUserAndStylistAndShopWithoutLocation = Prisma.validator<Prisma.ReservationArgs>()(
   {
@@ -30,6 +31,7 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
 : Reservation => ({
   id: reservation.id,
   reservationDate: reservation.reservationDate,
+  status: convertReservationStatus(reservation.status),
   shop: {
     id: reservation.shop.id,
     name: reservation.shop.shopDetail?.name,
@@ -45,7 +47,7 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
     email: reservation.user.email,
     lastNameKanji: reservation.user.profile?.lastNameKanji,
     firstNameKanji: reservation.user.profile?.firstNameKanji,
-    lastNameKana: reservation.user.profile?.firstNameKana,
+    lastNameKana: reservation.user.profile?.lastNameKana,
     firstNameKana: reservation.user.profile?.firstNameKana,
     role: reservation.user.role!,
   },
@@ -160,9 +162,12 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
     return cleanReservation
   },
 
-  async deleteReservation(id) {
-    const reservation = await prisma.reservation.delete({
+  async cancelReservation(id) {
+    const reservation = await prisma.reservation.update({
       where: { id },
+      data: {
+        status: PrismaReservationStatus.CANCELLED,
+      },
       include: {
         user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
