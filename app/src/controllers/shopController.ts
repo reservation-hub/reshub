@@ -49,7 +49,7 @@ export type ShopServiceInterface = {
   updateReservation(user: User, shopId: number, reservationId: number,
     reservationDate: Date, clientId: number, stylistId?: number)
     : Promise<Reservation>
-  deleteReservation(user: User, shopId: number, reservationId: number): Promise<Reservation>
+  cancelReservation(user: User, shopId: number, reservationId: number): Promise<Reservation>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -168,7 +168,7 @@ const ShopController: ShopControllerInterface = {
 
   async deleteReservation(user, query) {
     const { shopId, reservationId } = query
-    await ShopService.deleteReservation(user, shopId, reservationId)
+    await ShopService.cancelReservation(user, shopId, reservationId)
     return { message: 'Reservation deleted' }
   },
 }

@@ -4,7 +4,7 @@ import { ReservationRepositoryInterface as ShopServiceSocket } from '@services/S
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
-const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
+export const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
   switch (status) {
     case PrismaReservationStatus.CANCELLED:
       return ReservationStatus.CANCELLED
@@ -162,9 +162,12 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
     return cleanReservation
   },
 
-  async deleteReservation(id) {
-    const reservation = await prisma.reservation.delete({
+  async cancelReservation(id) {
+    const reservation = await prisma.reservation.update({
       where: { id },
+      data: {
+        status: PrismaReservationStatus.CANCELLED,
+      },
       include: {
         user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },

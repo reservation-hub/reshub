@@ -54,7 +54,7 @@ export type ReservationRepositoryInterface = {
     : Promise<Reservation>
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
     stylistId?: number): Promise<Reservation>
-  deleteReservation(id: number): Promise<Reservation>
+  cancelReservation(id: number): Promise<Reservation>
   fetchReservationsByShopIds(shopIds: number[])
     : Promise<{ id: number, data: Reservation[] }[]>
   fetchReservationsCountByShopIds(shopIds: number[])
@@ -408,7 +408,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       clientId, shopId, stylistId)
   },
 
-  async deleteReservation(user, shopId, reservationId) {
+  async cancelReservation(user, shopId, reservationId) {
     if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
@@ -419,7 +419,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
 
-    return ReservationRepository.deleteReservation(reservationId)
+    return ReservationRepository.cancelReservation(reservationId)
   },
 
 }
