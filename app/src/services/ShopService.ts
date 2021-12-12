@@ -63,6 +63,7 @@ export type ReservationRepositoryInterface = {
     : Promise<{ id: number, count: number }[]>
   fetchShopsReservations(shopIds: number[]): Promise<Reservation[]>
   fetchShopReservations(shopId: number): Promise<Reservation[]>
+  fetchMenuItemReservations(menuItemIds:number[]): Promise<Reservation[]>
 }
 
 export type MenuRepositoryInterface = {
@@ -89,12 +90,6 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     const shopIds = shops.map(s => s.id)
     return StylistRepository.fetchStylistsByShopIds(shopIds)
   },
-
-  // TODO: implement popular menus
-  // async fetchShopsPopularMenus(shops) {
-  //   const shopIds = shops.map(s => s.id)
-  //   return ShopRepository.fetchShopsPopularMenus(shopIds)
-  // },
 
   async fetchShopsWithTotalCount(user, params) {
     let shops
@@ -436,13 +431,29 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return ReservationRepository.cancelReservation(reservationId)
   },
 
-  async fetchShopPopularMenus(user, shopId) {
+  async fetchShopMenuItems(user, shopId) {
     if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
-    const menuItems = await ShopRepository.fetchShopMenuItems(shopId)
+    return ShopRepository.fetchShopMenuItems(shopId)
+  },
+
+  async fetchMenuItemReservationTotals(user, menuItemIds) {
+    const menuItemReservation = await ReservationRepository.fetchMenuItemReservations(menuItemIds)
+    const uniqueShopIds = menuItemReservation.map(r => r.shop!.id).filter((v, i, s) => s.indexOf(v) === i)
+    uniqueShopIds.forEach(async id => {
+      if (!await ShopRepository.shopIsOwnedByUser(user.id, id)) {
+        console.error('Shop is not owned by user')
+        throw new AuthorizationError()
+      }
+    })
+
+    return menuItemIds.map(i => ({
+      menuItemId: i,
+      totalReservations: menuItemReservation.filter(r => r.menuItem.id === i).length,
+    }))
   },
 
 }

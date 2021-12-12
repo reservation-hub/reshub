@@ -357,11 +357,35 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
   async fetchShopMenuItems(shopId) {
     const menu = await prisma.menu.findUnique({
       where: { shopId },
-      include: {
-        items: true,
-      },
+      include: { items: true },
     })
     return menu!.items
   },
+
+  // async fetchPopularMenuItems(shopId) {
+  //   // eslint-disable-next-line
+  //   const menuItemsWithCount = await prisma.$queryRaw<(MenuItem & { reservation_total: number })[]>(`
+  //     SELECT
+  //       mi.id,
+  //       mi.name,
+  //       mi.description,
+  //       mi.price,
+  //       (SELECT COUNT(*) FROM "Reservation" as r WHERE r.menu_item_id = mi.id) as reservation_total
+  //       FROM "MenuItem" as mi
+  //       LEFT JOIN "Menu" as m ON m.id = mi.menu_id
+  //       RIGHT JOIN "Shop" as s ON s.id = m.shop_id
+  //       WHERE s.id = ${shopId}
+  //       ORDER BY reservation_total
+  //       DESC LIMIT 5
+  //     `)
+
+  //   return menuItemsWithCount.map(i => ({
+  //     id: i.id,
+  //     name: i.name,
+  //     description: i.description,
+  //     price: i.price,
+  //     totalReservations: i.reservation_total,
+  //   })).filter(i => i.totalReservations > 0)
+  // },
 
 }

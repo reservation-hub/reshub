@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["referentialActions"]
+  previewFeatures = ["referentialActions", "selectRelationCount"]
 }
 
 datasource db {
@@ -105,15 +105,15 @@ model Menu {
 }
 
 model MenuItem {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.VarChar(255)
-  description String        @db.VarChar(255)
-  price       Int
-  imageId     Int?          @unique @map("image_id")
-  menuId      Int           @map("menu_id")
-  image       ModelImage?   @relation(fields: [imageId], references: [id])
-  menu        Menu          @relation(fields: [menuId], references: [id])
-  Reservation Reservation[]
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar(255)
+  description  String        @db.VarChar(255)
+  price        Int
+  imageId      Int?          @unique @map("image_id")
+  menuId       Int           @map("menu_id")
+  image        ModelImage?   @relation(fields: [imageId], references: [id])
+  menu         Menu          @relation(fields: [menuId], references: [id])
+  reservations Reservation[]
 }
 
 model ShopUser {

@@ -222,6 +222,20 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
     return cleanReservations
   },
 
+  async fetchMenuItemReservations(menuItemIds) {
+    const reservations = await prisma.reservation.findMany({
+      where: { menuItemId: { in: menuItemIds } },
+      include: {
+        user: { include: { profile: true, role: true } },
+        shop: { include: { shopDetail: true } },
+        stylist: { include: { shop: true } },
+        menuItem: true,
+      },
+    })
+
+    return reservations.map(r => reconstructReservation(r))
+  },
+
   // async searchReservations(keyword) {
   //   const userIds = await prisma.$queryRaw('SELECT id FROM "User" WHERE (username ILIKE $1 or email ILIKE $2)',
   //     `${keyword}%`,

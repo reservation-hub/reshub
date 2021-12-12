@@ -52,7 +52,9 @@ export type ShopServiceInterface = {
     reservationDate: Date, clientId: number, menuItemId: number, stylistId?: number)
     : Promise<Reservation>
   cancelReservation(user: User, shopId: number, reservationId: number): Promise<Reservation>
-  fetchShopPopularMenus(user: User, shopId: number): Promise<MenuItem[]>
+  fetchShopMenuItems(user: User, shopId: number): Promise<MenuItem[]>
+  fetchMenuItemReservationTotals(user: User, menuItemIds: number[])
+    : Promise<{ menuItemId: number, totalReservations: number }[]>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -81,8 +83,14 @@ const ShopController: ShopControllerInterface = {
   async show(user, query) {
     const { id } = query
     const shop = await ShopService.fetchShop(user, id)
-    const popularMenus = await ShopService.fetchShopPopularMenus(user, shop.id)
-    return { ...shop, popularMenus }
+    const menuItems = await ShopService.fetchShopMenuItems(user, shop.id)
+    const menuItemReservationTotals = await ShopService.fetchMenuItemReservationTotals(user,
+      menuItems.map(i => i.id))
+    const popularMenusWithReservationTotals = menuItems.map(i => ({
+      ...i,
+      totalReservations: menuItemReservationTotals.find(rt => rt.menuItemId === i.id)!.totalReservations,
+    })).filter(i => i.totalReservations > 0).sort((a, b) => b.totalReservations - a.totalReservations)
+    return { ...shop, popularMenus: popularMenusWithReservationTotals }
   },
 
   async insert(user, query) {
