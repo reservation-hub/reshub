@@ -52,6 +52,7 @@ export type ShopServiceInterface = {
     reservationDate: Date, clientId: number, menuItemId: number, stylistId?: number)
     : Promise<Reservation>
   cancelReservation(user: User, shopId: number, reservationId: number): Promise<Reservation>
+  fetchShopPopularMenus(user: User, shopId: number): Promise<MenuItem[]>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -79,7 +80,9 @@ const ShopController: ShopControllerInterface = {
 
   async show(user, query) {
     const { id } = query
-    return ShopService.fetchShop(user, id)
+    const shop = await ShopService.fetchShop(user, id)
+    const popularMenus = await ShopService.fetchShopPopularMenus(user, shop.id)
+    return { ...shop, popularMenus }
   },
 
   async insert(user, query) {

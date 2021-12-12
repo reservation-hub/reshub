@@ -6,7 +6,7 @@ import { parseIntIdMiddleware } from '@routes/utils'
 import {
   deleteMenuItemQuery, deleteShopQuery, deleteShopReservationQuery, deleteStylistQuery,
   insertMenuItemQuery, insertShopQuery, insertShopReservationQuery, insertStylistQuery,
-  menuResponse, reservationResponse, shopQuery, shopResponse, shopSearchQuery, shopSearchResponse,
+  menuResponse, reservationResponse, shopDetailsResponse, shopQuery, shopResponse, shopSearchQuery, shopSearchResponse,
   shopsResponse, shopsWithCountQuery, showShopReservationsQuery, showShopReservationsResponse,
   stylistResponse, updateMenuItemQuery, updateShopQuery, updateShopReservationQuery, updateStylistQuery,
 } from '@request-response-types/Shop'
@@ -14,7 +14,7 @@ import { User } from '@entities/User'
 
 export type ShopControllerInterface = {
   index(user: User, query: shopsWithCountQuery) : Promise<shopsResponse>
-  show(user: User, query: shopQuery) : Promise<shopResponse>
+  show(user: User, query: shopQuery) : Promise<shopDetailsResponse>
   insert(user: User, query: insertShopQuery) : Promise<shopResponse>
   update(user: User, query: updateShopQuery) : Promise<shopResponse>
   delete(user: User, query: deleteShopQuery) : Promise<{ message: string }>

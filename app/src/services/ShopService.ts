@@ -31,7 +31,6 @@ export type ShopRepositoryInterface = {
   searchShops(keyword: string): Promise<Shop[]>,
   fetchUserShops(userId: number): Promise<Shop[]>
   fetchUserShopsCount(userId: number): Promise<number>
-  // fetchShopsPopularMenus(shopIds: number[]): Promise<MenuItem[]>
   shopIsOwnedByUser(userId: number, shopId: number): Promise<boolean>
   assignShopToStaff(userId: number, shopId: number): void
 }
@@ -435,6 +434,15 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     }
 
     return ReservationRepository.cancelReservation(reservationId)
+  },
+
+  async fetchShopPopularMenus(user, shopId) {
+    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+
+    const menuItems = await ShopRepository.fetchShopMenuItems(shopId)
   },
 
 }
