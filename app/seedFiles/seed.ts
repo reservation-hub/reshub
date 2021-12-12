@@ -310,12 +310,14 @@ const roles = [
   await Promise.all(stylistPromises)
 
   console.log('running reservation seeder')
-  const randomStylist = await prisma.stylist.findFirst()
+  const randomStylist = await prisma.stylist.findFirst({
+    include: { shop: { include: { menu: { include: { items: true } } } } },
+  })
   const reservations = [
-    { date: new Date('2021-09-01') },
-    { date: new Date('2021-09-02') },
-    { date: new Date('2021-09-03') },
-    { date: new Date('2021-09-04') },
+    { date: new Date('2022-09-01') },
+    { date: new Date('2022-09-02') },
+    { date: new Date('2022-09-03') },
+    { date: new Date('2022-09-04') },
   ]
   const reservationPromises = reservations.map(reservation => prisma.reservation.create({
     data: {
@@ -323,6 +325,7 @@ const roles = [
       stylistId: randomStylist!.id,
       shopId: randomStylist!.shopId,
       userId: 1,
+      menuItemId: randomStylist!.shop.menu!.items[0].id,
     },
   }))
 

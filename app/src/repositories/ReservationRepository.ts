@@ -21,6 +21,7 @@ const reservationWithUserAndStylistAndShopWithoutLocation = Prisma.validator<Pri
       user: { include: { profile: true, role: true } },
       shop: { include: { shopDetail: true } },
       stylist: { include: { shop: true } },
+      menuItem: true,
     },
   },
 )
@@ -32,6 +33,7 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
   id: reservation.id,
   reservationDate: reservation.reservationDate,
   status: convertReservationStatus(reservation.status),
+  menuItem: reservation.menuItem,
   shop: {
     id: reservation.shop.id,
     name: reservation.shop.shopDetail?.name,
@@ -64,6 +66,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
+        menuItem: true,
       },
     })
 
@@ -83,6 +86,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
+        menuItem: true,
       },
     })
     return reservation ? reconstructReservation(reservation) : null
@@ -95,6 +99,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
+        menuItem: true,
       },
     })
 
@@ -113,7 +118,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
     return finalData
   },
 
-  async insertReservation(reservationDate, userId, shopId, stylistId?) {
+  async insertReservation(reservationDate, userId, shopId, menuItemId, stylistId?) {
     const reservation = await prisma.reservation.create({
       data: {
         reservationDate,
@@ -126,18 +131,22 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         user: {
           connect: { id: userId },
         },
+        menuItem: {
+          connect: { id: menuItemId },
+        },
       },
       include: {
         user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
+        menuItem: true,
       },
     })
     const cleanReservation = reconstructReservation(reservation)
     return cleanReservation
   },
 
-  async updateReservation(id, reservationDate, userId, shopId, stylistId) {
+  async updateReservation(id, reservationDate, userId, shopId, menuItemId, stylistId) {
     const reservation = await prisma.reservation.update({
       where: { id },
       data: {
@@ -151,11 +160,15 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         user: {
           connect: { id: userId },
         },
+        menuItem: {
+          connect: { id: menuItemId },
+        },
       },
       include: {
         user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
+        menuItem: true,
       },
     })
     const cleanReservation = reconstructReservation(reservation)
@@ -172,6 +185,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
+        menuItem: true,
       },
     })
     const cleanReservation = reconstructReservation(reservation)
@@ -185,6 +199,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
+        menuItem: true,
       },
     })
     const cleanReservations = reservations.map(r => reconstructReservation(r))
@@ -198,6 +213,7 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         user: { include: { profile: true, role: true } },
         shop: { include: { shopDetail: true } },
         stylist: { include: { shop: true } },
+        menuItem: true,
       },
     })
     const cleanReservations = reservations.map(r => reconstructReservation(r))

@@ -25,7 +25,7 @@ const shopWithShopDetailsAndLocationAndMenu = Prisma.validator<Prisma.ShopArgs>(
       city: true,
       menu: { include: { items: true } },
       stylists: true,
-      reservations: { include: { user: { include: { role: true } }, stylist: true } },
+      reservations: { include: { user: { include: { role: true } }, stylist: true, menuItem: true } },
     },
   },
 )
@@ -141,7 +141,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         city: true,
         menu: { include: { items: true } },
         stylists: true,
-        reservations: { include: { user: { include: { role: true } }, stylist: true } },
+        reservations: { include: { user: { include: { role: true } }, stylist: true, menuItem: true } },
       },
     })
     return shop ? reconstructShopWithMenuAndStylists(shop) : null
@@ -324,7 +324,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         city: true,
         menu: { include: { items: true } },
         stylists: true,
-        reservations: { include: { user: { include: { role: true } }, stylist: true } },
+        reservations: { include: { user: { include: { role: true } }, stylist: true, menuItem: true } },
       },
     })
     return shops.map(s => reconstructShopWithMenuAndStylists(s))
@@ -351,6 +351,16 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         userId, shopId,
       },
     })
+  },
+
+  async fetchShopMenuItems(shopId) {
+    const menu = await prisma.menu.findUnique({
+      where: { shopId },
+      include: {
+        items: true,
+      },
+    })
+    return menu!.items
   },
 
 }

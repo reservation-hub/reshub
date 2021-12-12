@@ -46,10 +46,10 @@ export type ShopServiceInterface = {
     description: string, price: number): Promise<MenuItem>
   deleteMenuItem(user: User, shopId: number, menuItemId: number): Promise<MenuItem>
   fetchShopReservations(user: User, shopId: number): Promise<Reservation[]>
-  insertReservation(user: User, shopId: number, reservationDate: Date, clientId: number, stylistId?: number)
-    : Promise<Reservation>
+  insertReservation(user: User, shopId: number, reservationDate: Date,
+    clientId: number, menuItemId: number, stylistId?: number): Promise<Reservation>
   updateReservation(user: User, shopId: number, reservationId: number,
-    reservationDate: Date, clientId: number, stylistId?: number)
+    reservationDate: Date, clientId: number, menuItemId: number, stylistId?: number)
     : Promise<Reservation>
   cancelReservation(user: User, shopId: number, reservationId: number): Promise<Reservation>
 }
@@ -161,15 +161,19 @@ const ShopController: ShopControllerInterface = {
   },
 
   async insertReservation(user, query) {
-    const { reservationDate, userId, stylistId } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
+    const {
+      reservationDate, userId, menuItemId, stylistId,
+    } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId } = query
-    return ShopService.insertReservation(user, shopId, reservationDate, userId, stylistId)
+    return ShopService.insertReservation(user, shopId, reservationDate, userId, menuItemId, stylistId)
   },
 
   async updateReservation(user, query) {
-    const { reservationDate, userId, stylistId } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
+    const {
+      reservationDate, userId, menuItemId, stylistId,
+    } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId, reservationId } = query
-    return ShopService.updateReservation(user, shopId, reservationId, reservationDate, userId, stylistId)
+    return ShopService.updateReservation(user, shopId, reservationId, reservationDate, userId, menuItemId, stylistId)
   },
 
   async deleteReservation(user, query) {
