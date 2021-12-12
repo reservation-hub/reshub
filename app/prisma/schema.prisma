@@ -161,6 +161,7 @@ model Stylist {
   price        Int
   shopId       Int           @map("shop_id")
   shop         Shop          @relation(fields: [shopId], references: [id])
+  schedule     Json?
 }
 
 enum ReservationStatus {
