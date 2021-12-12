@@ -105,14 +105,15 @@ model Menu {
 }
 
 model MenuItem {
-  id          Int         @id @default(autoincrement())
-  name        String      @db.VarChar(255)
-  description String      @db.VarChar(255)
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(255)
+  description String        @db.VarChar(255)
   price       Int
-  imageId     Int?        @unique @map("image_id")
-  menuId      Int         @map("menu_id")
-  image       ModelImage? @relation(fields: [imageId], references: [id])
-  menu        Menu        @relation(fields: [menuId], references: [id])
+  imageId     Int?          @unique @map("image_id")
+  menuId      Int           @map("menu_id")
+  image       ModelImage?   @relation(fields: [imageId], references: [id])
+  menu        Menu          @relation(fields: [menuId], references: [id])
+  Reservation Reservation[]
 }
 
 model ShopUser {
@@ -175,6 +176,8 @@ model Reservation {
   updatedAt       DateTime          @updatedAt @map("updated_at")
   shopId          Int               @map("shop_id")
   stylistId       Int?              @map("stylist_id")
+  menuItemId      Int               @map("menu_item_id")
+  menuItem        MenuItem          @relation(fields: [menuItemId], references: [id])
   userId          Int               @map("user_id")
   status          ReservationStatus @default(RESERVED)
   reservationDate DateTime          @map("reservation_date") @db.Timestamp(6)

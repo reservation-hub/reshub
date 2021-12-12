@@ -23,6 +23,7 @@ export type ShopRepositoryInterface = {
   deleteShop(id: number): Promise<Shop>,
   upsertSchedule(shopId: number, days: number[], start: string, end: string)
     : Promise<ShopSchedule>
+  fetchShopMenuItems(shopId: number): Promise<MenuItem[]>
   insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>,
   updateMenuItem(menuItemId: number, name: string, description: string, price: number): Promise<MenuItem>,
   deleteMenuItem(menuItemId: number): Promise<MenuItem>
@@ -50,10 +51,10 @@ export type StylistRepositoryInterface = {
 }
 
 export type ReservationRepositoryInterface = {
-  insertReservation(reservationDate: Date, userId: number, shopId: number, stylistId?: number)
+  insertReservation(reservationDate: Date, userId: number, shopId: number, menuItemId: number, stylistId?: number)
     : Promise<Reservation>
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
-    stylistId?: number): Promise<Reservation>
+    menuItemId: number, stylistId?: number): Promise<Reservation>
   cancelReservation(id: number): Promise<Reservation>
   fetchReservationsByShopIds(shopIds: number[])
     : Promise<{ id: number, data: Reservation[] }[]>
@@ -341,7 +342,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return ReservationRepository.fetchShopReservations(shopId)
   },
 
-  async insertReservation(user, shopId, reservationDate, clientId, stylistId?) {
+  async insertReservation(user, shopId, reservationDate, clientId, menuItemId, stylistId?) {
     if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
@@ -358,6 +359,12 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
 
+    const menuItems = await ShopRepository.fetchShopMenuItems(shop.id)
+    if (!menuItems.find(item => item.id === menuItemId)) {
+      console.error('Menu Item does not exist in shop')
+      throw new InvalidParamsError()
+    }
+
     if (stylistId && !shop.stylists?.find(stylist => stylist.id === stylistId)) {
       console.error('Stylist does not exist in shop')
       throw new InvalidParamsError()
@@ -368,10 +375,10 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       console.error('Invalid date, earlier than today')
       throw new InvalidParamsError()
     }
-    return ReservationRepository.insertReservation(reservationDate, clientId, shopId, stylistId)
+    return ReservationRepository.insertReservation(reservationDate, clientId, shopId, menuItemId, stylistId)
   },
 
-  async updateReservation(user, shopId, reservationId, reservationDate, clientId, stylistId) {
+  async updateReservation(user, shopId, reservationId, reservationDate, clientId, menuItemId, stylistId) {
     if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
@@ -393,6 +400,12 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
 
+    const menuItems = await ShopRepository.fetchShopMenuItems(shop.id)
+    if (!menuItems.find(item => item.id === menuItemId)) {
+      console.error('Menu Item does not exist in shop')
+      throw new InvalidParamsError()
+    }
+
     if (stylistId && !shop.stylists?.find(stylist => stylist.id === stylistId)) {
       console.error('Stylist does not exist in shop')
       throw new InvalidParamsError()
@@ -405,7 +418,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     }
 
     return ReservationRepository.updateReservation(reservationId, reservationDate,
-      clientId, shopId, stylistId)
+      clientId, shopId, menuItemId, stylistId)
   },
 
   async cancelReservation(user, shopId, reservationId) {
