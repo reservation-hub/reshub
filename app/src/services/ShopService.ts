@@ -14,15 +14,12 @@ import { AuthorizationError, InvalidParamsError, NotFoundError } from './Errors/
 export type ShopRepositoryInterface = {
   insertShop(
     name: string, areaId: number, prefectureId: number, cityId: number, address: string,
-    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string)
-    : Promise<Shop>,
+    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string) : Promise<Shop>,
   updateShop(
     id: number, name: string, areaId: number, prefectureId: number, cityId: number, address: string,
-    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string)
-    : Promise<Shop>,
+    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string) : Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
-  upsertSchedule(shopId: number, days: number[], start: string, end: string)
-    : Promise<ShopSchedule>
+  upsertSchedule(shopId: number, days: number[], start: string, end: string) : Promise<ShopSchedule>
   fetchShopMenuItems(shopId: number): Promise<MenuItem[]>
   insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>,
   updateMenuItem(menuItemId: number, name: string, description: string, price: number): Promise<MenuItem>,
@@ -44,11 +41,9 @@ export type StylistRepositoryInterface = {
   insertStylist(name: string, price: number, shopId: number, days:number[],
     startTime:string, endTime:string): Promise<Stylist>,
   updateStylist(id: number, name: string, price: number, shopId: number,
-    days: number[], startTime: string, endTime: string)
-    :Promise<Stylist>,
+    days: number[], startTime: string, endTime: string) :Promise<Stylist>,
   deleteStylist(id: number): Promise<Stylist>,
-  fetchStylistsByShopIds(shopIds: number[])
-    : Promise<{ id: number, name: string, price: number, shopId:number }[]>,
+  fetchStylistsByShopIds(shopIds: number[]) : Promise<{ id: number, name: string, price: number, shopId:number }[]>,
   fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ id: number, count: number }[]>,
 }
 
@@ -58,16 +53,10 @@ export type ReservationRepositoryInterface = {
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
     menuItemId: number, stylistId?: number): Promise<Reservation>
   cancelReservation(id: number): Promise<Reservation>
-  fetchReservationsByShopIds(shopIds: number[])
-    : Promise<{ id: number, data: Reservation[] }[]>
-  fetchReservationsCountByShopIds(shopIds: number[])
-    : Promise<{ id: number, count: number }[]>
+  fetchReservationsByShopIds(shopIds: number[]) : Promise<{ id: number, data: Reservation[] }[]>
+  fetchReservationsCountByShopIds(shopIds: number[]) : Promise<{ id: number, count: number }[]>
   fetchShopsReservations(shopIds: number[]): Promise<Reservation[]>
   fetchShopReservations(shopId: number): Promise<Reservation[]>
-}
-
-export type MenuRepositoryInterface = {
-  insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>
 }
 
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
