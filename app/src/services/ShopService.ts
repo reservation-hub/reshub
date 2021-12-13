@@ -442,13 +442,16 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
   async fetchMenuItemReservationTotals(user, menuItemIds) {
     const menuItemReservation = await ReservationRepository.fetchMenuItemReservations(menuItemIds)
-    const uniqueShopIds = menuItemReservation.map(r => r.shop!.id).filter((v, i, s) => s.indexOf(v) === i)
-    uniqueShopIds.forEach(async id => {
-      if (!await ShopRepository.shopIsOwnedByUser(user.id, id)) {
-        console.error('Shop is not owned by user')
-        throw new AuthorizationError()
-      }
-    })
+
+    if (user.role.slug === 'shop_staff') {
+      const uniqueShopIds = menuItemReservation.map(r => r.shop!.id).filter((v, i, s) => s.indexOf(v) === i)
+      uniqueShopIds.forEach(async id => {
+        if (!await ShopRepository.shopIsOwnedByUser(user.id, id)) {
+          console.error('Shop is not owned by user')
+          throw new AuthorizationError()
+        }
+      })
+    }
 
     return menuItemIds.map(i => ({
       menuItemId: i,
