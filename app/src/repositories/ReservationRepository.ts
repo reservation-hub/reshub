@@ -1,6 +1,7 @@
 import { Prisma, ReservationStatus as PrismaReservationStatus } from '@prisma/client'
 import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
+import { StylistSchedule } from '@entities/Stylist'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
@@ -43,6 +44,7 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
     name: reservation.stylist.name,
     price: reservation.stylist.price,
     shop: reservation.stylist.shop,
+    schedule: reservation.stylist.schedule as StylistSchedule,
   } : undefined,
   user: {
     id: reservation.user.id,
