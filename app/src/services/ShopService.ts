@@ -118,6 +118,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
     const shop = await ShopRepository.fetch(id)
     if (!shop) {
+      console.error('Shop does not exist')
       throw new NotFoundError()
     }
     return shop
@@ -126,14 +127,14 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
   async insertShop(user, name, areaId, prefectureId, cityId, address, phoneNumber, days, startTime, endTime, details) {
     const isValidLocation = await LocationRepository.isValidLocation(areaId, prefectureId, cityId)
     if (!isValidLocation) {
-      console.error('location')
+      console.error('Location provided is incorrect')
       throw new InvalidParamsError()
     }
 
     const startHour = convertToUnixTime(startTime)
     const endHour = convertToUnixTime(endTime)
     if (days.length === 0 || endHour <= startHour) {
-      console.error('dates')
+      console.error('Days are empty | end time is less than or equal to start hour')
       throw new InvalidParamsError()
     }
 
@@ -158,17 +159,20 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
     const isValidLocation = await LocationRepository.isValidLocation(areaId, prefectureId, cityId)
     if (!isValidLocation) {
+      console.error('Location provided is incorrect')
       throw new InvalidParamsError()
     }
 
     const shop = await ShopRepository.fetch(id)
     if (!shop) {
+      console.error('Shop does not exist')
       throw new NotFoundError()
     }
 
     const startHour = convertToUnixTime(startTime)
     const endHour = convertToUnixTime(endTime)
     if (days.length === 0 || endHour <= startHour) {
+      console.error('Days are empty | end time is less than or equal to start hour')
       throw new InvalidParamsError()
     }
 
@@ -189,6 +193,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
     const shop = await ShopRepository.fetch(id)
     if (!shop) {
+      console.error('Shop does not exist')
       throw new NotFoundError()
     }
     return ShopRepository.deleteShop(id)
@@ -221,6 +226,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
     const shop = await ShopRepository.fetch(shopId)
     if (!shop) {
+      console.error('Shop does not exist')
       throw new NotFoundError()
     }
     const menuItem = await ShopRepository.insertMenuItem(shopId, name,
@@ -236,10 +242,12 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
     const shop = await ShopRepository.fetch(shopId)
     if (!shop) {
+      console.error('Shop does not exist')
       throw new NotFoundError()
     }
     const menuItemIdIsValid = shop.menu!.items.findIndex(item => item.id === menuItemId) !== -1
     if (!menuItemIdIsValid) {
+      console.error('Menu item is not of the shop')
       throw new NotFoundError()
     }
 
@@ -388,6 +396,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
     const reservation = await ReservationRepository.fetch(reservationId)
     if (!reservation) {
+      console.error('Reservation does not exist')
       throw new NotFoundError()
     }
 
@@ -431,6 +440,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
     const reservation = await ReservationRepository.fetch(reservationId)
     if (!reservation) {
+      console.error('Reservation does not exist')
       throw new NotFoundError()
     }
 
