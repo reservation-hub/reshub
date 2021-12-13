@@ -108,6 +108,7 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
       price: r.stylist.price,
       schedule: r.stylist.schedule as StylistSchedule,
     } : undefined,
+    menuItem: r.menuItem,
   })),
 })
 
