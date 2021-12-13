@@ -30,11 +30,13 @@ const AuthService: AuthControllerSocket & PassportSocket = {
 
   async verifyIfUserInTokenIsLoggedIn(authToken, headerToken?) {
     if (headerToken && headerToken !== authToken) {
+      console.error('Header token does not match')
       throw new AuthenticationError()
     }
     const token = jwt.verify(authToken, config.JWT_TOKEN_SECRET) as JwtPayload
     const user = await UserRepository.fetch(token.user.id)
     if (!user) {
+      console.error('User in token does not exist')
       throw new NotFoundError()
     }
     throw new UserIsLoggedInError()
@@ -42,6 +44,7 @@ const AuthService: AuthControllerSocket & PassportSocket = {
 
   async silentRefreshTokenChecks(authToken, refreshToken, headerToken?) {
     if (!(!authToken && !headerToken && refreshToken)) {
+      console.error('Necessary tokens are not complete')
       throw new AuthorizationError()
     }
   },
@@ -55,11 +58,13 @@ const AuthService: AuthControllerSocket & PassportSocket = {
 
     const { email, sub } = ticket.getPayload() as TokenPayload
     if (!email) {
+      console.error('Token does not have email')
       throw new InvalidTokenError()
     }
 
     const user = await UserRepository.fetchByEmail(email)
     if (!user) {
+      console.error('User in token does not exist')
       throw new NotFoundError()
     }
 
@@ -74,14 +79,17 @@ const AuthService: AuthControllerSocket & PassportSocket = {
 
   async authenticateByEmailAndPassword({ email, password }) {
     if (!email || !password) {
+      console.error('email or password is required')
       throw new InvalidParamsError()
     }
 
     const user = await UserRepository.fetchByEmail(email)
     if (!user) {
+      console.error('User does not exist')
       throw new NotFoundError()
     }
     if (user.password && !bcrypt.compareSync(password, user.password)) {
+      console.error('password does not match')
       throw new InvalidParamsError()
     }
 

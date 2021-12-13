@@ -68,6 +68,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
   async fetchUser(id) {
     const user = await UserRepository.fetch(id)
     if (!user) {
+      console.error('User does not exist')
       throw new NotFoundError()
     }
     delete user.password
@@ -77,16 +78,19 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
 
   async insertUserFromAdmin(params) {
     if (params.password !== params.confirm) {
+      console.error('Passwords do not match')
       throw new InvalidParamsError()
     }
 
     const isValidRole = await RoleRepository.isValidRole(params.roleSlug)
     if (!isValidRole) {
+      console.error('Invalid Role passed')
       throw new InvalidParamsError()
     }
 
     const duplicate = await UserRepository.fetchByEmail(params.email)
     if (duplicate) {
+      console.error('Email is not available')
       throw new InvalidParamsError()
     }
 
@@ -112,11 +116,13 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
   async updateUserFromAdmin({ id, params }) {
     const isValidRole = await RoleRepository.isValidRole(params.roleSlug)
     if (!isValidRole) {
+      console.error('Invalid Role passed')
       throw new InvalidParamsError()
     }
 
     const user = await UserRepository.fetch(id)
     if (!user) {
+      console.error('User does not exist')
       throw new NotFoundError()
     }
 
@@ -133,6 +139,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
   async deleteUserFromAdmin(id) {
     const user = await UserRepository.fetch(id)
     if (!user) {
+      console.error('User does not exist')
       throw new NotFoundError()
     }
     const deletedUser = await UserRepository.deleteUserFromAdmin(id)
