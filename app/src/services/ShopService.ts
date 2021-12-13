@@ -41,8 +41,10 @@ export type LocationRepositoryInterface = {
 }
 
 export type StylistRepositoryInterface = {
-  insertStylist(name: string, price: number, shopId: number): Promise<Stylist>,
-  updateStylist(id: number, name: string, price: number, shopId: number)
+  insertStylist(name: string, price: number, shopId: number, days:number[],
+    startTime:string, endTime:string): Promise<Stylist>,
+  updateStylist(id: number, name: string, price: number, shopId: number,
+    days: number[], startTime: string, endTime: string)
     :Promise<Stylist>,
   deleteStylist(id: number): Promise<Stylist>,
   fetchStylistsByShopIds(shopIds: number[])
@@ -265,7 +267,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return ShopRepository.deleteMenuItem(menuItemId)
   },
 
-  async insertStylist(user, shopId, name, price) {
+  async insertStylist(user, shopId, name, price, days, startTime, endTime) {
     if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
@@ -277,11 +279,11 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
 
-    const stylist = await StylistRepository.insertStylist(name, price, shopId)
+    const stylist = await StylistRepository.insertStylist(name, price, shopId, days, startTime, endTime)
     return stylist
   },
 
-  async updateStylist(user, shopId, stylistId, name, price) {
+  async updateStylist(user, shopId, stylistId, name, price, days, startTime, endTime) {
     if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
@@ -299,7 +301,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
 
-    return StylistRepository.updateStylist(stylistId, name, price, shopId)
+    return StylistRepository.updateStylist(stylistId, name, price, shopId, days, startTime, endTime)
   },
 
   async deleteStylist(user, shopId, stylistId) {

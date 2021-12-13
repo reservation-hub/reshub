@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client'
-import { Stylist } from '@entities/Stylist'
+import { Stylist, StylistSchedule } from '@entities/Stylist'
 import { StylistRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
@@ -13,6 +13,7 @@ export const reconstructStylist = (stylist: stylistWithShops): Stylist => ({
   id: stylist.id,
   name: stylist.name,
   price: stylist.price,
+  schedule: stylist.schedule as StylistSchedule,
   shop: {
     id: stylist.shopId,
     name: stylist.shop.shopDetail?.name,
@@ -44,13 +45,18 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
     return stylist ? reconstructStylist(stylist) : null
   },
 
-  async insertStylist(name, price, shopId) {
+  async insertStylist(name, price, shopId, days, startTime, endTime) {
     const stylist = await prisma.stylist.create({
       data: {
         name,
         price,
         shop: {
           connect: { id: shopId },
+        },
+        schedule: {
+          days,
+          startTime,
+          endTime,
         },
       },
       include: { shop: { include: { shopDetail: true } } },
@@ -59,13 +65,18 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
     return cleanStylist
   },
 
-  async updateStylist(id, name, price, shopId) {
+  async updateStylist(id, name, price, shopId, days, startTime, endTime) {
     const stylist = await prisma.stylist.update({
       where: { id },
       data: {
         name,
         price,
         shop: { connect: { id: shopId } },
+        schedule: {
+          days,
+          startTime,
+          endTime,
+        },
       },
       include: { shop: { include: { shopDetail: true } } },
     })

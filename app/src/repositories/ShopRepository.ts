@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { Shop, ShopSchedule } from '@entities/Shop'
 import { ShopRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
+import { StylistSchedule } from '@entities/Stylist'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { convertReservationStatus } from './ReservationRepository'
@@ -86,7 +87,12 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
       price: item.price,
     })),
   },
-  stylists: shop.stylists,
+  stylists: shop.stylists.map(s => ({
+    id: s.id,
+    name: s.name,
+    price: s.price,
+    schedule: s.schedule as StylistSchedule,
+  })),
   reservations: shop.reservations.map(r => ({
     id: r.id,
     reservationDate: r.reservationDate,
@@ -96,8 +102,12 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
       role: r.user!.role!,
     },
     status: convertReservationStatus(r.status),
-    stylist: r.stylist ?? undefined,
-    menuItem: r.menuItem,
+    stylist: r.stylist ? {
+      id: r.stylist.id,
+      name: r.stylist.name,
+      price: r.stylist.price,
+      schedule: r.stylist.schedule as StylistSchedule,
+    } : undefined,
   })),
 })
 

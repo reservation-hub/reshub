@@ -31,9 +31,11 @@ export type ShopServiceInterface = {
     : Promise<{ id: number, count: number }[]>,
   fetchReservationsCountByShopIds(shopIds: number[])
     : Promise<{ id: number, count: number }[]>,
-  insertStylist(user: User, shopId: number, name: string, price: number)
+  insertStylist(user: User, shopId: number, name: string, price: number,
+    days:number[], startTime:string, endTime:string)
     : Promise<Stylist>
-  updateStylist(user: User, shopId: number, stylistId: number, name: string, price: number)
+  updateStylist(user: User, shopId: number, stylistId: number, name: string, price: number,
+    days: number[], startTime: string, endTime: string)
     : Promise<Stylist>
   deleteStylist(user: User, shopId: number, stylistId: number)
     : Promise<Stylist>
@@ -108,15 +110,19 @@ const ShopController: ShopControllerInterface = {
   },
 
   async insertStylist(user, query) {
-    const { name, price } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
+    const {
+      name, price, days, startTime, endTime,
+    } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId } = query
-    return ShopService.insertStylist(user, shopId, name, price)
+    return ShopService.insertStylist(user, shopId, name, price, days, startTime, endTime)
   },
 
   async updateStylist(user, query) {
-    const { name, price } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
+    const {
+      name, price, days, startTime, endTime,
+    } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId, stylistId } = query
-    return ShopService.updateStylist(user, shopId, stylistId, name, price)
+    return ShopService.updateStylist(user, shopId, stylistId, name, price, days, startTime, endTime)
   },
 
   async deleteStylist(user, query) {
