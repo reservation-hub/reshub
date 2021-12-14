@@ -85,6 +85,7 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
       name: item.name,
       description: item.description,
       price: item.price,
+      duration: item.duration,
     })),
   },
   stylists: shop.stylists.map(s => ({
@@ -284,13 +285,14 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         description,
         price,
         menuId,
-        duration
+        duration,
       },
       select: {
         id: true,
         name: true,
         description: true,
         price: true,
+        duration: true,
       },
     })
   },

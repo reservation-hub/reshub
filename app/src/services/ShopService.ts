@@ -22,7 +22,7 @@ export type ShopRepositoryInterface = {
   upsertSchedule(shopId: number, days: number[], start: string, end: string) : Promise<ShopSchedule>
   fetchShopMenuItems(shopId: number): Promise<MenuItem[]>
   insertMenuItem(shopId: number, name: string, description: string, price: number, duration: number): Promise<MenuItem>,
-  updateMenuItem(menuItemId: number, name: string, description: string, price: number, 
+  updateMenuItem(menuItemId: number, name: string, description: string, price: number,
     duration: number): Promise<MenuItem>,
   deleteMenuItem(menuItemId: number): Promise<MenuItem>
   fetchValidShopIds(shopIds: number[]): Promise<number[]>

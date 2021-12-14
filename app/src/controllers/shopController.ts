@@ -147,7 +147,9 @@ const ShopController: ShopControllerInterface = {
   },
 
   async updateMenuItem(user, query) {
-    const { name, description, price, duration} = await menuItemUpsertSchema.validateAsync(query.params, joiOptions)
+    const {
+      name, description, price, duration,
+    } = await menuItemUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId, menuItemId } = query
     return ShopService.updateMenuItem(user, shopId, menuItemId, name, description, price, duration)
   },
