@@ -109,6 +109,7 @@ model MenuItem {
   name        String        @db.VarChar(255)
   description String        @db.VarChar(255)
   price       Int
+  duration    Int
   imageId     Int?          @unique @map("image_id")
   menuId      Int           @map("menu_id")
   image       ModelImage?   @relation(fields: [imageId], references: [id])

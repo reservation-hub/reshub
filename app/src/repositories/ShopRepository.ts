@@ -275,7 +275,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     return shop.shopDetail?.schedule as ShopSchedule
   },
 
-  async insertMenuItem(shopId, name, description, price) {
+  async insertMenuItem(shopId, name, description, price, duration) {
     const shop = await this.fetch(shopId)
     const menuId = shop!.menu!.id
     return prisma.menuItem.create({
@@ -284,6 +284,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         description,
         price,
         menuId,
+        duration
       },
       select: {
         id: true,
@@ -294,7 +295,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     })
   },
 
-  async updateMenuItem(menuItemId, name, description, price) {
+  async updateMenuItem(menuItemId, name, description, price, duration) {
     return prisma.menuItem.update({
       where: { id: menuItemId },
       data: {
@@ -305,6 +306,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         name: true,
         description: true,
         price: true,
+        duration: true,
       },
     })
   },

@@ -281,6 +281,7 @@ const roles = [
       description: 'test',
       price: 500,
       menuId: id,
+      duration: 60
     },
   }))
 
