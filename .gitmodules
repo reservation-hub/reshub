@@ -1,9 +1,6 @@
 [submodule "reshub-deploy"]
 	path = reshub-deploy
 	url = git@github.com:reservation-hub/reshub-deploy.git
-[submodule "app/src/entities"]
-	path = app/src/entities
-	url = git@github.com:reservation-hub/entities.git
 [submodule "app/app/src/request-response-types"]
 	path = app/app/src/request-response-types
 	url = git@github.com:reservation-hub/request-response-types.git
