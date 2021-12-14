@@ -21,8 +21,9 @@ export type ShopRepositoryInterface = {
   deleteShop(id: number): Promise<Shop>,
   upsertSchedule(shopId: number, days: number[], start: string, end: string) : Promise<ShopSchedule>
   fetchShopMenuItems(shopId: number): Promise<MenuItem[]>
-  insertMenuItem(shopId: number, name: string, description: string, price: number): Promise<MenuItem>,
-  updateMenuItem(menuItemId: number, name: string, description: string, price: number): Promise<MenuItem>,
+  insertMenuItem(shopId: number, name: string, description: string, price: number, duration: number): Promise<MenuItem>,
+  updateMenuItem(menuItemId: number, name: string, description: string, price: number, 
+    duration: number): Promise<MenuItem>,
   deleteMenuItem(menuItemId: number): Promise<MenuItem>
   fetchValidShopIds(shopIds: number[]): Promise<number[]>
   searchShops(keyword: string): Promise<Shop[]>,
@@ -207,7 +208,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return ReservationRepository.fetchReservationsCountByShopIds(shopIds)
   },
 
-  async insertMenuItem(user, shopId, name, description, price) {
+  async insertMenuItem(user, shopId, name, description, price, duration) {
     if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
@@ -219,11 +220,11 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
     const menuItem = await ShopRepository.insertMenuItem(shopId, name,
-      description, price)
+      description, price, duration)
     return menuItem
   },
 
-  async updateMenuItem(user, shopId, menuItemId, name, description, price) {
+  async updateMenuItem(user, shopId, menuItemId, name, description, price, duration) {
     if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
@@ -241,7 +242,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     }
 
     return ShopRepository.updateMenuItem(menuItemId, name,
-      description, price)
+      description, price, duration)
   },
 
   async deleteMenuItem(user, shopId, menuItemId) {

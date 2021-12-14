@@ -40,10 +40,11 @@ export type ShopServiceInterface = {
   deleteStylist(user: User, shopId: number, stylistId: number)
     : Promise<Stylist>
   searchShops(keyword: string): Promise<Shop[]>
-  insertMenuItem(user: User, shopId: number, name: string, description: string, price: number)
+  insertMenuItem(user: User, shopId: number, name: string, description: string, price: number
+    , duration: number)
     : Promise<MenuItem>,
   updateMenuItem(user: User, shopId: number, menuItemId: number, name: string,
-    description: string, price: number): Promise<MenuItem>
+    description: string, price: number, duration: number): Promise<MenuItem>
   deleteMenuItem(user: User, shopId: number, menuItemId: number): Promise<MenuItem>
   fetchShopReservations(user: User, shopId: number): Promise<Reservation[]>
   insertReservation(user: User, shopId: number, reservationDate: Date,
@@ -138,15 +139,17 @@ const ShopController: ShopControllerInterface = {
   },
 
   async insertMenuItem(user, query) {
-    const { name, description, price } = await menuItemUpsertSchema.validateAsync(query.params, joiOptions)
+    const {
+      name, description, price, duration,
+    } = await menuItemUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId } = query
-    return ShopService.insertMenuItem(user, shopId, name, description, price)
+    return ShopService.insertMenuItem(user, shopId, name, description, price, duration)
   },
 
   async updateMenuItem(user, query) {
-    const { name, description, price } = await menuItemUpsertSchema.validateAsync(query.params, joiOptions)
+    const { name, description, price, duration} = await menuItemUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId, menuItemId } = query
-    return ShopService.updateMenuItem(user, shopId, menuItemId, name, description, price)
+    return ShopService.updateMenuItem(user, shopId, menuItemId, name, description, price, duration)
   },
 
   async deleteMenuItem(user, query) {
