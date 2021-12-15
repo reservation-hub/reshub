@@ -48,7 +48,7 @@ export type ShopServiceInterface = {
   deleteMenuItem(user: User, shopId: number, menuItemId: number): Promise<MenuItem>
   fetchShopReservations(user: User, shopId: number): Promise<Reservation[]>
   insertReservation(user: User, shopId: number, reservationDate: Date,
-    clientId: number, menuItemId: number, stylistId?: number): Promise<Reservation>
+    endDate: Date, clientId: number, menuItemId: number, stylistId?: number): Promise<Reservation>
   updateReservation(user: User, shopId: number, reservationId: number,
     reservationDate: Date, clientId: number, menuItemId: number, stylistId?: number)
     : Promise<Reservation>

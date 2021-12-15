@@ -315,14 +315,27 @@ const roles = [
     include: { shop: { include: { menu: { include: { items: true } } } } },
   })
   const reservations = [
-    { date: new Date('2022-09-01') },
-    { date: new Date('2022-09-02') },
-    { date: new Date('2022-09-03') },
-    { date: new Date('2022-09-04') },
+    { 
+      date: new Date('2022-09-01'),
+      endDate: new Date('2022-09-02')
+    },
+    { 
+      date: new Date('2022-09-02'),
+      endDate: new Date('2022-09-03')
+  },
+    { 
+      date: new Date('2022-09-03'),
+      endDate: new Date('2022-09-04')
+    },
+    { 
+      date: new Date('2022-09-04'),
+      endDate: new Date('2022-09-05')
+  },
   ]
   const reservationPromises = reservations.map(reservation => prisma.reservation.create({
     data: {
       reservationDate: reservation.date,
+      endDate: reservation.endDate,
       stylistId: randomStylist!.id,
       shopId: randomStylist!.shopId,
       userId: 1,

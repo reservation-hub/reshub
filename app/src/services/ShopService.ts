@@ -49,7 +49,8 @@ export type StylistRepositoryInterface = {
 }
 
 export type ReservationRepositoryInterface = {
-  insertReservation(reservationDate: Date, userId: number, shopId: number, menuItemId: number, stylistId?: number)
+  insertReservation(reservationDate: Date, endDate: Date,
+     userId: number, shopId: number, menuItemId: number, stylistId?: number)
     : Promise<Reservation>
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
     menuItemId: number, stylistId?: number): Promise<Reservation>
@@ -342,7 +343,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return ReservationRepository.fetchShopReservations(shopId)
   },
 
-  async insertReservation(user, shopId, reservationDate, clientId, menuItemId, stylistId?) {
+  async insertReservation(user, shopId, reservationDate, endDate, clientId, menuItemId, stylistId?) {
     if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
@@ -375,7 +376,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       console.error('Invalid date, earlier than today')
       throw new InvalidParamsError()
     }
-    return ReservationRepository.insertReservation(reservationDate, clientId, shopId, menuItemId, stylistId)
+    return ReservationRepository.insertReservation(reservationDate, endDate, clientId, shopId, menuItemId, stylistId)
   },
 
   async updateReservation(user, shopId, reservationId, reservationDate, clientId, menuItemId, stylistId) {

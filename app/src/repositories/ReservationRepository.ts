@@ -120,10 +120,11 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
     return finalData
   },
 
-  async insertReservation(reservationDate, userId, shopId, menuItemId, stylistId?) {
+  async insertReservation(reservationDate, endDate, userId, shopId, menuItemId, stylistId?) {
     const reservation = await prisma.reservation.create({
       data: {
         reservationDate,
+        endDate,
         shop: {
           connect: { id: shopId },
         },

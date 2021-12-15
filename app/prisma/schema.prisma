@@ -183,6 +183,7 @@ model Reservation {
   userId          Int               @map("user_id")
   status          ReservationStatus @default(RESERVED)
   reservationDate DateTime          @map("reservation_date") @db.Timestamp(6)
+  endDate         DateTime          @map("end_date") @db.Timestamp(6)
   shop            Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
   stylist         Stylist?          @relation(fields: [stylistId], references: [id])
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
