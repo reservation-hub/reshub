@@ -1,23 +1,42 @@
 import { Area, Prefecture, City } from '@entities/Location'
 import { LocationRepositoryInterface } from '@services/ShopService'
+import { LocationRepositoryInterface as LocationServiceSocket } from '@services/LocationService'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
-export const isValidLocation = async (areaId: number, prefectureId: number, cityId: number):
-Promise<boolean> => {
-  const count: number = await prisma.city.count({
-    where: {
-      prefecture: {
-        id: prefectureId,
-        area: { id: areaId },
+export const LocationRepository: LocationRepositoryInterface & LocationServiceSocket = {
+  async isValidLocation(areaId, prefectureId, cityId) {
+    const count: number = await prisma.city.count({
+      where: {
+        prefecture: {
+          id: prefectureId,
+          area: { id: areaId },
+        },
+        id: cityId,
       },
-      id: cityId,
-    },
-  })
-  return count !== 0
-}
+    })
+    return count !== 0
+  },
 
-export const LocationRepository: LocationRepositoryInterface = { isValidLocation }
+  async fetchLocationNamesOfIds(params) {
+    const areas = await prisma.area.findMany({
+      where: { id: { in: params.map(p => p.areaId) } },
+      select: { id: true, name: true },
+    })
+
+    const prefectures = await prisma.prefecture.findMany({
+      where: { id: { in: params.map(p => p.prefectureId) } },
+      select: { id: true, name: true },
+    })
+
+    const cities = await prisma.city.findMany({
+      where: { id: { in: params.map(p => p.cityId) } },
+      select: { id: true, name: true },
+    })
+
+    return { areas, prefectures, cities }
+  },
+}
 
 export const AreaRepository:CommonRepositoryInterface<Area> = {
   async fetchAll({ page = 1, order = DescOrder, limit = 10 }) {

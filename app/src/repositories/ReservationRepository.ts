@@ -1,8 +1,10 @@
 import { Prisma, ReservationStatus as PrismaReservationStatus } from '@prisma/client'
 import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
+import { ReservationRepositoryInterface as UserServiceSocket } from '@services/UserService'
 import { StylistSchedule } from '@entities/Stylist'
 import prisma from './prisma'
+import { convertRoleSlug } from './UserRepository'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 export const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
@@ -53,11 +55,16 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
     firstNameKanji: reservation.user.profile?.firstNameKanji,
     lastNameKana: reservation.user.profile?.lastNameKana,
     firstNameKana: reservation.user.profile?.firstNameKana,
-    role: reservation.user.role!,
+    role: {
+      id: reservation.user.role!.id,
+      name: reservation.user.role!.name,
+      description: reservation.user.role!.description,
+      slug: convertRoleSlug(reservation.user.role!.slug),
+    },
   },
 })
 
-const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServiceSocket = {
+const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServiceSocket & UserServiceSocket = {
   async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const reservations = await prisma.reservation.findMany({
@@ -220,6 +227,28 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
     })
     const cleanReservations = reservations.map(r => reconstructReservation(r))
     return cleanReservations
+  },
+
+  async fetchStylistReservationCounts(stylistIds) {
+    const reservations = await prisma.reservation.findMany({
+      where: { stylistId: { in: stylistIds } },
+    })
+
+    return stylistIds.map(id => ({
+      stylistId: id,
+      reservationCount: reservations.filter(r => r.stylistId === id).length,
+    }))
+  },
+
+  async fetchUsersReservationCounts(userIds) {
+    const reservations = await prisma.reservation.findMany({
+      where: { userId: { in: userIds } },
+    })
+
+    return userIds.map(id => ({
+      userId: id,
+      reservationCount: reservations.filter(r => r.userId === id).length,
+    }))
   },
 
   // async searchReservations(keyword) {

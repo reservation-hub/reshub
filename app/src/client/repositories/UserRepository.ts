@@ -3,6 +3,7 @@ import { User } from '@entities/User'
 import prisma from '@repositories/prisma'
 import { UserRepositoryInterface } from '@client/services/SignUpService'
 import { UserRepositoryInterface as AuthServiceSocket } from '@client/services/AuthService'
+import { convertRoleSlug } from '@repositories/UserRepository'
 
 const userWithProfileAndOAuthIdsAndRole = Prisma.validator<Prisma.UserArgs>()(
   { include: { profile: true, oAuthIds: true, role: true } },
@@ -20,7 +21,12 @@ const reconstructUser = (user: userWithProfileAndOAuthIdsAndRole): User => ({
     googleId: user.oAuthIds.googleId,
     facebookId: user.oAuthIds.facebookId,
   } : undefined,
-  role: user.role!,
+  role: {
+    id: user.roleId!,
+    name: user.role!.name,
+    description: user.role!.description,
+    slug: convertRoleSlug(user.role!.slug),
+  },
 })
 
 const UserRepository: UserRepositoryInterface & AuthServiceSocket = {

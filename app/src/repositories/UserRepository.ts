@@ -4,8 +4,20 @@ import {
 } from '@entities/User'
 import { UserRepositoryInterface as UserServiceSocket } from '@services/UserService'
 import { UserRepositoryInterface as AuthServiceSocket } from '@services/AuthService'
+import { RoleSlug } from '@entities/Role'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
+
+export const convertRoleSlug = (slug: string): RoleSlug => {
+  switch (slug) {
+    case 'shop_staff':
+      return RoleSlug.SHOP_STAFF
+    case 'client':
+      return RoleSlug.CLIENT
+    default:
+      return RoleSlug.ADMIN
+  }
+}
 
 const userWithProfileAndOAuthIdsAndRoles = Prisma.validator<Prisma.UserArgs>()(
   { include: { profile: true, oAuthIds: true, role: true } },
@@ -45,7 +57,12 @@ export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User 
   lastNameKanji: user.profile?.lastNameKanji,
   firstNameKana: user.profile?.firstNameKana,
   lastNameKana: user.profile?.lastNameKana,
-  role: user.role!,
+  role: {
+    id: user.roleId!,
+    name: user.role!.name,
+    description: user.role!.description,
+    slug: convertRoleSlug(user.role!.slug),
+  },
   birthday: user.profile!.birthday ?? undefined,
   gender: user.profile!.gender ? convertDBGenderToEntityGender(user.profile!.gender) : undefined,
 })

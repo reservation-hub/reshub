@@ -1,8 +1,11 @@
 import { LocationServiceInterface } from '@controllers/locationController'
+import { LocationServiceInterface as DashboardControllerSocket } from '@controllers/dashboardController'
 import {
-  AreaRepository, CityRepository, PrefectureRepository,
+  AreaRepository, CityRepository, LocationRepository, PrefectureRepository,
 } from '@repositories/LocationRepository'
-import { NotFoundError } from './Errors/ServiceError'
+import { RoleSlug } from '@entities/Role'
+import { ShopRepository } from '@repositories/ShopRepository'
+import { AuthorizationError, NotFoundError } from './Errors/ServiceError'
 
 export type LocationQuery = {
   page: number,
@@ -10,7 +13,21 @@ export type LocationQuery = {
   limit: number,
 }
 
-const LocationService: LocationServiceInterface = {
+type fetchLocationNamesParams = {
+  areaId: number
+  prefectureId: number
+  cityId: number
+}
+export type LocationRepositoryInterface = {
+  fetchLocationNamesOfIds(params: fetchLocationNamesParams[])
+    : Promise<{
+      areas: { id: number, name: string}[]
+      prefectures: {id: number, name: string}[]
+      cities: {id: number, name: string}[]
+    }>
+}
+
+const LocationService: LocationServiceInterface & DashboardControllerSocket = {
 
   async fetchAreasWithCount(query) {
     const areaCount = await AreaRepository.totalCount()
@@ -52,6 +69,29 @@ const LocationService: LocationServiceInterface = {
       throw new NotFoundError()
     }
     return city
+  },
+
+  async fetchLocationNamesOfShops(user, params) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF) {
+      params.forEach(async p => {
+        if (!await ShopRepository.shopIsOwnedByUser(user.id, p.shopId)) {
+          console.error('Shop is not owned by user')
+          throw new AuthorizationError()
+        }
+      })
+    }
+    const locations = params.map(l => ({
+      areaId: l.areaId,
+      prefectureId: l.prefectureId,
+      cityId: l.cityId,
+    }))
+    const locationCombinations = await LocationRepository.fetchLocationNamesOfIds(locations)
+    return params.map(p => ({
+      shopId: p.shopId,
+      areaName: locationCombinations.areas.find(a => a.id === p.areaId)!.name,
+      prefectureName: locationCombinations.prefectures.find(pr => pr.id === p.prefectureId)!.name,
+      cityName: locationCombinations.cities.find(c => c.id === p.cityId)!.name,
+    }))
   },
 
 }
