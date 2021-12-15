@@ -119,7 +119,18 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
     const finalData = value.map(item => ({ id: item.id, count: item.data.length }))
     return finalData
   },
-
+  async workDuration(date, minutes) {
+    const newDate = new Date(date)
+    newDate.setMinutes(newDate.getMinutes() + minutes)
+    return newDate
+  },
+  async checkReservationAviability(reservationDate, shopId, menuItemId, stylistId) {
+    const reservations = await prisma.reservation.findMany({
+      where: { reservationDate, stylistId },
+      include: { menuItem: true },
+    })
+    return reservations.length
+  },
   async insertReservation(reservationDate, userId, shopId, menuItemId, stylistId?) {
     const reservation = await prisma.reservation.create({
       data: {

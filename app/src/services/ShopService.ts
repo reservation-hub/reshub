@@ -9,7 +9,9 @@ import StylistRepository from '@repositories/StylistRepository'
 import ReservationRepository from '@repositories/ReservationRepository'
 import { LocationRepository } from '@repositories/LocationRepository'
 import UserRepository from '@repositories/UserRepository'
-import { AuthorizationError, InvalidParamsError, NotFoundError } from './Errors/ServiceError'
+import {
+  AuthorizationError, DuplicateModelError, InvalidParamsError, NotFoundError,
+} from './Errors/ServiceError'
 
 export type ShopRepositoryInterface = {
   insertShop(
@@ -49,6 +51,9 @@ export type StylistRepositoryInterface = {
 }
 
 export type ReservationRepositoryInterface = {
+  workDuration(date: Date, minutes: number) : Promise<Date>
+  checkReservationAviability(reservationDate: Date, shopId: number, menuItemId:number, stylistId?: number)
+  : Promise<number>
   insertReservation(reservationDate: Date, userId: number, shopId: number, menuItemId: number, stylistId?: number)
     : Promise<Reservation>
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
@@ -374,6 +379,13 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     if (dateObj < new Date()) {
       console.error('Invalid date, earlier than today')
       throw new InvalidParamsError()
+    }
+    const reservationAviability = await ReservationRepository.checkReservationAviability(reservationDate,
+      shopId,
+      menuItemId,
+      stylistId)
+    if (reservationAviability > 0) {
+      throw new DuplicateModelError()
     }
     return ReservationRepository.insertReservation(reservationDate, clientId, shopId, menuItemId, stylistId)
   },
