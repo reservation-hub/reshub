@@ -36,10 +36,6 @@ export type ShopRepositoryInterface = {
   assignShopToStaff(userId: number, shopId: number): void
 }
 
-export type LocationRepositoryInterface = {
-  isValidLocation(areaId: number, prefectureId: number, cityId: number): Promise<boolean>,
-}
-
 export type StylistRepositoryInterface = {
   insertStylist(name: string, price: number, shopId: number, days:number[],
     startTime:string, endTime:string): Promise<Stylist>,

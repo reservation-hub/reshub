@@ -1,74 +1,55 @@
 import { LocationServiceInterface } from '@controllers/locationController'
 import { LocationServiceInterface as DashboardControllerSocket } from '@controllers/dashboardController'
-import {
-  AreaRepository, CityRepository, LocationRepository, PrefectureRepository,
-} from '@repositories/LocationRepository'
+import { LocationRepository } from '@repositories/LocationRepository'
 import { RoleSlug } from '@entities/Role'
 import { ShopRepository } from '@repositories/ShopRepository'
+import { Area, City, Prefecture } from '@entities/Location'
 import { AuthorizationError, NotFoundError } from './Errors/ServiceError'
-
-export type LocationQuery = {
-  page: number,
-  order: any,
-  limit: number,
-}
 
 type fetchLocationNamesParams = {
   areaId: number
   prefectureId: number
   cityId: number
 }
+
 export type LocationRepositoryInterface = {
+  fetchAreas() : Promise<Area[]>
+  fetchArea(areaId: number) : Promise<Area | null>
+  fetchAreaPrefectures(areaId: number) : Promise<Prefecture[]>
+  fetchPrefecture(prefectureId: number) : Promise<Prefecture | null>
+  fetchPrefectureCities(prefectureId: number) : Promise<City[]>
+  isValidLocation(areaId: number, prefectureId: number, cityId: number): Promise<boolean>
   fetchLocationNamesOfIds(params: fetchLocationNamesParams[])
     : Promise<{
       areas: { id: number, name: string}[]
       prefectures: {id: number, name: string}[]
       cities: {id: number, name: string}[]
     }>
-}
+  }
 
 const LocationService: LocationServiceInterface & DashboardControllerSocket = {
-
-  async fetchAreasWithCount(query) {
-    const areaCount = await AreaRepository.totalCount()
-    const areas = await AreaRepository.fetchAll(query)
-    return { data: areas, totalCount: areaCount }
+  async fetchAreas() {
+    return LocationRepository.fetchAreas()
   },
 
-  async fetchArea(id) {
-    const area = await AreaRepository.fetch(id)
+  async fetchAreaWithPrefectures(areaId) {
+    const area = await LocationRepository.fetchArea(areaId)
     if (!area) {
+      console.error('Area does not exist')
       throw new NotFoundError()
     }
-    return area
+    const prefectures = await LocationRepository.fetchAreaPrefectures(area.id)
+    return { ...area, prefectures }
   },
 
-  async fetchPrefecturesWithCount(query) {
-    const prefectureCount = await PrefectureRepository.totalCount()
-    const prefectures = await PrefectureRepository.fetchAll(query)
-    return { data: prefectures, totalCount: prefectureCount }
-  },
-
-  async fetchPrefecture(id) {
-    const prefecture = await PrefectureRepository.fetch(id)
+  async fetchPrefectureWithCities(prefectureId) {
+    const prefecture = await LocationRepository.fetchPrefecture(prefectureId)
     if (!prefecture) {
+      console.error('Prefecture does not exist')
       throw new NotFoundError()
     }
-    return prefecture
-  },
-
-  async fetchCitiesWithCount(query) {
-    const cityCount = await CityRepository.totalCount()
-    const cities = await CityRepository.fetchAll(query)
-    return { data: cities, totalCount: cityCount }
-  },
-
-  async fetchCity(id) {
-    const city = await CityRepository.fetch(id)
-    if (!city) {
-      throw new NotFoundError()
-    }
-    return city
+    const cities = await LocationRepository.fetchPrefectureCities(prefecture.id)
+    return { ...prefecture, cities }
   },
 
   async fetchLocationNamesOfShops(user, params) {

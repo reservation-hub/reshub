@@ -1,75 +1,40 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-import { AreaController, CityController, PrefectureController } from '@controllers/locationController'
-import { Area, Prefecture, City } from '@entities/Location'
+import LocationController from '@controllers/locationController'
 import { roleCheck, parseIntIdMiddleware } from '@routes/utils'
-import { LocationQuery, LocationResponse } from '@request-response-types/Location'
+import { AreaPrefecturesResponse, AreaResponse, PrefectureCitiesResponse } from '@request-response-types/Location'
 
-export type AreaControllerInterface = {
-  areaIndex(query: LocationQuery) : Promise<LocationResponse>,
-  showArea(id: number) : Promise<Area>
+export type LocationControllerInterface = {
+  areaList() : Promise<AreaResponse>,
+  areaPrefectures(areaId: number) : Promise<AreaPrefecturesResponse>
+  prefectureCities(prefectureId: number) : Promise<PrefectureCitiesResponse>
 }
 
-export type PrefectureControllerInterface = {
-  prefectureIndex(query: LocationQuery) : Promise<LocationResponse>,
-  showPrefecture(id: number) : Promise<Prefecture>
-}
-
-export type CityControllerInterface = {
-  cityIndex(query: LocationQuery): Promise<LocationResponse>,
-  showCity(id: number) : Promise<City>
-}
-
-const areaIndex = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+const areaList = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order } = req.query
-    return res.send(await AreaController.areaIndex({ page, order }))
+    return res.send(await LocationController.areaList())
   } catch (e) { return next(e) }
 }
 
-const showArea = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+const areaPrefectures = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { id } = res.locals
-    return res.send(await AreaController.showArea(id))
+    return res.send(await LocationController.areaPrefectures(id))
   } catch (e) { return next(e) }
 }
 
-const prefectureIndex = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
-  try {
-    const { page, order } = req.query
-    return res.send(await PrefectureController.prefectureIndex({ page, order }))
-  } catch (e) { return next(e) }
-}
-
-const showPrefecture = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+const prefectureCities = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { id } = res.locals
-    return res.send(await PrefectureController.showPrefecture(id))
-  } catch (e) { return next(e) }
-}
-
-const cityIndex = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
-  try {
-    const { page, order } = req.query
-    return res.send(await CityController.cityIndex({ page, order }))
-  } catch (e) { return next(e) }
-}
-
-const showCity = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
-  try {
-    const { id } = res.locals
-    return res.send(await CityController.showCity(id))
+    return res.send(await LocationController.prefectureCities(id))
   } catch (e) { return next(e) }
 }
 
 const routes = Router()
 
-routes.get('/areas', roleCheck(['admin', 'shop_staff']), areaIndex)
-routes.get('/areas/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, showArea)
-routes.get('/prefectures', roleCheck(['admin', 'shop_staff']), prefectureIndex)
-routes.get('/prefectures/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, showPrefecture)
-routes.get('/cities', roleCheck(['admin', 'shop_staff']), cityIndex)
-routes.get('/cities/:id', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, showCity)
+routes.get('/areas', roleCheck(['admin', 'shop_staff']), areaList)
+routes.get('/areas/:id/prefectures', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, areaPrefectures)
+routes.get('/prefectures/:id/cities', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, prefectureCities)
 
 export default routes
