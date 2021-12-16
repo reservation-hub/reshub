@@ -16,6 +16,13 @@ export const convertReservationStatus = (status: PrismaReservationStatus): Reser
   }
 }
 
+export const nextAvailableDate = (reservationDate: Date, menuDuration: number) => {
+  const nextAvailableDate = new Date(reservationDate)
+  nextAvailableDate.setMinutes(nextAvailableDate.getMinutes() + menuDuration)
+
+  return nextAvailableDate
+}
+
 const reservationWithUserAndStylistAndShopWithoutLocation = Prisma.validator<Prisma.ReservationArgs>()(
   {
     include: {
@@ -33,6 +40,7 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
 : Reservation => ({
   id: reservation.id,
   reservationDate: reservation.reservationDate,
+  nextAvailableDate: nextAvailableDate(reservation.reservationDate, reservation.menuItem.duration),
   status: convertReservationStatus(reservation.status),
   menuItem: reservation.menuItem,
   shop: {

@@ -4,7 +4,7 @@ import { ShopRepositoryInterface as ShopServiceSocket } from '@services/ShopServ
 import { StylistSchedule } from '@entities/Stylist'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
-import { convertReservationStatus } from './ReservationRepository'
+import { convertReservationStatus, nextAvailableDate } from './ReservationRepository'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {
@@ -97,6 +97,7 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
   reservations: shop.reservations.map(r => ({
     id: r.id,
     reservationDate: r.reservationDate,
+    nextAvailableDate: nextAvailableDate(r.reservationDate, r.menuItem.duration),
     user: {
       id: r.user.id,
       email: r.user.email,

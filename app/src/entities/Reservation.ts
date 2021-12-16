@@ -13,6 +13,7 @@ export type Reservation = {
   id: number,
   shop?: Shop,
   reservationDate: Date,
+  nextAvailableDate: Date,
   user: User,
   status: ReservationStatus
   menuItem: MenuItem
