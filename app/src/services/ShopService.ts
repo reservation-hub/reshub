@@ -62,6 +62,12 @@ export type ReservationRepositoryInterface = {
 
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
+export const nextAvailableDate = (reservationDate: Date, menuDuration: number) => {
+  const nextAvailableDate = new Date(reservationDate)
+  nextAvailableDate.setMinutes(nextAvailableDate.getMinutes() + menuDuration)
+  return nextAvailableDate
+}
+
 export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
   async fetchShopsForDashboard() {
