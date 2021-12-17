@@ -41,8 +41,6 @@ const AuthService: APIAuthServiceInterface & AuthControllerSocket = {
       throw new InvalidParamsError()
     }
 
-    delete user.password
-
     return user
   },
 

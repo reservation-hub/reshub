@@ -1,6 +1,7 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
+import { RoleSlug } from '@entities/Role'
 import LocationController from '@controllers/locationController'
 import { roleCheck, parseIntIdMiddleware } from '@routes/utils'
 import { AreaPrefecturesResponse, AreaResponse, PrefectureCitiesResponse } from '@request-response-types/Location'
@@ -33,8 +34,10 @@ const prefectureCities = async (req: Request, res: Response, next: NextFunction)
 
 const routes = Router()
 
-routes.get('/areas', roleCheck(['admin', 'shop_staff']), areaList)
-routes.get('/areas/:id/prefectures', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, areaPrefectures)
-routes.get('/prefectures/:id/cities', roleCheck(['admin', 'shop_staff']), parseIntIdMiddleware, prefectureCities)
+routes.get('/areas', roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), areaList)
+routes.get('/areas/:id/prefectures', roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]),
+  parseIntIdMiddleware, areaPrefectures)
+routes.get('/prefectures/:id/cities', roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]),
+  parseIntIdMiddleware, prefectureCities)
 
 export default routes

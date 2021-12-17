@@ -3,6 +3,7 @@ import prisma from '../src/repositories/prisma'
 import areas from './areas-db'
 import prefectures from './prefec-db'
 import cities from './cities-db'
+import { RoleSlug } from '.prisma/client'
 
 const admins = [
   {
@@ -22,14 +23,6 @@ const admins = [
     email: 'upthe15752@gmail.com',
   },
   {
-    firstNameKanji: 'sana',
-    lastNameKanji: 'nakamura',
-    firstNameKana: 'サナ',
-    lastNameKana: 'ナカムラ',
-    password: 'testtest',
-    email: 'dq.tri.fi@gmail.com',
-  },
-  {
     firstNameKanji: 'sabir',
     lastNameKanji: 'barahi',
     firstNameKana: 'サビル',
@@ -46,25 +39,64 @@ const staffs = [
     firstNameKana: 'staff',
     lastNameKana: 'staff',
     password: 'testtest',
-    email: 'staff@staff.com',
-
+    email: 'staff1@staff.com',
+  },
+  {
+    firstNameKanji: 'staff',
+    lastNameKanji: 'staff',
+    firstNameKana: 'staff',
+    lastNameKana: 'staff',
+    password: 'testtest',
+    email: 'staff2@staff.com',
+  },
+  {
+    firstNameKanji: 'staff',
+    lastNameKanji: 'staff',
+    firstNameKana: 'staff',
+    lastNameKana: 'staff',
+    password: 'testtest',
+    email: 'staff3@staff.com',
+  },
+  {
+    firstNameKanji: 'staff',
+    lastNameKanji: 'staff',
+    firstNameKana: 'staff',
+    lastNameKana: 'staff',
+    password: 'testtest',
+    email: 'staff4@staff.com',
+  },
+  {
+    firstNameKanji: 'staff',
+    lastNameKanji: 'staff',
+    firstNameKana: 'staff',
+    lastNameKana: 'staff',
+    password: 'testtest',
+    email: 'staff5@staff.com',
+  },
+  {
+    firstNameKanji: 'staff',
+    lastNameKanji: 'staff',
+    firstNameKana: 'staff',
+    lastNameKana: 'staff',
+    password: 'testtest',
+    email: 'staff6@staff.com',
   },
 ]
 
 const roles = [
   {
     name: 'admin',
-    slug: 'admin',
+    slug: RoleSlug.ADMIN,
     description: 'Administrator role. Can make changes on everything.',
   },
   {
     name: 'client',
-    slug: 'client',
+    slug: RoleSlug.CLIENT,
     description: 'Client role. Can make profile and reservations.',
   },
   {
     name: 'shop staff',
-    slug: 'shop_staff',
+    slug: RoleSlug.SHOP_STAFF,
     description: 'Shop staff user role. Can view shop details connected to the user.',
   },
 ];
@@ -91,7 +123,7 @@ const roles = [
   console.log('running admins seeder')
 
   const adminRole = await prisma.role.findUnique({
-    where: { slug: 'admin' },
+    where: { slug: RoleSlug.ADMIN },
   })
   const adminPromises = admins.map(async (admin: any) => {
     try {
@@ -127,7 +159,7 @@ const roles = [
   console.log('running staff seeder')
 
   const staffRole = await prisma.role.findUnique({
-    where: { slug: 'shop_staff' },
+    where: { slug: RoleSlug.SHOP_STAFF },
   })
 
   const staffPromises = staffs.map(async (staff: any) => {
@@ -238,6 +270,14 @@ const roles = [
           },
         },
       })
+      const shopDetail = await prisma.shopDetail.create({
+        data: {
+          name: 'TEST',
+        },
+      })
+      const menu = await prisma.menu.create({
+        data: {},
+      })
       await prisma.shop.create({
         data: {
           city: {
@@ -256,12 +296,12 @@ const roles = [
             },
           },
           shopDetail: {
-            create: {
-              name: 'TEST',
+            connect: {
+              id: shopDetail.id,
             },
           },
           menu: {
-            create: {},
+            connect: { id: menu.id },
           },
         },
       })
@@ -272,6 +312,20 @@ const roles = [
     count--
   }
 
+  console.log('connecting staff to shops')
+  const shopStaffs = await prisma.user.findMany({
+    where: { role: { slug: RoleSlug.SHOP_STAFF } },
+  })
+  const staffShopTargets = await prisma.shop.findMany({})
+  shopStaffs.map(async ss => {
+    await prisma.shopUser.create({
+      data: {
+        shopId: staffShopTargets[ss.id].id,
+        userId: ss.id,
+      },
+    })
+  })
+
   console.log('running menu item seeder')
   const menus = await prisma.menu.findMany()
   const menuIds = menus.map(m => m.id)
@@ -281,7 +335,7 @@ const roles = [
       description: 'test',
       price: 500,
       menuId: id,
-      duration: 60
+      duration: 60,
     },
   }))
 

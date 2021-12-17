@@ -6,6 +6,7 @@ import { AuthServiceInterface as PassportSocket } from '@middlewares/passport'
 import { AuthServiceInterface as AuthControllerSocket } from '@controllers/authController'
 import { User } from '@entities/User'
 import UserRepository from '@repositories/UserRepository'
+import { RoleSlug } from '@entities/Role'
 import config from '../config'
 import {
   InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError, AuthenticationError, AuthorizationError,
@@ -68,8 +69,6 @@ const AuthService: AuthControllerSocket & PassportSocket = {
       throw new NotFoundError()
     }
 
-    delete user.password
-
     if (!user.oAuthIds || !user.oAuthIds.googleId) {
       await UserRepository.addOAuthId(user.id, 'google', sub)
     }
@@ -93,14 +92,12 @@ const AuthService: AuthControllerSocket & PassportSocket = {
       throw new InvalidParamsError()
     }
 
-    delete user.password
-
     return user
   },
 
   async hack(role) {
     let user
-    if (role === 'staff') {
+    if (role === RoleSlug.SHOP_STAFF) {
       user = await UserRepository.fetchByEmail('staff@staff.com')
     } else {
       user = await UserRepository.fetchByEmail('eugene.sinamban@gmail.com')
@@ -108,7 +105,6 @@ const AuthService: AuthControllerSocket & PassportSocket = {
     if (!user) {
       throw new NotFoundError()
     }
-    delete user.password
     return user
   },
 
