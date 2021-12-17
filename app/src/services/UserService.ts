@@ -4,6 +4,7 @@ import { UserServiceInterface as DashboardControllerSocket } from '@controllers/
 import { User } from '@entities/User'
 import UserRepository from '@repositories/UserRepository'
 import RoleRepository from '@repositories/RoleRepository'
+import ReservationRepository from '@repositories/ReservationRepository'
 import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
 export type UserRepositoryInterface = {
@@ -36,6 +37,10 @@ export type UserRepositoryInterface = {
 export type RoleRepositoryInterface = {
   isValidRole(slug: string): Promise<boolean>,
   extractValidRoleSlugs(roleSlugs: string[]): Promise<string[]>
+}
+
+export type ReservationRepositoryInterface = {
+  fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 
 const UserService: UserControllerSocket & DashboardControllerSocket = {
@@ -145,6 +150,10 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
     const deletedUser = await UserRepository.deleteUserFromAdmin(id)
     delete deletedUser.password
     return deletedUser
+  },
+
+  async fetchUsersReservationCounts(userIds) {
+    return ReservationRepository.fetchUsersReservationCounts(userIds)
   },
 }
 

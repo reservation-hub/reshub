@@ -9,6 +9,7 @@ import StylistRepository from '@repositories/StylistRepository'
 import ReservationRepository from '@repositories/ReservationRepository'
 import { LocationRepository } from '@repositories/LocationRepository'
 import UserRepository from '@repositories/UserRepository'
+import { RoleSlug } from '@entities/Role'
 import { AuthorizationError, InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
 export type ShopRepositoryInterface = {
@@ -31,11 +32,8 @@ export type ShopRepositoryInterface = {
   fetchUserShopsCount(userId: number): Promise<number>
   // fetchShopsPopularMenus(shopIds: number[]): Promise<MenuItem[]>
   shopIsOwnedByUser(userId: number, shopId: number): Promise<boolean>
+  fetchUserShopIds(userId: number): Promise<number[]>
   assignShopToStaff(userId: number, shopId: number): void
-}
-
-export type LocationRepositoryInterface = {
-  isValidLocation(areaId: number, prefectureId: number, cityId: number): Promise<boolean>,
 }
 
 export type StylistRepositoryInterface = {
@@ -58,14 +56,21 @@ export type ReservationRepositoryInterface = {
   fetchReservationsCountByShopIds(shopIds: number[]) : Promise<{ id: number, count: number }[]>
   fetchShopsReservations(shopIds: number[]): Promise<Reservation[]>
   fetchShopReservations(shopId: number): Promise<Reservation[]>
+  fetchStylistReservationCounts(stylistIds: number[]): Promise<{ stylistId: number, reservationCount: number }[]>
 }
 
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
-export const nextAvailableDate = (reservationDate: Date, menuDuration: number) => {
+export const nextAvailableDate = (reservationDate: Date, menuDuration: number): Date => {
   const nextAvailableDate = new Date(reservationDate)
   nextAvailableDate.setMinutes(nextAvailableDate.getMinutes() + menuDuration)
   return nextAvailableDate
+}
+
+const shopIsOwnedByUser = async (userId: number, shopIds: number[]): Promise<boolean> => {
+  const userShopIds = await ShopRepository.fetchUserShopIds(userId)
+  const result = shopIds.every(id => userShopIds.find(usid => usid === id))
+  return result
 }
 
 export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
@@ -82,9 +87,21 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return { shops, totalCount }
   },
 
-  async fetchShopsStylists(shops) {
-    const shopIds = shops.map(s => s.id)
-    return StylistRepository.fetchStylistsByShopIds(shopIds)
+  async fetchShopsStylists(user, shopIds) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !shopIsOwnedByUser(user.id, shopIds)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+    const stylists = await StylistRepository.fetchStylistsByShopIds(shopIds)
+    return stylists.map(s => ({
+      id: s.id,
+      name: s.name,
+      price: s.price,
+    }))
+  },
+
+  async fetchStylistsReservationCounts(user, stylistIds) {
+    return ReservationRepository.fetchStylistReservationCounts(stylistIds)
   },
 
   // TODO: implement popular menus
@@ -329,10 +346,14 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return StylistRepository.deleteStylist(stylistId)
   },
 
-  async fetchShopsReservations(shops) {
-    const shopIds = shops.map(s => s.id)
-    const reservations = await ReservationRepository.fetchShopsReservations(shopIds)
-    return reservations
+  async fetchShopsReservations(user, shopIds) {
+    shopIds.forEach(async sid => {
+      if (user.role.slug === RoleSlug.SHOP_STAFF && !await ShopRepository.shopIsOwnedByUser(user.id, sid)) {
+        console.error('Shop is not owned by user')
+        throw new AuthorizationError()
+      }
+    })
+    return ReservationRepository.fetchShopsReservations(shopIds)
   },
 
   async fetchShopReservations(user, shopId) {

@@ -5,6 +5,7 @@ import { StylistSchedule } from '@entities/Stylist'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 import { convertReservationStatus } from './ReservationRepository'
+import { convertRoleSlug } from './UserRepository'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {
@@ -100,7 +101,12 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
     user: {
       id: r.user.id,
       email: r.user.email,
-      role: r.user!.role!,
+      role: {
+        id: r.user.roleId!,
+        name: r.user.role!.name,
+        description: r.user.role!.description,
+        slug: convertRoleSlug(r.user.role!.slug),
+      },
     },
     status: convertReservationStatus(r.status),
     stylist: r.stylist ? {
@@ -333,6 +339,14 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
       },
     })
     return shops.map(s => reconstructShopWithMenuAndStylists(s))
+  },
+
+  async fetchUserShopIds(userId) {
+    const shopIds = await prisma.shop.findMany({
+      where: { shopUser: { userId } },
+      select: { id: true },
+    })
+    return shopIds.map(ids => ids.id)
   },
 
   async fetchUserShopsCount(userId) {

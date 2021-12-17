@@ -1,8 +1,17 @@
 import { Role } from '@entities/Role'
+import { Role as PrismaRole } from '@prisma/client'
 import { RoleRepositoryInterface as UserServiceSocket } from '@services/UserService'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 import prisma from './prisma'
+import { convertRoleSlug } from './UserRepository'
+
+const reconstructRole = (role: PrismaRole): Role => ({
+  id: role.id,
+  name: role.name,
+  description: role.description,
+  slug: convertRoleSlug(role.slug),
+})
 
 const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket = {
 
@@ -24,11 +33,12 @@ const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket = {
 
   async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
-    return prisma.role.findMany({
+    const roles = await prisma.role.findMany({
       skip: skipIndex,
       orderBy: { id: order },
       take: limit,
     })
+    return roles.map(r => reconstructRole(r))
   },
 
   async totalCount() {
@@ -36,9 +46,10 @@ const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket = {
   },
 
   async fetch(id) {
-    return prisma.role.findUnique({
+    const role = await prisma.role.findUnique({
       where: { id },
     })
+    return role ? reconstructRole(role) : null
   },
 
 }
