@@ -17,10 +17,16 @@ model User {
   updatedAt    DateTime      @updatedAt @map("updated_at")
   reservations Reservation[]
   oAuthIds     UserOAuthIds?
-  profile      UserProfile?
-  role         Role?         @relation(fields: [roleId], references: [id])
-  roleId       Int?
+  profile      UserProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId    Int           @unique @map("profile_id")
+  role         Role          @relation(fields: [roleId], references: [id])
+  roleId       Int
   shopUser     ShopUser[]
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }
 
 model UserProfile {
@@ -31,10 +37,9 @@ model UserProfile {
   lastNameKana   String    @map("last_name_kana") @db.VarChar(255)
   phoneNumber    String?   @map("phone_number") @db.VarChar(15)
   address        String?   @db.VarChar(255)
-  userId         Int       @unique @map("user_id")
-  gender         String?   @db.Char(1)
+  gender         Gender?
   birthday       DateTime? @db.Date
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User?
 }
 
 model UserOAuthIds {
@@ -45,11 +50,17 @@ model UserOAuthIds {
   user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+enum RoleSlug {
+  ADMIN
+  SHOP_STAFF
+  CLIENT
+}
+
 model Role {
-  id          Int    @id @default(autoincrement())
-  name        String @db.VarChar(32)
-  description String @db.VarChar(255)
-  slug        String @unique
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(32)
+  description String   @db.VarChar(255)
+  slug        RoleSlug @unique
   users       User[]
 }
 
@@ -90,9 +101,11 @@ model Shop {
   area         Area          @relation(fields: [areaId], references: [id])
   city         City          @relation(fields: [cityId], references: [id])
   prefecture   Prefecture    @relation(fields: [prefectureId], references: [id])
-  menu         Menu?
+  menu         Menu          @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  menuId       Int           @unique @map("menu_id")
   reservations Reservation[]
-  shopDetail   ShopDetail?
+  shopDetail   ShopDetail    @relation(fields: [shopDetailId], references: [id], onDelete: Cascade)
+  shopDetailId Int           @unique @map("shop_detail_id")
   stylists     Stylist[]
   shopUser     ShopUser?
 }
@@ -100,8 +113,8 @@ model Shop {
 model Menu {
   id     Int        @id @default(autoincrement())
   items  MenuItem[]
-  shopId Int        @unique @map("shop_id")
-  shop   Shop       @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopId Int?       @unique @map("shop_id")
+  shop   Shop?
 }
 
 model MenuItem {
@@ -130,8 +143,8 @@ model ShopDetail {
   name        String       @db.VarChar(255)
   address     String?      @db.VarChar(255)
   phoneNumber String?      @map("phone_number") @db.VarChar(255)
-  shopId      Int          @unique @map("shop_id")
-  shop        Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopId      Int?         @unique @map("shop_id")
+  shop        Shop?
   details     String?      @db.VarChar(255)
   schedule    Json?
   images      ModelImage[]

@@ -4,7 +4,7 @@ import { RoleRepositoryInterface as UserServiceSocket } from '@services/UserServ
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 import prisma from './prisma'
-import { convertRoleSlug } from './UserRepository'
+import { convertEntityRoleSlugToPrismaRoleSlug, convertRoleSlug } from './UserRepository'
 
 const reconstructRole = (role: PrismaRole): Role => ({
   id: role.id,
@@ -17,7 +17,7 @@ const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket = {
 
   async isValidRole(slug) {
     const role = await prisma.role.findUnique({
-      where: { slug },
+      where: { slug: convertEntityRoleSlugToPrismaRoleSlug(slug) },
     })
     return role !== null
   },
@@ -25,10 +25,10 @@ const RoleRepository:CommonRepositoryInterface<Role> & UserServiceSocket = {
   async extractValidRoleSlugs(roleSlugs) {
     const validRoles = await prisma.role.findMany({
       where: {
-        slug: { in: roleSlugs },
+        slug: { in: roleSlugs.map(rs => convertEntityRoleSlugToPrismaRoleSlug(rs)) },
       },
     })
-    return validRoles.map(validRole => validRole.slug)
+    return validRoles.map(vr => convertRoleSlug(vr.slug))
   },
 
   async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {

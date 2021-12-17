@@ -24,6 +24,7 @@
     "@joi/date": "^2.1.0",
     "@prisma/client": "^2.29.1",
     "@types/bcrypt": "^5.0.0",
+    "@types/joi": "^17.2.3",
     "@types/jsonwebtoken": "^8.5.4",
     "@types/nodemailer": "^6.4.4",
     "@types/passport-jwt": "^3.0.6",

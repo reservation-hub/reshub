@@ -1,42 +1,27 @@
 import bcrypt from 'bcrypt'
 import { UserServiceInterface as UserControllerSocket } from '@controllers/userController'
 import { UserServiceInterface as DashboardControllerSocket } from '@controllers/dashboardController'
-import { User } from '@entities/User'
+import { Gender, User } from '@entities/User'
 import UserRepository from '@repositories/UserRepository'
 import RoleRepository from '@repositories/RoleRepository'
 import ReservationRepository from '@repositories/ReservationRepository'
+import { RoleSlug } from '@entities/Role'
 import { InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
 export type UserRepositoryInterface = {
-  insertUserWithProfile(
-    email: string,
-    password: string,
-    roleSlug: string,
-    lastNameKanji: string,
-    firstNameKanji: string,
-    lastNameKana: string,
-    firstNameKana: string,
-    birthday: string,
-    gender: string,
-  ): Promise<User>,
-  updateUserFromAdmin(
-    id: number,
-    email: string,
-    roleSlug: string,
-    lastNameKanji: string,
-    firstNameKanji: string,
-    lastNameKana: string,
-    firstNameKana: string,
-    birthday: string,
-    gender: string,
-  ): Promise<User>,
+  insertUserWithProfile(email: string, password: string, roleSlug: RoleSlug, lastNameKanji: string,
+    firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: string, gender: Gender,)
+    : Promise<User>,
+  updateUserFromAdmin(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string,
+    firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: string, gender: Gender)
+    : Promise<User>,
   deleteUserFromAdmin(id: number): Promise<User>,
   searchUser(keyword: string): Promise<User[]>,
 }
 
 export type RoleRepositoryInterface = {
-  isValidRole(slug: string): Promise<boolean>,
-  extractValidRoleSlugs(roleSlugs: string[]): Promise<string[]>
+  isValidRole(slug: RoleSlug): Promise<boolean>,
+  extractValidRoleSlugs(roleSlugs: RoleSlug[]): Promise<RoleSlug[]>
 }
 
 export type ReservationRepositoryInterface = {
@@ -46,27 +31,18 @@ export type ReservationRepositoryInterface = {
 const UserService: UserControllerSocket & DashboardControllerSocket = {
   async fetchUsersForDashboard() {
     const users = await UserRepository.fetchAll({ limit: 5 })
-    users.forEach(user => {
-      delete user.password
-    })
     const totalCount = await UserRepository.totalCount()
     return { users, totalCount }
   },
 
   async fetchUsersWithTotalCount(params) {
     const users = await UserRepository.fetchAll(params)
-    users.forEach(user => {
-      delete user.password
-    })
     const usersCount = await UserRepository.totalCount()
     return { values: users, totalCount: usersCount }
   },
 
   async searchUser(keyword) {
     const users = await UserRepository.searchUser(keyword)
-    users.forEach(user => {
-      delete user.password
-    })
     return users
   },
 
@@ -76,50 +52,41 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
       console.error('User does not exist')
       throw new NotFoundError()
     }
-    delete user.password
-
     return user
   },
 
-  async insertUserFromAdmin(params) {
-    if (params.password !== params.confirm) {
+  async insertUserFromAdmin(password, confirm, email, roleSlug, lastNameKanji,
+    firstNameKanji, lastNameKana, firstNameKana, gender, birthday) {
+    if (password !== confirm) {
       console.error('Passwords do not match')
       throw new InvalidParamsError()
     }
 
-    const isValidRole = await RoleRepository.isValidRole(params.roleSlug)
+    const isValidRole = await RoleRepository.isValidRole(roleSlug)
     if (!isValidRole) {
       console.error('Invalid Role passed')
       throw new InvalidParamsError()
     }
 
-    const duplicate = await UserRepository.fetchByEmail(params.email)
+    const duplicate = await UserRepository.fetchByEmail(email)
     if (duplicate) {
       console.error('Email is not available')
       throw new InvalidParamsError()
     }
 
-    const hash = bcrypt.hashSync(params.password, 10 /* hash rounds */)
+    const hash = bcrypt.hashSync(password, 10 /* hash rounds */)
 
     const user = await UserRepository.insertUserWithProfile(
-      params.email,
-      hash,
-      params.roleSlug,
-      params.lastNameKanji,
-      params.firstNameKanji,
-      params.lastNameKana,
-      params.firstNameKana,
-      params.birthday,
-      params.gender,
+      email, hash, roleSlug, lastNameKanji, firstNameKanji,
+      lastNameKana, firstNameKana, birthday, gender,
     )
-
-    delete user.password
 
     return user
   },
 
-  async updateUserFromAdmin({ id, params }) {
-    const isValidRole = await RoleRepository.isValidRole(params.roleSlug)
+  async updateUserFromAdmin(id, email, roleSlug, lastNameKanji, firstNameKanji,
+    lastNameKana, firstNameKana, gender, birthday) {
+    const isValidRole = await RoleRepository.isValidRole(roleSlug)
     if (!isValidRole) {
       console.error('Invalid Role passed')
       throw new InvalidParamsError()
@@ -132,11 +99,9 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
     }
 
     const updatedUser = await UserRepository.updateUserFromAdmin(
-      id, params.email, params.roleSlug, params.lastNameKanji, params.firstNameKanji,
-      params.lastNameKana, params.firstNameKana, params.birthday, params.gender,
+      id, email, roleSlug, lastNameKanji, firstNameKanji,
+      lastNameKana, firstNameKana, birthday, gender,
     )
-
-    delete updatedUser.password
 
     return updatedUser
   },
@@ -148,7 +113,6 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
     const deletedUser = await UserRepository.deleteUserFromAdmin(id)
-    delete deletedUser.password
     return deletedUser
   },
 

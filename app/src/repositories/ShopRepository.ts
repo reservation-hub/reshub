@@ -26,7 +26,7 @@ const shopWithShopDetailsAndLocationAndMenu = Prisma.validator<Prisma.ShopArgs>(
       city: true,
       menu: { include: { items: true } },
       stylists: true,
-      reservations: { include: { user: { include: { role: true } }, stylist: true, menuItem: true } },
+      reservations: { include: { user: { include: { role: true, profile: true } }, stylist: true, menuItem: true } },
     },
   },
 )
@@ -101,6 +101,11 @@ export const reconstructShopWithMenuAndStylists = (shop: shopWithShopDetailsAndL
     user: {
       id: r.user.id,
       email: r.user.email,
+      password: r.user.password,
+      firstNameKana: r.user.profile.firstNameKana,
+      lastNameKana: r.user.profile.lastNameKana,
+      firstNameKanji: r.user.profile.firstNameKanji,
+      lastNameKanji: r.user.profile.lastNameKanji,
       role: {
         id: r.user.roleId!,
         name: r.user.role!.name,
@@ -149,7 +154,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         city: true,
         menu: { include: { items: true } },
         stylists: true,
-        reservations: { include: { user: { include: { role: true } }, stylist: true, menuItem: true } },
+        reservations: { include: { user: { include: { role: true, profile: true } }, stylist: true, menuItem: true } },
       },
     })
     return shop ? reconstructShopWithMenuAndStylists(shop) : null
@@ -307,7 +312,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     return prisma.menuItem.update({
       where: { id: menuItemId },
       data: {
-        name, description, price,
+        name, description, price, duration,
       },
       select: {
         id: true,
@@ -335,7 +340,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         city: true,
         menu: { include: { items: true } },
         stylists: true,
-        reservations: { include: { user: { include: { role: true } }, stylist: true, menuItem: true } },
+        reservations: { include: { user: { include: { role: true, profile: true } }, stylist: true, menuItem: true } },
       },
     })
     return shops.map(s => reconstructShopWithMenuAndStylists(s))

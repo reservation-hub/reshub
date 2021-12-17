@@ -3,20 +3,19 @@ import {
 } from 'express'
 import userController from '@controllers/userController'
 import { parseIntIdMiddleware, roleCheck } from '@routes/utils'
+import { RoleSlug } from '@entities/Role'
 import {
-  deleteUserQuery,
-  insertUserQuery,
-  updateUserQuery,
-  userQuery, userResponse, userSearchQuery, userSearchResponse, usersResponse, usersWithCountQuery,
+  UserListQuery, UserListResponse, UserQuery, UserResponse,
+  InsertUserQuery, UpdateUserQuery, deleteUserQuery, userSearchQuery,
 } from '@request-response-types/User'
 
 export type UserControllerInterface = {
-  index(query: usersWithCountQuery): Promise<usersResponse>
-  show(query: userQuery): Promise<userResponse>
-  insert(query: insertUserQuery): Promise<userResponse>
-  update(query: updateUserQuery): Promise<userResponse>
+  index(query: UserListQuery): Promise<UserListResponse>
+  show(query: UserQuery): Promise<UserResponse>
+  insert(query: InsertUserQuery): Promise<UserResponse>
+  update(query: UpdateUserQuery): Promise<UserResponse>
   delete(query: deleteUserQuery): Promise<{ message: string }>
-  searchUsers(query: userSearchQuery): Promise<userSearchResponse>
+  searchUsers(query: userSearchQuery): Promise<UserListResponse>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -64,11 +63,11 @@ const searchUser = async (req: Request, res: Response, next: NextFunction) : Pro
 
 const routes = Router()
 
-routes.get('/', roleCheck(['admin']), index)
-routes.get('/:id', roleCheck(['admin']), parseIntIdMiddleware, showUser)
-routes.post('/', roleCheck(['admin']), insertUser)
+routes.get('/', roleCheck([RoleSlug.ADMIN]), index)
+routes.get('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, showUser)
+routes.post('/', roleCheck([RoleSlug.ADMIN]), insertUser)
 routes.post('/search', searchUser)
-routes.patch('/:id', roleCheck(['admin']), parseIntIdMiddleware, updateUser)
-routes.delete('/:id', roleCheck(['admin']), parseIntIdMiddleware, deleteUser)
+routes.patch('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, updateUser)
+routes.delete('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, deleteUser)
 
 export default routes

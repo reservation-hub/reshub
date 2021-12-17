@@ -1,21 +1,30 @@
-import { Prisma } from '@prisma/client'
-import {
-  Female, Male, Gender, User,
-} from '@entities/User'
+import { Prisma, Gender as PrismaGender, RoleSlug as PrismaRoleSlug } from '@prisma/client'
+import { Gender, User } from '@entities/User'
 import { UserRepositoryInterface as UserServiceSocket } from '@services/UserService'
 import { UserRepositoryInterface as AuthServiceSocket } from '@services/AuthService'
 import { RoleSlug } from '@entities/Role'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
-export const convertRoleSlug = (slug: string): RoleSlug => {
+export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
   switch (slug) {
-    case 'shop_staff':
+    case PrismaRoleSlug.SHOP_STAFF:
       return RoleSlug.SHOP_STAFF
-    case 'client':
+    case PrismaRoleSlug.CLIENT:
       return RoleSlug.CLIENT
     default:
       return RoleSlug.ADMIN
+  }
+}
+
+export const convertEntityRoleSlugToPrismaRoleSlug = (slug: RoleSlug): PrismaRoleSlug => {
+  switch (slug) {
+    case RoleSlug.SHOP_STAFF:
+      return PrismaRoleSlug.SHOP_STAFF
+    case RoleSlug.CLIENT:
+      return PrismaRoleSlug.CLIENT
+    default:
+      return PrismaRoleSlug.ADMIN
   }
 }
 
@@ -25,21 +34,21 @@ const userWithProfileAndOAuthIdsAndRoles = Prisma.validator<Prisma.UserArgs>()(
 
 type userWithProfileAndOAuthIdsAndRoles = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIdsAndRoles>
 
-export const convertEntityGenderToDBGender = (gender: Gender): string => {
+export const convertEntityGenderToDBGender = (gender: Gender): PrismaGender => {
   switch (gender) {
-    case Female:
-      return '1'
+    case Gender.FEMALE:
+      return PrismaGender.FEMALE
     default:
-      return '0'
+      return PrismaGender.MALE
   }
 }
 
-const convertDBGenderToEntityGender = (gender: string): Gender => {
+const convertDBGenderToEntityGender = (gender: PrismaGender): Gender => {
   switch (gender) {
-    case '1':
-      return Female
+    case PrismaGender.FEMALE:
+      return Gender.FEMALE
     default:
-      return Male
+      return Gender.MALE
   }
 }
 
@@ -53,17 +62,17 @@ export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User 
     googleId: user.oAuthIds.googleId,
     facebookId: user.oAuthIds.facebookId,
   } : undefined,
-  firstNameKanji: user.profile?.firstNameKanji,
-  lastNameKanji: user.profile?.lastNameKanji,
-  firstNameKana: user.profile?.firstNameKana,
-  lastNameKana: user.profile?.lastNameKana,
+  firstNameKanji: user.profile.firstNameKanji,
+  lastNameKanji: user.profile.lastNameKanji,
+  firstNameKana: user.profile.firstNameKana,
+  lastNameKana: user.profile.lastNameKana,
   role: {
-    id: user.roleId!,
-    name: user.role!.name,
-    description: user.role!.description,
-    slug: convertRoleSlug(user.role!.slug),
+    id: user.roleId,
+    name: user.role.name,
+    description: user.role.description,
+    slug: convertRoleSlug(user.role.slug),
   },
-  birthday: user.profile!.birthday ?? undefined,
+  birthday: user.profile.birthday ?? undefined,
   gender: user.profile!.gender ? convertDBGenderToEntityGender(user.profile!.gender) : undefined,
 })
 
@@ -103,22 +112,15 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
   },
 
   async insertUserWithProfile(
-    email,
-    password,
-    roleSlug,
-    lastNameKanji,
-    firstNameKanji,
-    lastNameKana,
-    firstNameKana,
-    birthday,
-    gender,
+    email, password, roleSlug, lastNameKanji, firstNameKanji,
+    lastNameKana, firstNameKana, birthday, gender,
   ) {
     const user = await prisma.user.create({
       data: {
         email,
         password,
         role: {
-          connect: { slug: roleSlug },
+          connect: { slug: convertEntityRoleSlugToPrismaRoleSlug(roleSlug) },
         },
         profile: {
           create: {
@@ -142,15 +144,8 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
   },
 
   async updateUserFromAdmin(
-    id,
-    email,
-    roleSlug,
-    lastNameKanji,
-    firstNameKanji,
-    lastNameKana,
-    firstNameKana,
-    birthday,
-    gender,
+    id, email, roleSlug, lastNameKanji, firstNameKanji,
+    lastNameKana, firstNameKana, birthday, gender,
   ) {
     const user = await prisma.user.update({
       where: { id },
@@ -165,7 +160,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
             gender: convertEntityGenderToDBGender(gender),
           },
         },
-        role: { connect: { slug: roleSlug } },
+        role: { connect: { slug: convertEntityRoleSlugToPrismaRoleSlug(roleSlug) } },
         email,
       },
       include: {

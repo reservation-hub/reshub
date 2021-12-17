@@ -51,6 +51,7 @@ export const reconstructReservation = (reservation: reservationWithUserAndStylis
   user: {
     id: reservation.user.id,
     email: reservation.user.email,
+    password: reservation.user.password,
     lastNameKanji: reservation.user.profile?.lastNameKanji,
     firstNameKanji: reservation.user.profile?.firstNameKanji,
     lastNameKana: reservation.user.profile?.lastNameKana,

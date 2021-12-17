@@ -3,7 +3,7 @@ import {
 } from 'express'
 
 import { User } from '@entities/User'
-import { verifyIfNotLoggedInYet } from '@controllers/authController'
+import { verifyIfNotLoggedInYet } from '@controller-adapter/Auth'
 import SignUpService, { signUpQuery } from '@client/services/SignUpService'
 import { signUpSchema } from './schemas/signup'
 

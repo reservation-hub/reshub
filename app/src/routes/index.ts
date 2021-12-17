@@ -1,8 +1,8 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-
-import authController from '@controllers/authController'
+import { RoleSlug } from '@entities/Role'
+import authController from '@controller-adapter/Auth'
 
 import dashboardController from '@controller-adapter/Dashboard'
 import LocationController from '@controller-adapter/Location'
@@ -17,10 +17,10 @@ const router = Router()
 export default router
 
 router.use('/auth', authController)
-router.use('/dashboard', protectAdminRoute, roleCheck(['admin', 'shop_staff']), dashboardController)
-router.use('/shops', protectAdminRoute, roleCheck(['admin', 'shop_staff']), shopController)
-router.use('/users', protectAdminRoute, roleCheck(['admin']), userController)
-router.use('/', protectAdminRoute, roleCheck(['admin', 'shop_staff']), LocationController)
+router.use('/dashboard', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), dashboardController)
+router.use('/shops', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), shopController)
+router.use('/users', protectAdminRoute, roleCheck([RoleSlug.ADMIN]), userController)
+router.use('/', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), LocationController)
 // client api
 router.use('/api/', roleCheck(['client']), apiRoutes)
 

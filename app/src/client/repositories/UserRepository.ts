@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, RoleSlug } from '@prisma/client'
 import { User } from '@entities/User'
 import prisma from '@repositories/prisma'
 import { UserRepositoryInterface } from '@client/services/SignUpService'
@@ -16,16 +16,20 @@ const reconstructUser = (user: userWithProfileAndOAuthIdsAndRole): User => ({
   email: user.email,
   username: user.username ?? undefined,
   password: user.password,
+  firstNameKana: user.profile.firstNameKana,
+  lastNameKana: user.profile.lastNameKana,
+  firstNameKanji: user.profile.firstNameKanji,
+  lastNameKanji: user.profile.lastNameKanji,
   oAuthIds: user.oAuthIds ? {
     id: user.oAuthIds.id,
     googleId: user.oAuthIds.googleId,
     facebookId: user.oAuthIds.facebookId,
   } : undefined,
   role: {
-    id: user.roleId!,
-    name: user.role!.name,
-    description: user.role!.description,
-    slug: convertRoleSlug(user.role!.slug),
+    id: user.roleId,
+    name: user.role.name,
+    description: user.role.description,
+    slug: convertRoleSlug(user.role.slug),
   },
 })
 
@@ -46,7 +50,15 @@ const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
         username,
         password,
         role: {
-          connect: { slug: 'client' },
+          connect: { slug: RoleSlug.CLIENT },
+        },
+        profile: {
+          create: {
+            firstNameKana: '',
+            lastNameKana: '',
+            firstNameKanji: '',
+            lastNameKanji: '',
+          },
         },
       },
 
