@@ -438,7 +438,7 @@ const roles = [
       return prisma.reservation.create({
         data: {
           reservationDate: d,
-          stylistId: sfs.stylists![0].id,
+          stylistId: sfs.stylists![Math.floor(Math.random() * sfs.stylists!.length) + 1].id,
           shopId: sfs.id,
           userId: clientsForReservation[randomClientIndex].id,
           menuId: sfs.menu[0].id,

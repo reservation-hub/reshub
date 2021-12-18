@@ -92,6 +92,7 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
   async fetchShopStaffStylists(userId) {
     const stylists = await prisma.stylist.findMany({
       where: { shop: { shopUser: { userId } } },
+      take: 5,
     })
     return stylists.map(s => reconstructStylist(s))
   },
