@@ -70,60 +70,56 @@ const roles = [
 ];
 
 (async () => {
+  // eslint-disable-next-line
   console.log('running seeder')
 
+  // eslint-disable-next-line
   console.log('running roles seeder')
-  await Promise.all(roles.map(async item => {
-    try {
-      await prisma.role.upsert({
-        where: {
-          slug: item.slug,
-        },
-        update: item,
-        create: item,
-      })
-    } catch (e) {
-      console.error('Role Error', e)
-      process.exit()
-    }
-  }))
+  await Promise.all(roles.map(async item => prisma.role.upsert({
+    where: {
+      slug: item.slug,
+    },
+    update: item,
+    create: item,
+  }))).catch(e => {
+    console.error('Role Seed Error', e)
+    process.exit(1)
+  })
 
+  // eslint-disable-next-line
   console.log('running admins seeder')
 
   const adminRole = await prisma.role.findUnique({
     where: { slug: RoleSlug.ADMIN },
   })
-  const adminPromises = admins.map(async (admin: any) => {
-    try {
-      return prisma.user.upsert({
-        where: { email: admin.email },
-        update: {},
+  const adminPromises = admins.map(async (admin: any) => prisma.user.upsert({
+    where: { email: admin.email },
+    update: {},
+    create: {
+      email: admin.email,
+      username: admin.username,
+      password: bcrypt.hashSync('testtest', 10),
+      profile: {
         create: {
-          email: admin.email,
-          username: admin.username,
-          password: bcrypt.hashSync('testtest', 10),
-          profile: {
-            create: {
-              firstNameKanji: admin.firstNameKanji,
-              lastNameKanji: admin.lastNameKanji,
-              firstNameKana: admin.firstNameKana,
-              lastNameKana: admin.lastNameKana,
-            },
-          },
-          role: {
-            connect: {
-              id: adminRole?.id,
-            },
-          },
+          firstNameKanji: admin.firstNameKanji,
+          lastNameKanji: admin.lastNameKanji,
+          firstNameKana: admin.firstNameKana,
+          lastNameKana: admin.lastNameKana,
         },
-      })
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      process.exit()
-    }
+      },
+      role: {
+        connect: {
+          id: adminRole?.id,
+        },
+      },
+    },
+  }))
+  await Promise.all(adminPromises).catch(e => {
+    console.error(`Admin Seed Error : ${e}`)
+    process.exit(1)
   })
-  await Promise.all(adminPromises)
 
+  // eslint-disable-next-line
   console.log('running staff seeder')
 
   const staffRole = await prisma.role.findUnique({
@@ -131,46 +127,45 @@ const roles = [
   })
 
   const staffPromises = staffs.map(async (staffEmail, i) => {
-    try {
-      const lastNameIndex = Math.floor(Math.random() * lastNames.length)
-      const lastName = lastNames[lastNameIndex]
-      let firstNameIndex
-      let firstName
-      if (i % 2 === 0) {
-        firstNameIndex = Math.floor(Math.random() * maleNames.length)
-        firstName = maleNames[firstNameIndex]
-      } else {
-        firstNameIndex = Math.floor(Math.random() * femaleNames.length)
-        firstName = femaleNames[firstNameIndex]
-      }
-      return prisma.user.create({
-        data: {
-          email: staffEmail,
-          username: staffEmail,
-          password: bcrypt.hashSync('testtest', 10),
-          profile: {
-            create: {
-              firstNameKanji: firstName,
-              lastNameKanji: lastName,
-              firstNameKana: firstName,
-              lastNameKana: lastName,
-            },
-          },
-          role: {
-            connect: {
-              id: staffRole?.id,
-            },
+    const lastNameIndex = Math.floor(Math.random() * lastNames.length)
+    const lastName = lastNames[lastNameIndex]
+    let firstNameIndex
+    let firstName
+    if (i % 2 === 0) {
+      firstNameIndex = Math.floor(Math.random() * maleNames.length)
+      firstName = maleNames[firstNameIndex]
+    } else {
+      firstNameIndex = Math.floor(Math.random() * femaleNames.length)
+      firstName = femaleNames[firstNameIndex]
+    }
+    return prisma.user.create({
+      data: {
+        email: staffEmail,
+        username: staffEmail,
+        password: bcrypt.hashSync('testtest', 10),
+        profile: {
+          create: {
+            firstNameKanji: firstName,
+            lastNameKanji: lastName,
+            firstNameKana: firstName,
+            lastNameKana: lastName,
           },
         },
-      })
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      process.exit()
-    }
+        role: {
+          connect: {
+            id: staffRole?.id,
+          },
+        },
+      },
+    })
   })
 
-  await Promise.all(staffPromises)
+  await Promise.all(staffPromises).catch(e => {
+    console.error(`Staff Seed Error : ${e}`)
+    process.exit(1)
+  })
 
+  // eslint-disable-next-line
   console.log('running client seeder')
   const clientRole = await prisma.role.findUnique({
     where: { slug: RoleSlug.CLIENT },
@@ -195,8 +190,12 @@ const roles = [
       },
     },
   }))
-  await Promise.all(clientPromises)
+  await Promise.all(clientPromises).catch(e => {
+    console.error(`Client Seed Error : ${e}`)
+    process.exit(1)
+  })
 
+  // eslint-disable-next-line
   console.log('running area seeder')
 
   await prisma.area.createMany({
@@ -207,135 +206,140 @@ const roles = [
     skipDuplicates: true,
   })
 
+  // eslint-disable-next-line
   console.log('running prefecture seeder')
 
-  const prefecturePromises = prefectures.map(async prefec => {
-    try {
-      return await prisma.prefecture.upsert({
-        where: { slug: prefec.slug },
-        update: {},
-        create: {
-          name: prefec.name,
-          slug: prefec.slug,
-          area: {
-            connect: {
-              slug: prefec.area,
-            },
-          },
+  const prefecturePromises = prefectures.map(async prefec => prisma.prefecture.upsert({
+    where: { slug: prefec.slug },
+    update: {},
+    create: {
+      name: prefec.name,
+      slug: prefec.slug,
+      area: {
+        connect: {
+          slug: prefec.area,
         },
-      })
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      process.exit()
-    }
+      },
+    },
+  }))
+
+  await Promise.all(prefecturePromises).catch(e => {
+    console.error(`Prefecture Seed Error : ${e}`)
+    process.exit(1)
   })
 
-  await Promise.all(prefecturePromises)
-
+  // eslint-disable-next-line
   console.log('running city seeder')
 
-  const cityPromises = cities.map(async city => {
-    try {
-      return await prisma.city.upsert({
-        where: { slug: `SUB${city.id}` },
-        update: {},
-        create: {
-          name: city.name,
-          slug: `SUB${city.id}`,
-          prefecture: {
-            connect: {
-              slug: city.prefecture,
-            },
-          },
+  const cityPromises = cities.map(async city => prisma.city.upsert({
+    where: { slug: `SUB${city.id}` },
+    update: {},
+    create: {
+      name: city.name,
+      slug: `SUB${city.id}`,
+      prefecture: {
+        connect: {
+          slug: city.prefecture,
         },
-      })
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      process.exit()
-    }
+      },
+    },
+  }))
+
+  await Promise.all(cityPromises).catch(e => {
+    console.error(`City Seed Error : ${e}`)
+    process.exit(1)
   })
 
-  await Promise.all(cityPromises)
-
+  // eslint-disable-next-line
   console.log('running shop seeder')
   const cityCount = 1747
-  let count = 300
-  while (count > 0) {
-    const randomInt = Math.floor(Math.random() * cityCount)
-    try {
-      const city = await prisma.city.findFirst({
-        skip: randomInt,
+  const totalShopToBeCreated = 300
+  const cityIds = Array(totalShopToBeCreated * 2).fill(0).map(v => Math.floor(Math.random() * cityCount) + 1)
+  const shopCities = await prisma.city.findMany({
+    where: { id: { in: cityIds } },
+    include: {
+      prefecture: {
         include: {
-          prefecture: {
-            include: {
-              area: true,
-            },
-          },
+          area: true,
         },
-      })
-      const shopDetail = await prisma.shopDetail.create({
-        data: {
-          name: 'TEST',
-          days: [
-            Days.MONDAY,
-            Days.WEDNESDAY,
-            Days.FRIDAY,
-            Days.THURSDAY,
-            Days.SATURDAY,
-            Days.SUNDAY,
-          ],
-          startTime: '10:00',
-          endTime: '20:00',
-        },
-      })
-      await prisma.shop.create({
-        data: {
-          city: {
-            connect: {
-              id: city?.id,
-            },
-          },
-          prefecture: {
-            connect: {
-              id: city?.prefecture.id,
-            },
-          },
-          area: {
-            connect: {
-              id: city?.prefecture.area.id,
-            },
-          },
-          shopDetail: {
-            connect: {
-              id: shopDetail.id,
-            },
-          },
-        },
-      })
-    } catch (e) {
-      console.error(`Exception : ${e}`)
-      process.exit()
-    }
-    count--
-  }
+      },
+    },
+    take: totalShopToBeCreated,
+  })
 
+  const shopDetails = await Promise.all(Array(totalShopToBeCreated).fill('').map(v => prisma.shopDetail.create({
+    data: {
+      name: 'TEST',
+      days: [
+        Days.MONDAY,
+        Days.WEDNESDAY,
+        Days.FRIDAY,
+        Days.THURSDAY,
+        Days.SATURDAY,
+        Days.SUNDAY,
+      ],
+      startTime: '10:00',
+      endTime: '20:00',
+    },
+  })))
+
+  const shopPromises = shopDetails.map(async (sd, i) => prisma.shop.create({
+    data: {
+      city: {
+        connect: {
+          id: shopCities[i].id,
+        },
+      },
+      prefecture: {
+        connect: {
+          id: shopCities[i].prefecture.id,
+        },
+      },
+      area: {
+        connect: {
+          id: shopCities[i].prefecture.area.id,
+        },
+      },
+      shopDetail: {
+        connect: {
+          id: sd.id,
+        },
+      },
+    },
+  }))
+
+  await Promise.all(shopPromises).catch(e => {
+    console.error(`Shop Seed error : ${e}`)
+    process.exit(1)
+  })
+
+  // eslint-disable-next-line
   console.log('connecting staff to shops')
   const shopStaffs = await prisma.user.findMany({
     where: { role: { slug: RoleSlug.SHOP_STAFF } },
   })
   const shopStaffIds = shopStaffs.map(s => s.id)
+  const maxStaffId = Math.max(...shopStaffIds)
+  const minStaffId = Math.min(...shopStaffIds)
   const staffShopTargets = await prisma.shop.findMany({})
-  staffShopTargets.map(async sst => {
-    const randomStaffId = Math.floor(Math.random() * shopStaffIds.length) + 1
-    await prisma.shopUser.create({
+  const staffShopConnectionPromises = staffShopTargets.map(async sst => {
+    const randomStaffId = Math.floor(Math.random() * maxStaffId) + minStaffId
+    return prisma.shopUser.create({
       data: {
         shopId: sst.id,
-        userId: shopStaffIds[randomStaffId],
+        userId: randomStaffId,
       },
     })
   })
 
+  await Promise.all(staffShopConnectionPromises).catch(e => {
+    console.error(`Staff Connection Error : ${e}`)
+    process.exit(1)
+  })
+
+  // eslint-disable-next-line
   console.log('running menu seeder')
+
   const shops = await prisma.shop.findMany()
   const menuPromises = shops.map(async s => prisma.menu.createMany({
     data: [{
@@ -359,9 +363,14 @@ const roles = [
     }],
   }))
 
-  await Promise.all(menuPromises)
+  await Promise.all(menuPromises).catch(e => {
+    console.error(`Menu Seed Error : ${e}`)
+    process.exit(1)
+  })
 
+  // eslint-disable-next-line
   console.log('running stylist seeder')
+
   const shopsForSeed = await prisma.shop.findMany({
     include: { menu: true },
   })
@@ -393,8 +402,12 @@ const roles = [
       },
     }))
   })
-  await Promise.all(stylistPromises)
+  await Promise.all(stylistPromises).catch(e => {
+    console.error(`Stylist Seed Error : ${e}`)
+    process.exit(1)
+  })
 
+  // eslint-disable-next-line
   console.log('running reservation seeder')
   const shopsForReservationSeed = await prisma.shop.findMany({
     include: { menu: true, stylists: true, shopDetail: true },
@@ -434,7 +447,11 @@ const roles = [
     })
   })
   await Promise.all(reservationPromises).then(v => {
+    // eslint-disable-next-line
     console.log('seed done')
-    process.exit()
+    process.exit(0)
+  }).catch(e => {
+    console.error(`Reservation Seed Error : ${e}`)
+    process.exit(1)
   })
 })()
