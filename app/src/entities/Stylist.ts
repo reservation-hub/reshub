@@ -1,18 +1,11 @@
-import { Reservation } from '@entities/Reservation'
-import { Shop } from '@entities/Shop'
-
-export type StylistSchedule = {
-  days: number[],
-  startTime: string,
-  endTime: string,
-}
+import { ScheduleDays } from './Common'
 
 export type Stylist = {
   id: number,
   name: string,
   price: number,
-  shopId?: number,
-  shop?: Shop,
-  reservations?: Reservation[],
-  schedule?: StylistSchedule,
+  shopId: number,
+  days: ScheduleDays[],
+  startTime: string,
+  endTime: string,
 }

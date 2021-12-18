@@ -1,8 +1,3 @@
-import { Shop } from '@entities/Shop'
-import { Stylist } from '@entities/Stylist'
-import { User } from '@entities/User'
-import { MenuItem } from './Menu'
-
 export enum ReservationStatus {
   RESERVED,
   CANCELLED,
@@ -11,10 +6,10 @@ export enum ReservationStatus {
 
 export type Reservation = {
   id: number,
-  shop?: Shop,
+  shopId: number
   reservationDate: Date,
-  user: User,
+  clientId: number
   status: ReservationStatus
-  menuItem: MenuItem
-  stylist?: Stylist,
+  menuId: number
+  stylistId?: number
 }

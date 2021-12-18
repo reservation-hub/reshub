@@ -111,6 +111,14 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
     return prisma.user.count()
   },
 
+  async fetchUsersByIds(userIds) {
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      include: { profile: true, oAuthIds: true, role: true },
+    })
+    return users.map(u => reconstructUser(u))
+  },
+
   async insertUserWithProfile(
     email, password, roleSlug, lastNameKanji, firstNameKanji,
     lastNameKana, firstNameKana, birthday, gender,

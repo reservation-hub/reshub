@@ -3,18 +3,18 @@ import {
 } from 'express'
 import AuthController from '@controllers/authController'
 import { RoleSlug } from '@entities/Role'
-import { User } from '@request-response-types/Auth'
+import { UserForAuth } from '@request-response-types/models/User'
 import { UnknownServerError } from '@routes/errors'
 import passport from '@middlewares/passport'
 import config from '../config'
 
 export type AuthControllerInterface = {
-  hack(role?: RoleSlug): Promise<User>
-  createOneDayToken(user: User): string
-  createThirtyDaysToken(user: User): string
+  hack(role?: RoleSlug): Promise<UserForAuth>
+  createOneDayToken(user: UserForAuth): string
+  createThirtyDaysToken(user: UserForAuth): string
   verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>
   silentRefreshTokenChecks(authToken: string, refreshToken: string, headerToken?: string): Promise<void>
-  googleAuthenticate(query: { provider: string, tokenId: string }): Promise<User>
+  googleAuthenticate(query: { provider: string, tokenId: string }): Promise<UserForAuth>
 }
 
 const cookieOptions: CookieOptions = {
@@ -27,7 +27,7 @@ const cookieOptions: CookieOptions = {
 
 export const login = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const user = req.user as User
+    const user = req.user as UserForAuth
     if (!user) {
       throw new UnknownServerError()
     }
@@ -45,7 +45,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) : P
 
 export const refreshLogin = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const user = req.user as User
+    const user = req.user as UserForAuth
     if (!user) {
       throw new UnknownServerError()
     }

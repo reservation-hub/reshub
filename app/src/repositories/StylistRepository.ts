@@ -1,23 +1,56 @@
-import { Prisma } from '@prisma/client'
-import { Stylist, StylistSchedule } from '@entities/Stylist'
+import { Stylist as PrismaStylist, Days } from '@prisma/client'
+import { Stylist } from '@entities/Stylist'
+import { ScheduleDays } from '@entities/Common'
 import { StylistRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
 import prisma from './prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
-const stylistWithShops = Prisma.validator<Prisma.StylistArgs>()(
-  { include: { shop: { include: { shopDetail: true } } } },
-)
-type stylistWithShops = Prisma.StylistGetPayload<typeof stylistWithShops>
+const convertEntityDayToPrismaDay = (day: ScheduleDays): Days => {
+  switch (day) {
+    case ScheduleDays.MONDAY:
+      return Days.MONDAY
+    case ScheduleDays.TUESDAY:
+      return Days.TUESDAY
+    case ScheduleDays.WEDNESDAY:
+      return Days.WEDNESDAY
+    case ScheduleDays.THURSDAY:
+      return Days.THURSDAY
+    case ScheduleDays.FRIDAY:
+      return Days.FRIDAY
+    case ScheduleDays.SATURDAY:
+      return Days.SATURDAY
+    default:
+      return Days.SUNDAY
+  }
+}
 
-export const reconstructStylist = (stylist: stylistWithShops): Stylist => ({
+const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
+  switch (day) {
+    case Days.MONDAY:
+      return ScheduleDays.MONDAY
+    case Days.TUESDAY:
+      return ScheduleDays.TUESDAY
+    case Days.WEDNESDAY:
+      return ScheduleDays.WEDNESDAY
+    case Days.THURSDAY:
+      return ScheduleDays.THURSDAY
+    case Days.FRIDAY:
+      return ScheduleDays.FRIDAY
+    case Days.SATURDAY:
+      return ScheduleDays.SATURDAY
+    default:
+      return ScheduleDays.SUNDAY
+  }
+}
+
+export const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
   id: stylist.id,
+  shopId: stylist.shopId,
   name: stylist.name,
   price: stylist.price,
-  schedule: stylist.schedule as StylistSchedule,
-  shop: {
-    id: stylist.shopId,
-    name: stylist.shop.shopDetail?.name,
-  },
+  days: stylist.days.map(s => convertPrismaDayToEntityDay(s)),
+  startTime: stylist.startTime,
+  endTime: stylist.endTime,
 })
 
 export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopServiceSocket = {
@@ -29,8 +62,7 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
       take: limit,
       include: { shop: { include: { shopDetail: true } } },
     })
-    const cleanStylists = stylists.map(stylist => reconstructStylist(stylist))
-    return cleanStylists
+    return stylists.map(stylist => reconstructStylist(stylist))
   },
 
   async totalCount() {
@@ -45,6 +77,25 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
     return stylist ? reconstructStylist(stylist) : null
   },
 
+  async fetchStylistsByIds(userIds) {
+    const stylists = await prisma.stylist.findMany({ where: { id: { in: userIds } } })
+    return stylists.map(s => reconstructStylist(s))
+  },
+
+  async fetchStylistsByShopId(shopId) {
+    const stylists = await prisma.stylist.findMany({
+      where: { shopId },
+    })
+    return stylists.map(s => reconstructStylist(s))
+  },
+
+  async fetchShopStaffStylists(userId) {
+    const stylists = await prisma.stylist.findMany({
+      where: { shop: { shopUser: { userId } } },
+    })
+    return stylists.map(s => reconstructStylist(s))
+  },
+
   async insertStylist(name, price, shopId, days, startTime, endTime) {
     const stylist = await prisma.stylist.create({
       data: {
@@ -53,11 +104,9 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
         shop: {
           connect: { id: shopId },
         },
-        schedule: {
-          days,
-          startTime,
-          endTime,
-        },
+        days: days.map(d => convertEntityDayToPrismaDay(d)),
+        startTime,
+        endTime,
       },
       include: { shop: { include: { shopDetail: true } } },
     })
@@ -72,11 +121,9 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopService
         name,
         price,
         shop: { connect: { id: shopId } },
-        schedule: {
-          days,
-          startTime,
-          endTime,
-        },
+        days: days.map(d => convertEntityDayToPrismaDay(d)),
+        startTime,
+        endTime,
       },
       include: { shop: { include: { shopDetail: true } } },
     })

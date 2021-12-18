@@ -51,7 +51,11 @@ const AuthController : AuthControllerInterface = {
 
   async googleAuthenticate(body) {
     const schemaValues = await googleSchema.validateAsync(body, joiOptions)
-    return AuthService.googleAuthenticate(schemaValues.tokenId)
+    const user = await AuthService.googleAuthenticate(schemaValues.tokenId)
+    return {
+      id: user.id,
+      role: user.role,
+    }
   },
 
 }

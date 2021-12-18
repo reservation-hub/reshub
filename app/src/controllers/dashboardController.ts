@@ -1,13 +1,13 @@
 import { Reservation } from '@entities/Reservation'
 import { Shop } from '@entities/Shop'
-import { User } from '@entities/User'
+import { User, UserForAuth } from '@entities/User'
 import { Stylist } from '@entities/Stylist'
 import ShopService from '@services/ShopService'
 import UserService from '@services/UserService'
 import { DashboardControllerInterface } from '@controller-adapter/Dashboard'
 import { RoleSlug } from '@entities/Role'
 import { salonIndexAdminResponse, salonIndexShopStaffResponse } from '@request-response-types/Dashboard'
-import LocationService from '@services/LocationService'
+import { Menu } from '@entities/Menu'
 
 export type UserServiceInterface = {
   fetchUsersForDashboard(): Promise<{ users: User[], totalCount: number }>
@@ -16,54 +16,33 @@ export type UserServiceInterface = {
 
 export type ShopServiceInterface = {
   fetchShopsForDashboard(): Promise<{ shops: Shop[], totalCount: number }>
-  fetchShopsForDashboardForShopStaff(user: User): Promise<{ shops: Shop[], totalCount: number }>
-  fetchShopsStylists(user: User, shopIds: number[]): Promise<Stylist[]>
-  fetchStylistsReservationCounts(user: User, stylistIds: number[])
+  fetchShopsForDashboardForShopStaff(user: UserForAuth): Promise<{ shops: Shop[], totalCount: number }>
+  fetchShopStaffReservationForDashboard(user: UserForAuth): Promise<Reservation[]>
+  fetchShopStaffStylistsForDashboard(user: UserForAuth): Promise<Stylist[]>
+  fetchStylistsReservationCounts(user: UserForAuth, stylistIds: number[])
     : Promise<{ stylistId: number, reservationCount: number }[]>
-  // fetchShopsPopularMenus(shops: Shop[]): Promise<MenuItem[]>
-  fetchShopsReservations(user: User, shopIds: number[]): Promise<Reservation[]>
+  fetchShopsByIds(user: UserForAuth, shopIds: number[]): Promise<Shop[]>
+  fetchStylistsByIds(user: UserForAuth, stylistIds: number[]): Promise<Stylist[]>
+  fetchMenusByIds(user: UserForAuth, menuIds: number[]): Promise<Menu[]>
 }
 
-type fetchLocationNamesParams = {
-  shopId: number
-  areaId: number
-  prefectureId: number
-  cityId: number
-}
-export type LocationServiceInterface = {
-  fetchLocationNamesOfShops(user: User, params: fetchLocationNamesParams[]): Promise<{
-    shopId: number, areaName: string, prefectureName: string, cityName: string}[]>
-}
-
-const salonIndexForAdmin = async (user: User): Promise<salonIndexAdminResponse> => {
+const salonIndexForAdmin = async (): Promise<salonIndexAdminResponse> => {
   const { users, totalCount: userTotalCount } = await UserService.fetchUsersForDashboard()
   const { shops, totalCount: shopTotalCount } = await ShopService.fetchShopsForDashboard()
   const userReservationCounts = await UserService.fetchUsersReservationCounts(users.map(u => u.id))
   const shopIds = shops.map(shop => shop.id)
-  const locationNamesOfShops = await LocationService.fetchLocationNamesOfShops(
-    user,
-    shops.map(s => ({
-      shopId: s.id,
-      areaId: s.area!.id,
-      prefectureId: s.prefecture!.id,
-      cityId: s.city!.id,
-    })),
-  )
   const stylistCounts = await ShopService.fetchStylistsCountByShopIds(shopIds)
   const reservationCounts = await ShopService.fetchReservationsCountByShopIds(shopIds)
-  const shopData = shops.map(s => {
-    const locationNames = locationNamesOfShops.find(l => l.shopId === s.id)!
-    return {
-      id: s.id,
-      name: s.name!,
-      phoneNumber: s.phoneNumber!,
-      address: s.address!,
-      prefectureName: locationNames.prefectureName,
-      cityName: locationNames.cityName,
-      reservationsCount: reservationCounts.find(item => item.id === s.id)!.count,
-      stylistsCount: stylistCounts.find(item => item.id === s.id)!.count,
-    }
-  })
+  const shopData = shops.map(s => ({
+    id: s.id,
+    name: s.name!,
+    phoneNumber: s.phoneNumber!,
+    address: s.address!,
+    prefectureName: s.prefecture.name,
+    cityName: s.city.name,
+    reservationsCount: reservationCounts.find(item => item.id === s.id)!.count,
+    stylistsCount: stylistCounts.find(item => item.id === s.id)!.count,
+  }))
 
   const usersForList = users.map(u => ({
     id: u.id,
@@ -81,49 +60,53 @@ const salonIndexForAdmin = async (user: User): Promise<salonIndexAdminResponse> 
   }
 }
 
-const salonIndexForShopStaff = async (user: User): Promise<salonIndexShopStaffResponse> => {
+const salonIndexForShopStaff = async (user: UserForAuth): Promise<salonIndexShopStaffResponse> => {
   const { shops, totalCount: shopTotalCount } = await ShopService.fetchShopsForDashboardForShopStaff(user)
   const shopIds = shops.map(shop => shop.id)
-  const locationNamesOfShops = await LocationService.fetchLocationNamesOfShops(
-    user,
-    shops.map(s => ({
-      shopId: s.id,
-      areaId: s.area!.id,
-      prefectureId: s.prefecture!.id,
-      cityId: s.city!.id,
-    })),
-  )
   const stylistCounts = await ShopService.fetchStylistsCountByShopIds(shopIds)
   const reservationCounts = await ShopService.fetchReservationsCountByShopIds(shopIds)
-  const shopData = shops.map(s => {
-    const locationNames = locationNamesOfShops.find(l => l.shopId === s.id)!
-    return {
-      id: s.id,
-      name: s.name!,
-      phoneNumber: s.phoneNumber,
-      address: s.address,
-      prefectureName: locationNames.prefectureName,
-      cityName: locationNames.cityName,
-      reservationsCount: reservationCounts.find(item => item.id === s.id)!.count,
-      stylistsCount: stylistCounts.find(item => item.id === s.id)!.count,
-    }
-  })
-  // reservations
-  const reservations = await ShopService.fetchShopsReservations(user, shopIds)
-  const reservationList = reservations.map(r => ({
-    id: r.id,
-    shopName: r.shop!.name!,
-    clientName: `${r.user.lastNameKana!} ${r.user.firstNameKana!}`,
-    menuItemName: r.menuItem.name,
-    stylistName: r.stylist!.name ?? null,
-    status: r.status,
+  const shopData = shops.map(s => ({
+    id: s.id,
+    name: s.name!,
+    phoneNumber: s.phoneNumber,
+    address: s.address,
+    prefectureName: s.prefecture.name,
+    cityName: s.city.name,
+    reservationsCount: reservationCounts.find(item => item.id === s.id)!.count,
+    stylistsCount: stylistCounts.find(item => item.id === s.id)!.count,
   }))
 
+  // reservations
+  const reservations = await ShopService.fetchShopStaffReservationForDashboard(user)
+  const clients = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
+  const reservationShops = await ShopService.fetchShopsByIds(user, reservations.map(r => r.shopId))
+  const stylistIds = reservations.map(r => r.stylistId).filter((r): r is number => typeof r === 'number')
+  const reservationStylists = await ShopService.fetchStylistsByIds(user, stylistIds)
+  const menus = await ShopService.fetchMenusByIds(user, reservations.map(r => r.menuId))
+
+  const reservationList = reservations.map(r => {
+    const client = clients.find(c => c.id === r.clientId)!
+    const shop = reservationShops.find(rs => rs.id === r.shopId)!
+    const stylist = reservationStylists.find(rs => rs.id === r.stylistId)
+    const menu = menus.find(m => m.id === r.menuId)!
+    return {
+      id: r.id,
+      shopId: r.shopId,
+      shopName: shop.name,
+      clientName: `${client.lastNameKana!} ${client.firstNameKana!}`,
+      menuName: menu.name,
+      stylistName: stylist?.name,
+      status: r.status,
+      reservationDate: r.reservationDate,
+    }
+  })
+
   // stylists
-  const stylists = await ShopService.fetchShopsStylists(user, shops.map(s => s.id))
+  const stylists = await ShopService.fetchShopStaffStylistsForDashboard(user)
   const stylistReservationCounts = await ShopService.fetchStylistsReservationCounts(user, stylists.map(s => s.id))
   const stylistList = stylists.map(s => ({
     id: s.id,
+    shopId: s.shopId,
     name: s.name,
     price: s.price,
     reservationCount: stylistReservationCounts.find(src => src.stylistId === s.id)!.reservationCount,
@@ -141,7 +124,7 @@ const DashboardController : DashboardControllerInterface = {
     if (user.role.slug === RoleSlug.SHOP_STAFF) {
       return salonIndexForShopStaff(user)
     }
-    return salonIndexForAdmin(user)
+    return salonIndexForAdmin()
   },
 
 }

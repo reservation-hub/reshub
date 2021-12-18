@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import { UserServiceInterface as UserControllerSocket } from '@controllers/userController'
 import { UserServiceInterface as DashboardControllerSocket } from '@controllers/dashboardController'
+import { UserServiceInterface as ShopControllerSocket } from '@controllers/shopController'
 import { Gender, User } from '@entities/User'
 import UserRepository from '@repositories/UserRepository'
 import RoleRepository from '@repositories/RoleRepository'
@@ -17,6 +18,7 @@ export type UserRepositoryInterface = {
     : Promise<User>,
   deleteUserFromAdmin(id: number): Promise<User>,
   searchUser(keyword: string): Promise<User[]>,
+  fetchUsersByIds(userIds: number[]): Promise<User[]>
 }
 
 export type RoleRepositoryInterface = {
@@ -28,7 +30,7 @@ export type ReservationRepositoryInterface = {
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 
-const UserService: UserControllerSocket & DashboardControllerSocket = {
+const UserService: UserControllerSocket & DashboardControllerSocket & ShopControllerSocket = {
   async fetchUsersForDashboard() {
     const users = await UserRepository.fetchAll({ limit: 5 })
     const totalCount = await UserRepository.totalCount()
@@ -55,6 +57,10 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
     return user
   },
 
+  async fetchUsersByIds(userIds) {
+    return UserRepository.fetchUsersByIds(userIds)
+  },
+
   async insertUserFromAdmin(password, confirm, email, roleSlug, lastNameKanji,
     firstNameKanji, lastNameKana, firstNameKana, gender, birthday) {
     if (password !== confirm) {
@@ -76,12 +82,10 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
 
     const hash = bcrypt.hashSync(password, 10 /* hash rounds */)
 
-    const user = await UserRepository.insertUserWithProfile(
+    await UserRepository.insertUserWithProfile(
       email, hash, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, birthday, gender,
     )
-
-    return user
   },
 
   async updateUserFromAdmin(id, email, roleSlug, lastNameKanji, firstNameKanji,
@@ -98,12 +102,10 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
 
-    const updatedUser = await UserRepository.updateUserFromAdmin(
+    await UserRepository.updateUserFromAdmin(
       id, email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, birthday, gender,
     )
-
-    return updatedUser
   },
 
   async deleteUserFromAdmin(id) {
@@ -112,8 +114,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket = {
       console.error('User does not exist')
       throw new NotFoundError()
     }
-    const deletedUser = await UserRepository.deleteUserFromAdmin(id)
-    return deletedUser
+    await UserRepository.deleteUserFromAdmin(id)
   },
 
   async fetchUsersReservationCounts(userIds) {

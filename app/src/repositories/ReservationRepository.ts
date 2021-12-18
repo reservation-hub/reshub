@@ -1,10 +1,11 @@
-import { Prisma, ReservationStatus as PrismaReservationStatus } from '@prisma/client'
+import {
+  ReservationStatus as PrismaReservationStatus,
+  Reservation as PrismaReservation,
+} from '@prisma/client'
 import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
 import { ReservationRepositoryInterface as UserServiceSocket } from '@services/UserService'
-import { StylistSchedule } from '@entities/Stylist'
 import prisma from './prisma'
-import { convertRoleSlug } from './UserRepository'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 export const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
@@ -18,51 +19,15 @@ export const convertReservationStatus = (status: PrismaReservationStatus): Reser
   }
 }
 
-const reservationWithUserAndStylistAndShopWithoutLocation = Prisma.validator<Prisma.ReservationArgs>()(
-  {
-    include: {
-      user: { include: { profile: true, role: true } },
-      shop: { include: { shopDetail: true } },
-      stylist: { include: { shop: true } },
-      menuItem: true,
-    },
-  },
-)
-type reservationWithUserAndStylistAndShopWithoutLocation =
-Prisma.ReservationGetPayload<typeof reservationWithUserAndStylistAndShopWithoutLocation>
-
-export const reconstructReservation = (reservation: reservationWithUserAndStylistAndShopWithoutLocation)
+export const reconstructReservation = (reservation: PrismaReservation)
 : Reservation => ({
   id: reservation.id,
+  shopId: reservation.shopId,
   reservationDate: reservation.reservationDate,
   status: convertReservationStatus(reservation.status),
-  menuItem: reservation.menuItem,
-  shop: {
-    id: reservation.shop.id,
-    name: reservation.shop.shopDetail?.name,
-  },
-  stylist: reservation.stylist ? {
-    id: reservation.stylist.id,
-    name: reservation.stylist.name,
-    price: reservation.stylist.price,
-    shop: reservation.stylist.shop,
-    schedule: reservation.stylist.schedule as StylistSchedule,
-  } : undefined,
-  user: {
-    id: reservation.user.id,
-    email: reservation.user.email,
-    password: reservation.user.password,
-    lastNameKanji: reservation.user.profile?.lastNameKanji,
-    firstNameKanji: reservation.user.profile?.firstNameKanji,
-    lastNameKana: reservation.user.profile?.lastNameKana,
-    firstNameKana: reservation.user.profile?.firstNameKana,
-    role: {
-      id: reservation.user.role!.id,
-      name: reservation.user.role!.name,
-      description: reservation.user.role!.description,
-      slug: convertRoleSlug(reservation.user.role!.slug),
-    },
-  },
+  clientId: reservation.userId,
+  menuId: reservation.menuId,
+  stylistId: reservation.stylistId ?? undefined,
 })
 
 const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServiceSocket & UserServiceSocket = {
@@ -72,12 +37,6 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
       skip: skipIndex,
       orderBy: { id: order },
       take: limit,
-      include: {
-        user: { include: { profile: true, role: true } },
-        shop: { include: { shopDetail: true } },
-        stylist: { include: { shop: true } },
-        menuItem: true,
-      },
     })
 
     const cleanReservations = reservations.map(r => reconstructReservation(r))
@@ -92,12 +51,6 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
   async fetch(id) {
     const reservation = await prisma.reservation.findUnique({
       where: { id },
-      include: {
-        user: { include: { profile: true, role: true } },
-        shop: { include: { shopDetail: true } },
-        stylist: { include: { shop: true } },
-        menuItem: true,
-      },
     })
     return reservation ? reconstructReservation(reservation) : null
   },
@@ -105,30 +58,29 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
   async fetchReservationsByShopIds(shopIds) {
     const reservations = await prisma.reservation.findMany({
       where: { shopId: { in: shopIds } },
-      include: {
-        user: { include: { profile: true, role: true } },
-        shop: { include: { shopDetail: true } },
-        stylist: { include: { shop: true } },
-        menuItem: true,
-      },
     })
 
-    const finalData = shopIds.map(id => ({
+    return shopIds.map(id => ({
       id,
       data: reservations.filter(reservation => reservation.shopId === id)
         .map(reservation => reconstructReservation(reservation)),
     }))
+  },
 
-    return finalData
+  async fetchShopStaffReservations(userId) {
+    const reservations = await prisma.reservation.findMany({
+      where: { shop: { shopUser: { userId } } },
+      take: 5,
+    })
+    return reservations.map(r => reconstructReservation(r))
   },
 
   async fetchReservationsCountByShopIds(shopIds) {
     const value = await this.fetchReservationsByShopIds(shopIds)
-    const finalData = value.map(item => ({ id: item.id, count: item.data.length }))
-    return finalData
+    return value.map(item => ({ id: item.id, count: item.data.length }))
   },
 
-  async insertReservation(reservationDate, userId, shopId, menuItemId, stylistId?) {
+  async insertReservation(reservationDate, userId, shopId, menuId, stylistId?) {
     const reservation = await prisma.reservation.create({
       data: {
         reservationDate,
@@ -141,22 +93,16 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         user: {
           connect: { id: userId },
         },
-        menuItem: {
-          connect: { id: menuItemId },
+        menu: {
+          connect: { id: menuId },
         },
-      },
-      include: {
-        user: { include: { profile: true, role: true } },
-        shop: { include: { shopDetail: true } },
-        stylist: { include: { shop: true } },
-        menuItem: true,
       },
     })
     const cleanReservation = reconstructReservation(reservation)
     return cleanReservation
   },
 
-  async updateReservation(id, reservationDate, userId, shopId, menuItemId, stylistId) {
+  async updateReservation(id, reservationDate, userId, shopId, menuId, stylistId) {
     const reservation = await prisma.reservation.update({
       where: { id },
       data: {
@@ -170,15 +116,9 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
         user: {
           connect: { id: userId },
         },
-        menuItem: {
-          connect: { id: menuItemId },
+        menu: {
+          connect: { id: menuId },
         },
-      },
-      include: {
-        user: { include: { profile: true, role: true } },
-        shop: { include: { shopDetail: true } },
-        stylist: { include: { shop: true } },
-        menuItem: true,
       },
     })
     const cleanReservation = reconstructReservation(reservation)
@@ -191,12 +131,6 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
       data: {
         status: PrismaReservationStatus.CANCELLED,
       },
-      include: {
-        user: { include: { profile: true, role: true } },
-        shop: { include: { shopDetail: true } },
-        stylist: { include: { shop: true } },
-        menuItem: true,
-      },
     })
     const cleanReservation = reconstructReservation(reservation)
     return cleanReservation
@@ -205,12 +139,6 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
   async fetchShopsReservations(shopIds) {
     const reservations = await prisma.reservation.findMany({
       where: { shopId: { in: shopIds } },
-      include: {
-        user: { include: { profile: true, role: true } },
-        shop: { include: { shopDetail: true } },
-        stylist: { include: { shop: true } },
-        menuItem: true,
-      },
     })
     const cleanReservations = reservations.map(r => reconstructReservation(r))
     return cleanReservations
@@ -219,12 +147,6 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
   async fetchShopReservations(shopId) {
     const reservations = await prisma.reservation.findMany({
       where: { shopId },
-      include: {
-        user: { include: { profile: true, role: true } },
-        shop: { include: { shopDetail: true } },
-        stylist: { include: { shop: true } },
-        menuItem: true,
-      },
     })
     const cleanReservations = reservations.map(r => reconstructReservation(r))
     return cleanReservations

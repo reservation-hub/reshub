@@ -20,3 +20,8 @@ export type User = {
   gender?: Gender
   oAuthIds?: OAuthIds
 }
+
+export type UserForAuth = {
+  id: number,
+  role: Role
+}

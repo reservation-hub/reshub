@@ -8,6 +8,33 @@ datasource db {
   url      = env("POSTGRES_HOST")
 }
 
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum RoleSlug {
+  ADMIN
+  SHOP_STAFF
+  CLIENT
+}
+
+enum ReservationStatus {
+  CANCELLED
+  COMPLETED
+  RESERVED
+}
+
+enum Days {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 model User {
   id           Int           @id @default(autoincrement())
   email        String        @unique @db.VarChar(255)
@@ -22,11 +49,6 @@ model User {
   role         Role          @relation(fields: [roleId], references: [id])
   roleId       Int
   shopUser     ShopUser[]
-}
-
-enum Gender {
-  MALE
-  FEMALE
 }
 
 model UserProfile {
@@ -48,12 +70,6 @@ model UserOAuthIds {
   googleId   String? @unique @map("google_id")
   userId     Int     @unique @map("user_id")
   user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-enum RoleSlug {
-  ADMIN
-  SHOP_STAFF
-  CLIENT
 }
 
 model Role {
@@ -101,8 +117,7 @@ model Shop {
   area         Area          @relation(fields: [areaId], references: [id])
   city         City          @relation(fields: [cityId], references: [id])
   prefecture   Prefecture    @relation(fields: [prefectureId], references: [id])
-  menu         Menu          @relation(fields: [menuId], references: [id], onDelete: Cascade)
-  menuId       Int           @unique @map("menu_id")
+  menu         Menu[]
   reservations Reservation[]
   shopDetail   ShopDetail    @relation(fields: [shopDetailId], references: [id], onDelete: Cascade)
   shopDetailId Int           @unique @map("shop_detail_id")
@@ -111,22 +126,15 @@ model Shop {
 }
 
 model Menu {
-  id     Int        @id @default(autoincrement())
-  items  MenuItem[]
-  shopId Int?       @unique @map("shop_id")
-  shop   Shop?
-}
-
-model MenuItem {
   id          Int           @id @default(autoincrement())
   name        String        @db.VarChar(255)
   description String        @db.VarChar(255)
   price       Int
   duration    Int
   imageId     Int?          @unique @map("image_id")
-  menuId      Int           @map("menu_id")
+  shopId      Int           @map("shop_id")
   image       ModelImage?   @relation(fields: [imageId], references: [id])
-  menu        Menu          @relation(fields: [menuId], references: [id])
+  shop        Shop          @relation(fields: [shopId], references: [id])
   Reservation Reservation[]
 }
 
@@ -146,7 +154,9 @@ model ShopDetail {
   shopId      Int?         @unique @map("shop_id")
   shop        Shop?
   details     String?      @db.VarChar(255)
-  schedule    Json?
+  days        Days[]
+  startTime   String       @map("start_time")
+  endTime     String       @map("end_time")
   images      ModelImage[]
 }
 
@@ -158,7 +168,7 @@ model ModelImage {
   image        Image       @relation(fields: [imageId], references: [id], onDelete: Cascade)
   shopDetail   ShopDetail? @relation(fields: [shopDetailId], references: [id], onDelete: Cascade)
   stylist      Stylist?    @relation(fields: [stylistId], references: [id], onDelete: Cascade)
-  menuItem     MenuItem?
+  menu         Menu?
 }
 
 model Image {
@@ -176,13 +186,9 @@ model Stylist {
   price        Int
   shopId       Int           @map("shop_id")
   shop         Shop          @relation(fields: [shopId], references: [id])
-  schedule     Json?
-}
-
-enum ReservationStatus {
-  CANCELLED
-  COMPLETED
-  RESERVED
+  days         Days[]
+  startTime    String        @map("start_time")
+  endTime      String        @map("end_time")
 }
 
 model Reservation {
@@ -191,8 +197,8 @@ model Reservation {
   updatedAt       DateTime          @updatedAt @map("updated_at")
   shopId          Int               @map("shop_id")
   stylistId       Int?              @map("stylist_id")
-  menuItemId      Int               @map("menu_item_id")
-  menuItem        MenuItem          @relation(fields: [menuItemId], references: [id])
+  menuId          Int               @map("menu_id")
+  menu            Menu              @relation(fields: [menuId], references: [id])
   userId          Int               @map("user_id")
   status          ReservationStatus @default(RESERVED)
   reservationDate DateTime          @map("reservation_date") @db.Timestamp(6)

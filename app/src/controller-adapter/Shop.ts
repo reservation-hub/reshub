@@ -4,37 +4,38 @@ import {
 import ShopController from '@controllers/shopController'
 import { parseIntIdMiddleware } from '@routes/utils'
 import {
-  deleteMenuItemQuery, deleteShopQuery, deleteShopReservationQuery, deleteStylistQuery,
-  insertMenuItemQuery, insertShopQuery, insertShopReservationQuery, insertStylistQuery,
-  menuResponse, reservationResponse, shopQuery, shopResponse, shopSearchQuery, shopSearchResponse,
-  shopsResponse, shopsWithCountQuery, showShopReservationsQuery, showShopReservationsResponse,
-  stylistResponse, updateMenuItemQuery, updateShopQuery, updateShopReservationQuery, updateStylistQuery,
+  InsertShopQuery, UpdateShopQuery, ShopQuery, ShopListResponse, ShopListQuery, ShopResponse,
+  DeleteShopQuery, InsertStylistQuery, UpdateStylistQuery, DeleteStylistQuery,
+  ShopSearchQuery, InsertMenuQuery, UpdateMenuQuery, DeleteMenuQuery, ReservationListQuery,
+  ReservationListResponse, InsertShopReservationQuery, UpdateShopReservationQuery,
+  DeleteShopReservationQuery,
 } from '@request-response-types/Shop'
-import { User } from '@entities/User'
+import { UserForAuth } from '@entities/User'
+import { ResponseMessage } from '@request-response-types/Common'
 
 export type ShopControllerInterface = {
-  index(user: User, query: shopsWithCountQuery) : Promise<shopsResponse>
-  show(user: User, query: shopQuery) : Promise<shopResponse>
-  insert(user: User, query: insertShopQuery) : Promise<shopResponse>
-  update(user: User, query: updateShopQuery) : Promise<shopResponse>
-  delete(user: User, query: deleteShopQuery) : Promise<{ message: string }>
-  insertStylist(user: User, query: insertStylistQuery) : Promise<stylistResponse>
-  updateStylist(user: User, query: updateStylistQuery) : Promise<stylistResponse>
-  deleteStylist(user: User, query: deleteStylistQuery) : Promise<{ message: string }>
-  searchShops(query: shopSearchQuery): Promise<shopSearchResponse>
-  insertMenuItem(user: User, query: insertMenuItemQuery): Promise<menuResponse>
-  updateMenuItem(user: User, query: updateMenuItemQuery): Promise<menuResponse>
-  deleteMenuItem(user: User, query: deleteMenuItemQuery): Promise<{ message: string }>
-  showReservations(user: User, query: showShopReservationsQuery): Promise<showShopReservationsResponse>
-  insertReservation(user: User, query: insertShopReservationQuery): Promise<reservationResponse>
-  updateReservation(user: User, query: updateShopReservationQuery): Promise<reservationResponse>
-  deleteReservation(user: User, query: deleteShopReservationQuery): Promise<{ message: string }>
+  index(user: UserForAuth, query: ShopListQuery) : Promise<ShopListResponse>
+  show(user: UserForAuth, query: ShopQuery) : Promise<ShopResponse>
+  insert(user: UserForAuth, query: InsertShopQuery) : Promise<ResponseMessage>
+  update(user: UserForAuth, query: UpdateShopQuery) : Promise<ResponseMessage>
+  delete(user: UserForAuth, query: DeleteShopQuery) : Promise<ResponseMessage>
+  insertStylist(user: UserForAuth, query: InsertStylistQuery) : Promise<ResponseMessage>
+  updateStylist(user: UserForAuth, query: UpdateStylistQuery) : Promise<ResponseMessage>
+  deleteStylist(user: UserForAuth, query: DeleteStylistQuery) : Promise<ResponseMessage>
+  searchShops(query: ShopSearchQuery): Promise<ShopListResponse>
+  insertMenu(user: UserForAuth, query: InsertMenuQuery): Promise<ResponseMessage>
+  updateMenu(user: UserForAuth, query: UpdateMenuQuery): Promise<ResponseMessage>
+  deleteMenu(user: UserForAuth, query: DeleteMenuQuery): Promise<ResponseMessage>
+  showReservations(user: UserForAuth, query: ReservationListQuery): Promise<ReservationListResponse>
+  insertReservation(user: UserForAuth, query: InsertShopReservationQuery): Promise<ResponseMessage>
+  updateReservation(user: UserForAuth, query: UpdateShopReservationQuery): Promise<ResponseMessage>
+  deleteReservation(user: UserForAuth, query: DeleteShopReservationQuery): Promise<ResponseMessage>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { page, order } = req.query
-    const user = req.user as User
+    const user = req.user as UserForAuth
     return res.send(await ShopController.index(user, { page, order }))
   } catch (e) { return next(e) }
 }
@@ -42,7 +43,7 @@ const index = async (req: Request, res: Response, next: NextFunction) : Promise<
 const showShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { id } = res.locals
-    const user = req.user as User
+    const user = req.user as UserForAuth
     return res.send(await ShopController.show(user, { id }))
   } catch (e) { return next(e) }
 }
@@ -50,7 +51,7 @@ const showShop = async (req: Request, res: Response, next: NextFunction) : Promi
 const insertShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body } = req
-    const user = req.user as User
+    const user = req.user as UserForAuth
     return res.send(await ShopController.insert(user, body))
   } catch (e) { return next(e) }
 }
@@ -58,7 +59,7 @@ const insertShop = async (req: Request, res: Response, next: NextFunction) : Pro
 const updateShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body: params } = req
-    const user = req.user as User
+    const user = req.user as UserForAuth
     const { id } = res.locals
     return res.send(await ShopController.update(user, { id, params }))
   } catch (e) { return next(e) }
@@ -66,7 +67,7 @@ const updateShop = async (req: Request, res: Response, next: NextFunction) : Pro
 
 const deleteShop = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const user = req.user as User
+    const user = req.user as UserForAuth
     const { id } = res.locals
     return res.send(await ShopController.delete(user, { id }))
   } catch (e) { return next(e) }
@@ -76,7 +77,7 @@ const insertStylist = async (req: Request, res: Response, next: NextFunction) : 
   try {
     const { shopId } = res.locals
     const { body: params } = req
-    const user = req.user as User
+    const user = req.user as UserForAuth
     return res.send(await ShopController.insertStylist(user, { shopId, params }))
   } catch (e) { return next(e) }
 }
@@ -85,7 +86,7 @@ const updateStylist = async (req: Request, res: Response, next: NextFunction) : 
   try {
     const { shopId, stylistId } = res.locals
     const { body: params } = req
-    const user = req.user as User
+    const user = req.user as UserForAuth
     return res.send(await ShopController.updateStylist(user, { shopId, stylistId, params }))
   } catch (e) { return next(e) }
 }
@@ -93,7 +94,7 @@ const updateStylist = async (req: Request, res: Response, next: NextFunction) : 
 const deleteStylist = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { shopId, stylistId } = res.locals
-    const user = req.user as User
+    const user = req.user as UserForAuth
     return res.send(await ShopController.deleteStylist(user, { shopId, stylistId }))
   } catch (e) { return next(e) }
 }
@@ -105,36 +106,36 @@ const searchShops = async (req: Request, res: Response, next: NextFunction) : Pr
   } catch (e) { return next(e) }
 }
 
-const insertMenuItem = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+const insertMenu = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body: params } = req
     const { shopId } = res.locals
-    const user = req.user as User
-    return res.send(await ShopController.insertMenuItem(user, { shopId, params }))
+    const user = req.user as UserForAuth
+    return res.send(await ShopController.insertMenu(user, { shopId, params }))
   } catch (e) { return next(e) }
 }
 
-const updateMenuItem = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+const updateMenu = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body: params } = req
-    const { shopId, menuItemId } = res.locals
-    const user = req.user as User
-    return res.send(await ShopController.updateMenuItem(user, { shopId, menuItemId, params }))
+    const { shopId, menuId } = res.locals
+    const user = req.user as UserForAuth
+    return res.send(await ShopController.updateMenu(user, { shopId, menuId, params }))
   } catch (e) { return next(e) }
 }
 
-const deleteMenuItem = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+const deleteMenu = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { shopId, menuItemId } = res.locals
-    const user = req.user as User
-    return res.send(await ShopController.deleteMenuItem(user, { shopId, menuItemId }))
+    const { shopId, menuId } = res.locals
+    const user = req.user as UserForAuth
+    return res.send(await ShopController.deleteMenu(user, { shopId, menuId }))
   } catch (e) { return next(e) }
 }
 
 const showReservations = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { shopId } = res.locals
-    const user = req.user as User
+    const user = req.user as UserForAuth
     return res.send(await ShopController.showReservations(user, { shopId }))
   } catch (e) { return next(e) }
 }
@@ -143,7 +144,7 @@ const insertReservation = async (req: Request, res: Response, next: NextFunction
   try {
     const { body: params } = req
     const { shopId } = res.locals
-    const user = req.user as User
+    const user = req.user as UserForAuth
     return res.send(await ShopController.insertReservation(user, { shopId, params }))
   } catch (e) { return next(e) }
 }
@@ -152,7 +153,7 @@ const updateReservation = async (req: Request, res: Response, next: NextFunction
   try {
     const { body: params } = req
     const { shopId, reservationId } = res.locals
-    const user = req.user as User
+    const user = req.user as UserForAuth
     return res.send(await ShopController.updateReservation(user, { shopId, reservationId, params }))
   } catch (e) { return next(e) }
 }
@@ -160,7 +161,7 @@ const updateReservation = async (req: Request, res: Response, next: NextFunction
 const deleteReservation = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { shopId, reservationId } = res.locals
-    const user = req.user as User
+    const user = req.user as UserForAuth
     return res.send(await ShopController.deleteReservation(user, { shopId, reservationId }))
   } catch (e) { return next(e) }
 }
@@ -181,9 +182,9 @@ routes.patch('/:shopId/stylist/:stylistId', parseIntIdMiddleware, updateStylist)
 routes.delete('/:shopId/stylist/:stylistId', parseIntIdMiddleware, deleteStylist)
 
 // menu routes
-routes.post('/:shopId/menu', parseIntIdMiddleware, insertMenuItem)
-routes.patch('/:shopId/menu/:menuItemId', parseIntIdMiddleware, updateMenuItem)
-routes.delete('/:shopId/menu/:menuItemId', parseIntIdMiddleware, deleteMenuItem)
+routes.post('/:shopId/menu', parseIntIdMiddleware, insertMenu)
+routes.patch('/:shopId/menu/:menuId', parseIntIdMiddleware, updateMenu)
+routes.delete('/:shopId/menu/:menuId', parseIntIdMiddleware, deleteMenu)
 
 // reservation routes
 routes.get('/:shopId/reservation', parseIntIdMiddleware, showReservations)
