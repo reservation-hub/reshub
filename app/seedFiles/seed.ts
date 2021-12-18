@@ -2,6 +2,9 @@ import bcrypt from 'bcrypt'
 import prisma from '../src/repositories/prisma'
 import areas from './areas-db'
 import prefectures from './prefec-db'
+import lastNames from './lastNames'
+import maleNames from './maleNames'
+import femaleNames from './femaleNames'
 import cities from './cities-db'
 import { RoleSlug, Days } from '.prisma/client'
 
@@ -32,56 +35,21 @@ const admins = [
   },
 ]
 
-const staffs = [
-  {
-    firstNameKanji: 'staff',
-    lastNameKanji: 'staff',
-    firstNameKana: 'staff',
-    lastNameKana: 'staff',
-    password: 'testtest',
-    email: 'staff1@staff.com',
-  },
-  {
-    firstNameKanji: 'staff',
-    lastNameKanji: 'staff',
-    firstNameKana: 'staff',
-    lastNameKana: 'staff',
-    password: 'testtest',
-    email: 'staff2@staff.com',
-  },
-  {
-    firstNameKanji: 'staff',
-    lastNameKanji: 'staff',
-    firstNameKana: 'staff',
-    lastNameKana: 'staff',
-    password: 'testtest',
-    email: 'staff3@staff.com',
-  },
-  {
-    firstNameKanji: 'staff',
-    lastNameKanji: 'staff',
-    firstNameKana: 'staff',
-    lastNameKana: 'staff',
-    password: 'testtest',
-    email: 'staff4@staff.com',
-  },
-  {
-    firstNameKanji: 'staff',
-    lastNameKanji: 'staff',
-    firstNameKana: 'staff',
-    lastNameKana: 'staff',
-    password: 'testtest',
-    email: 'staff5@staff.com',
-  },
-  {
-    firstNameKanji: 'staff',
-    lastNameKanji: 'staff',
-    firstNameKana: 'staff',
-    lastNameKana: 'staff',
-    password: 'testtest',
-    email: 'staff6@staff.com',
-  },
-]
+const staffs = Array(100).fill('').map((s, i) => `staff${i + 1}@staff.com`)
+const clients = Array(2000).fill({ first: '', last: '' }).map((c, i) => {
+  const lastNameIndex = Math.floor(Math.random() * lastNames.length)
+  const lastName = lastNames[lastNameIndex]
+  let firstNameIndex
+  let firstName
+  if (i % 2 === 0) {
+    firstNameIndex = Math.floor(Math.random() * maleNames.length)
+    firstName = maleNames[firstNameIndex]
+  } else {
+    firstNameIndex = Math.floor(Math.random() * femaleNames.length)
+    firstName = femaleNames[firstNameIndex]
+  }
+  return { first: firstName, last: lastName }
+})
 
 const roles = [
   {
@@ -133,7 +101,7 @@ const roles = [
         create: {
           email: admin.email,
           username: admin.username,
-          password: bcrypt.hashSync(admin.password, 10),
+          password: bcrypt.hashSync('testtest', 10),
           profile: {
             create: {
               firstNameKanji: admin.firstNameKanji,
@@ -162,21 +130,30 @@ const roles = [
     where: { slug: RoleSlug.SHOP_STAFF },
   })
 
-  const staffPromises = staffs.map(async (staff: any) => {
+  const staffPromises = staffs.map(async (staffEmail, i) => {
     try {
-      return prisma.user.upsert({
-        where: { email: staff.email },
-        update: {},
-        create: {
-          email: staff.email,
-          username: staff.username,
-          password: bcrypt.hashSync(staff.password, 10),
+      const lastNameIndex = Math.floor(Math.random() * lastNames.length)
+      const lastName = lastNames[lastNameIndex]
+      let firstNameIndex
+      let firstName
+      if (i % 2 === 0) {
+        firstNameIndex = Math.floor(Math.random() * maleNames.length)
+        firstName = maleNames[firstNameIndex]
+      } else {
+        firstNameIndex = Math.floor(Math.random() * femaleNames.length)
+        firstName = femaleNames[firstNameIndex]
+      }
+      return prisma.user.create({
+        data: {
+          email: staffEmail,
+          username: staffEmail,
+          password: bcrypt.hashSync('testtest', 10),
           profile: {
             create: {
-              firstNameKanji: staff.firstNameKanji,
-              lastNameKanji: staff.lastNameKanji,
-              firstNameKana: staff.firstNameKana,
-              lastNameKana: staff.lastNameKana,
+              firstNameKanji: firstName,
+              lastNameKanji: lastName,
+              firstNameKana: firstName,
+              lastNameKana: lastName,
             },
           },
           role: {
@@ -193,6 +170,32 @@ const roles = [
   })
 
   await Promise.all(staffPromises)
+
+  console.log('running client seeder')
+  const clientRole = await prisma.role.findUnique({
+    where: { slug: RoleSlug.CLIENT },
+  })
+  const clientPromises = clients.map((c, i) => prisma.user.create({
+    data: {
+      email: `${c.last.toLowerCase}${c.first.toLowerCase}${i}@client.com`,
+      username: `${c.last.toLowerCase}${c.first.toLowerCase}${i}`,
+      password: bcrypt.hashSync('testtest', 10),
+      profile: {
+        create: {
+          firstNameKanji: c.first,
+          lastNameKanji: c.last,
+          firstNameKana: c.first,
+          lastNameKana: c.last,
+        },
+      },
+      role: {
+        connect: {
+          id: clientRole?.id,
+        },
+      },
+    },
+  }))
+  await Promise.all(clientPromises)
 
   console.log('running area seeder')
 
@@ -256,7 +259,7 @@ const roles = [
 
   console.log('running shop seeder')
   const cityCount = 1747
-  let count = 10
+  let count = 300
   while (count > 0) {
     const randomInt = Math.floor(Math.random() * cityCount)
     try {
@@ -320,83 +323,118 @@ const roles = [
   const shopStaffs = await prisma.user.findMany({
     where: { role: { slug: RoleSlug.SHOP_STAFF } },
   })
+  const shopStaffIds = shopStaffs.map(s => s.id)
   const staffShopTargets = await prisma.shop.findMany({})
-  shopStaffs.map(async ss => {
+  staffShopTargets.map(async sst => {
+    const randomStaffId = Math.floor(Math.random() * shopStaffIds.length) + 1
     await prisma.shopUser.create({
       data: {
-        shopId: staffShopTargets[ss.id].id,
-        userId: ss.id,
+        shopId: sst.id,
+        userId: shopStaffIds[randomStaffId],
       },
     })
   })
 
   console.log('running menu seeder')
   const shops = await prisma.shop.findMany()
-  const menuPromises = shops.map(async s => prisma.menu.create({
-    data: {
-      name: 'test',
-      description: 'test',
-      price: 500,
+  const menuPromises = shops.map(async s => prisma.menu.createMany({
+    data: [{
+      name: 'フワ',
+      description: 'ふわふわになる',
+      price: Math.floor(Math.random() * 100000) + 3000,
       shopId: s.id,
-      duration: 60,
-    },
+      duration: Math.floor(Math.random() * 2) === 0 ? 30 : 60,
+    }, {
+      name: 'ボウズ',
+      description: 'ハゲになるやつ',
+      price: Math.floor(Math.random() * 100000) + 3000,
+      shopId: s.id,
+      duration: Math.floor(Math.random() * 2) === 0 ? 30 : 60,
+    }, {
+      name: 'アフロ',
+      description: 'ファンキー',
+      price: Math.floor(Math.random() * 100000) + 3000,
+      shopId: s.id,
+      duration: Math.floor(Math.random() * 2) === 0 ? 30 : 60,
+    }],
   }))
 
   await Promise.all(menuPromises)
 
   console.log('running stylist seeder')
-  const shopCounts = await prisma.shop.count()
-  const randomShopInt = Math.floor(Math.random() * shopCounts)
-  const randomShop = async () => prisma.shop.findFirst({ skip: randomShopInt })
-  const stylists = [
-    { name: 'Testarou', price: 500, shop: await randomShop() },
-    { name: 'Testoko', price: 500, shop: await randomShop() },
-  ]
+  const shopsForSeed = await prisma.shop.findMany({
+    include: { menu: true },
+  })
 
-  const stylistPromises = stylists.map(async stylist => prisma.stylist.create({
-    data: {
-      name: stylist.name,
-      price: stylist.price,
-      days: [
-        Days.MONDAY,
-        Days.WEDNESDAY,
-        Days.FRIDAY,
-        Days.THURSDAY,
-        Days.SATURDAY,
-        Days.SUNDAY,
-      ],
-      startTime: '10:00',
-      endTime: '20:00',
-      shop: {
-        connect: {
-          id: stylist.shop?.id,
+  const stylistPromises = shopsForSeed.map(async s => {
+    const stylistLastNames = Array(10).fill('').map(x => lastNames[Math.floor(Math.random() * lastNames.length)])
+    const stylistFemaleNames = Array(5).fill('').map(x => lastNames[Math.floor(Math.random() * femaleNames.length)])
+    const stylistMaleNames = Array(5).fill('').map(x => lastNames[Math.floor(Math.random() * maleNames.length)])
+    const stylistFirstNames = [...stylistFemaleNames, ...stylistMaleNames]
+    return stylistLastNames.map(async (slm, i) => prisma.stylist.create({
+      data: {
+        name: `${slm} ${stylistFirstNames[i]}`,
+        price: Math.floor(Math.random() * 100000),
+        days: [
+          Days.MONDAY,
+          Days.WEDNESDAY,
+          Days.FRIDAY,
+          Days.THURSDAY,
+          Days.SATURDAY,
+          Days.SUNDAY,
+        ],
+        startTime: '10:00',
+        endTime: '20:00',
+        shop: {
+          connect: {
+            id: s.id,
+          },
         },
       },
-    },
-  }))
-
+    }))
+  })
   await Promise.all(stylistPromises)
 
   console.log('running reservation seeder')
-  const randomStylist = await prisma.stylist.findFirst({ include: { shop: { include: { menu: true } } } })
-  const reservations = [
-    { date: new Date('2022-09-01') },
-    { date: new Date('2022-09-02') },
-    { date: new Date('2022-09-03') },
-    { date: new Date('2022-09-04') },
-  ]
-  const reservationPromises = reservations.map(reservation => prisma.reservation.create({
-    data: {
-      reservationDate: reservation.date,
-      stylistId: randomStylist!.id,
-      shopId: randomStylist!.shopId,
-      userId: 1,
-      menuId: randomStylist!.shop.menu[0].id,
-    },
-  }))
+  const shopsForReservationSeed = await prisma.shop.findMany({
+    include: { menu: true, stylists: true, shopDetail: true },
+  })
+  function getRandomDate(from: Date, to: Date) {
+    const fromTime = from.getTime()
+    const toTime = to.getTime()
+    return new Date(fromTime + Math.random() * (toTime - fromTime))
+  }
+  const clientsForReservation = await prisma.user.findMany({
+    where: { role: { slug: RoleSlug.SHOP_STAFF } },
+  })
 
-  await Promise.all(reservationPromises)
-
-  console.log('seed done')
-  process.exit()
+  const reservationPromises = shopsForReservationSeed.map(async sfs => {
+    const dates = Array(1000).fill(new Date()).map(d => {
+      const start = d
+      const end = new Date('2025-12-31')
+      const shopOpeningHours = sfs.shopDetail.startTime.split(':').map(soh => parseInt(soh, 10))
+      const shopClosingHours = sfs.shopDetail.endTime.split(':').map(sch => parseInt(sch, 10))
+      const randomDate = getRandomDate(start, end)
+      const randomHour = Math.floor(Math.random() * shopClosingHours[0]) + shopOpeningHours[0]
+      const randomMinutes = Math.floor(Math.random() * 2) === 0 ? 30 : 0
+      randomDate.setHours(randomHour, randomMinutes)
+      return randomDate
+    })
+    return dates.map(async d => {
+      const randomClientIndex = Math.floor(Math.random() * clientsForReservation.length)
+      return prisma.reservation.create({
+        data: {
+          reservationDate: d,
+          stylistId: sfs.stylists![0].id,
+          shopId: sfs.id,
+          userId: clientsForReservation[randomClientIndex].id,
+          menuId: sfs.menu[0].id,
+        },
+      })
+    })
+  })
+  await Promise.all(reservationPromises).then(v => {
+    console.log('seed done')
+    process.exit()
+  })
 })()
