@@ -11,7 +11,7 @@ alias rh-lint-fix="docker-compose exec server node_modules/.bin/eslint . --fix"
 alias db-push="docker-compose exec server node_modules/.bin/prisma db push"
 alias db-seed="docker-compose exec server npm run seed"
 alias db-seed-shop="docker-compose exec server npm run seed-shop"
-alias db-reset="docker-compose exec server npm run db-reset"
+alias db-reset="time docker-compose exec server npm run db-reset"
 alias db-studio="docker-compose exec server node_modules/.bin/prisma studio"
 alias rh-test="docker-compose exec server node seedFiles/test.js"
 
