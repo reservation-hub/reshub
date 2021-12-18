@@ -380,7 +380,7 @@ const roles = [
     const stylistFemaleNames = Array(5).fill('').map(x => lastNames[Math.floor(Math.random() * femaleNames.length)])
     const stylistMaleNames = Array(5).fill('').map(x => lastNames[Math.floor(Math.random() * maleNames.length)])
     const stylistFirstNames = [...stylistFemaleNames, ...stylistMaleNames]
-    return stylistLastNames.map(async (slm, i) => prisma.stylist.create({
+    return Promise.all(stylistLastNames.map(async (slm, i) => prisma.stylist.create({
       data: {
         name: `${slm} ${stylistFirstNames[i]}`,
         price: Math.floor(Math.random() * 100000),
@@ -400,7 +400,7 @@ const roles = [
           },
         },
       },
-    }))
+    })))
   })
   await Promise.all(stylistPromises).catch(e => {
     console.error(`Stylist Seed Error : ${e}`)
@@ -430,10 +430,10 @@ const roles = [
       const randomDate = getRandomDate(start, end)
       const randomHour = Math.floor(Math.random() * shopClosingHours[0]) + shopOpeningHours[0]
       const randomMinutes = Math.floor(Math.random() * 2) === 0 ? 30 : 0
-      randomDate.setHours(randomHour, randomMinutes)
+      randomDate.setHours(randomHour, randomMinutes, 0)
       return randomDate
     })
-    return dates.map(async d => {
+    return Promise.all(dates.map(async d => {
       const randomClientIndex = Math.floor(Math.random() * clientsForReservation.length)
       return prisma.reservation.create({
         data: {
@@ -444,14 +444,15 @@ const roles = [
           menuId: sfs.menu[0].id,
         },
       })
-    })
+    }))
   })
-  await Promise.all(reservationPromises).then(v => {
-    // eslint-disable-next-line
-    console.log('seed done')
-    process.exit(0)
-  }).catch(e => {
+
+  await Promise.all(reservationPromises).catch(e => {
     console.error(`Reservation Seed Error : ${e}`)
     process.exit(1)
   })
+
+  // eslint-disable-next-line
+  console.log('seed done')
+  process.exit(0)
 })()
