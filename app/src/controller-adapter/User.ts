@@ -8,13 +8,14 @@ import {
   UserListQuery, UserListResponse, UserQuery, UserResponse,
   InsertUserQuery, UpdateUserQuery, deleteUserQuery, userSearchQuery,
 } from '@request-response-types/User'
+import { ResponseMessage } from '@request-response-types/Common'
 
 export type UserControllerInterface = {
   index(query: UserListQuery): Promise<UserListResponse>
   show(query: UserQuery): Promise<UserResponse>
-  insert(query: InsertUserQuery): Promise<UserResponse>
-  update(query: UpdateUserQuery): Promise<UserResponse>
-  delete(query: deleteUserQuery): Promise<{ message: string }>
+  insert(query: InsertUserQuery): Promise<ResponseMessage>
+  update(query: UpdateUserQuery): Promise<ResponseMessage>
+  delete(query: deleteUserQuery): Promise<ResponseMessage>
   searchUsers(query: userSearchQuery): Promise<UserListResponse>
 }
 

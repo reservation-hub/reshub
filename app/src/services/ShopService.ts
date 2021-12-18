@@ -2,7 +2,7 @@ import { ShopServiceInterface as ShopControllerSocket } from '@controllers/shopC
 import { ShopServiceInterface as DashboardControllerSocket } from '@controllers/dashboardController'
 import { Shop, ShopSchedule } from '@entities/Shop'
 import { Reservation } from '@entities/Reservation'
-import { MenuItem } from '@entities/Menu'
+import { Menu } from '@entities/Menu'
 import { Stylist } from '@entities/Stylist'
 import { ShopRepository } from '@repositories/ShopRepository'
 import StylistRepository from '@repositories/StylistRepository'
@@ -21,19 +21,20 @@ export type ShopRepositoryInterface = {
     phoneNumber: string, days: number[], startTime: string, endTime: string, details: string) : Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
   upsertSchedule(shopId: number, days: number[], start: string, end: string) : Promise<ShopSchedule>
-  fetchShopMenuItems(shopId: number): Promise<MenuItem[]>
-  insertMenuItem(shopId: number, name: string, description: string, price: number, duration: number): Promise<MenuItem>,
-  updateMenuItem(menuItemId: number, name: string, description: string, price: number,
-    duration: number): Promise<MenuItem>,
-  deleteMenuItem(menuItemId: number): Promise<MenuItem>
+  fetchShopMenus(shopId: number): Promise<Menu[]>
+  fetchMenusByIds(menuIds: number[]): Promise<Menu[]>
+  insertMenu(shopId: number, name: string, description: string, price: number, duration: number): Promise<Menu>,
+  updateMenu(menuId: number, name: string, description: string, price: number,
+    duration: number): Promise<Menu>,
+  deleteMenu(menuId: number): Promise<Menu>
   fetchValidShopIds(shopIds: number[]): Promise<number[]>
   searchShops(keyword: string): Promise<Shop[]>,
   fetchUserShops(userId: number): Promise<Shop[]>
   fetchUserShopsCount(userId: number): Promise<number>
-  // fetchShopsPopularMenus(shopIds: number[]): Promise<MenuItem[]>
-  shopIsOwnedByUser(userId: number, shopId: number): Promise<boolean>
+  isUserOwnedShop(userId: number, shopId: number): Promise<boolean>
   fetchUserShopIds(userId: number): Promise<number[]>
   assignShopToStaff(userId: number, shopId: number): void
+  fetchShopsByIds(shopIds: number[]): Promise<Shop[]>
 }
 
 export type StylistRepositoryInterface = {
@@ -42,16 +43,20 @@ export type StylistRepositoryInterface = {
   updateStylist(id: number, name: string, price: number, shopId: number,
     days: number[], startTime: string, endTime: string) :Promise<Stylist>,
   deleteStylist(id: number): Promise<Stylist>,
+  fetchStylistsByIds(stylistIds: number[]): Promise<Stylist[]>
   fetchStylistsByShopIds(shopIds: number[]) : Promise<{ id: number, name: string, price: number, shopId:number }[]>,
+  fetchStylistsByShopId(shopId: number): Promise<Stylist[]>
   fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ id: number, count: number }[]>,
+  fetchUserStylists(userId: number): Promise<Stylist[]>
 }
 
 export type ReservationRepositoryInterface = {
-  insertReservation(reservationDate: Date, userId: number, shopId: number, menuItemId: number, stylistId?: number)
+  insertReservation(reservationDate: Date, userId: number, shopId: number, menuId: number, stylistId?: number)
     : Promise<Reservation>
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
-    menuItemId: number, stylistId?: number): Promise<Reservation>
+    menuId: number, stylistId?: number): Promise<Reservation>
   cancelReservation(id: number): Promise<Reservation>
+  fetchUserReservations(userId: number): Promise<Reservation[]>
   fetchReservationsByShopIds(shopIds: number[]) : Promise<{ id: number, data: Reservation[] }[]>
   fetchReservationsCountByShopIds(shopIds: number[]) : Promise<{ id: number, count: number }[]>
   fetchShopsReservations(shopIds: number[]): Promise<Reservation[]>
@@ -67,10 +72,20 @@ export const nextAvailableDate = (reservationDate: Date, menuDuration: number): 
   return nextAvailableDate
 }
 
-const shopIsOwnedByUser = async (userId: number, shopIds: number[]): Promise<boolean> => {
+const isUserOwnedShop = async (userId: number, shopIds: number[]): Promise<boolean> => {
   const userShopIds = await ShopRepository.fetchUserShopIds(userId)
   const result = shopIds.every(id => userShopIds.find(usid => usid === id))
   return result
+}
+
+const isValidMenuId = async (shopId: number, menuId: number): Promise<boolean> => {
+  const menus = await ShopRepository.fetchShopMenus(shopId)
+  return menus.find(m => m.id === menuId) !== undefined
+}
+
+const isValidStylistId = async (shopId: number, stylistId: number): Promise<boolean> => {
+  const stylists = await StylistRepository.fetchStylistsByShopId(shopId)
+  return stylists.find(s => s.id === stylistId) !== undefined
 }
 
 export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
@@ -87,33 +102,34 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return { shops, totalCount }
   },
 
-  async fetchShopsStylists(user, shopIds) {
-    if (user.role.slug === RoleSlug.SHOP_STAFF && !shopIsOwnedByUser(user.id, shopIds)) {
-      console.error('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
-    const stylists = await StylistRepository.fetchStylistsByShopIds(shopIds)
-    return stylists.map(s => ({
-      id: s.id,
-      name: s.name,
-      price: s.price,
-    }))
+  async fetchShopStaffReservationForDashboard(user) {
+    return ReservationRepository.fetchUserReservations(user.id)
+  },
+
+  async fetchShopStaffStylistsForDashboard(user) {
+    return StylistRepository.fetchUserStylists(user.id)
+  },
+
+  async fetchShopsByIds(user, shopIds) {
+    return ShopRepository.fetchShopsByIds(shopIds)
+  },
+
+  async fetchStylistsByIds(user, stylistIds) {
+    return StylistRepository.fetchStylistsByIds(stylistIds)
+  },
+
+  async fetchMenusByIds(user, menuIds) {
+    return ShopRepository.fetchMenusByIds(menuIds)
   },
 
   async fetchStylistsReservationCounts(user, stylistIds) {
     return ReservationRepository.fetchStylistReservationCounts(stylistIds)
   },
 
-  // TODO: implement popular menus
-  // async fetchShopsPopularMenus(shops) {
-  //   const shopIds = shops.map(s => s.id)
-  //   return ShopRepository.fetchShopsPopularMenus(shopIds)
-  // },
-
   async fetchShopsWithTotalCount(user, params) {
     let shops
     let shopsCount
-    if (user.role.slug === 'shop_staff') {
+    if (user.role.slug === RoleSlug.SHOP_STAFF) {
       shops = await ShopRepository.fetchUserShops(user.id)
       shopsCount = await ShopRepository.fetchUserShopsCount(user.id)
     } else {
@@ -124,7 +140,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
   },
 
   async fetchShop(user, id) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, id)) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [id])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
@@ -157,7 +173,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       name, areaId, prefectureId, cityId, address,
       phoneNumber, uniqueDays, startTime, endTime, details,
     )
-    if (user.role.slug === 'shop_staff') {
+    if (user.role.slug === RoleSlug.SHOP_STAFF) {
       await ShopRepository.assignShopToStaff(user.id, shop.id)
     }
     return shop
@@ -165,7 +181,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
   async updateShop(user, id, name, areaId, prefectureId, cityId, address,
     phoneNumber, days, startTime, endTime, details) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, id)) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [id])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
@@ -199,7 +215,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
   },
 
   async deleteShop(user, id) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, id)) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [id])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
@@ -231,24 +247,40 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return ReservationRepository.fetchReservationsCountByShopIds(shopIds)
   },
 
-  async insertMenuItem(user, shopId, name, description, price, duration) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
-      console.error('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
-
+  async fetchShopMenus(user, shopId) {
     const shop = await ShopRepository.fetch(shopId)
     if (!shop) {
       console.error('Shop does not exist')
       throw new NotFoundError()
     }
-    const menuItem = await ShopRepository.insertMenuItem(shopId, name,
-      description, price, duration)
-    return menuItem
+
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+
+    return ShopRepository.fetchShopMenus(shopId)
   },
 
-  async updateMenuItem(user, shopId, menuItemId, name, description, price, duration) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+  async insertMenu(user, shopId, name, description, price, duration) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      console.error('Shop does not exist')
+      throw new NotFoundError()
+    }
+
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+
+    const menu = await ShopRepository.insertMenu(shopId, name,
+      description, price, duration)
+    return menu
+  },
+
+  async updateMenu(user, shopId, menuId, name, description, price, duration) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
@@ -258,18 +290,17 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       console.error('Shop does not exist')
       throw new NotFoundError()
     }
-    const menuItemIdIsValid = shop.menu!.items.findIndex(item => item.id === menuItemId) !== -1
-    if (!menuItemIdIsValid) {
+    if (!await isValidMenuId(shopId, menuId)) {
       console.error('Menu item is not of the shop')
       throw new NotFoundError()
     }
 
-    return ShopRepository.updateMenuItem(menuItemId, name,
+    return ShopRepository.updateMenu(menuId, name,
       description, price, duration)
   },
 
-  async deleteMenuItem(user, shopId, menuItemId) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+  async deleteMenu(user, shopId, menuId) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
@@ -279,25 +310,44 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       console.error('shop not found')
       throw new NotFoundError()
     }
-    const menuItemIdIsValid = shop.menu!.items.findIndex(item => item.id === menuItemId) !== -1
-    if (!menuItemIdIsValid) {
+    if (!await isValidMenuId(shopId, menuId)) {
       console.error('menu item not found')
       throw new NotFoundError()
     }
 
-    return ShopRepository.deleteMenuItem(menuItemId)
+    return ShopRepository.deleteMenu(menuId)
   },
 
-  async insertStylist(user, shopId, name, price, days, startTime, endTime) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
-      console.error('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
-
+  async fetchShopStylistsWithReservationCount(user, shopId) {
     const shop = await ShopRepository.fetch(shopId)
     if (!shop) {
       console.error('shop not found')
       throw new NotFoundError()
+    }
+
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+
+    const stylists = await StylistRepository.fetchStylistsByShopId(shopId)
+    const reservations = await ReservationRepository.fetchStylistReservationCounts(stylists.map(s => s.id))
+    return stylists.map(s => ({
+      ...s,
+      reservationCount: reservations.find(r => r.stylistId === s.id)!.reservationCount,
+    }))
+  },
+
+  async insertStylist(user, shopId, name, price, days, startTime, endTime) {
+    const shop = await ShopRepository.fetch(shopId)
+    if (!shop) {
+      console.error('shop not found')
+      throw new NotFoundError()
+    }
+
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
     }
 
     const stylist = await StylistRepository.insertStylist(name, price, shopId, days, startTime, endTime)
@@ -305,7 +355,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
   },
 
   async updateStylist(user, shopId, stylistId, name, price, days, startTime, endTime) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
@@ -326,7 +376,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
   },
 
   async deleteStylist(user, shopId, stylistId) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
@@ -346,18 +396,8 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return StylistRepository.deleteStylist(stylistId)
   },
 
-  async fetchShopsReservations(user, shopIds) {
-    shopIds.forEach(async sid => {
-      if (user.role.slug === RoleSlug.SHOP_STAFF && !await ShopRepository.shopIsOwnedByUser(user.id, sid)) {
-        console.error('Shop is not owned by user')
-        throw new AuthorizationError()
-      }
-    })
-    return ReservationRepository.fetchShopsReservations(shopIds)
-  },
-
   async fetchShopReservations(user, shopId) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
@@ -369,8 +409,8 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     return ReservationRepository.fetchShopReservations(shopId)
   },
 
-  async insertReservation(user, shopId, reservationDate, clientId, menuItemId, stylistId?) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+  async insertReservation(user, shopId, reservationDate, clientId, menuId, stylistId?) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
@@ -386,13 +426,12 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
 
-    const menuItems = await ShopRepository.fetchShopMenuItems(shop.id)
-    if (!menuItems.find(item => item.id === menuItemId)) {
+    if (!await isValidMenuId(shopId, menuId)) {
       console.error('Menu Item does not exist in shop')
       throw new InvalidParamsError()
     }
 
-    if (stylistId && !shop.stylists?.find(stylist => stylist.id === stylistId)) {
+    if (stylistId && !isValidStylistId(shopId, stylistId)) {
       console.error('Stylist does not exist in shop')
       throw new InvalidParamsError()
     }
@@ -402,11 +441,11 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       console.error('Invalid date, earlier than today')
       throw new InvalidParamsError()
     }
-    return ReservationRepository.insertReservation(reservationDate, clientId, shopId, menuItemId, stylistId)
+    return ReservationRepository.insertReservation(reservationDate, clientId, shopId, menuId, stylistId)
   },
 
-  async updateReservation(user, shopId, reservationId, reservationDate, clientId, menuItemId, stylistId) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+  async updateReservation(user, shopId, reservationId, reservationDate, clientId, menuId, stylistId) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
@@ -428,13 +467,13 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
 
-    const menuItems = await ShopRepository.fetchShopMenuItems(shop.id)
-    if (!menuItems.find(item => item.id === menuItemId)) {
+    const menus = await ShopRepository.fetchShopMenus(shop.id)
+    if (!menus.find(item => item.id === menuId)) {
       console.error('Menu Item does not exist in shop')
       throw new InvalidParamsError()
     }
 
-    if (stylistId && !shop.stylists?.find(stylist => stylist.id === stylistId)) {
+    if (stylistId && !isValidStylistId(shopId, stylistId)) {
       console.error('Stylist does not exist in shop')
       throw new InvalidParamsError()
     }
@@ -446,11 +485,11 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     }
 
     return ReservationRepository.updateReservation(reservationId, reservationDate,
-      clientId, shopId, menuItemId, stylistId)
+      clientId, shopId, menuId, stylistId)
   },
 
   async cancelReservation(user, shopId, reservationId) {
-    if (user.role.slug === 'shop_staff' && !await ShopRepository.shopIsOwnedByUser(user.id, shopId)) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }

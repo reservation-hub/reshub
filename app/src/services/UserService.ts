@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import { UserServiceInterface as UserControllerSocket } from '@controllers/userController'
 import { UserServiceInterface as DashboardControllerSocket } from '@controllers/dashboardController'
+import { UserServiceInterface as ShopControllerSocket } from '@controllers/shopController'
 import { Gender, User } from '@entities/User'
 import UserRepository from '@repositories/UserRepository'
 import RoleRepository from '@repositories/RoleRepository'
@@ -28,7 +29,7 @@ export type ReservationRepositoryInterface = {
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 
-const UserService: UserControllerSocket & DashboardControllerSocket = {
+const UserService: UserControllerSocket & DashboardControllerSocket & ShopControllerSocket = {
   async fetchUsersForDashboard() {
     const users = await UserRepository.fetchAll({ limit: 5 })
     const totalCount = await UserRepository.totalCount()

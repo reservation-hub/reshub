@@ -1,9 +1,7 @@
 import { Gender, User } from '@entities/User'
 
-import {
-  fetchModelsWithTotalCountQuery, fetchModelsWithTotalCountResponse,
-} from '@request-response-types/ServiceCommonTypes'
-import { User as UserEndpointUser } from '@request-response-types/User'
+import { UserListQuery, UserListResponse } from '@request-response-types/User'
+import { User as UserResponseModel } from '@request-response-types/models/User'
 import UserService from '@services/UserService'
 import { UserControllerInterface } from '@controller-adapter/User'
 import { RoleSlug } from '@entities/Role'
@@ -14,7 +12,7 @@ import indexSchema from './schemas/indexSchema'
 import { searchSchema } from './schemas/search'
 
 export type UserServiceInterface = {
-  fetchUsersWithTotalCount(query: fetchModelsWithTotalCountQuery): Promise<fetchModelsWithTotalCountResponse<User>>,
+  fetchUsersWithTotalCount(query: UserListQuery): Promise<UserListResponse>,
   fetchUser(id: number): Promise<User>,
   searchUser(keyword: string): Promise<User[]>,
   insertUserFromAdmin(password: string, confirm: string, email: string, roleSlug: RoleSlug, lastNameKanji: string,
@@ -26,18 +24,6 @@ export type UserServiceInterface = {
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
-
-const reconstructUserFromEntity = (u: User, reservationCount: number): UserEndpointUser => ({
-  id: u.id,
-  username: u.username,
-  email: u.email,
-  role: u.role,
-  lastNameKana: u.lastNameKana,
-  firstNameKana: u.firstNameKana,
-  birthday: u.birthday,
-  gender: u.gender,
-  reservationCount,
-})
 
 const UserController: UserControllerInterface = {
   async index(query) {
@@ -58,9 +44,19 @@ const UserController: UserControllerInterface = {
 
   async show(query) {
     const { id } = query
-    const user = await UserService.fetchUser(id)
-    const userReservationCount = await UserService.fetchUsersReservationCounts([user.id])
-    return reconstructUserFromEntity(user, userReservationCount[0].reservationCount)
+    const u = await UserService.fetchUser(id)
+    const userReservationCount = await UserService.fetchUsersReservationCounts([u.id])
+    return {
+      id: u.id,
+      username: u.username,
+      email: u.email,
+      role: u.role,
+      lastNameKana: u.lastNameKana,
+      firstNameKana: u.firstNameKana,
+      birthday: u.birthday,
+      gender: u.gender,
+      reservationCount: userReservationCount[0].reservationCount,
+    }
   },
 
   async insert(query) {
@@ -68,9 +64,9 @@ const UserController: UserControllerInterface = {
       password, confirm, email, roleSlug, lastNameKanji,
       firstNameKanji, lastNameKana, firstNameKana, gender, birthday,
     } = await userInsertSchema.validateAsync(query, joiOptions)
-    const user = await UserService.insertUserFromAdmin(password, confirm, email, roleSlug, lastNameKanji,
+    await UserService.insertUserFromAdmin(password, confirm, email, roleSlug, lastNameKanji,
       firstNameKanji, lastNameKana, firstNameKana, gender, birthday)
-    return reconstructUserFromEntity(user, 0)
+    return 'User created'
   },
 
   async update(query) {
@@ -78,16 +74,15 @@ const UserController: UserControllerInterface = {
       email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, gender, birthday,
     } = await userUpdateSchema.validateAsync(query.params, joiOptions)
-    const user = await UserService.updateUserFromAdmin(query.id, email, roleSlug, lastNameKanji, firstNameKanji,
+    await UserService.updateUserFromAdmin(query.id, email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, gender, birthday)
-    const reservationCount = await UserService.fetchUsersReservationCounts([user.id])
-    return reconstructUserFromEntity(user, reservationCount[0].reservationCount)
+    return 'User updated'
   },
 
   async delete(query) {
     const { id } = query
     await UserService.deleteUserFromAdmin(id)
-    return { message: 'User deleted' }
+    return 'User deleted'
   },
 
   async searchUsers(query) {

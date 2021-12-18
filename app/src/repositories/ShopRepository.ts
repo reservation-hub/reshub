@@ -342,6 +342,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         stylists: true,
         reservations: { include: { user: { include: { role: true, profile: true } }, stylist: true, menuItem: true } },
       },
+
     })
     return shops.map(s => reconstructShopWithMenuAndStylists(s))
   },

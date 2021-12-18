@@ -15,25 +15,6 @@ export const LocationRepository: LocationRepositoryInterface = {
     return count !== 0
   },
 
-  async fetchLocationNamesOfIds(params) {
-    const areas = await prisma.area.findMany({
-      where: { id: { in: params.map(p => p.areaId) } },
-      select: { id: true, name: true },
-    })
-
-    const prefectures = await prisma.prefecture.findMany({
-      where: { id: { in: params.map(p => p.prefectureId) } },
-      select: { id: true, name: true },
-    })
-
-    const cities = await prisma.city.findMany({
-      where: { id: { in: params.map(p => p.cityId) } },
-      select: { id: true, name: true },
-    })
-
-    return { areas, prefectures, cities }
-  },
-
   async fetchAreas() {
     return prisma.area.findMany()
   },
