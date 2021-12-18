@@ -18,6 +18,7 @@ export type UserRepositoryInterface = {
     : Promise<User>,
   deleteUserFromAdmin(id: number): Promise<User>,
   searchUser(keyword: string): Promise<User[]>,
+  fetchUsersByIds(userIds: number[]): Promise<User[]>
 }
 
 export type RoleRepositoryInterface = {
@@ -56,6 +57,10 @@ const UserService: UserControllerSocket & DashboardControllerSocket & ShopContro
     return user
   },
 
+  async fetchUsersByIds(userIds) {
+    return UserRepository.fetchUsersByIds(userIds)
+  },
+
   async insertUserFromAdmin(password, confirm, email, roleSlug, lastNameKanji,
     firstNameKanji, lastNameKana, firstNameKana, gender, birthday) {
     if (password !== confirm) {
@@ -77,12 +82,10 @@ const UserService: UserControllerSocket & DashboardControllerSocket & ShopContro
 
     const hash = bcrypt.hashSync(password, 10 /* hash rounds */)
 
-    const user = await UserRepository.insertUserWithProfile(
+    await UserRepository.insertUserWithProfile(
       email, hash, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, birthday, gender,
     )
-
-    return user
   },
 
   async updateUserFromAdmin(id, email, roleSlug, lastNameKanji, firstNameKanji,
@@ -99,12 +102,10 @@ const UserService: UserControllerSocket & DashboardControllerSocket & ShopContro
       throw new NotFoundError()
     }
 
-    const updatedUser = await UserRepository.updateUserFromAdmin(
+    await UserRepository.updateUserFromAdmin(
       id, email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, birthday, gender,
     )
-
-    return updatedUser
   },
 
   async deleteUserFromAdmin(id) {
@@ -113,8 +114,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket & ShopContro
       console.error('User does not exist')
       throw new NotFoundError()
     }
-    const deletedUser = await UserRepository.deleteUserFromAdmin(id)
-    return deletedUser
+    await UserRepository.deleteUserFromAdmin(id)
   },
 
   async fetchUsersReservationCounts(userIds) {

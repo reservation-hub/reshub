@@ -3,7 +3,7 @@ import prisma from '../src/repositories/prisma'
 import areas from './areas-db'
 import prefectures from './prefec-db'
 import cities from './cities-db'
-import { RoleSlug } from '.prisma/client'
+import { RoleSlug, Days } from '.prisma/client'
 
 const admins = [
   {
@@ -273,10 +273,17 @@ const roles = [
       const shopDetail = await prisma.shopDetail.create({
         data: {
           name: 'TEST',
+          days: [
+            Days.MONDAY,
+            Days.WEDNESDAY,
+            Days.FRIDAY,
+            Days.THURSDAY,
+            Days.SATURDAY,
+            Days.SUNDAY,
+          ],
+          startTime: '10:00',
+          endTime: '20:00',
         },
-      })
-      const menu = await prisma.menu.create({
-        data: {},
       })
       await prisma.shop.create({
         data: {
@@ -299,9 +306,6 @@ const roles = [
             connect: {
               id: shopDetail.id,
             },
-          },
-          menu: {
-            connect: { id: menu.id },
           },
         },
       })
@@ -326,20 +330,19 @@ const roles = [
     })
   })
 
-  console.log('running menu item seeder')
-  const menus = await prisma.menu.findMany()
-  const menuIds = menus.map(m => m.id)
-  const menuItemPromises = menuIds.map(async id => prisma.menuItem.create({
+  console.log('running menu seeder')
+  const shops = await prisma.shop.findMany()
+  const menuPromises = shops.map(async s => prisma.menu.create({
     data: {
       name: 'test',
       description: 'test',
       price: 500,
-      menuId: id,
+      shopId: s.id,
       duration: 60,
     },
   }))
 
-  await Promise.all(menuItemPromises)
+  await Promise.all(menuPromises)
 
   console.log('running stylist seeder')
   const shopCounts = await prisma.shop.count()
@@ -354,6 +357,16 @@ const roles = [
     data: {
       name: stylist.name,
       price: stylist.price,
+      days: [
+        Days.MONDAY,
+        Days.WEDNESDAY,
+        Days.FRIDAY,
+        Days.THURSDAY,
+        Days.SATURDAY,
+        Days.SUNDAY,
+      ],
+      startTime: '10:00',
+      endTime: '20:00',
       shop: {
         connect: {
           id: stylist.shop?.id,
@@ -365,9 +378,7 @@ const roles = [
   await Promise.all(stylistPromises)
 
   console.log('running reservation seeder')
-  const randomStylist = await prisma.stylist.findFirst({
-    include: { shop: { include: { menu: { include: { items: true } } } } },
-  })
+  const randomStylist = await prisma.stylist.findFirst({ include: { shop: { include: { menu: true } } } })
   const reservations = [
     { date: new Date('2022-09-01') },
     { date: new Date('2022-09-02') },
@@ -380,7 +391,7 @@ const roles = [
       stylistId: randomStylist!.id,
       shopId: randomStylist!.shopId,
       userId: 1,
-      menuItemId: randomStylist!.shop.menu!.items[0].id,
+      menuId: randomStylist!.shop.menu[0].id,
     },
   }))
 

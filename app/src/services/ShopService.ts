@@ -1,6 +1,6 @@
 import { ShopServiceInterface as ShopControllerSocket } from '@controllers/shopController'
 import { ShopServiceInterface as DashboardControllerSocket } from '@controllers/dashboardController'
-import { Shop, ShopSchedule } from '@entities/Shop'
+import { Shop } from '@entities/Shop'
 import { Reservation } from '@entities/Reservation'
 import { Menu } from '@entities/Menu'
 import { Stylist } from '@entities/Stylist'
@@ -10,17 +10,17 @@ import ReservationRepository from '@repositories/ReservationRepository'
 import { LocationRepository } from '@repositories/LocationRepository'
 import UserRepository from '@repositories/UserRepository'
 import { RoleSlug } from '@entities/Role'
+import { ScheduleDays } from '@entities/Common'
 import { AuthorizationError, InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
 export type ShopRepositoryInterface = {
   insertShop(
     name: string, areaId: number, prefectureId: number, cityId: number, address: string,
-    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string) : Promise<Shop>,
+    phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>,
   updateShop(
     id: number, name: string, areaId: number, prefectureId: number, cityId: number, address: string,
-    phoneNumber: string, days: number[], startTime: string, endTime: string, details: string) : Promise<Shop>,
+    phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
-  upsertSchedule(shopId: number, days: number[], start: string, end: string) : Promise<ShopSchedule>
   fetchShopMenus(shopId: number): Promise<Menu[]>
   fetchMenusByIds(menuIds: number[]): Promise<Menu[]>
   insertMenu(shopId: number, name: string, description: string, price: number, duration: number): Promise<Menu>,
@@ -31,23 +31,22 @@ export type ShopRepositoryInterface = {
   searchShops(keyword: string): Promise<Shop[]>,
   fetchUserShops(userId: number): Promise<Shop[]>
   fetchUserShopsCount(userId: number): Promise<number>
-  isUserOwnedShop(userId: number, shopId: number): Promise<boolean>
   fetchUserShopIds(userId: number): Promise<number[]>
   assignShopToStaff(userId: number, shopId: number): void
   fetchShopsByIds(shopIds: number[]): Promise<Shop[]>
 }
 
 export type StylistRepositoryInterface = {
-  insertStylist(name: string, price: number, shopId: number, days:number[],
+  insertStylist(name: string, price: number, shopId: number, days:ScheduleDays[],
     startTime:string, endTime:string): Promise<Stylist>,
   updateStylist(id: number, name: string, price: number, shopId: number,
-    days: number[], startTime: string, endTime: string) :Promise<Stylist>,
+    days: ScheduleDays[], startTime: string, endTime: string) :Promise<Stylist>,
   deleteStylist(id: number): Promise<Stylist>,
   fetchStylistsByIds(stylistIds: number[]): Promise<Stylist[]>
   fetchStylistsByShopIds(shopIds: number[]) : Promise<{ id: number, name: string, price: number, shopId:number }[]>,
   fetchStylistsByShopId(shopId: number): Promise<Stylist[]>
   fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ id: number, count: number }[]>,
-  fetchUserStylists(userId: number): Promise<Stylist[]>
+  fetchShopStaffStylists(userId: number): Promise<Stylist[]>
 }
 
 export type ReservationRepositoryInterface = {
@@ -56,7 +55,7 @@ export type ReservationRepositoryInterface = {
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
     menuId: number, stylistId?: number): Promise<Reservation>
   cancelReservation(id: number): Promise<Reservation>
-  fetchUserReservations(userId: number): Promise<Reservation[]>
+  fetchShopStaffReservations(userId: number): Promise<Reservation[]>
   fetchReservationsByShopIds(shopIds: number[]) : Promise<{ id: number, data: Reservation[] }[]>
   fetchReservationsCountByShopIds(shopIds: number[]) : Promise<{ id: number, count: number }[]>
   fetchShopsReservations(shopIds: number[]): Promise<Reservation[]>
@@ -103,11 +102,11 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
   },
 
   async fetchShopStaffReservationForDashboard(user) {
-    return ReservationRepository.fetchUserReservations(user.id)
+    return ReservationRepository.fetchShopStaffReservations(user.id)
   },
 
   async fetchShopStaffStylistsForDashboard(user) {
-    return StylistRepository.fetchUserStylists(user.id)
+    return StylistRepository.fetchShopStaffStylists(user.id)
   },
 
   async fetchShopsByIds(user, shopIds) {
@@ -167,7 +166,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new InvalidParamsError()
     }
 
-    const uniqueDays: number[] = days.filter((n, i) => days.indexOf(n) === i)
+    const uniqueDays: ScheduleDays[] = days.filter((n, i) => days.indexOf(n) === i)
 
     const shop = await ShopRepository.insertShop(
       name, areaId, prefectureId, cityId, address,
@@ -205,7 +204,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new InvalidParamsError()
     }
 
-    const uniqueDays: number[] = days.filter((n, i) => days.indexOf(n) === i)
+    const uniqueDays: ScheduleDays[] = days.filter((n, i) => days.indexOf(n) === i)
 
     return ShopRepository.updateShop(
       id,

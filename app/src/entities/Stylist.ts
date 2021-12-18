@@ -1,13 +1,11 @@
-export type StylistSchedule = {
-  days: number[],
-  startTime: string,
-  endTime: string,
-}
+import { ScheduleDays } from './Common'
 
 export type Stylist = {
   id: number,
   name: string,
   price: number,
   shopId: number,
-  schedule: StylistSchedule,
+  days: ScheduleDays[],
+  startTime: string,
+  endTime: string,
 }

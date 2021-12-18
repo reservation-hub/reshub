@@ -7,6 +7,7 @@ import { User, UserForAuth } from '@entities/User'
 import { Menu } from '@entities/Menu'
 import { Reservation } from '@entities/Reservation'
 import UserService from '@services/UserService'
+import { ScheduleDays } from '@entities/Common'
 import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import { shopStylistUpsertSchema } from './schemas/stylist'
@@ -19,10 +20,10 @@ export type ShopServiceInterface = {
     : Promise<{ values: Shop[], totalCount: number }>
   fetchShop(user: UserForAuth, id: number): Promise<Shop>
   insertShop(user: UserForAuth, name: string, areaId: number, prefectureId: number,
-    cityId: number, address: string, phoneNumber: string, days: number[],
+    cityId: number, address: string, phoneNumber: string, days: ScheduleDays[],
     startTime: string, endTime: string, details: string): Promise<Shop>
   updateShop(user: UserForAuth, id: number, name: string, areaId: number, prefectureId: number,
-    cityId: number, address: string, phoneNumber: string, days: number[],
+    cityId: number, address: string, phoneNumber: string, days: ScheduleDays[],
     startTime: string, endTime: string, details: string): Promise<Shop>
   deleteShop(user: UserForAuth, id: number): Promise<Shop>
   fetchStylistsCountByShopIds(shopIds: number[])
@@ -32,10 +33,10 @@ export type ShopServiceInterface = {
   fetchShopStylistsWithReservationCount(user: UserForAuth, shopId: number)
     : Promise<(Stylist & { reservationCount: number})[]>
   insertStylist(user: UserForAuth, shopId: number, name: string, price: number,
-    days:number[], startTime:string, endTime:string)
+    days:ScheduleDays[], startTime:string, endTime:string)
     : Promise<Stylist>
   updateStylist(user: UserForAuth, shopId: number, stylistId: number, name: string, price: number,
-    days: number[], startTime: string, endTime: string)
+    days: ScheduleDays[], startTime: string, endTime: string)
     : Promise<Stylist>
   deleteStylist(user: UserForAuth, shopId: number, stylistId: number)
     : Promise<Stylist>
@@ -124,9 +125,9 @@ const ShopController: ShopControllerInterface = {
       id: shop.id,
       prefectureName: shop.prefecture.name,
       cityName: shop.city.name,
-      days: shop.schedule.days,
-      startTime: shop.schedule.hours.start,
-      endTime: shop.schedule.hours.end,
+      days: shop.days,
+      startTime: shop.startTime,
+      endTime: shop.endTime,
       name: shop.name,
       address: shop.address,
       details: shop.details,

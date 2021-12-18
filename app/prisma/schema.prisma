@@ -8,6 +8,33 @@ datasource db {
   url      = env("POSTGRES_HOST")
 }
 
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum RoleSlug {
+  ADMIN
+  SHOP_STAFF
+  CLIENT
+}
+
+enum ReservationStatus {
+  CANCELLED
+  COMPLETED
+  RESERVED
+}
+
+enum Days {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 model User {
   id           Int           @id @default(autoincrement())
   email        String        @unique @db.VarChar(255)
@@ -22,11 +49,6 @@ model User {
   role         Role          @relation(fields: [roleId], references: [id])
   roleId       Int
   shopUser     ShopUser[]
-}
-
-enum Gender {
-  MALE
-  FEMALE
 }
 
 model UserProfile {
@@ -48,12 +70,6 @@ model UserOAuthIds {
   googleId   String? @unique @map("google_id")
   userId     Int     @unique @map("user_id")
   user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-enum RoleSlug {
-  ADMIN
-  SHOP_STAFF
-  CLIENT
 }
 
 model Role {
@@ -102,7 +118,6 @@ model Shop {
   city         City          @relation(fields: [cityId], references: [id])
   prefecture   Prefecture    @relation(fields: [prefectureId], references: [id])
   menu         Menu[]
-  menuId       Int           @unique @map("menu_id")
   reservations Reservation[]
   shopDetail   ShopDetail    @relation(fields: [shopDetailId], references: [id], onDelete: Cascade)
   shopDetailId Int           @unique @map("shop_detail_id")
@@ -139,7 +154,9 @@ model ShopDetail {
   shopId      Int?         @unique @map("shop_id")
   shop        Shop?
   details     String?      @db.VarChar(255)
-  schedule    Json?
+  days        Days[]
+  startTime   String       @map("start_time")
+  endTime     String       @map("end_time")
   images      ModelImage[]
 }
 
@@ -169,13 +186,9 @@ model Stylist {
   price        Int
   shopId       Int           @map("shop_id")
   shop         Shop          @relation(fields: [shopId], references: [id])
-  schedule     Json?
-}
-
-enum ReservationStatus {
-  CANCELLED
-  COMPLETED
-  RESERVED
+  days         Days[]
+  startTime    String        @map("start_time")
+  endTime      String        @map("end_time")
 }
 
 model Reservation {

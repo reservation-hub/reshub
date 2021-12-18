@@ -1,7 +1,6 @@
 import { Gender, User } from '@entities/User'
 
-import { UserListQuery, UserListResponse } from '@request-response-types/User'
-import { User as UserResponseModel } from '@request-response-types/models/User'
+import { UserListQuery } from '@request-response-types/User'
 import UserService from '@services/UserService'
 import { UserControllerInterface } from '@controller-adapter/User'
 import { RoleSlug } from '@entities/Role'
@@ -12,15 +11,15 @@ import indexSchema from './schemas/indexSchema'
 import { searchSchema } from './schemas/search'
 
 export type UserServiceInterface = {
-  fetchUsersWithTotalCount(query: UserListQuery): Promise<UserListResponse>,
+  fetchUsersWithTotalCount(query: UserListQuery): Promise<{ values: User[], totalCount: number}>,
   fetchUser(id: number): Promise<User>,
   searchUser(keyword: string): Promise<User[]>,
   insertUserFromAdmin(password: string, confirm: string, email: string, roleSlug: RoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string)
-    : Promise<User>,
+    : Promise<void>,
   updateUserFromAdmin(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string, firstNameKanji: string,
-    lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string) : Promise<User>,
-  deleteUserFromAdmin(id: number): Promise<User>,
+    lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string) : Promise<void>,
+  deleteUserFromAdmin(id: number): Promise<void>,
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }

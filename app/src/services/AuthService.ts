@@ -98,7 +98,7 @@ const AuthService: AuthControllerSocket & PassportSocket = {
   async hack(role) {
     let user
     if (role === RoleSlug.SHOP_STAFF) {
-      user = await UserRepository.fetchByEmail('staff@staff.com')
+      user = await UserRepository.fetchByEmail('staff1@staff.com')
     } else {
       user = await UserRepository.fetchByEmail('eugene.sinamban@gmail.com')
     }
