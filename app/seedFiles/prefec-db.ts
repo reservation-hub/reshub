@@ -1,3 +1,9 @@
+export type PrefectureObject = {
+  name: string
+  slug: string
+  area: string
+}
+
 export default [{
   name: '北海道', slug: 'hokkaido', area: 'hokkaidou-touhoku',
 }, {

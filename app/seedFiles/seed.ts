@@ -1,73 +1,72 @@
 import bcrypt from 'bcrypt'
 import prisma from '../src/repositories/prisma'
-import areas from './areas-db'
-import prefectures from './prefec-db'
-import lastNames from './lastNames'
-import maleNames from './maleNames'
-import femaleNames from './femaleNames'
-import cities from './cities-db'
-import { RoleSlug, Days } from '.prisma/client'
+import areas, { AreaObject } from './areas-db'
+import prefectures, { PrefectureObject } from './prefec-db'
 
-const admins = [
-  {
-    firstNameKanji: 'eugene',
-    lastNameKanji: 'sinamban',
-    firstNameKana: 'ユージン',
-    lastNameKana: 'シナンバン',
-    password: 'testtest',
-    email: 'eugene.sinamban@gmail.com',
-  },
-  {
-    firstNameKanji: 'yoonsung',
-    lastNameKanji: 'jang',
-    firstNameKana: 'ユンソン',
-    lastNameKana: 'チャン',
-    password: 'testtest',
-    email: 'upthe15752@gmail.com',
-  },
-  {
-    firstNameKanji: 'sabir',
-    lastNameKanji: 'barahi',
-    firstNameKana: 'サビル',
-    lastNameKana: 'バラヒ',
-    password: 'testtest',
-    email: 'sabirbarahi41@gmail.com',
-  },
-]
+import cities, { CityObject } from './cities-db'
+import {
+  RoleSlug, Days, Role, User, Area, Prefecture, City,
+} from '.prisma/client'
+import {
+  UserObject, admins, staffs, clients,
+} from './users'
+import roles, { RoleObject } from './roles'
 
-const staffs = Array(100).fill('').map((s, i) => `staff${i + 1}@staff.com`)
-const clients = Array(2000).fill({ first: '', last: '' }).map((c, i) => {
-  const lastNameIndex = Math.floor(Math.random() * lastNames.length)
-  const lastName = lastNames[lastNameIndex]
-  let firstNameIndex
-  let firstName
-  if (i % 2 === 0) {
-    firstNameIndex = Math.floor(Math.random() * maleNames.length)
-    firstName = maleNames[firstNameIndex]
-  } else {
-    firstNameIndex = Math.floor(Math.random() * femaleNames.length)
-    firstName = femaleNames[firstNameIndex]
-  }
-  return { first: firstName, last: lastName }
+const userDataObject = (r: Role, u: UserObject) => ({
+  email: u.email,
+  username: u.email,
+  password: bcrypt.hashSync(u.password, 10),
+  profile: {
+    create: {
+      firstNameKana: u.firstNameKana,
+      lastNameKana: u.lastNameKana,
+      firstNameKanji: u.firstNameKanji,
+      lastNameKanji: u.lastNameKanji,
+    },
+  },
+  role: {
+    connect: r,
+  },
 })
 
-const roles = [
-  {
-    name: 'admin',
-    slug: RoleSlug.ADMIN,
-    description: 'Administrator role. Can make changes on everything.',
-  },
-  {
-    name: 'client',
-    slug: RoleSlug.CLIENT,
-    description: 'Client role. Can make profile and reservations.',
-  },
-  {
-    name: 'shop staff',
-    slug: RoleSlug.SHOP_STAFF,
-    description: 'Shop staff user role. Can view shop details connected to the user.',
-  },
-];
+const roleSeeder = async (rs: RoleObject[]): Promise<Role[]> => Promise.all(rs.map(async r => prisma.role.create({
+  data: r,
+})))
+
+const userSeeder = async (r: Role, us: UserObject[]): Promise<User[]> => Promise.all(
+  us.map(async u => prisma.user.create({
+    data: userDataObject(r, u),
+  })),
+)
+
+const areaSeeder = async (as: AreaObject[]): Promise<Area[]> => Promise.all(
+  as.map(async a => prisma.area.create({
+    data: {
+      slug: a.slug,
+      name: a.name,
+    },
+  })),
+)
+
+const prefectureSeeder = async (ps: PrefectureObject[]): Promise<Prefecture[]> => Promise.all(
+  ps.map(async p => prisma.prefecture.create({
+    data: {
+      name: p.name,
+      slug: p.slug,
+      area: { connect: { slug: p.area } },
+    },
+  })),
+)
+
+const citySeeder = async (cs: CityObject[]): Promise<City[]> => Promise.all(
+  cs.map(async c => prisma.city.create({
+    data: {
+      name: c.name,
+      slug: `SUB${c.id}`,
+      prefecture: { connect: { slug: c.prefecture } },
+    },
+  })),
+);
 
 (async () => {
   // eslint-disable-next-line
@@ -75,180 +74,84 @@ const roles = [
 
   // eslint-disable-next-line
   console.log('running roles seeder')
-  await Promise.all(roles.map(async item => prisma.role.upsert({
-    where: {
-      slug: item.slug,
-    },
-    update: item,
-    create: item,
-  }))).catch(e => {
-    console.error('Role Seed Error', e)
+  try {
+    await roleSeeder(roles)
+  } catch (e) {
+    console.error(`Roles Seed Error : ${e}`)
     process.exit(1)
-  })
+  }
 
   // eslint-disable-next-line
   console.log('running admins seeder')
-
-  const adminRole = await prisma.role.findUnique({
-    where: { slug: RoleSlug.ADMIN },
-  })
-  const adminPromises = admins.map(async (admin: any) => prisma.user.upsert({
-    where: { email: admin.email },
-    update: {},
-    create: {
-      email: admin.email,
-      username: admin.username,
-      password: bcrypt.hashSync('testtest', 10),
-      profile: {
-        create: {
-          firstNameKanji: admin.firstNameKanji,
-          lastNameKanji: admin.lastNameKanji,
-          firstNameKana: admin.firstNameKana,
-          lastNameKana: admin.lastNameKana,
-        },
-      },
-      role: {
-        connect: {
-          id: adminRole?.id,
-        },
-      },
-    },
-  }))
-  await Promise.all(adminPromises).catch(e => {
+  try {
+    const adminRole = await prisma.role.findUnique({
+      where: { slug: RoleSlug.ADMIN },
+    })
+    if (!adminRole) {
+      throw new Error('Admin role does not exist')
+    }
+    await userSeeder(adminRole, admins)
+  } catch (e) {
     console.error(`Admin Seed Error : ${e}`)
     process.exit(1)
-  })
+  }
 
   // eslint-disable-next-line
   console.log('running staff seeder')
-
-  const staffRole = await prisma.role.findUnique({
-    where: { slug: RoleSlug.SHOP_STAFF },
-  })
-
-  const staffPromises = staffs.map(async (staffEmail, i) => {
-    const lastNameIndex = Math.floor(Math.random() * lastNames.length)
-    const lastName = lastNames[lastNameIndex]
-    let firstNameIndex
-    let firstName
-    if (i % 2 === 0) {
-      firstNameIndex = Math.floor(Math.random() * maleNames.length)
-      firstName = maleNames[firstNameIndex]
-    } else {
-      firstNameIndex = Math.floor(Math.random() * femaleNames.length)
-      firstName = femaleNames[firstNameIndex]
-    }
-    return prisma.user.create({
-      data: {
-        email: staffEmail,
-        username: staffEmail,
-        password: bcrypt.hashSync('testtest', 10),
-        profile: {
-          create: {
-            firstNameKanji: firstName,
-            lastNameKanji: lastName,
-            firstNameKana: firstName,
-            lastNameKana: lastName,
-          },
-        },
-        role: {
-          connect: {
-            id: staffRole?.id,
-          },
-        },
-      },
+  try {
+    const staffRole = await prisma.role.findUnique({
+      where: { slug: RoleSlug.SHOP_STAFF },
     })
-  })
-
-  await Promise.all(staffPromises).catch(e => {
+    if (!staffRole) {
+      throw new Error('Staff role does not exist')
+    }
+    await userSeeder(staffRole, staffs)
+  } catch (e) {
     console.error(`Staff Seed Error : ${e}`)
     process.exit(1)
-  })
+  }
 
   // eslint-disable-next-line
   console.log('running client seeder')
-  const clientRole = await prisma.role.findUnique({
-    where: { slug: RoleSlug.CLIENT },
-  })
-  const clientPromises = clients.map((c, i) => prisma.user.create({
-    data: {
-      email: `${c.last.toLowerCase}${c.first.toLowerCase}${i}@client.com`,
-      username: `${c.last.toLowerCase}${c.first.toLowerCase}${i}`,
-      password: bcrypt.hashSync('testtest', 10),
-      profile: {
-        create: {
-          firstNameKanji: c.first,
-          lastNameKanji: c.last,
-          firstNameKana: c.first,
-          lastNameKana: c.last,
-        },
-      },
-      role: {
-        connect: {
-          id: clientRole?.id,
-        },
-      },
-    },
-  }))
-  await Promise.all(clientPromises).catch(e => {
+  try {
+    const clientRole = await prisma.role.findUnique({
+      where: { slug: RoleSlug.CLIENT },
+    })
+    if (!clientRole) {
+      throw new Error('Client role does not exist')
+    }
+    await userSeeder(clientRole, clients)
+  } catch (e) {
     console.error(`Client Seed Error : ${e}`)
     process.exit(1)
-  })
+  }
 
   // eslint-disable-next-line
   console.log('running area seeder')
-
-  await prisma.area.createMany({
-    data: areas.map((area: any) => ({
-      slug: area.slug,
-      name: area.name,
-    })),
-    skipDuplicates: true,
-  })
+  try {
+    await areaSeeder(areas)
+  } catch (e) {
+    console.error(`Area Seed Error : ${e}`)
+    process.exit(1)
+  }
 
   // eslint-disable-next-line
   console.log('running prefecture seeder')
-
-  const prefecturePromises = prefectures.map(async prefec => prisma.prefecture.upsert({
-    where: { slug: prefec.slug },
-    update: {},
-    create: {
-      name: prefec.name,
-      slug: prefec.slug,
-      area: {
-        connect: {
-          slug: prefec.area,
-        },
-      },
-    },
-  }))
-
-  await Promise.all(prefecturePromises).catch(e => {
+  try {
+    await prefectureSeeder(prefectures)
+  } catch (e) {
     console.error(`Prefecture Seed Error : ${e}`)
     process.exit(1)
-  })
+  }
 
   // eslint-disable-next-line
   console.log('running city seeder')
-
-  const cityPromises = cities.map(async city => prisma.city.upsert({
-    where: { slug: `SUB${city.id}` },
-    update: {},
-    create: {
-      name: city.name,
-      slug: `SUB${city.id}`,
-      prefecture: {
-        connect: {
-          slug: city.prefecture,
-        },
-      },
-    },
-  }))
-
-  await Promise.all(cityPromises).catch(e => {
-    console.error(`City Seed Error : ${e}`)
+  try {
+    await citySeeder(cities)
+  } catch (e) {
+    console.error(`City Seed Error: ${e}`)
     process.exit(1)
-  })
+  }
 
   // eslint-disable-next-line
   console.log('running shop seeder')
