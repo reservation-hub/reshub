@@ -1,7 +1,7 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-import dashboardController from '@controllers/dashboardController'
+import dashboardController from '@controllers/dashboard/DashboardController'
 import { UserForAuth } from '@entities/User'
 import { roleCheck } from '@routes/utils'
 import { salonIndexAdminResponse, salonIndexShopStaffResponse } from '@request-response-types/Dashboard'

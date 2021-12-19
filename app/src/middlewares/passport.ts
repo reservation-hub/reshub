@@ -2,7 +2,7 @@ import { Request } from 'express'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
-import { localStrategySchema } from '@controllers/schemas/auth'
+import { localStrategySchema } from '@controllers/auth/schemas/auth'
 import { User } from '@entities/User'
 import { localAuthenticationQuery } from '@request-response-types/Auth'
 import { localAuthenticationQuery as clientLocalAuthenticationQuery }

@@ -84,7 +84,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const shops = await prisma.shop.findMany({
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: order === DescOrder ? Prisma.SortOrder.desc : Prisma.SortOrder.asc },
       take: limit,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
@@ -243,7 +243,9 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
         description,
         price,
         duration,
-        shopId,
+        shop: {
+          connect: { id: shopId },
+        },
       },
     })
   },

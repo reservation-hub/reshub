@@ -1,7 +1,7 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-import userController from '@controllers/userController'
+import userController from '@controllers/user/UserController'
 import { parseIntIdMiddleware, roleCheck } from '@routes/utils'
 import { RoleSlug } from '@entities/Role'
 import {

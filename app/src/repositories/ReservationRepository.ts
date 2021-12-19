@@ -67,10 +67,10 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
     }))
   },
 
-  async fetchShopStaffReservations(userId) {
+  async fetchShopStaffReservations(userId, limit?) {
     const reservations = await prisma.reservation.findMany({
       where: { shop: { shopUser: { userId } } },
-      take: 5,
+      take: limit,
     })
     return reservations.map(r => reconstructReservation(r))
   },

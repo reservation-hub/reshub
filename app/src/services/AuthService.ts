@@ -3,7 +3,7 @@ import { OAuth2Client as GoogleAuthClient, TokenPayload } from 'google-auth-libr
 import bcrypt from 'bcrypt'
 
 import { AuthServiceInterface as PassportSocket } from '@middlewares/passport'
-import { AuthServiceInterface as AuthControllerSocket } from '@controllers/authController'
+import { AuthServiceInterface as AuthControllerSocket } from '@controllers/auth/AuthController'
 import { User } from '@entities/User'
 import UserRepository from '@repositories/UserRepository'
 import { RoleSlug } from '@entities/Role'

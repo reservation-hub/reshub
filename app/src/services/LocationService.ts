@@ -1,4 +1,4 @@
-import { LocationServiceInterface } from '@controllers/locationController'
+import { LocationServiceInterface } from '@controllers/location/LocationController'
 import { LocationRepository } from '@repositories/LocationRepository'
 import { Area, City, Prefecture } from '@entities/Location'
 import { NotFoundError } from './Errors/ServiceError'
