@@ -290,7 +290,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
     if (!await isValidMenuId(shopId, menuId)) {
-      console.error('Menu item is not of the shop')
+      console.error('Menu is not of the shop')
       throw new NotFoundError()
     }
 
@@ -310,7 +310,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
       throw new NotFoundError()
     }
     if (!await isValidMenuId(shopId, menuId)) {
-      console.error('menu item not found')
+      console.error('Menu not found')
       throw new NotFoundError()
     }
 
@@ -426,7 +426,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
     }
 
     if (!await isValidMenuId(shopId, menuId)) {
-      console.error('Menu Item does not exist in shop')
+      console.error('Menu does not exist in shop')
       throw new InvalidParamsError()
     }
 
@@ -468,7 +468,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
 
     const menus = await ShopRepository.fetchShopMenus(shop.id)
     if (!menus.find(item => item.id === menuId)) {
-      console.error('Menu Item does not exist in shop')
+      console.error('Menu does not exist in shop')
       throw new InvalidParamsError()
     }
 
