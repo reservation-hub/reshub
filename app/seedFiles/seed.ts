@@ -254,10 +254,11 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
       })
       return Promise.all(dates.map(async d => {
         const randomClientIndex = Math.floor(Math.random() * clientsForReservation.length)
+        const randomStylistIndex = Math.floor(Math.random() * sfs.stylists.length)
         return prisma.reservation.create({
           data: {
             reservationDate: d,
-            stylistId: sfs.stylists[Math.floor(Math.random() * sfs.stylists.length) + 1]?.id,
+            stylistId: sfs.stylists[randomStylistIndex]?.id,
             shopId: sfs.id,
             userId: clientsForReservation[randomClientIndex].id,
             menuId: sfs.menu[0].id,
@@ -272,17 +273,14 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
 }
 
 const main = async () => {
-// eslint-disable-next-line
   console.log('running seeder')
 
-  // eslint-disable-next-line
   console.log('running roles seeder')
   await roleSeeder(roles)
   console.log('')
   console.log('roles seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('running admins seeder')
   const adminRole = await prisma.role.findUnique({
     where: { slug: RoleSlug.ADMIN },
@@ -296,7 +294,6 @@ const main = async () => {
   console.log('admin seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('running staff seeder')
   const staffRole = await prisma.role.findUnique({
     where: { slug: RoleSlug.SHOP_STAFF },
@@ -309,7 +306,6 @@ const main = async () => {
   console.log('staff seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('running client seeder')
   const clientRole = await prisma.role.findUnique({
     where: { slug: RoleSlug.CLIENT },
@@ -322,28 +318,24 @@ const main = async () => {
   console.log('client seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('running area seeder')
   await areaSeeder(areas)
   console.log('')
   console.log('area seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('running prefecture seeder')
   await prefectureSeeder(prefectures)
   console.log('')
   console.log('prefecture seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('running city seeder')
   await citySeeder(cities)
   console.log('')
   console.log('city seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('running shop seeder')
   const shopCount = 300
   const cityCount = 1747
@@ -364,7 +356,6 @@ const main = async () => {
   console.log('shop seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('connecting staff to shops')
   const shopStaffs = await prisma.user.findMany({
     where: { role: { slug: RoleSlug.SHOP_STAFF } },
@@ -379,7 +370,6 @@ const main = async () => {
   console.log('connecting staff to shop done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('running menu seeder')
   const shopsForMenuSeed = await prisma.shop.findMany()
   await menuSeeder(shopsForMenuSeed)
@@ -387,7 +377,6 @@ const main = async () => {
   console.log('menu seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('running stylist seeder')
   const shopsForStylistSeed = await prisma.shop.findMany({
     include: { menu: true },
@@ -397,7 +386,6 @@ const main = async () => {
   console.log('stylist seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('running reservation seeder')
   const shopsForReservationSeed = await prisma.shop.findMany({
     include: { menu: true, stylists: true, shopDetail: true },
@@ -422,7 +410,6 @@ const main = async () => {
   console.log('reservation seeder done')
   console.log('')
 
-  // eslint-disable-next-line
   console.log('seed done')
   process.exit(0)
 };
