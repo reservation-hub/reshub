@@ -12,7 +12,7 @@ import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import { shopStylistUpsertSchema } from './schemas/stylist'
 import { searchSchema } from './schemas/search'
-import { menuItemUpsertSchema } from './schemas/menu'
+import { menuUpsertSchema } from './schemas/menu'
 import { reservationUpsertSchema } from './schemas/reservation'
 
 export type ShopServiceInterface = {
@@ -218,7 +218,7 @@ const ShopController: ShopControllerInterface = {
   async insertMenu(user, query) {
     const {
       name, description, price, duration,
-    } = await menuItemUpsertSchema.validateAsync(query.params, joiOptions)
+    } = await menuUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId } = query
     await ShopService.insertMenu(user, shopId, name, description, price, duration)
     return 'Menu created'
@@ -227,7 +227,7 @@ const ShopController: ShopControllerInterface = {
   async updateMenu(user, query) {
     const {
       name, description, price, duration,
-    } = await menuItemUpsertSchema.validateAsync(query.params, joiOptions)
+    } = await menuUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId, menuId } = query
     await ShopService.updateMenu(user, shopId, menuId, name, description, price, duration)
     return 'Menu updated'
