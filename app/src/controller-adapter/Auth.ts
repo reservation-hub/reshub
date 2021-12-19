@@ -29,6 +29,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) : P
   try {
     const user = req.user as UserForAuth
     if (!user) {
+      console.error('User not found in request')
       throw new UnknownServerError()
     }
 
@@ -47,6 +48,7 @@ export const refreshLogin = async (req: Request, res: Response, next: NextFuncti
   try {
     const user = req.user as UserForAuth
     if (!user) {
+      console.error('User not found in request')
       throw new UnknownServerError()
     }
     const token = AuthController.createOneDayToken(user)

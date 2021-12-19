@@ -15,6 +15,7 @@ const login = async (req: Request, res: Response, next: NextFunction) : Promise<
   try {
     const { user } = req
     if (!user) {
+      console.error('User is not found in request')
       throw new UnknownServerError()
     }
 

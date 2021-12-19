@@ -32,10 +32,14 @@ export const createSignupToken = (email: string): string => (jwt.sign(
 
 export const signUpUser = async (query: signUpQuery): Promise<User> => {
   if (query.password !== query.confirm) {
+    console.error('passwords did not match')
     throw new InvalidParamsError()
   }
   const isAvailable = await UserRepository.emailIsAvailable(query.email)
-  if (!isAvailable) throw new DuplicateModelError()
+  if (!isAvailable) {
+    console.error('Email is not available')
+    throw new DuplicateModelError()
+  }
   const hash = bcrypt.hashSync(query.password, 10 /* hash rounds */)
   const user = await UserRepository.insertUser(query.email, query.username, hash)
   const token = createSignupToken(user.email)

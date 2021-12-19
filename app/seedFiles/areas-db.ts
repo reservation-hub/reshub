@@ -1,3 +1,8 @@
+export type AreaObject = {
+  name: string
+  slug: string
+}
+
 export default [
   { name: '北海道・東北', slug: 'hokkaidou-touhoku' },
   { name: '関東', slug: 'kantou' },
