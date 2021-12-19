@@ -40,6 +40,7 @@ const AuthService: AuthControllerSocket & PassportSocket = {
       console.error('User in token does not exist')
       throw new NotFoundError()
     }
+    console.error('User is already logged in')
     throw new UserIsLoggedInError()
   },
 
@@ -103,6 +104,7 @@ const AuthService: AuthControllerSocket & PassportSocket = {
       user = await UserRepository.fetchByEmail('eugene.sinamban@gmail.com')
     }
     if (!user) {
+      console.error('User for hack not found')
       throw new NotFoundError()
     }
     return user
