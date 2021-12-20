@@ -2,10 +2,13 @@
 import prisma from "@repositories/prisma"
 
 (async () => {
+  const reservationDate = new Date('2021-12-20 14:00:00')
+  const startDate = new Date(reservationDate.toISOString().split('T')[0])
+  const endDate = new Date(startDate.getTime() + ( 3600 * 1000 * 24) /* one day in ms*/)
   const reservations = await prisma.reservation.findMany({
     where: { reservationDate: {
-      gte: new Date('2021-12-20'),
-      lt: new Date('2021-12-21'),
+      gte: startDate,
+      lt: endDate,
     } },
     include: { menu: true },
     take: 10,
@@ -15,7 +18,6 @@ import prisma from "@repositories/prisma"
     nextAvailableDate.setMinutes(nextAvailableDate.getMinutes() + menuDuration)
     return nextAvailableDate
   }
-  const reservationDate = new Date('2021-12-20 14:00:00')
   const reservationDuration = 60
   const reservationEndTime = nextAvailableDate(reservationDate, reservationDuration).getTime()
   const isAvailable = reservations.every(r => {
