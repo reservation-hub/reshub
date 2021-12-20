@@ -2,19 +2,20 @@ import jwt from 'jsonwebtoken'
 import { OAuth2Client as GoogleAuthClient, TokenPayload } from 'google-auth-library'
 import bcrypt from 'bcrypt'
 
-import { AuthServiceInterface as PassportSocket } from '@middlewares/passport'
-import { AuthServiceInterface as AuthControllerSocket } from '@controllers/auth/AuthController'
-import { User } from '@entities/User'
-import UserRepository from '@repositories/UserRepository'
+import config from '@config'
+import { AuthServiceInterface as PassportSocket } from '@auth/middlewares/passport'
+import { AuthServiceInterface as AuthControllerSocket } from '@auth/AuthController'
 import { RoleSlug } from '@entities/Role'
-import config from '../config'
+import { User } from '@entities/User'
+import UserRepository from '@auth/repositories/UserRepository'
 import {
   InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError, AuthenticationError, AuthorizationError,
 } from './Errors/ServiceError'
 
 export type UserRepositoryInterface = {
-  fetchByEmail(email: string): Promise<User | null>,
-  addOAuthId(id: number, provider: string, authId: string): Promise<boolean | null>,
+  fetch(id: number): Promise<User | null>
+  fetchByEmail(email: string): Promise<User | null>
+  addOAuthId(id: number, provider: string, authId: string): Promise<boolean | null>
 }
 interface JwtPayload {
   user: User

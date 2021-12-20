@@ -1,9 +1,8 @@
 import { Prisma, Gender as PrismaGender, RoleSlug as PrismaRoleSlug } from '@prisma/client'
 import { Gender, User } from '@entities/User'
 import { UserRepositoryInterface as UserServiceSocket } from '@services/UserService'
-import { UserRepositoryInterface as AuthServiceSocket } from '@services/AuthService'
 import { RoleSlug } from '@entities/Role'
-import prisma from './prisma'
+import prisma from '@controllers/prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
@@ -76,7 +75,7 @@ export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User 
   gender: user.profile!.gender ? convertDBGenderToEntityGender(user.profile!.gender) : undefined,
 })
 
-const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & AuthServiceSocket = {
+const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket = {
   async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const users = await prisma.user.findMany({
@@ -205,7 +204,7 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
     const users = usersResult.map(user => reconstructUser(user))
     return users
   },
-  async fetchByEmail(email) {
+  async fetchUserByEmail(email) {
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
@@ -217,30 +216,6 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket & Aut
     return user ? reconstructUser(user) : null
   },
 
-  async addOAuthId(id, provider, authId) {
-    const updateQuery = {
-      where: { id },
-      data: {
-        oAuthIds: {
-          upsert: {
-            update: {},
-            create: {},
-          },
-        },
-      },
-    }
-
-    switch (provider) {
-      case 'google':
-        Object.assign(updateQuery.data.oAuthIds.upsert.create, { googleId: authId })
-        Object.assign(updateQuery.data.oAuthIds.upsert.update, { googleId: authId })
-        break
-      default:
-    }
-
-    const user = await prisma.user.update(updateQuery)
-    return !!user
-  },
 }
 
 export default UserRepository

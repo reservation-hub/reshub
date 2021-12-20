@@ -2,22 +2,18 @@ import { Request } from 'express'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
-import { localStrategySchema } from '@controllers/auth/schemas/auth'
 import { User } from '@entities/User'
-import { localAuthenticationQuery } from '@request-response-types/Auth'
-import { localAuthenticationQuery as clientLocalAuthenticationQuery }
-  from '@request-response-types/client/Auth'
-import AuthService from '@services/AuthService'
-import UserService from '@services/UserService'
-import ClientAuthService from '@client/services/AuthService'
-import { localStrategySchema as apiLocalStrategySchema } from '@client/controllers/schemas/auth'
+import { localAuthenticationQuery } from '@request-response-types/client/Auth'
+import AuthService from '@client/services/AuthService'
+import UserService from '@client/services/UserService'
+import { localStrategySchema } from '@client/controllers/schemas/auth'
 
 export type AuthServiceInterface = {
-  authenticateByEmailAndPassword(query: localAuthenticationQuery): Promise<User>
+  authenticateByUsernameAndPassword(query: localAuthenticationQuery): Promise<User>
 }
 
-export type APIAuthServiceInterface = {
-  authenticateByUsernameAndPassword(query: clientLocalAuthenticationQuery): Promise<User>
+export type UserServiceInterface = {
+  fetch(id: number): Promise<User | null>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -54,51 +50,35 @@ const commonJwtOptions = {
   jwtFromRequest: cookieExtractor,
   secretOrKey: process.env.JWT_TOKEN_SECRET,
   issuer: process.env.RESHUB_URL,
+  audience: 'http://localhost:3000',
 }
 
 const jwtOptionsRefresh = {
   ...commonJwtOptions,
   jwtFromRequest: refreshCookieExtractor,
-  audience: 'http://localhost:8080',
   expiresIn: '30d',
-}
-
-const jwtOptionsAdmin = {
-  ...commonJwtOptions,
-  audience: 'http://localhost:8080',
-  expiresIn: '1d',
 }
 
 const jwtOptionsClient = {
   ...commonJwtOptions,
-  audience: 'http://localhost:3000',
   expiresIn: '30d',
 }
 
 const jwtStrategyLogic = async (jwtPayload: any, done: any) => {
   try {
-    const user = await UserService.fetchUser(jwtPayload.user.id)
+    const user = await UserService.fetch(jwtPayload.user.id)
     return done(null, user)
   } catch (error) { return done(error) }
 }
 
-passport.use('admin-jwt', new JWTStrategy(jwtOptionsAdmin, jwtStrategyLogic))
 passport.use('client-jwt', new JWTStrategy(jwtOptionsClient, jwtStrategyLogic))
 passport.use('refresh-jwt', new JWTStrategy(jwtOptionsRefresh, jwtStrategyLogic))
 // local
 
 passport.use('client-local', new LocalStrategy(async (username, password, done) => {
   try {
-    const schemaValues = await apiLocalStrategySchema.validateAsync({ username, password }, joiOptions)
-    const user = await ClientAuthService.authenticateByUsernameAndPassword(schemaValues)
-    return done(null, user)
-  } catch (error) { return done(error) }
-}))
-
-passport.use('admin-local', new LocalStrategy({ usernameField: 'email' }, async (username, password, done) => {
-  try {
-    const schemaValues = await localStrategySchema.validateAsync({ email: username, password }, joiOptions)
-    const user = await AuthService.authenticateByEmailAndPassword(schemaValues)
+    const schemaValues = await localStrategySchema.validateAsync({ username, password }, joiOptions)
+    const user = await AuthService.authenticateByUsernameAndPassword(schemaValues)
     return done(null, user)
   } catch (error) { return done(error) }
 }))

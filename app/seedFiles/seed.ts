@@ -1,6 +1,6 @@
 /* eslint-disable  */
 import bcrypt from 'bcrypt'
-import prisma from '../src/repositories/prisma'
+import prisma from '@controllers/prisma'
 import areas, { AreaObject } from './areas-db'
 import prefectures, { PrefectureObject } from './prefec-db'
 

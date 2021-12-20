@@ -1,9 +1,9 @@
 import { Prisma, RoleSlug } from '@prisma/client'
-import { User } from '@entities/User'
-import prisma from '@repositories/prisma'
 import { UserRepositoryInterface } from '@client/services/SignUpService'
 import { UserRepositoryInterface as AuthServiceSocket } from '@client/services/AuthService'
 import { convertRoleSlug } from '@repositories/UserRepository'
+import { User } from '@entities/User'
+import prisma from '@/controllers/prisma'
 
 const userWithProfileAndOAuthIdsAndRole = Prisma.validator<Prisma.UserArgs>()(
   { include: { profile: true, oAuthIds: true, role: true } },
