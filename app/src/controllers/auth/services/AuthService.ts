@@ -8,9 +8,7 @@ import { AuthServiceInterface as AuthControllerSocket } from '@auth/AuthControll
 import { RoleSlug } from '@entities/Role'
 import { User } from '@entities/User'
 import UserRepository from '@auth/repositories/UserRepository'
-import {
-  InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError, AuthenticationError, AuthorizationError,
-} from './Errors/ServiceError'
+import { AuthError } from './Errors/ServiceError'
 
 export type UserRepositoryInterface = {
   fetch(id: number): Promise<User | null>
@@ -33,22 +31,22 @@ const AuthService: AuthControllerSocket & PassportSocket = {
   async verifyIfUserInTokenIsLoggedIn(authToken, headerToken?) {
     if (headerToken && headerToken !== authToken) {
       console.error('Header token does not match')
-      throw new AuthenticationError()
+      throw new AuthError.AuthenticationError()
     }
     const token = jwt.verify(authToken, config.JWT_TOKEN_SECRET) as JwtPayload
     const user = await UserRepository.fetch(token.user.id)
     if (!user) {
       console.error('User in token does not exist')
-      throw new NotFoundError()
+      throw new AuthError.NotFoundError()
     }
     console.error('User is already logged in')
-    throw new UserIsLoggedInError()
+    throw new AuthError.UserIsLoggedInError()
   },
 
   async silentRefreshTokenChecks(authToken, refreshToken, headerToken?) {
     if (!(!authToken && !headerToken && refreshToken)) {
       console.error('Necessary tokens are not complete')
-      throw new AuthorizationError()
+      throw new AuthError.AuthorizationError()
     }
   },
 
@@ -62,13 +60,13 @@ const AuthService: AuthControllerSocket & PassportSocket = {
     const { email, sub } = ticket.getPayload() as TokenPayload
     if (!email) {
       console.error('Token does not have email')
-      throw new InvalidTokenError()
+      throw new AuthError.InvalidTokenError()
     }
 
     const user = await UserRepository.fetchByEmail(email)
     if (!user) {
       console.error('User in token does not exist')
-      throw new NotFoundError()
+      throw new AuthError.NotFoundError()
     }
 
     if (!user.oAuthIds || !user.oAuthIds.googleId) {
@@ -81,17 +79,17 @@ const AuthService: AuthControllerSocket & PassportSocket = {
   async authenticateByEmailAndPassword({ email, password }) {
     if (!email || !password) {
       console.error('email or password is required')
-      throw new InvalidParamsError()
+      throw new AuthError.InvalidParamsError()
     }
 
     const user = await UserRepository.fetchByEmail(email)
     if (!user) {
       console.error('User does not exist')
-      throw new NotFoundError()
+      throw new AuthError.NotFoundError()
     }
     if (user.password && !bcrypt.compareSync(password, user.password)) {
       console.error('password does not match')
-      throw new InvalidParamsError()
+      throw new AuthError.InvalidParamsError()
     }
 
     return user
@@ -106,7 +104,7 @@ const AuthService: AuthControllerSocket & PassportSocket = {
     }
     if (!user) {
       console.error('User for hack not found')
-      throw new NotFoundError()
+      throw new AuthError.NotFoundError()
     }
     return user
   },
