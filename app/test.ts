@@ -1,5 +1,5 @@
 /* eslint-disable */
-import prisma from "@repositories/prisma"
+import prisma from "@/controllers/prisma"
 
 (async () => {
   const reservationDate = new Date('2021-12-20 14:00:00')
