@@ -1,7 +1,7 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-import ShopController from '@controllers/shopController'
+import ShopController from '@controllers/shop/ShopController'
 import { parseIntIdMiddleware } from '@routes/utils'
 import {
   InsertShopQuery, UpdateShopQuery, ShopQuery, ShopListResponse, ShopListQuery, ShopResponse,

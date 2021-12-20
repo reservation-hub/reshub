@@ -1,5 +1,5 @@
-import { ShopServiceInterface as ShopControllerSocket } from '@controllers/shopController'
-import { ShopServiceInterface as DashboardControllerSocket } from '@controllers/dashboardController'
+import { ShopServiceInterface as ShopControllerSocket } from '@controllers/shop/ShopController'
+import { ShopServiceInterface as DashboardControllerSocket } from '@controllers/dashboard/DashboardController'
 import { Shop } from '@entities/Shop'
 import { Reservation } from '@entities/Reservation'
 import { Menu } from '@entities/Menu'
@@ -55,7 +55,7 @@ export type ReservationRepositoryInterface = {
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
     menuId: number, stylistId?: number): Promise<Reservation>
   cancelReservation(id: number): Promise<Reservation>
-  fetchShopStaffReservations(userId: number): Promise<Reservation[]>
+  fetchShopStaffReservations(userId: number, limit?: number): Promise<Reservation[]>
   fetchReservationsByShopIds(shopIds: number[]) : Promise<{ id: number, data: Reservation[] }[]>
   fetchReservationsCountByShopIds(shopIds: number[]) : Promise<{ id: number, count: number }[]>
   fetchShopsReservations(shopIds: number[]): Promise<Reservation[]>
@@ -102,7 +102,7 @@ export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
   },
 
   async fetchShopStaffReservationForDashboard(user) {
-    return ReservationRepository.fetchShopStaffReservations(user.id)
+    return ReservationRepository.fetchShopStaffReservations(user.id, 5)
   },
 
   async fetchShopStaffStylistsForDashboard(user) {
