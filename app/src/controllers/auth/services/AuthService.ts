@@ -8,7 +8,7 @@ import { AuthServiceInterface as AuthControllerSocket } from '@auth/AuthControll
 import { RoleSlug } from '@entities/Role'
 import { User } from '@entities/User'
 import UserRepository from '@auth/repositories/UserRepository'
-import * as AuthError from './Errors/ServiceError'
+import * as AuthError from '@auth/services/ServiceError'
 
 export type UserRepositoryInterface = {
   fetch(id: number): Promise<User | null>

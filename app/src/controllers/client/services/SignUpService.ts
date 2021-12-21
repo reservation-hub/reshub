@@ -4,7 +4,7 @@ import config from '@config'
 import { SignUpServiceInterface } from '@client/controllers/signUpController'
 import UserRepository from '@client/repositories/UserRepository'
 import { User } from '@entities/User'
-import { DuplicateModelError, InvalidParamsError } from '@services/Errors/ServiceError'
+import { DuplicateModelError, InvalidParamsError } from '@client/services/ServiceError'
 import MailService from './MailService'
 
 export type UserRepositoryInterface = {

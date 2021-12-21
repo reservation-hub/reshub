@@ -2,37 +2,37 @@ import { Reservation } from '@entities/Reservation'
 import { Shop } from '@entities/Shop'
 import { User, UserForAuth } from '@entities/User'
 import { Stylist } from '@entities/Stylist'
-import ShopService from '@services/ShopService'
-import UserService from '@services/UserService'
+import ShopService from '@dashboard/services/ShopService'
+import UserService from '@dashboard/services/UserService'
 import { DashboardControllerInterface } from '@controller-adapter/Dashboard'
 import { RoleSlug } from '@entities/Role'
 import { salonIndexAdminResponse, salonIndexShopStaffResponse } from '@request-response-types/Dashboard'
 import { Menu } from '@entities/Menu'
+import ReservationService from '@dashboard/services/ReservationService'
+import StylistService from '@dashboard/services/StylistService'
 
 export type UserServiceInterface = {
-  fetchUsersForDashboard(): Promise<{ users: User[], totalCount: number }>
-  fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number}[]>
+  fetchUsersWithReservationCounts(): Promise<{ users: (User & { reservationCount: number })[], totalCount: number }>
+  fetchUsersByIds(userIds: number[]): Promise<User[]>
 }
 
 export type ShopServiceInterface = {
-  fetchShopsForDashboard(): Promise<{ shops: Shop[], totalCount: number }>
-  fetchShopsForDashboardForShopStaff(user: UserForAuth): Promise<{ shops: Shop[], totalCount: number }>
-  fetchShopStaffReservationForDashboard(user: UserForAuth): Promise<Reservation[]>
-  fetchShopStaffStylistsForDashboard(user: UserForAuth): Promise<Stylist[]>
-  fetchStylistsReservationCounts(user: UserForAuth, stylistIds: number[])
-    : Promise<{ stylistId: number, reservationCount: number }[]>
-  fetchShopsByIds(user: UserForAuth, shopIds: number[]): Promise<Shop[]>
-  fetchStylistsByIds(user: UserForAuth, stylistIds: number[]): Promise<Stylist[]>
-  fetchMenusByIds(user: UserForAuth, menuIds: number[]): Promise<Menu[]>
+  fetchShopsWithStylistCountsAndReservationCounts(user?: UserForAuth): Promise<{ shops: (Shop & {
+    stylistCount: number, reservationCount: number })[], totalCount: number }>
+}
+
+export type ReservationServiceInterface = {
+  fetchReservationsWithClientAndStylistAndMenu(user: UserForAuth): Promise<(Reservation &
+    { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
+}
+
+export type StylistServiceInterface = {
+  fetchStylistsWithReservationCount(user: UserForAuth): Promise<(Stylist & { reservationCount: number })[]>
 }
 
 const salonIndexForAdmin = async (): Promise<salonIndexAdminResponse> => {
-  const { users, totalCount: userTotalCount } = await UserService.fetchUsersForDashboard()
-  const { shops, totalCount: shopTotalCount } = await ShopService.fetchShopsForDashboard()
-  const userReservationCounts = await UserService.fetchUsersReservationCounts(users.map(u => u.id))
-  const shopIds = shops.map(shop => shop.id)
-  const stylistCounts = await ShopService.fetchStylistsCountByShopIds(shopIds)
-  const reservationCounts = await ShopService.fetchReservationsCountByShopIds(shopIds)
+  const { users, totalCount: userTotalCount } = await UserService.fetchUsersWithReservationCounts()
+  const { shops, totalCount: shopTotalCount } = await ShopService.fetchShopsWithStylistCountsAndReservationCounts()
   const shopData = shops.map(s => ({
     id: s.id,
     name: s.name!,
@@ -40,8 +40,8 @@ const salonIndexForAdmin = async (): Promise<salonIndexAdminResponse> => {
     address: s.address!,
     prefectureName: s.prefecture.name,
     cityName: s.city.name,
-    reservationsCount: reservationCounts.find(item => item.id === s.id)!.count,
-    stylistsCount: stylistCounts.find(item => item.id === s.id)!.count,
+    reservationsCount: s.reservationCount,
+    stylistsCount: s.stylistCount,
   }))
 
   const usersForList = users.map(u => ({
@@ -51,7 +51,7 @@ const salonIndexForAdmin = async (): Promise<salonIndexAdminResponse> => {
     firstNameKana: u.firstNameKana!,
     lastNameKana: u.lastNameKana!,
     role: u.role,
-    reservationCount: userReservationCounts.find(urc => urc.userId === u.id)!.reservationCount,
+    reservationCount: u.reservationCount,
   }))
 
   return {
@@ -61,10 +61,7 @@ const salonIndexForAdmin = async (): Promise<salonIndexAdminResponse> => {
 }
 
 const salonIndexForShopStaff = async (user: UserForAuth): Promise<salonIndexShopStaffResponse> => {
-  const { shops, totalCount: shopTotalCount } = await ShopService.fetchShopsForDashboardForShopStaff(user)
-  const shopIds = shops.map(shop => shop.id)
-  const stylistCounts = await ShopService.fetchStylistsCountByShopIds(shopIds)
-  const reservationCounts = await ShopService.fetchReservationsCountByShopIds(shopIds)
+  const { shops, totalCount: shopTotalCount } = await ShopService.fetchShopsWithStylistCountsAndReservationCounts(user)
   const shopData = shops.map(s => ({
     id: s.id,
     name: s.name!,
@@ -72,44 +69,31 @@ const salonIndexForShopStaff = async (user: UserForAuth): Promise<salonIndexShop
     address: s.address,
     prefectureName: s.prefecture.name,
     cityName: s.city.name,
-    reservationsCount: reservationCounts.find(item => item.id === s.id)!.count,
-    stylistsCount: stylistCounts.find(item => item.id === s.id)!.count,
+    reservationsCount: s.reservationCount,
+    stylistsCount: s.stylistCount,
   }))
 
   // reservations
-  const reservations = await ShopService.fetchShopStaffReservationForDashboard(user)
-  const clients = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
-  const reservationShops = await ShopService.fetchShopsByIds(user, reservations.map(r => r.shopId))
-  const stylistIds = reservations.map(r => r.stylistId).filter((r): r is number => typeof r === 'number')
-  const reservationStylists = await ShopService.fetchStylistsByIds(user, stylistIds)
-  const menus = await ShopService.fetchMenusByIds(user, reservations.map(r => r.menuId))
-
-  const reservationList = reservations.map(r => {
-    const client = clients.find(c => c.id === r.clientId)!
-    const shop = reservationShops.find(rs => rs.id === r.shopId)!
-    const stylist = reservationStylists.find(rs => rs.id === r.stylistId)
-    const menu = menus.find(m => m.id === r.menuId)!
-    return {
-      id: r.id,
-      shopId: r.shopId,
-      shopName: shop.name,
-      clientName: `${client.lastNameKana!} ${client.firstNameKana!}`,
-      menuName: menu.name,
-      stylistName: stylist?.name,
-      status: r.status,
-      reservationDate: r.reservationDate,
-    }
-  })
+  const reservations = await ReservationService.fetchReservationsWithClientAndStylistAndMenu(user)
+  const reservationList = reservations.map(r => ({
+    id: r.id,
+    shopId: r.shopId,
+    shopName: r.shop.name,
+    clientName: `${r.client.lastNameKana!} ${r.client.firstNameKana!}`,
+    menuName: r.menu.name,
+    stylistName: r.stylist?.name,
+    status: r.status,
+    reservationDate: r.reservationDate,
+  }))
 
   // stylists
-  const stylists = await ShopService.fetchShopStaffStylistsForDashboard(user)
-  const stylistReservationCounts = await ShopService.fetchStylistsReservationCounts(user, stylists.map(s => s.id))
+  const stylists = await StylistService.fetchStylistsWithReservationCount(user)
   const stylistList = stylists.map(s => ({
     id: s.id,
     shopId: s.shopId,
     name: s.name,
     price: s.price,
-    reservationCount: stylistReservationCounts.find(src => src.stylistId === s.id)!.reservationCount,
+    reservationCount: s.reservationCount,
   }))
 
   // popular menu

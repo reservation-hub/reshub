@@ -2,7 +2,7 @@ import { UserServiceInterface } from '@auth/middlewares/passport'
 import { Gender, User } from '@entities/User'
 import UserRepository from '@auth/repositories/UserRepository'
 import { RoleSlug } from '@entities/Role'
-import * as AuthError from './Errors/ServiceError'
+import * as AuthError from '@auth/services/ServiceError'
 
 export type UserRepositoryInterface = {
   insertUserWithProfile(email: string, password: string, roleSlug: RoleSlug, lastNameKanji: string,
