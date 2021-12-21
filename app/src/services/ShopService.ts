@@ -1,5 +1,4 @@
-import { ShopServiceInterface as ShopControllerSocket } from '@controllers/shop/ShopController'
-import { ShopServiceInterface as DashboardControllerSocket } from '@controllers/dashboard/DashboardController'
+import { ShopServiceInterface } from '@controllers/shop/ShopController'
 import { Shop } from '@entities/Shop'
 import { Reservation } from '@entities/Reservation'
 import { Menu } from '@entities/Menu'
@@ -87,43 +86,7 @@ const isValidStylistId = async (shopId: number, stylistId: number): Promise<bool
   return stylists.find(s => s.id === stylistId) !== undefined
 }
 
-export const ShopService: ShopControllerSocket & DashboardControllerSocket = {
-
-  async fetchShopsForDashboard() {
-    const shops = await ShopRepository.fetchAll({ limit: 5 })
-    const shopsCount = await ShopRepository.totalCount()
-    return { shops, totalCount: shopsCount }
-  },
-
-  async fetchShopsForDashboardForShopStaff(user) {
-    const shops = await ShopRepository.fetchUserShops(user.id)
-    const totalCount = await ShopRepository.fetchUserShopsCount(user.id)
-    return { shops, totalCount }
-  },
-
-  async fetchShopStaffReservationForDashboard(user) {
-    return ReservationRepository.fetchShopStaffReservations(user.id, 5)
-  },
-
-  async fetchShopStaffStylistsForDashboard(user) {
-    return StylistRepository.fetchShopStaffStylists(user.id)
-  },
-
-  async fetchShopsByIds(user, shopIds) {
-    return ShopRepository.fetchShopsByIds(shopIds)
-  },
-
-  async fetchStylistsByIds(user, stylistIds) {
-    return StylistRepository.fetchStylistsByIds(stylistIds)
-  },
-
-  async fetchMenusByIds(user, menuIds) {
-    return ShopRepository.fetchMenusByIds(menuIds)
-  },
-
-  async fetchStylistsReservationCounts(user, stylistIds) {
-    return ReservationRepository.fetchStylistReservationCounts(stylistIds)
-  },
+export const ShopService: ShopServiceInterface = {
 
   async fetchShopsWithTotalCount(user, params) {
     let shops

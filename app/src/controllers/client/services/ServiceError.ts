@@ -1,4 +1,14 @@
 type ServiceErrorCode = number
+export enum ErrorCode {
+  NotFound,
+  InvalidToken,
+  InvalidParams,
+  DuplicateModel,
+  LoggedIn,
+  Authentication,
+  Authorization,
+}
+
 export const NotFound: ServiceErrorCode = 0
 export const InvalidToken: ServiceErrorCode = 1
 export const InvalidParams: ServiceErrorCode = 2
@@ -14,47 +24,47 @@ export class ServiceError extends Error {
     this.code = code
   }
 
-  code: ServiceErrorCode
+  code: ErrorCode
 }
 
 export class NotFoundError extends ServiceError {
   constructor() {
-    super('Resource not found', NotFound)
+    super('Resource not found', ErrorCode.NotFound)
   }
 }
 
 export class InvalidTokenError extends ServiceError {
   constructor() {
-    super('Invalid token', InvalidToken)
+    super('Invalid token', ErrorCode.InvalidToken)
   }
 }
 
 export class InvalidParamsError extends ServiceError {
   constructor() {
-    super('Invalid query params', InvalidParams)
+    super('Invalid query params', ErrorCode.InvalidParams)
   }
 }
 
 export class DuplicateModelError extends ServiceError {
   constructor() {
-    super('Duplicate resource found', DuplicateModel)
+    super('Duplicate resource found', ErrorCode.DuplicateModel)
   }
 }
 
 export class UserIsLoggedInError extends ServiceError {
   constructor() {
-    super('User is logged in', LoggedIn)
+    super('User is logged in', ErrorCode.LoggedIn)
   }
 }
 
 export class AuthenticationError extends ServiceError {
   constructor() {
-    super('User authentication failed', Authentication)
+    super('User authentication failed', ErrorCode.Authentication)
   }
 }
 
 export class AuthorizationError extends ServiceError {
   constructor() {
-    super('User not Authorized', Authorization)
+    super('User not Authorized', ErrorCode.Authorization)
   }
 }

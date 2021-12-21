@@ -150,7 +150,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
             name,
             address,
             phoneNumber,
-            days: days.map(d => convertEntityDayToPrismaDay(d)),
+            days: days.map(convertEntityDayToPrismaDay),
             startTime,
             endTime,
             details,

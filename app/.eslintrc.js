@@ -37,7 +37,7 @@ module.exports = {
     'max-len': ['error', { code: 120 }],
     'no-console': ['error', { allow: ['error'] }],
     'no-duplicate-imports': 'error',
-    'no-underscore-dangle': ['error', { allow: ['_id'] }],
+    'no-underscore-dangle': ['warn', { allow: ['_id', '_count'] }],
     'no-useless-computed-key': 'error',
     'no-useless-constructor': 'error',
     'no-useless-rename': 'error',

@@ -20,6 +20,7 @@ export type UserServiceInterface = {
   updateUserFromAdmin(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string, firstNameKanji: string,
     lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string) : Promise<void>,
   deleteUserFromAdmin(id: number): Promise<void>,
+  fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
