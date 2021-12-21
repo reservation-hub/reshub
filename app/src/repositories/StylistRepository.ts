@@ -1,7 +1,7 @@
 import { Stylist as PrismaStylist, Days } from '@prisma/client'
 import { Stylist } from '@entities/Stylist'
 import { ScheduleDays } from '@entities/Common'
-import { StylistRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
+import { StylistRepositoryInterface } from '@services/ShopService'
 import prisma from '@/prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
@@ -53,7 +53,7 @@ export const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
   endTime: stylist.endTime,
 })
 
-export const StylistRepository: CommonRepositoryInterface<Stylist> & ShopServiceSocket = {
+export const StylistRepository: CommonRepositoryInterface<Stylist> & StylistRepositoryInterface = {
   async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const stylists = await prisma.stylist.findMany({

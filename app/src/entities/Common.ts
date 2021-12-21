@@ -7,3 +7,8 @@ export enum ScheduleDays {
   SATURDAY = '土',
   SUNDAY = '日',
 }
+
+export enum OrderBy {
+  ASC = 'asc',
+  DESC = 'desc',
+}

@@ -1,5 +1,6 @@
 import Joi from 'joi'
 import date from '@joi/date'
+import { RoleSlug } from '@request-response-types/models/Role'
 
 const joi = Joi.extend(date)
 
@@ -7,7 +8,7 @@ export const userInsertSchema = joi.object({
   password: joi.string().trim().alphanum().required(),
   confirm: joi.string().trim().alphanum().required(),
   email: joi.string().email().trim().required(),
-  roleSlug: joi.string().required(),
+  roleSlug: joi.string().valid(RoleSlug.ADMIN, RoleSlug.CLIENT, RoleSlug.SHOP_STAFF).required(),
   firstNameKanji: joi.string().trim().required(),
   lastNameKanji: joi.string().trim().required(),
   firstNameKana: joi.string().trim().required(),
@@ -18,7 +19,7 @@ export const userInsertSchema = joi.object({
 
 export const userUpdateSchema = joi.object({
   email: joi.string().email().trim().required(),
-  roleSlug: joi.string().required(),
+  roleSlug: joi.string().valid(RoleSlug.ADMIN, RoleSlug.CLIENT, RoleSlug.SHOP_STAFF).required(),
   firstNameKanji: joi.string().trim().required(),
   lastNameKanji: joi.string().trim().required(),
   firstNameKana: joi.string().trim().required(),

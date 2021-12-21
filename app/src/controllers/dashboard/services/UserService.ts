@@ -1,7 +1,7 @@
 import { UserServiceInterface } from '@dashboard/DashboardController'
 import { User } from '@entities/User'
 import UserRepository from '@dashboard/repositories/UserRepository'
-import ReservationRepository from '@repositories/ReservationRepository'
+import ReservationRepository from '@dashboard/repositories/ReservationRepository'
 
 export type UserRepositoryInterface = {
   fetchUsers(): Promise<User[]>

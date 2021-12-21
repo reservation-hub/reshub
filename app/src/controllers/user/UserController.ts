@@ -1,25 +1,22 @@
-import { Gender, User } from '@entities/User'
-
-import { UserListQuery } from '@request-response-types/User'
-import UserService from '@services/UserService'
 import { UserControllerInterface } from '@controller-adapter/User'
+import { Gender, User } from '@entities/User'
 import { RoleSlug } from '@entities/Role'
-import {
-  userInsertSchema, userUpdateSchema,
-} from './schemas/user'
-import indexSchema from './schemas/indexSchema'
-import { searchSchema } from './schemas/search'
+import { userInsertSchema, userUpdateSchema } from '@user/schemas/user'
+import UserService from '@user/services/UserService'
+import indexSchema from '@user/schemas/indexSchema'
+import { searchSchema } from '@user/schemas/search'
+import { OrderBy } from '@/entities/Common'
 
 export type UserServiceInterface = {
-  fetchUsersWithTotalCount(query: UserListQuery): Promise<{ values: User[], totalCount: number}>,
+  fetchUsersWithTotalCount(page?: number, order?: OrderBy): Promise<{ users: User[], totalCount: number}>,
   fetchUser(id: number): Promise<User>,
   searchUser(keyword: string): Promise<User[]>,
-  insertUserFromAdmin(password: string, confirm: string, email: string, roleSlug: RoleSlug, lastNameKanji: string,
+  insertUser(password: string, confirm: string, email: string, roleSlug: RoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string)
     : Promise<void>,
-  updateUserFromAdmin(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string, firstNameKanji: string,
+  updateUser(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string, firstNameKanji: string,
     lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string) : Promise<void>,
-  deleteUserFromAdmin(id: number): Promise<void>,
+  deleteUser(id: number): Promise<void>,
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 
@@ -27,8 +24,8 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const UserController: UserControllerInterface = {
   async index(query) {
-    const schemaValues = await indexSchema.validateAsync(query, joiOptions)
-    const { values: users, totalCount } = await UserService.fetchUsersWithTotalCount(schemaValues)
+    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const { users, totalCount } = await UserService.fetchUsersWithTotalCount(page, order)
     const userReservationCounts = await UserService.fetchUsersReservationCounts(users.map(u => u.id))
     const userList = users.map(u => ({
       id: u.id,
@@ -64,7 +61,7 @@ const UserController: UserControllerInterface = {
       password, confirm, email, roleSlug, lastNameKanji,
       firstNameKanji, lastNameKana, firstNameKana, gender, birthday,
     } = await userInsertSchema.validateAsync(query, joiOptions)
-    await UserService.insertUserFromAdmin(password, confirm, email, roleSlug, lastNameKanji,
+    await UserService.insertUser(password, confirm, email, roleSlug, lastNameKanji,
       firstNameKanji, lastNameKana, firstNameKana, gender, birthday)
     return 'User created'
   },
@@ -74,14 +71,14 @@ const UserController: UserControllerInterface = {
       email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, gender, birthday,
     } = await userUpdateSchema.validateAsync(query.params, joiOptions)
-    await UserService.updateUserFromAdmin(query.id, email, roleSlug, lastNameKanji, firstNameKanji,
+    await UserService.updateUser(query.id, email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, gender, birthday)
     return 'User updated'
   },
 
   async delete(query) {
     const { id } = query
-    await UserService.deleteUserFromAdmin(id)
+    await UserService.deleteUser(id)
     return 'User deleted'
   },
 
