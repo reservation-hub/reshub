@@ -26,7 +26,6 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-namespace': 'off',
     'arrow-parens': ['error', 'as-needed'],
     'arrow-body-style': 'error',
     'arrow-spacing': 'error',
