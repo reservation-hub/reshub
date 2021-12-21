@@ -2,7 +2,7 @@ import { User } from '@entities/User'
 import AuthService from '@auth/services/AuthService'
 import { AuthControllerInterface } from '@controller-adapter/Auth'
 import { RoleSlug } from '@entities/Role'
-import googleSchema from './schemas/google'
+import googleSchema from '@auth/schemas/google'
 
 export type AuthServiceInterface = {
   createToken(user: Express.User, expiresIn: string): string,

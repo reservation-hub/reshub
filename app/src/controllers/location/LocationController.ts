@@ -1,5 +1,5 @@
 import { Area, Prefecture, City } from '@entities/Location'
-import LocationService from '@services/LocationService'
+import LocationService from '@location/services/LocationService'
 import { LocationControllerInterface } from '@controller-adapter/Location'
 
 export type LocationServiceInterface = {

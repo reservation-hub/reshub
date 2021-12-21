@@ -1,7 +1,7 @@
-import { LocationServiceInterface } from '@controllers/location/LocationController'
-import { LocationRepository } from '@repositories/LocationRepository'
+import { LocationServiceInterface } from '@location/LocationController'
+import { LocationRepository } from '@location/repositories/LocationRepository'
 import { Area, City, Prefecture } from '@entities/Location'
-import { NotFoundError } from './Errors/ServiceError'
+import { NotFoundError } from '@location/services/ServiceError'
 
 export type LocationRepositoryInterface = {
   fetchAreas() : Promise<Area[]>
@@ -10,7 +10,7 @@ export type LocationRepositoryInterface = {
   fetchPrefecture(prefectureId: number) : Promise<Prefecture | null>
   fetchPrefectureCities(prefectureId: number) : Promise<City[]>
   isValidLocation(areaId: number, prefectureId: number, cityId: number): Promise<boolean>
-  }
+}
 
 const LocationService: LocationServiceInterface = {
   async fetchAreas() {
