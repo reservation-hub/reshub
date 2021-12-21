@@ -62,6 +62,10 @@ export type ReservationRepositoryInterface = {
   fetchStylistReservationCounts(stylistIds: number[]): Promise<{ stylistId: number, reservationCount: number }[]>
 }
 
+export type LocationRepositoryInterface = {
+  isValidLocation(areaId: number, prefectureId: number, cityId: number): Promise<boolean>
+}
+
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
 export const nextAvailableDate = (reservationDate: Date, menuDuration: number): Date => {

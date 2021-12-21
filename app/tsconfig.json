@@ -8,6 +8,7 @@
       "@repositories/*": ["src/repositories/*"],
       "@controllers/*": ["src/controllers/*"],
       "@auth/*": ["src/controllers/auth/*"],
+      "@location/*": ["src/controllers/location/*"],
       "@dashboard/*": ["src/controllers/dashboard/*"],
       "@shop/*": ["src/controllers/shop/*"],
       "@user/*": ["src/controllers/user/*"],

@@ -1,4 +1,4 @@
-import { LocationRepositoryInterface } from '@services/LocationService'
+import { LocationRepositoryInterface } from '@services/ShopService'
 import prisma from '@/prisma'
 
 export const LocationRepository: LocationRepositoryInterface = {
@@ -13,34 +13,6 @@ export const LocationRepository: LocationRepositoryInterface = {
       },
     })
     return count !== 0
-  },
-
-  async fetchAreas() {
-    return prisma.area.findMany()
-  },
-
-  async fetchArea(areaId) {
-    return prisma.area.findUnique({
-      where: { id: areaId },
-    })
-  },
-
-  async fetchAreaPrefectures(areaId) {
-    return prisma.prefecture.findMany({
-      where: { areaId },
-    })
-  },
-
-  async fetchPrefecture(prefectureId) {
-    return prisma.prefecture.findUnique({
-      where: { id: prefectureId },
-    })
-  },
-
-  async fetchPrefectureCities(prefectureId) {
-    return prisma.city.findMany({
-      where: { prefectureId },
-    })
   },
 
 }
