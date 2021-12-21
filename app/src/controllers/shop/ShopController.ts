@@ -12,7 +12,7 @@ import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import { shopStylistUpsertSchema } from './schemas/stylist'
 import { searchSchema } from './schemas/search'
-import { menuUpsertSchema } from './schemas/menu'
+
 import { reservationUpsertSchema } from './schemas/reservation'
 
 export type ShopServiceInterface = {
@@ -42,13 +42,9 @@ export type ShopServiceInterface = {
     : Promise<Stylist>
   searchShops(keyword: string): Promise<Shop[]>
   fetchShopMenus(user: UserForAuth, shopId: number): Promise<Menu[]>
-  insertMenu(user: UserForAuth, shopId: number, name: string, description: string, price: number
-    , duration: number)
-    : Promise<Menu>
-  updateMenu(user: UserForAuth, shopId: number, menuId: number, name: string,
-    description: string, price: number, duration: number): Promise<Menu>
-  deleteMenu(user: UserForAuth, shopId: number, menuId: number): Promise<Menu>
   fetchShopReservationsForShopDetails(user: UserForAuth, shopId: number): Promise<Reservation[]>
+  fetchShopReservationsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
+    : Promise<{ values: Reservation[], totalCount: number}>
   insertReservation(user: UserForAuth, shopId: number, reservationDate: Date,
     clientId: number, menuId: number, stylistId?: number): Promise<Reservation>
   updateReservation(user: UserForAuth, shopId: number, reservationId: number,
@@ -66,8 +62,7 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
     const { page, order } = await indexSchema.validateAsync(query, joiOptions)
-    const shopsWithCount = await ShopService.fetchShopsWithTotalCount(user, page, order)
-    const { values: shops, totalCount } = shopsWithCount
+    const { values: shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order)
 
     const shopIds = shops.map(shop => shop.id)
 
@@ -218,34 +213,13 @@ const ShopController: ShopControllerInterface = {
     return { values, totalCount: shops.length }
   },
 
-  async insertMenu(user, query) {
-    const {
-      name, description, price, duration,
-    } = await menuUpsertSchema.validateAsync(query.params, joiOptions)
-    const { shopId } = query
-    await ShopService.insertMenu(user, shopId, name, description, price, duration)
-    return 'Menu created'
-  },
-
-  async updateMenu(user, query) {
-    const {
-      name, description, price, duration,
-    } = await menuUpsertSchema.validateAsync(query.params, joiOptions)
-    const { shopId, menuId } = query
-    await ShopService.updateMenu(user, shopId, menuId, name, description, price, duration)
-    return 'Menu updated'
-  },
-
-  async deleteMenu(user, query) {
-    const { shopId, menuId } = query
-    await ShopService.deleteMenu(user, shopId, menuId)
-    return 'Menu deleted'
-  },
-
   async showReservations(user, query) {
+    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
     const { shopId } = query
     const shop = await ShopService.fetchShop(user, shopId)
-    const reservations = await ShopService.fetchShopReservationsForShopDetails(user, shopId)
+    const { values: reservations, totalCount } = await ShopService.fetchShopReservationsWithTotalCount(
+      user, shopId, page, order,
+    )
     const users = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
     const stylists = await ShopService.fetchShopStylistsWithReservationCount(user, shopId)
     const menus = await ShopService.fetchShopMenus(user, shopId)
@@ -255,7 +229,7 @@ const ShopController: ShopControllerInterface = {
       const menu = menus.find(m => m.id === r.menuId)!
       return {
         id: r.id,
-        shopId: r.shopId,
+        shopId,
         shopName: shop.name,
         clientName: `${user.lastNameKana} ${user.firstNameKana}`,
         stylistName: stylist?.name,
@@ -264,7 +238,7 @@ const ShopController: ShopControllerInterface = {
         reservationDate: r.reservationDate,
       }
     })
-    return { values: reservationList, totalCount: reservations.length }
+    return { values: reservationList, totalCount }
   },
 
   async insertReservation(user, query) {

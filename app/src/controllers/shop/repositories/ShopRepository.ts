@@ -192,33 +192,6 @@ const ShopRepository: ShopServiceSocket = {
     })
   },
 
-  async insertMenu(shopId, name, description, price, duration) {
-    return prisma.menu.create({
-      data: {
-        name,
-        description,
-        price,
-        duration,
-        shop: {
-          connect: { id: shopId },
-        },
-      },
-    })
-  },
-
-  async updateMenu(menuId, name, description, price, duration) {
-    return prisma.menu.update({
-      where: { id: menuId },
-      data: {
-        name, description, price, duration,
-      },
-    })
-  },
-
-  async deleteMenu(menuId) {
-    return prisma.menu.delete({ where: { id: menuId } })
-  },
-
   async fetchStaffShops(userId) {
     const shops = await prisma.shop.findMany({
       where: {

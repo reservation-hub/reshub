@@ -4,12 +4,12 @@
     "paths": {
       "@/*": ["src/*"],
       "@entities/*": ["src/entities/*"],
-      "@controllers/*": ["src/controllers/*"],
       "@auth/*": ["src/controllers/auth/*"],
       "@location/*": ["src/controllers/location/*"],
       "@dashboard/*": ["src/controllers/dashboard/*"],
       "@shop/*": ["src/controllers/shop/*"],
       "@user/*": ["src/controllers/user/*"],
+      "@menu/*": ["src/controllers/menu/*"],
       "@client/*": ["src/controllers/client/*"],
       "@config": ["src/config"],
       "@routes/*": ["src/routes/*"],

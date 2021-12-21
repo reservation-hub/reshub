@@ -1,10 +1,10 @@
 import { UserControllerInterface } from '@controller-adapter/User'
 import { Gender, User } from '@entities/User'
 import { RoleSlug } from '@entities/Role'
-import { userInsertSchema, userUpdateSchema } from '@user/schemas/user'
 import UserService from '@user/services/UserService'
-import indexSchema from '@user/schemas/indexSchema'
-import { searchSchema } from '@user/schemas/search'
+import {
+  userInsertSchema, userUpdateSchema, indexSchema, searchSchema,
+} from '@/controllers/user/schemas'
 import { OrderBy } from '@/entities/Common'
 
 export type UserServiceInterface = {
