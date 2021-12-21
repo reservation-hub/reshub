@@ -1,9 +1,9 @@
 import { Prisma, Gender as PrismaGender, RoleSlug as PrismaRoleSlug } from '@prisma/client'
 import { Gender, User } from '@entities/User'
 import { UserRepositoryInterface as UserServiceSocket } from '@services/UserService'
+import { UserRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
 import { RoleSlug } from '@entities/Role'
 import prisma from '@/prisma'
-import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
   switch (slug) {
@@ -16,31 +16,11 @@ export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
   }
 }
 
-export const convertEntityRoleSlugToPrismaRoleSlug = (slug: RoleSlug): PrismaRoleSlug => {
-  switch (slug) {
-    case RoleSlug.SHOP_STAFF:
-      return PrismaRoleSlug.SHOP_STAFF
-    case RoleSlug.CLIENT:
-      return PrismaRoleSlug.CLIENT
-    default:
-      return PrismaRoleSlug.ADMIN
-  }
-}
-
 const userWithProfileAndOAuthIdsAndRoles = Prisma.validator<Prisma.UserArgs>()(
   { include: { profile: true, oAuthIds: true, role: true } },
 )
 
 type userWithProfileAndOAuthIdsAndRoles = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIdsAndRoles>
-
-export const convertEntityGenderToDBGender = (gender: Gender): PrismaGender => {
-  switch (gender) {
-    case Gender.FEMALE:
-      return PrismaGender.FEMALE
-    default:
-      return PrismaGender.MALE
-  }
-}
 
 const convertDBGenderToEntityGender = (gender: PrismaGender): Gender => {
   switch (gender) {
@@ -75,39 +55,14 @@ export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User 
   gender: user.profile!.gender ? convertDBGenderToEntityGender(user.profile!.gender) : undefined,
 })
 
-const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket = {
-  async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
-    const skipIndex = page > 1 ? (page - 1) * 10 : 0
-    const users = await prisma.user.findMany({
-      skip: skipIndex,
-      orderBy: { id: order },
-      take: limit,
-      include: {
-        profile: true,
-        oAuthIds: true,
-        role: true,
-      },
-    })
+const UserRepository: UserServiceSocket & ShopServiceSocket = {
 
-    const cleanUsers = users.map(user => reconstructUser(user))
-
-    return cleanUsers
-  },
-
-  async fetch(id) {
+  async fetchUser(userId) {
     const user = await prisma.user.findUnique({
-      where: { id },
-      include: {
-        profile: true,
-        oAuthIds: true,
-        role: true,
-      },
+      where: { id: userId },
+      include: { profile: true, oAuthIds: true, role: true },
     })
     return user ? reconstructUser(user) : null
-  },
-
-  async totalCount() {
-    return prisma.user.count()
   },
 
   async fetchUsersByIds(userIds) {
@@ -116,104 +71,6 @@ const UserRepository: CommonRepositoryInterface<User > & UserServiceSocket = {
       include: { profile: true, oAuthIds: true, role: true },
     })
     return users.map(u => reconstructUser(u))
-  },
-
-  async insertUserWithProfile(
-    email, password, roleSlug, lastNameKanji, firstNameKanji,
-    lastNameKana, firstNameKana, birthday, gender,
-  ) {
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password,
-        role: {
-          connect: { slug: convertEntityRoleSlugToPrismaRoleSlug(roleSlug) },
-        },
-        profile: {
-          create: {
-            lastNameKanji,
-            firstNameKanji,
-            lastNameKana,
-            firstNameKana,
-            birthday,
-            gender: convertEntityGenderToDBGender(gender),
-          },
-        },
-      },
-      include: {
-        profile: true,
-        oAuthIds: true,
-        role: true,
-      },
-    })
-    const cleanUser = reconstructUser(user)
-    return cleanUser
-  },
-
-  async updateUserFromAdmin(
-    id, email, roleSlug, lastNameKanji, firstNameKanji,
-    lastNameKana, firstNameKana, birthday, gender,
-  ) {
-    const user = await prisma.user.update({
-      where: { id },
-      data: {
-        profile: {
-          update: {
-            firstNameKanji,
-            lastNameKanji,
-            firstNameKana,
-            lastNameKana,
-            birthday,
-            gender: convertEntityGenderToDBGender(gender),
-          },
-        },
-        role: { connect: { slug: convertEntityRoleSlugToPrismaRoleSlug(roleSlug) } },
-        email,
-      },
-      include: {
-        oAuthIds: true,
-        profile: true,
-        role: true,
-      },
-    })
-    const cleanUser = reconstructUser(user)
-    return cleanUser
-  },
-
-  async deleteUserFromAdmin(id) {
-    const user = await prisma.user.delete({
-      where: { id },
-      include: {
-        oAuthIds: true,
-        profile: true,
-        role: true,
-      },
-    })
-    return reconstructUser(user)
-  },
-
-  async searchUser(keyword) {
-    const usersResult = await prisma.user.findMany({
-      where: { OR: [{ email: { contains: keyword } }, { username: { contains: keyword } }] },
-      include: {
-        oAuthIds: true,
-        profile: true,
-        role: true,
-      },
-    })
-    const users = usersResult.map(user => reconstructUser(user))
-    return users
-  },
-  async fetchUserByEmail(email) {
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        oAuthIds: true,
-        profile: true,
-        role: true,
-      },
-    })
-    return user ? reconstructUser(user) : null
   },
 
 }

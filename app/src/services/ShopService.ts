@@ -10,6 +10,7 @@ import { LocationRepository } from '@repositories/LocationRepository'
 import UserRepository from '@repositories/UserRepository'
 import { RoleSlug } from '@entities/Role'
 import { ScheduleDays } from '@entities/Common'
+import { User } from '@entities/User'
 import { AuthorizationError, InvalidParamsError, NotFoundError } from './Errors/ServiceError'
 
 export type ShopRepositoryInterface = {
@@ -64,6 +65,10 @@ export type ReservationRepositoryInterface = {
 
 export type LocationRepositoryInterface = {
   isValidLocation(areaId: number, prefectureId: number, cityId: number): Promise<boolean>
+}
+
+export type UserRepositoryInterface = {
+  fetchUser(userid: number): Promise<User | null>
 }
 
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
@@ -382,7 +387,7 @@ export const ShopService: ShopServiceInterface = {
     }
 
     let stylist
-    const client = await UserRepository.fetch(clientId)
+    const client = await UserRepository.fetchUser(clientId)
     const shop = await ShopRepository.fetch(shopId)
     if (stylistId) {
       stylist = await StylistRepository.fetch(stylistId)
@@ -423,7 +428,7 @@ export const ShopService: ShopServiceInterface = {
     }
 
     let stylist
-    const client = await UserRepository.fetch(clientId)
+    const client = await UserRepository.fetchUser(clientId)
     const shop = await ShopRepository.fetch(shopId)
     if (stylistId) {
       stylist = await StylistRepository.fetch(stylistId)

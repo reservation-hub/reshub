@@ -3,8 +3,7 @@ import {
   Reservation as PrismaReservation,
 } from '@prisma/client'
 import { Reservation, ReservationStatus } from '@entities/Reservation'
-import { ReservationRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
-import { ReservationRepositoryInterface as UserServiceSocket } from '@services/UserService'
+import { ReservationRepositoryInterface } from '@services/ShopService'
 import prisma from '@/prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
@@ -30,7 +29,7 @@ export const reconstructReservation = (reservation: PrismaReservation)
   stylistId: reservation.stylistId ?? undefined,
 })
 
-const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServiceSocket & UserServiceSocket = {
+const ReservationRepository: CommonRepositoryInterface<Reservation> & ReservationRepositoryInterface = {
   async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const reservations = await prisma.reservation.findMany({
@@ -162,35 +161,6 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & ShopServic
       reservationCount: reservations.filter(r => r.stylistId === id).length,
     }))
   },
-
-  async fetchUsersReservationCounts(userIds) {
-    const reservations = await prisma.reservation.findMany({
-      where: { userId: { in: userIds } },
-    })
-
-    return userIds.map(id => ({
-      userId: id,
-      reservationCount: reservations.filter(r => r.userId === id).length,
-    }))
-  },
-
-  // async searchReservations(keyword) {
-  //   const userIds = await prisma.$queryRaw('SELECT id FROM "User" WHERE (username ILIKE $1 or email ILIKE $2)',
-  //     `${keyword}%`,
-  //     `${keyword}%`)
-
-  //   let mappedIds = userIds.map((obj: any) => obj.id)
-  //   if (mappedIds.length === 0) {
-  //     mappedIds = [0]
-  //   }
-  //   const reservations = await prisma.$queryRaw(`SELECT s.name,r.reservation_date,st.name,st.price,u.email
-  //   FROM "Reservation" AS r
-  //   INNER JOIN "ShopDetail" AS s ON s.id = r.shop_id
-  //   INNER JOIN "Stylist" AS st ON st.id = r.stylist_id
-  //   INNER JOIN "User" AS u ON u.id = r.user_id
-  //   WHERE r.user_id IN (${mappedIds})`)
-  //   return reservations
-  // },
 
 }
 
