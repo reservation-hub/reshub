@@ -8,8 +8,8 @@ import { InvalidParamsError, NotFoundError } from '@user/services/ServiceError'
 import { OrderBy } from '@/entities/Common'
 
 export type UserRepositoryInterface = {
-  fetchAll(page: number, order: OrderBy): Promise<User[]>
-  fetch(userId: number): Promise<User | null>
+  fetchAllUsers(page: number, order: OrderBy): Promise<User[]>
+  fetchUser(userId: number): Promise<User | null>
   totalCount(): Promise<number>
   insertUser(email: string, password: string, roleSlug: RoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: string, gender: Gender,)
@@ -29,7 +29,7 @@ export type ReservationRepositoryInterface = {
 const UserService: UserServiceInterface = {
 
   async fetchUsersWithTotalCount(page = 1, order = OrderBy.DESC) {
-    const users = await UserRepository.fetchAll(page, order)
+    const users = await UserRepository.fetchAllUsers(page, order)
     const totalCount = await UserRepository.totalCount()
     return { users, totalCount }
   },
@@ -40,7 +40,7 @@ const UserService: UserServiceInterface = {
   },
 
   async fetchUser(id) {
-    const user = await UserRepository.fetch(id)
+    const user = await UserRepository.fetchUser(id)
     if (!user) {
       console.error('User does not exist')
       throw new NotFoundError()
@@ -71,7 +71,7 @@ const UserService: UserServiceInterface = {
 
   async updateUser(id, email, roleSlug, lastNameKanji, firstNameKanji,
     lastNameKana, firstNameKana, gender, birthday) {
-    const user = await UserRepository.fetch(id)
+    const user = await UserRepository.fetchUser(id)
     if (!user) {
       console.error('User does not exist')
       throw new NotFoundError()
@@ -84,7 +84,7 @@ const UserService: UserServiceInterface = {
   },
 
   async deleteUser(id) {
-    const user = await UserRepository.fetch(id)
+    const user = await UserRepository.fetchUser(id)
     if (!user) {
       console.error('User does not exist')
       throw new NotFoundError()

@@ -6,7 +6,7 @@ import UserRepository from '@client/repositories/UserRepository'
 import { User } from '@entities/User'
 import {
   InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError,
-} from '@services/Errors/ServiceError'
+} from '@client/services/ServiceError'
 import { AuthServiceInterface as PassportSocket } from '@client/middlewares/passport'
 
 export type UserRepositoryInterface = {

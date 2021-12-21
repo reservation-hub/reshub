@@ -1,6 +1,4 @@
-export enum ErrorCode {
-  NotFound,
-}
+import { ErrorCode } from '@entities/Common'
 
 export class ServiceError extends Error {
   constructor(message: string, code: ErrorCode) {

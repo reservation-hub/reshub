@@ -1,7 +1,7 @@
-import { LocationRepositoryInterface } from '@services/ShopService'
+import { LocationRepositoryInterface } from '@shop/services/ShopService'
 import prisma from '@/prisma'
 
-export const LocationRepository: LocationRepositoryInterface = {
+const LocationRepository: LocationRepositoryInterface = {
   async isValidLocation(areaId, prefectureId, cityId) {
     const count: number = await prisma.city.count({
       where: {
@@ -16,3 +16,5 @@ export const LocationRepository: LocationRepositoryInterface = {
   },
 
 }
+
+export default LocationRepository

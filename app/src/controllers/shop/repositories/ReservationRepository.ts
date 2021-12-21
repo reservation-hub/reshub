@@ -3,9 +3,8 @@ import {
   Reservation as PrismaReservation,
 } from '@prisma/client'
 import { Reservation, ReservationStatus } from '@entities/Reservation'
-import { ReservationRepositoryInterface } from '@services/ShopService'
+import { ReservationRepositoryInterface } from '@shop/services/ShopService'
 import prisma from '@/prisma'
-import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 export const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
   switch (status) {
@@ -29,10 +28,12 @@ export const reconstructReservation = (reservation: PrismaReservation)
   stylistId: reservation.stylistId ?? undefined,
 })
 
-const ReservationRepository: CommonRepositoryInterface<Reservation> & ReservationRepositoryInterface = {
-  async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
+const ReservationRepository: ReservationRepositoryInterface = {
+  async fetchAllShopReservations(shopId, page, order) {
+    const limit = 10
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const reservations = await prisma.reservation.findMany({
+      where: { shopId },
       skip: skipIndex,
       orderBy: { id: order },
       take: limit,
@@ -43,27 +44,17 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
     return cleanReservations
   },
 
-  async totalCount() {
-    return prisma.reservation.count()
-  },
-
-  async fetch(id) {
+  async fetchReservation(id) {
     const reservation = await prisma.reservation.findUnique({
       where: { id },
     })
     return reservation ? reconstructReservation(reservation) : null
   },
 
-  async fetchReservationsByShopIds(shopIds) {
-    const reservations = await prisma.reservation.findMany({
-      where: { shopId: { in: shopIds } },
+  async fetchShopTotalReservationCount(shopId) {
+    return prisma.reservation.count({
+      where: { shopId },
     })
-
-    return shopIds.map(id => ({
-      id,
-      data: reservations.filter(reservation => reservation.shopId === id)
-        .map(reservation => reconstructReservation(reservation)),
-    }))
   },
 
   async fetchShopStaffReservations(userId, limit?) {
@@ -75,8 +66,15 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
   },
 
   async fetchReservationsCountByShopIds(shopIds) {
-    const value = await this.fetchReservationsByShopIds(shopIds)
-    return value.map(item => ({ id: item.id, count: item.data.length }))
+    const reservations = await prisma.reservation.groupBy({
+      by: ['shopId'],
+      where: { shopId: { in: shopIds } },
+      _count: true,
+    })
+    return reservations.map(r => ({
+      shopId: r.shopId,
+      count: r._count,
+    }))
   },
 
   async insertReservation(reservationDate, userId, shopId, menuId, stylistId?) {
@@ -135,30 +133,24 @@ const ReservationRepository: CommonRepositoryInterface<Reservation> & Reservatio
     return cleanReservation
   },
 
-  async fetchShopsReservations(shopIds) {
-    const reservations = await prisma.reservation.findMany({
-      where: { shopId: { in: shopIds } },
-    })
-    const cleanReservations = reservations.map(r => reconstructReservation(r))
-    return cleanReservations
-  },
-
-  async fetchShopReservations(shopId) {
+  async fetchShopReservationsForShopDetails(shopId) {
     const reservations = await prisma.reservation.findMany({
       where: { shopId },
+      take: 5,
     })
-    const cleanReservations = reservations.map(r => reconstructReservation(r))
+    const cleanReservations = reservations.map(reconstructReservation)
     return cleanReservations
   },
 
   async fetchStylistReservationCounts(stylistIds) {
-    const reservations = await prisma.reservation.findMany({
+    const reservations = await prisma.reservation.groupBy({
+      by: ['stylistId'],
       where: { stylistId: { in: stylistIds } },
+      _count: true,
     })
-
-    return stylistIds.map(id => ({
-      stylistId: id,
-      reservationCount: reservations.filter(r => r.stylistId === id).length,
+    return reservations.map(r => ({
+      stylistId: r.stylistId!,
+      reservationCount: r._count,
     }))
   },
 

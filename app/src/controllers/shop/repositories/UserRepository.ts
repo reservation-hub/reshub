@@ -1,8 +1,8 @@
 import { Prisma, Gender as PrismaGender, RoleSlug as PrismaRoleSlug } from '@prisma/client'
 import { Gender, User } from '@entities/User'
-import { UserRepositoryInterface as UserServiceSocket } from '@services/UserService'
-import { UserRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
 import { RoleSlug } from '@entities/Role'
+import { UserRepositoryInterface as UserServiceSocket } from '@shop/services/UserService'
+import { UserRepositoryInterface as ShopServiceSocket } from '@shop/services/ShopService'
 import prisma from '@/prisma'
 
 export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
