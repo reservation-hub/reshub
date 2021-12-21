@@ -2,7 +2,7 @@ import { Prisma, Days } from '@prisma/client'
 import { Shop } from '@entities/Shop'
 import { ShopRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
 import { ScheduleDays } from '@entities/Common'
-import prisma from '@controllers/prisma'
+import prisma from '@/prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
