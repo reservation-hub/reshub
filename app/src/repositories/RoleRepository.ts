@@ -1,7 +1,7 @@
 import { Role } from '@entities/Role'
 import { Role as PrismaRole } from '@prisma/client'
 import { RoleRepositoryInterface as UserServiceSocket } from '@services/UserService'
-import prisma from '@controllers/prisma'
+import prisma from '@/prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 import { convertEntityRoleSlugToPrismaRoleSlug, convertRoleSlug } from './UserRepository'

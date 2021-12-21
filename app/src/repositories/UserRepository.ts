@@ -2,7 +2,7 @@ import { Prisma, Gender as PrismaGender, RoleSlug as PrismaRoleSlug } from '@pri
 import { Gender, User } from '@entities/User'
 import { UserRepositoryInterface as UserServiceSocket } from '@services/UserService'
 import { RoleSlug } from '@entities/Role'
-import prisma from '@controllers/prisma'
+import prisma from '@/prisma'
 import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
