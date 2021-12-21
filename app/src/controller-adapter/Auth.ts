@@ -5,8 +5,8 @@ import AuthController from '@controllers/auth/AuthController'
 import { RoleSlug } from '@entities/Role'
 import { UserForAuth } from '@request-response-types/models/User'
 import { UnknownServerError } from '@routes/errors'
-import passport from '@middlewares/passport'
-import config from '../config'
+import passport from '@auth/middlewares/passport'
+import config from '@config'
 
 export type AuthControllerInterface = {
   hack(role?: RoleSlug): Promise<UserForAuth>

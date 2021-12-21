@@ -2,19 +2,18 @@ import jwt from 'jsonwebtoken'
 import { OAuth2Client as GoogleAuthClient, TokenPayload } from 'google-auth-library'
 import bcrypt from 'bcrypt'
 
-import { AuthServiceInterface as PassportSocket } from '@middlewares/passport'
-import { AuthServiceInterface as AuthControllerSocket } from '@controllers/auth/AuthController'
-import { User } from '@entities/User'
-import UserRepository from '@repositories/UserRepository'
+import config from '@config'
+import { AuthServiceInterface as PassportSocket } from '@auth/middlewares/passport'
+import { AuthServiceInterface as AuthControllerSocket } from '@auth/AuthController'
 import { RoleSlug } from '@entities/Role'
-import config from '../config'
-import {
-  InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError, AuthenticationError, AuthorizationError,
-} from './Errors/ServiceError'
+import { User } from '@entities/User'
+import UserRepository from '@auth/repositories/UserRepository'
+import * as AuthError from './Errors/ServiceError'
 
 export type UserRepositoryInterface = {
-  fetchByEmail(email: string): Promise<User | null>,
-  addOAuthId(id: number, provider: string, authId: string): Promise<boolean | null>,
+  fetch(id: number): Promise<User | null>
+  fetchByEmail(email: string): Promise<User | null>
+  addOAuthId(id: number, provider: string, authId: string): Promise<boolean | null>
 }
 interface JwtPayload {
   user: User
@@ -32,22 +31,22 @@ const AuthService: AuthControllerSocket & PassportSocket = {
   async verifyIfUserInTokenIsLoggedIn(authToken, headerToken?) {
     if (headerToken && headerToken !== authToken) {
       console.error('Header token does not match')
-      throw new AuthenticationError()
+      throw new AuthError.AuthenticationError()
     }
     const token = jwt.verify(authToken, config.JWT_TOKEN_SECRET) as JwtPayload
     const user = await UserRepository.fetch(token.user.id)
     if (!user) {
       console.error('User in token does not exist')
-      throw new NotFoundError()
+      throw new AuthError.NotFoundError()
     }
     console.error('User is already logged in')
-    throw new UserIsLoggedInError()
+    throw new AuthError.UserIsLoggedInError()
   },
 
   async silentRefreshTokenChecks(authToken, refreshToken, headerToken?) {
     if (!(!authToken && !headerToken && refreshToken)) {
       console.error('Necessary tokens are not complete')
-      throw new AuthorizationError()
+      throw new AuthError.AuthorizationError()
     }
   },
 
@@ -61,13 +60,13 @@ const AuthService: AuthControllerSocket & PassportSocket = {
     const { email, sub } = ticket.getPayload() as TokenPayload
     if (!email) {
       console.error('Token does not have email')
-      throw new InvalidTokenError()
+      throw new AuthError.InvalidTokenError()
     }
 
     const user = await UserRepository.fetchByEmail(email)
     if (!user) {
       console.error('User in token does not exist')
-      throw new NotFoundError()
+      throw new AuthError.NotFoundError()
     }
 
     if (!user.oAuthIds || !user.oAuthIds.googleId) {
@@ -80,17 +79,17 @@ const AuthService: AuthControllerSocket & PassportSocket = {
   async authenticateByEmailAndPassword({ email, password }) {
     if (!email || !password) {
       console.error('email or password is required')
-      throw new InvalidParamsError()
+      throw new AuthError.InvalidParamsError()
     }
 
     const user = await UserRepository.fetchByEmail(email)
     if (!user) {
       console.error('User does not exist')
-      throw new NotFoundError()
+      throw new AuthError.NotFoundError()
     }
     if (user.password && !bcrypt.compareSync(password, user.password)) {
       console.error('password does not match')
-      throw new InvalidParamsError()
+      throw new AuthError.InvalidParamsError()
     }
 
     return user
@@ -105,7 +104,7 @@ const AuthService: AuthControllerSocket & PassportSocket = {
     }
     if (!user) {
       console.error('User for hack not found')
-      throw new NotFoundError()
+      throw new AuthError.NotFoundError()
     }
     return user
   },

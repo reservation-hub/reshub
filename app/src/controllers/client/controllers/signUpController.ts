@@ -2,9 +2,9 @@ import {
   Router, Response, Request, NextFunction,
 } from 'express'
 
+import SignUpService, { signUpQuery } from '@client/services/SignUpService'
 import { User } from '@entities/User'
 import { verifyIfNotLoggedInYet } from '@controller-adapter/Auth'
-import SignUpService, { signUpQuery } from '@client/services/SignUpService'
 import { signUpSchema } from './schemas/signup'
 
 const joiOptions = { abortEarly: false, stripUnknown: true }

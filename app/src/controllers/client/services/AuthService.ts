@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import config from '@config'
 import { AuthServiceInterface as AuthControllerSocket } from '@client/controllers/authController'
-import { APIAuthServiceInterface } from '@middlewares/passport'
-import { User } from '@entities/User'
 import UserRepository from '@client/repositories/UserRepository'
+import { User } from '@entities/User'
 import {
   InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError,
 } from '@services/Errors/ServiceError'
-import config from '../../config'
+import { AuthServiceInterface as PassportSocket } from '@client/middlewares/passport'
 
 export type UserRepositoryInterface = {
   fetch(id: number): Promise<User | null>
@@ -18,7 +18,7 @@ interface JwtPayload {
   user: User
 }
 
-const AuthService: APIAuthServiceInterface & AuthControllerSocket = {
+const AuthService: PassportSocket & AuthControllerSocket = {
 
   createToken(user) {
     return jwt.sign({ user }, config.JWT_TOKEN_SECRET, {

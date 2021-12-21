@@ -1,5 +1,5 @@
 import { LocationRepositoryInterface } from '@services/LocationService'
-import prisma from './prisma'
+import prisma from '@controllers/prisma'
 
 export const LocationRepository: LocationRepositoryInterface = {
   async isValidLocation(areaId, prefectureId, cityId) {

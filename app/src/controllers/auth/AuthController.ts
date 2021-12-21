@@ -1,5 +1,5 @@
 import { User } from '@entities/User'
-import AuthService from '@services/AuthService'
+import AuthService from '@auth/services/AuthService'
 import { AuthControllerInterface } from '@controller-adapter/Auth'
 import { RoleSlug } from '@entities/Role'
 import googleSchema from './schemas/google'

@@ -19,6 +19,7 @@ export type UserRepositoryInterface = {
   deleteUserFromAdmin(id: number): Promise<User>,
   searchUser(keyword: string): Promise<User[]>,
   fetchUsersByIds(userIds: number[]): Promise<User[]>
+  fetchUserByEmail(email: string): Promise<User | null>
 }
 
 export type RoleRepositoryInterface = {
@@ -74,7 +75,7 @@ const UserService: UserControllerSocket & DashboardControllerSocket & ShopContro
       throw new InvalidParamsError()
     }
 
-    const duplicate = await UserRepository.fetchByEmail(email)
+    const duplicate = await UserRepository.fetchUserByEmail(email)
     if (duplicate) {
       console.error('Email is not available')
       throw new InvalidParamsError()

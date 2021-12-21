@@ -1,10 +1,10 @@
 import {
   Router, CookieOptions, Request, Response, NextFunction,
 } from 'express'
+import config from '@config'
 import { UnknownServerError } from '@routes/errors'
-import passport from '@middlewares/passport'
+import passport from '@client/middlewares/passport'
 import AuthService from '@client/services/AuthService'
-import config from '../../config'
 
 export type AuthServiceInterface = {
   createToken(user: Express.User): string

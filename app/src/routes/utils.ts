@@ -1,11 +1,12 @@
 import Joi from 'joi'
 import { Request, Response, NextFunction } from 'express'
-import pt from '@middlewares/passport'
 import { UserForAuth } from '@entities/User'
+import adminPassport from '@/controllers/auth/middlewares/passport'
+import clientPassport from '@/controllers/client/middlewares/passport'
 import { UnauthorizedError } from './errors'
 
-export const protectAdminRoute = pt.authenticate('admin-jwt', { session: false })
-export const protectClientRoute = pt.authenticate('client-jwt', { session: false })
+export const protectAdminRoute = adminPassport.authenticate('admin-jwt', { session: false })
+export const protectClientRoute = clientPassport.authenticate('client-jwt', { session: false })
 
 export const roleCheck = (roles: string[]) => (req: Request, res: Response, next: NextFunction): void => {
   const user = req.user as UserForAuth
