@@ -123,7 +123,10 @@ const ShopController: ShopControllerInterface = {
 
     return {
       id: shop.id,
+      areaId: shop.area.id,
+      prefectureId: shop.prefecture.id,
       prefectureName: shop.prefecture.name,
+      cityId: shop.city.id,
       cityName: shop.city.name,
       days: shop.days,
       startTime: shop.startTime,
