@@ -1,23 +1,7 @@
-type ServiceErrorCode = number
-export enum ErrorCode {
-  NotFound,
-  InvalidToken,
-  InvalidParams,
-  DuplicateModel,
-  LoggedIn,
-  Authentication,
-  Authorization,
-}
+import { ErrorCode } from '@entities/Common'
 
-export const NotFound: ServiceErrorCode = 0
-export const InvalidToken: ServiceErrorCode = 1
-export const InvalidParams: ServiceErrorCode = 2
-export const DuplicateModel: ServiceErrorCode = 3
-export const LoggedIn: ServiceErrorCode = 4
-export const Authentication: ServiceErrorCode = 5
-export const Authorization: ServiceErrorCode = 6
 export class ServiceError extends Error {
-  constructor(message: string, code: ServiceErrorCode) {
+  constructor(message: string, code: ErrorCode) {
     super(message)
     Object.setPrototypeOf(this, ServiceError.prototype)
     this.name = 'ServiceError'

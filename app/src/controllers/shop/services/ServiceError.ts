@@ -10,6 +10,7 @@ export class ServiceError extends Error {
 
   code: ErrorCode
 }
+
 export class NotFoundError extends ServiceError {
   constructor() {
     super('Resource not found', ErrorCode.NotFound)
@@ -19,5 +20,10 @@ export class NotFoundError extends ServiceError {
 export class InvalidParamsError extends ServiceError {
   constructor() {
     super('Invalid query params', ErrorCode.InvalidParams)
+  }
+}
+export class AuthorizationError extends ServiceError {
+  constructor() {
+    super('User not Authorized', ErrorCode.Authorization)
   }
 }

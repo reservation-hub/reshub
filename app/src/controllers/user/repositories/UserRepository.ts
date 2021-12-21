@@ -75,7 +75,7 @@ export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User 
 })
 
 const UserRepository: UserRepositoryInterface = {
-  async fetchAll(page, order) {
+  async fetchAllUsers(page, order) {
     const limit = 10
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const users = await prisma.user.findMany({
@@ -94,7 +94,7 @@ const UserRepository: UserRepositoryInterface = {
     return cleanUsers
   },
 
-  async fetch(id) {
+  async fetchUser(id) {
     const user = await prisma.user.findUnique({
       where: { id },
       include: {

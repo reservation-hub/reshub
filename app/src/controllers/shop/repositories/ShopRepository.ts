@@ -1,9 +1,8 @@
 import { Prisma, Days } from '@prisma/client'
 import { Shop } from '@entities/Shop'
-import { ShopRepositoryInterface as ShopServiceSocket } from '@services/ShopService'
 import { ScheduleDays } from '@entities/Common'
+import { ShopRepositoryInterface as ShopServiceSocket } from '@/controllers/shop/services/ShopService'
 import prisma from '@/prisma'
-import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {
@@ -79,26 +78,27 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
   details: shop.shopDetail?.details ?? undefined,
 })
 
-export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket = {
-  async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
+const ShopRepository: ShopServiceSocket = {
+  async fetchAllShops(page, order) {
+    const limit = 10
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const shops = await prisma.shop.findMany({
       skip: skipIndex,
-      orderBy: { id: order === DescOrder ? Prisma.SortOrder.desc : Prisma.SortOrder.asc },
+      orderBy: { id: order },
       take: limit,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
       },
     })
 
-    return shops.map(s => reconstructShop(s))
+    return shops.map(reconstructShop)
   },
 
   async totalCount() {
     return prisma.shop.count()
   },
 
-  async fetch(id) {
+  async fetchShop(id) {
     const shop = await prisma.shop.findUnique({
       where: { id },
       include: {
@@ -111,29 +111,8 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     return shop ? reconstructShop(shop) : null
   },
 
-  async fetchShopsByIds(shopIds) {
-    const shops = await prisma.shop.findMany({
-      where: { id: { in: shopIds } },
-      include: {
-        shopDetail: true,
-        area: true,
-        prefecture: true,
-        city: true,
-      },
-    })
-    return shops.map(s => reconstructShop(s))
-  },
-
-  async insertShop(name,
-    areaId,
-    prefectureId,
-    cityId,
-    address,
-    phoneNumber,
-    days,
-    startTime,
-    endTime,
-    details) {
+  async insertShop(name, areaId, prefectureId, cityId, address,
+    phoneNumber, days, startTime, endTime, details) {
     const shop = await prisma.shop.create({
       data: {
         area: {
@@ -164,17 +143,8 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     const cleanShop = reconstructShop(shop)
     return cleanShop
   },
-  async updateShop(id,
-    name,
-    areaId,
-    prefectureId,
-    cityId,
-    address,
-    phoneNumber,
-    days,
-    startTime,
-    endTime,
-    details) {
+  async updateShop(id, name, areaId, prefectureId, cityId, address,
+    phoneNumber, days, startTime, endTime, details) {
     const shop = await prisma.shop.update({
       where: { id },
       data: {
@@ -216,23 +186,9 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     return cleanShop
   },
 
-  async fetchValidShopIds(shopIds) {
-    const validShopIds = await prisma.shop.findMany({
-      where: { id: { in: shopIds } },
-      select: { id: true },
-    })
-    return validShopIds.map(obj => obj.id)
-  },
-
   async fetchShopMenus(shopId) {
     return prisma.menu.findMany({
       where: { shopId },
-    })
-  },
-
-  async fetchMenusByIds(menuIds) {
-    return prisma.menu.findMany({
-      where: { id: { in: menuIds } },
     })
   },
 
@@ -263,7 +219,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     return prisma.menu.delete({ where: { id: menuId } })
   },
 
-  async fetchUserShops(userId) {
+  async fetchStaffShops(userId) {
     const shops = await prisma.shop.findMany({
       where: {
         shopUser: { userId },
@@ -287,7 +243,7 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
     return shopIds.map(ids => ids.id)
   },
 
-  async fetchUserShopsCount(userId) {
+  async fetchStaffTotalShopsCount(userId) {
     return prisma.shop.count({
       where: {
         shopUser: { userId },
@@ -304,3 +260,5 @@ export const ShopRepository: CommonRepositoryInterface<Shop> & ShopServiceSocket
   },
 
 }
+
+export default ShopRepository

@@ -3,13 +3,29 @@ import { Prisma } from '@prisma/client'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 import { JsonWebTokenError } from 'jsonwebtoken'
 import { ValidationError, ValidationErrorItem } from 'joi'
-import {
-  DuplicateModel, InvalidParams, InvalidToken, LoggedIn, NotFound, ServiceError,
-} from './services/Errors/ServiceError'
+
+import { ServiceError as ShopServiceError } from '@shop/services/ServiceError'
+import { ServiceError as UserServiceError } from '@user/services/ServiceError'
+import { ServiceError as DashboardServiceError } from '@dashboard/services/ServiceError'
+import { ServiceError as AuthServiceError } from '@location/services/ServiceError'
+import { ServiceError as LocationServiceError } from '@auth/services/ServiceError'
+
+import { ErrorCode as EntityErrorCode } from '@entities/Common'
 import { MiddlewareError, InvalidRouteError } from './routes/errors'
 
+enum ErrorCode {
+  BadRequest = 400,
+  Unauthorized = 401,
+  Forbidden = 403,
+  NotFound = 404,
+  InternalServerError = 500,
+}
+
+type ServiceError = ShopServiceError | UserServiceError | DashboardServiceError |
+  AuthServiceError | LocationServiceError
+
 export type ResHubError =
-  PrismaClientKnownRequestError | ServiceError | ValidationError | InvalidRouteError
+  PrismaClientKnownRequestError | ValidationError | InvalidRouteError | ServiceError
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const errorHandler: ErrorRequestHandler = (error: ResHubError | MiddlewareError,
@@ -17,57 +33,58 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
   console.error('error: ', error)
   if (error.name === 'ServiceError') {
     console.error('is service error')
-    let code: number
+    error as ServiceError
+    let code: ErrorCode
     switch (error.code) {
-      case InvalidParams:
-      case DuplicateModel:
-        code = 400
+      case EntityErrorCode.InvalidParams:
+      case EntityErrorCode.DuplicateModel:
+        code = ErrorCode.BadRequest
         break
-      case InvalidToken:
-        code = 401
+      case EntityErrorCode.InvalidToken:
+        code = ErrorCode.Unauthorized
         break
-      case LoggedIn:
-        code = 403
+      case EntityErrorCode.LoggedIn:
+        code = ErrorCode.Forbidden
         break
-      case NotFound:
-        code = 404
+      case EntityErrorCode.NotFound:
+        code = ErrorCode.NotFound
         break
       default:
-        code = 500
+        code = ErrorCode.InternalServerError
     }
     return res.status(code).send(error.message)
   }
   // prisma errors
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === 'P2002') {
-      return res.status(400).send(error.message)
+      return res.status(ErrorCode.BadRequest).send(error.message)
     }
 
     if (error.code === 'P2025') {
       // code 404 エラー
-      return res.status(404).send(error.message)
+      return res.status(ErrorCode.NotFound).send(error.message)
     }
 
     if (error.code[0] === 'P') {
-      return res.status(500).send('Server Error')
+      return res.status(ErrorCode.InternalServerError).send('Server Error')
     }
-    return res.status(400).send(error.message)
+    return res.status(ErrorCode.BadRequest).send(error.message)
   }
 
   if (error instanceof ValidationError) {
     // Joi Validation エラー処理
     console.error(error)
     const keys = error.details.map((e: ValidationErrorItem) => e.path.toString())
-    return res.status(400).send({ keys, message: 'Invalid values error' })
+    return res.status(ErrorCode.BadRequest).send({ keys, message: 'Invalid values error' })
   }
 
   if (error instanceof JsonWebTokenError) {
-    return res.status(400).send(error.message)
+    return res.status(ErrorCode.BadRequest).send(error.message)
   }
 
   if (error.name === 'InvalidRouteError' || error.name === 'MiddlewareError') {
-    return res.status(error.code).send(error.message)
+    return res.status(ErrorCode.NotFound).send(error.message)
   }
 
-  return res.status(500).send('Internal Server Error')
+  return res.status(ErrorCode.InternalServerError).send('Internal Server Error')
 }

@@ -8,7 +8,7 @@ import MenuRepository from '@dashboard/repositories/MenuRepository'
 import UserRepository from '@dashboard/repositories/UserRepository'
 import ShopRepository from '@dashboard/repositories/ShopRepository'
 import { Stylist } from '@entities/Stylist'
-import StylistRepository from '@/repositories/StylistRepository'
+import StylistRepository from '@dashboard/repositories/StylistRepository'
 
 export type ReservationRepositoryInterface = {
   fetchShopStaffReservations(userId: number): Promise<Reservation[]>

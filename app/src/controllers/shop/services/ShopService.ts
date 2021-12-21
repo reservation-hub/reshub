@@ -1,19 +1,22 @@
 import { ShopServiceInterface } from '@controllers/shop/ShopController'
-import { Shop } from '@entities/Shop'
-import { Reservation } from '@entities/Reservation'
+import { ScheduleDays, OrderBy } from '@entities/Common'
 import { Menu } from '@entities/Menu'
-import { Stylist } from '@entities/Stylist'
-import { ShopRepository } from '@repositories/ShopRepository'
-import StylistRepository from '@repositories/StylistRepository'
-import ReservationRepository from '@repositories/ReservationRepository'
-import { LocationRepository } from '@repositories/LocationRepository'
-import UserRepository from '@repositories/UserRepository'
+import { Reservation } from '@entities/Reservation'
 import { RoleSlug } from '@entities/Role'
-import { ScheduleDays } from '@entities/Common'
+import { Shop } from '@entities/Shop'
+import { Stylist } from '@entities/Stylist'
 import { User } from '@entities/User'
-import { AuthorizationError, InvalidParamsError, NotFoundError } from './Errors/ServiceError'
+import ShopRepository from '@shop/repositories/ShopRepository'
+import StylistRepository from '@shop/repositories/StylistRepository'
+import ReservationRepository from '@shop/repositories/ReservationRepository'
+import LocationRepository from '@shop/repositories/LocationRepository'
+import UserRepository from '@shop/repositories/UserRepository'
+import { AuthorizationError, InvalidParamsError, NotFoundError } from '@shop/services/ServiceError'
 
 export type ShopRepositoryInterface = {
+  fetchAllShops(page: number, order: OrderBy): Promise<Shop[]>
+  fetchShop(shopId: number): Promise<Shop | null>
+  totalCount(): Promise<number>
   insertShop(
     name: string, areaId: number, prefectureId: number, cityId: number, address: string,
     phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>,
@@ -22,44 +25,43 @@ export type ShopRepositoryInterface = {
     phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
   fetchShopMenus(shopId: number): Promise<Menu[]>
-  fetchMenusByIds(menuIds: number[]): Promise<Menu[]>
   insertMenu(shopId: number, name: string, description: string, price: number, duration: number): Promise<Menu>,
   updateMenu(menuId: number, name: string, description: string, price: number,
     duration: number): Promise<Menu>,
   deleteMenu(menuId: number): Promise<Menu>
-  fetchValidShopIds(shopIds: number[]): Promise<number[]>
   searchShops(keyword: string): Promise<Shop[]>,
-  fetchUserShops(userId: number): Promise<Shop[]>
-  fetchUserShopsCount(userId: number): Promise<number>
+  fetchStaffShops(userId: number, page: number, order: OrderBy): Promise<Shop[]>
+  fetchStaffTotalShopsCount(userId: number): Promise<number>
   fetchUserShopIds(userId: number): Promise<number[]>
   assignShopToStaff(userId: number, shopId: number): void
-  fetchShopsByIds(shopIds: number[]): Promise<Shop[]>
 }
 
 export type StylistRepositoryInterface = {
+  fetchAllShopStylists(shopId: number, page: number, order: OrderBy): Promise<Stylist[]>
+  fetchStylist(stylistId: number): Promise<Stylist | null>
+  fetchShopTotalStylistCount(shopId: number): Promise<number>
   insertStylist(name: string, price: number, shopId: number, days:ScheduleDays[],
     startTime:string, endTime:string): Promise<Stylist>,
   updateStylist(id: number, name: string, price: number, shopId: number,
     days: ScheduleDays[], startTime: string, endTime: string) :Promise<Stylist>,
   deleteStylist(id: number): Promise<Stylist>,
-  fetchStylistsByIds(stylistIds: number[]): Promise<Stylist[]>
-  fetchStylistsByShopIds(shopIds: number[]) : Promise<{ id: number, name: string, price: number, shopId:number }[]>,
   fetchStylistsByShopId(shopId: number): Promise<Stylist[]>
-  fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ id: number, count: number }[]>,
-  fetchShopStaffStylists(userId: number): Promise<Stylist[]>
+  fetchShopStylistsForShopDetails(shopId: number, limit: number): Promise<Stylist[]>
+  fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ shopId: number, count: number }[]>,
 }
 
 export type ReservationRepositoryInterface = {
+  fetchAllShopReservations(shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
+  fetchReservation(reservationId: number): Promise<Reservation | null>
+  fetchShopTotalReservationCount(shopId: number): Promise<number>
   insertReservation(reservationDate: Date, userId: number, shopId: number, menuId: number, stylistId?: number)
     : Promise<Reservation>
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
     menuId: number, stylistId?: number): Promise<Reservation>
   cancelReservation(id: number): Promise<Reservation>
   fetchShopStaffReservations(userId: number, limit?: number): Promise<Reservation[]>
-  fetchReservationsByShopIds(shopIds: number[]) : Promise<{ id: number, data: Reservation[] }[]>
-  fetchReservationsCountByShopIds(shopIds: number[]) : Promise<{ id: number, count: number }[]>
-  fetchShopsReservations(shopIds: number[]): Promise<Reservation[]>
-  fetchShopReservations(shopId: number): Promise<Reservation[]>
+  fetchReservationsCountByShopIds(shopIds: number[]) : Promise<{ shopId: number, count: number }[]>
+  fetchShopReservationsForShopDetails(shopId: number): Promise<Reservation[]>
   fetchStylistReservationCounts(stylistIds: number[]): Promise<{ stylistId: number, reservationCount: number }[]>
 }
 
@@ -68,7 +70,7 @@ export type LocationRepositoryInterface = {
 }
 
 export type UserRepositoryInterface = {
-  fetchUser(userid: number): Promise<User | null>
+  fetchUser(userId: number): Promise<User | null>
 }
 
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
@@ -97,14 +99,14 @@ const isValidStylistId = async (shopId: number, stylistId: number): Promise<bool
 
 export const ShopService: ShopServiceInterface = {
 
-  async fetchShopsWithTotalCount(user, params) {
+  async fetchShopsWithTotalCount(user, page = 1, order = OrderBy.DESC) {
     let shops
     let shopsCount
     if (user.role.slug === RoleSlug.SHOP_STAFF) {
-      shops = await ShopRepository.fetchUserShops(user.id)
-      shopsCount = await ShopRepository.fetchUserShopsCount(user.id)
+      shops = await ShopRepository.fetchStaffShops(user.id, page, order)
+      shopsCount = await ShopRepository.fetchStaffTotalShopsCount(user.id)
     } else {
-      shops = await ShopRepository.fetchAll(params)
+      shops = await ShopRepository.fetchAllShops(page, order)
       shopsCount = await ShopRepository.totalCount()
     }
     return { values: shops, totalCount: shopsCount }
@@ -116,7 +118,7 @@ export const ShopService: ShopServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const shop = await ShopRepository.fetch(id)
+    const shop = await ShopRepository.fetchShop(id)
     if (!shop) {
       console.error('Shop does not exist')
       throw new NotFoundError()
@@ -163,7 +165,7 @@ export const ShopService: ShopServiceInterface = {
       throw new InvalidParamsError()
     }
 
-    const shop = await ShopRepository.fetch(id)
+    const shop = await ShopRepository.fetchShop(id)
     if (!shop) {
       console.error('Shop does not exist')
       throw new NotFoundError()
@@ -191,7 +193,7 @@ export const ShopService: ShopServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const shop = await ShopRepository.fetch(id)
+    const shop = await ShopRepository.fetchShop(id)
     if (!shop) {
       console.error('Shop does not exist')
       throw new NotFoundError()
@@ -205,21 +207,15 @@ export const ShopService: ShopServiceInterface = {
   },
 
   async fetchStylistsCountByShopIds(shopIds) {
-    if (shopIds.length === 0) {
-      return []
-    }
     return StylistRepository.fetchStylistsCountByShopIds(shopIds)
   },
 
   async fetchReservationsCountByShopIds(shopIds) {
-    if (shopIds.length === 0) {
-      return []
-    }
     return ReservationRepository.fetchReservationsCountByShopIds(shopIds)
   },
 
   async fetchShopMenus(user, shopId) {
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
       console.error('Shop does not exist')
       throw new NotFoundError()
@@ -234,7 +230,7 @@ export const ShopService: ShopServiceInterface = {
   },
 
   async insertMenu(user, shopId, name, description, price, duration) {
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
       console.error('Shop does not exist')
       throw new NotFoundError()
@@ -256,7 +252,7 @@ export const ShopService: ShopServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
       console.error('Shop does not exist')
       throw new NotFoundError()
@@ -276,7 +272,7 @@ export const ShopService: ShopServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
       console.error('shop not found')
       throw new NotFoundError()
@@ -290,7 +286,7 @@ export const ShopService: ShopServiceInterface = {
   },
 
   async fetchShopStylistsWithReservationCount(user, shopId) {
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
       console.error('shop not found')
       throw new NotFoundError()
@@ -301,7 +297,7 @@ export const ShopService: ShopServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const stylists = await StylistRepository.fetchStylistsByShopId(shopId)
+    const stylists = await StylistRepository.fetchShopStylistsForShopDetails(shopId, 5)
     const reservations = await ReservationRepository.fetchStylistReservationCounts(stylists.map(s => s.id))
     return stylists.map(s => ({
       ...s,
@@ -310,7 +306,7 @@ export const ShopService: ShopServiceInterface = {
   },
 
   async insertStylist(user, shopId, name, price, days, startTime, endTime) {
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
       console.error('shop not found')
       throw new NotFoundError()
@@ -331,13 +327,13 @@ export const ShopService: ShopServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
       console.error('shop not found')
       throw new NotFoundError()
     }
 
-    const stylist = await StylistRepository.fetch(stylistId)
+    const stylist = await StylistRepository.fetchStylist(stylistId)
     if (!stylist) {
       console.error('stylist not found')
       throw new NotFoundError()
@@ -352,13 +348,13 @@ export const ShopService: ShopServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
       console.error('shop not found')
       throw new NotFoundError()
     }
 
-    const stylist = await StylistRepository.fetch(stylistId)
+    const stylist = await StylistRepository.fetchStylist(stylistId)
     if (!stylist) {
       console.error('stylist not found')
       throw new NotFoundError()
@@ -367,17 +363,17 @@ export const ShopService: ShopServiceInterface = {
     return StylistRepository.deleteStylist(stylistId)
   },
 
-  async fetchShopReservations(user, shopId) {
+  async fetchShopReservationsForShopDetails(user, shopId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
     }
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
       console.error('shop not found')
       throw new NotFoundError()
     }
-    return ReservationRepository.fetchShopReservations(shopId)
+    return ReservationRepository.fetchShopReservationsForShopDetails(shopId)
   },
 
   async insertReservation(user, shopId, reservationDate, clientId, menuId, stylistId?) {
@@ -388,9 +384,9 @@ export const ShopService: ShopServiceInterface = {
 
     let stylist
     const client = await UserRepository.fetchUser(clientId)
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (stylistId) {
-      stylist = await StylistRepository.fetch(stylistId)
+      stylist = await StylistRepository.fetchStylist(stylistId)
     }
     if (!client || !shop || (stylistId && !stylist)) {
       console.error('user | shop | stylist does not exist')
@@ -421,7 +417,7 @@ export const ShopService: ShopServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const reservation = await ReservationRepository.fetch(reservationId)
+    const reservation = await ReservationRepository.fetchReservation(reservationId)
     if (!reservation) {
       console.error('Reservation does not exist')
       throw new NotFoundError()
@@ -429,9 +425,9 @@ export const ShopService: ShopServiceInterface = {
 
     let stylist
     const client = await UserRepository.fetchUser(clientId)
-    const shop = await ShopRepository.fetch(shopId)
+    const shop = await ShopRepository.fetchShop(shopId)
     if (stylistId) {
-      stylist = await StylistRepository.fetch(stylistId)
+      stylist = await StylistRepository.fetchStylist(stylistId)
     }
     if (!client || !shop || (stylistId && !stylist)) {
       console.error('user | shop | stylist does not exist')
@@ -465,7 +461,7 @@ export const ShopService: ShopServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const reservation = await ReservationRepository.fetch(reservationId)
+    const reservation = await ReservationRepository.fetchReservation(reservationId)
     if (!reservation) {
       console.error('Reservation does not exist')
       throw new NotFoundError()

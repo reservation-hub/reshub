@@ -1,9 +1,8 @@
 import { Stylist as PrismaStylist, Days } from '@prisma/client'
-import { Stylist } from '@entities/Stylist'
 import { ScheduleDays } from '@entities/Common'
-import { StylistRepositoryInterface } from '@services/ShopService'
+import { Stylist } from '@entities/Stylist'
+import { StylistRepositoryInterface } from '@shop/services/ShopService'
 import prisma from '@/prisma'
-import { CommonRepositoryInterface, DescOrder } from './CommonRepository'
 
 const convertEntityDayToPrismaDay = (day: ScheduleDays): Days => {
   switch (day) {
@@ -53,8 +52,9 @@ export const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
   endTime: stylist.endTime,
 })
 
-export const StylistRepository: CommonRepositoryInterface<Stylist> & StylistRepositoryInterface = {
-  async fetchAll({ page = 0, order = DescOrder, limit = 10 }) {
+export const StylistRepository: StylistRepositoryInterface = {
+  async fetchAllShopStylists(shopId, page, order) {
+    const limit = 10
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const stylists = await prisma.stylist.findMany({
       skip: skipIndex,
@@ -62,14 +62,16 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & StylistRepo
       take: limit,
       include: { shop: { include: { shopDetail: true } } },
     })
-    return stylists.map(stylist => reconstructStylist(stylist))
+    return stylists.map(reconstructStylist)
   },
 
-  async totalCount() {
-    return prisma.stylist.count()
+  async fetchShopTotalStylistCount(shopId) {
+    return prisma.stylist.count({
+      where: { shopId },
+    })
   },
 
-  async fetch(id) {
+  async fetchStylist(id) {
     const stylist = await prisma.stylist.findUnique({
       where: { id },
       include: { shop: { include: { shopDetail: true } } },
@@ -77,24 +79,19 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & StylistRepo
     return stylist ? reconstructStylist(stylist) : null
   },
 
-  async fetchStylistsByIds(userIds) {
-    const stylists = await prisma.stylist.findMany({ where: { id: { in: userIds } } })
-    return stylists.map(s => reconstructStylist(s))
-  },
-
   async fetchStylistsByShopId(shopId) {
     const stylists = await prisma.stylist.findMany({
       where: { shopId },
     })
-    return stylists.map(s => reconstructStylist(s))
+    return stylists.map(reconstructStylist)
   },
 
-  async fetchShopStaffStylists(userId) {
+  async fetchShopStylistsForShopDetails(shopId, limit) {
     const stylists = await prisma.stylist.findMany({
-      where: { shop: { shopUser: { userId } } },
-      take: 5,
+      where: { shopId },
+      take: limit,
     })
-    return stylists.map(s => reconstructStylist(s))
+    return stylists.map(reconstructStylist)
   },
 
   async insertStylist(name, price, shopId, days, startTime, endTime) {
@@ -141,24 +138,16 @@ export const StylistRepository: CommonRepositoryInterface<Stylist> & StylistRepo
     return cleanStylist
   },
 
-  async fetchStylistsByShopIds(shopIds) {
-    const stylists = await prisma.stylist.findMany({
-      where: { shopId: { in: shopIds } },
-      include: { shop: { include: { shopDetail: true } } },
-    })
-    const cleanStylists = stylists.map(stylist => ({
-      id: stylist.id,
-      name: stylist.name,
-      price: stylist.price,
-      shopId: stylist.shopId,
-    }))
-    return cleanStylists
-  },
-
   async fetchStylistsCountByShopIds(shopIds) {
-    const stylists = await this.fetchStylistsByShopIds(shopIds)
-    const finalData = shopIds.map(id => ({ id, count: stylists.filter(stylist => id === stylist.shopId).length }))
-    return finalData
+    const stylists = await prisma.stylist.groupBy({
+      by: ['shopId'],
+      where: { shopId: { in: shopIds } },
+      _count: true,
+    })
+    return stylists.map(s => ({
+      shopId: s.shopId,
+      count: s._count,
+    }))
   },
 
 }

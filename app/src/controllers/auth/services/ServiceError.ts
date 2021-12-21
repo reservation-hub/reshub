@@ -1,54 +1,48 @@
-type ServiceErrorCode = number
-export const NotFound: ServiceErrorCode = 0
-export const InvalidToken: ServiceErrorCode = 1
-export const InvalidParams: ServiceErrorCode = 2
-export const DuplicateModel: ServiceErrorCode = 3
-export const LoggedIn: ServiceErrorCode = 4
-export const Authentication: ServiceErrorCode = 5
-export const Authorization: ServiceErrorCode = 6
+import { ErrorCode } from '@entities/Common'
+
 export class ServiceError extends Error {
-  constructor(message: string, code: ServiceErrorCode) {
+  constructor(message: string, code: ErrorCode) {
     super(message)
     Object.setPrototypeOf(this, ServiceError.prototype)
     this.name = 'ServiceError'
     this.code = code
   }
 
-    code: ServiceErrorCode
+  code: ErrorCode
 }
 
 export class NotFoundError extends ServiceError {
   constructor() {
-    super('Resource not found', NotFound)
+    super('Resource not found', ErrorCode.NotFound)
   }
 }
 
 export class InvalidTokenError extends ServiceError {
   constructor() {
-    super('Invalid token', InvalidToken)
+    super('Invalid token', ErrorCode.InvalidToken)
   }
 }
 
 export class InvalidParamsError extends ServiceError {
   constructor() {
-    super('Invalid query params', InvalidParams)
+    super('Invalid query params', ErrorCode.InvalidParams)
   }
 }
 
 export class UserIsLoggedInError extends ServiceError {
   constructor() {
-    super('User is logged in', LoggedIn)
+    super('User is logged in', ErrorCode.LoggedIn)
   }
 }
 
 export class AuthenticationError extends ServiceError {
   constructor() {
-    super('User authentication failed', Authentication)
+    super('User authentication failed', ErrorCode.Authentication)
   }
 }
 
 export class AuthorizationError extends ServiceError {
   constructor() {
-    super('User not Authorized', Authorization)
+    super('User not Authorized', ErrorCode.Authorization)
   }
 }

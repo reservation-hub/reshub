@@ -1,7 +1,7 @@
-import { Prisma, RoleSlug } from '@prisma/client'
+import { Prisma, RoleSlug as PrismaRoleSlug } from '@prisma/client'
+import { RoleSlug } from '@entities/Role'
 import { UserRepositoryInterface } from '@client/services/SignUpService'
 import { UserRepositoryInterface as AuthServiceSocket } from '@client/services/AuthService'
-import { convertRoleSlug } from '@repositories/UserRepository'
 import { User } from '@entities/User'
 import prisma from '@/prisma'
 
@@ -10,6 +10,17 @@ const userWithProfileAndOAuthIdsAndRole = Prisma.validator<Prisma.UserArgs>()(
 )
 
 type userWithProfileAndOAuthIdsAndRole = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIdsAndRole>
+
+export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
+  switch (slug) {
+    case PrismaRoleSlug.SHOP_STAFF:
+      return RoleSlug.SHOP_STAFF
+    case PrismaRoleSlug.CLIENT:
+      return RoleSlug.CLIENT
+    default:
+      return RoleSlug.ADMIN
+  }
+}
 
 const reconstructUser = (user: userWithProfileAndOAuthIdsAndRole): User => ({
   id: user.id,
@@ -50,7 +61,7 @@ const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
         username,
         password,
         role: {
-          connect: { slug: RoleSlug.CLIENT },
+          connect: { slug: PrismaRoleSlug.CLIENT },
         },
         profile: {
           create: {

@@ -1,13 +1,13 @@
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
-import ShopService from '@services/ShopService'
-import { ShopListQuery } from '@request-response-types/Shop'
 import { ShopControllerInterface } from '@controller-adapter/Shop'
 import { User, UserForAuth } from '@entities/User'
 import { Menu } from '@entities/Menu'
 import { Reservation } from '@entities/Reservation'
-import UserService from '@services/UserService'
 import { ScheduleDays } from '@entities/Common'
+import ShopService from '@shop/services/ShopService'
+import UserService from '@shop/services/UserService'
+import { OrderBy } from '@request-response-types/Common'
 import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import { shopStylistUpsertSchema } from './schemas/stylist'
@@ -16,7 +16,7 @@ import { menuUpsertSchema } from './schemas/menu'
 import { reservationUpsertSchema } from './schemas/reservation'
 
 export type ShopServiceInterface = {
-  fetchShopsWithTotalCount(user: UserForAuth, query: ShopListQuery)
+  fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: OrderBy)
     : Promise<{ values: Shop[], totalCount: number }>
   fetchShop(user: UserForAuth, id: number): Promise<Shop>
   insertShop(user: UserForAuth, name: string, areaId: number, prefectureId: number,
@@ -27,9 +27,9 @@ export type ShopServiceInterface = {
     startTime: string, endTime: string, details: string): Promise<Shop>
   deleteShop(user: UserForAuth, id: number): Promise<Shop>
   fetchStylistsCountByShopIds(shopIds: number[])
-    : Promise<{ id: number, count: number }[]>
+    : Promise<{ shopId: number, count: number }[]>
   fetchReservationsCountByShopIds(shopIds: number[])
-    : Promise<{ id: number, count: number }[]>
+    : Promise<{ shopId: number, count: number }[]>
   fetchShopStylistsWithReservationCount(user: UserForAuth, shopId: number)
     : Promise<(Stylist & { reservationCount: number})[]>
   insertStylist(user: UserForAuth, shopId: number, name: string, price: number,
@@ -48,7 +48,7 @@ export type ShopServiceInterface = {
   updateMenu(user: UserForAuth, shopId: number, menuId: number, name: string,
     description: string, price: number, duration: number): Promise<Menu>
   deleteMenu(user: UserForAuth, shopId: number, menuId: number): Promise<Menu>
-  fetchShopReservations(user: UserForAuth, shopId: number): Promise<Reservation[]>
+  fetchShopReservationsForShopDetails(user: UserForAuth, shopId: number): Promise<Reservation[]>
   insertReservation(user: UserForAuth, shopId: number, reservationDate: Date,
     clientId: number, menuId: number, stylistId?: number): Promise<Reservation>
   updateReservation(user: UserForAuth, shopId: number, reservationId: number,
@@ -65,8 +65,8 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
-    const params = await indexSchema.validateAsync(query, joiOptions)
-    const shopsWithCount = await ShopService.fetchShopsWithTotalCount(user, params)
+    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const shopsWithCount = await ShopService.fetchShopsWithTotalCount(user, page, order)
     const { values: shops, totalCount } = shopsWithCount
 
     const shopIds = shops.map(shop => shop.id)
@@ -82,8 +82,8 @@ const ShopController: ShopControllerInterface = {
       address: shop.address,
       prefectureName: shop.prefecture.name,
       cityName: shop.city.name,
-      reservationsCount: totalReservationsCount.find(item => item.id === shop.id)!.count,
-      stylistsCount: totalStylistsCount.find(item => item.id === shop.id)!.count,
+      reservationsCount: totalReservationsCount.find(item => item.shopId === shop.id)!.count,
+      stylistsCount: totalStylistsCount.find(item => item.shopId === shop.id)!.count,
     }))
 
     return { values, totalCount }
@@ -93,7 +93,7 @@ const ShopController: ShopControllerInterface = {
     const { id } = query
     const shop = await ShopService.fetchShop(user, id)
     const stylists = await ShopService.fetchShopStylistsWithReservationCount(user, shop.id)
-    const reservations = await ShopService.fetchShopReservations(user, shop.id)
+    const reservations = await ShopService.fetchShopReservationsForShopDetails(user, shop.id)
     const menus = await ShopService.fetchShopMenus(user, shop.id)
     const users = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
 
@@ -212,8 +212,8 @@ const ShopController: ShopControllerInterface = {
       address: shop.address,
       prefectureName: shop.prefecture.name,
       cityName: shop.city.name,
-      reservationsCount: totalReservationsCount.find(item => item.id === shop.id)!.count,
-      stylistsCount: totalStylistsCount.find(item => item.id === shop.id)!.count,
+      reservationsCount: totalReservationsCount.find(item => item.shopId === shop.id)!.count,
+      stylistsCount: totalStylistsCount.find(item => item.shopId === shop.id)!.count,
     }))
     return { values, totalCount: shops.length }
   },
@@ -245,7 +245,7 @@ const ShopController: ShopControllerInterface = {
   async showReservations(user, query) {
     const { shopId } = query
     const shop = await ShopService.fetchShop(user, shopId)
-    const reservations = await ShopService.fetchShopReservations(user, shopId)
+    const reservations = await ShopService.fetchShopReservationsForShopDetails(user, shopId)
     const users = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
     const stylists = await ShopService.fetchShopStylistsWithReservationCount(user, shopId)
     const menus = await ShopService.fetchShopMenus(user, shopId)

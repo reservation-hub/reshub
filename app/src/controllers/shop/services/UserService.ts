@@ -1,6 +1,6 @@
 import { UserServiceInterface } from '@controllers/shop/ShopController'
 import { User } from '@entities/User'
-import UserRepository from '@repositories/UserRepository'
+import UserRepository from '@shop/repositories/UserRepository'
 import { RoleSlug } from '@entities/Role'
 
 export type UserRepositoryInterface = {
