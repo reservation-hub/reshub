@@ -1,5 +1,5 @@
-import { ShopServiceInterface } from '@controllers/dashboard/DashboardController'
 import { Shop } from '@entities/Shop'
+import { ShopServiceInterface } from '@dashboard/DashboardController'
 import ShopRepository from '@dashboard/repositories/ShopRepository'
 import StylistRepository from '@dashboard/repositories/StylistRepository'
 import ReservationRepository from '@dashboard/repositories/ReservationRepository'
@@ -25,7 +25,7 @@ export const ShopService: ShopServiceInterface = {
   async fetchShopsWithStylistCountsAndReservationCounts(user) {
     let shops: Shop[] = []
     let shopsTotalCount: number
-    if (user?.role.slug === RoleSlug.CLIENT) {
+    if (user?.role.slug === RoleSlug.SHOP_STAFF) {
       shops = await ShopRepository.fetchUserShops(user.id)
       shopsTotalCount = await ShopRepository.fetchUserShopsCount(user.id)
     } else {
