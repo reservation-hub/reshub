@@ -8,7 +8,7 @@ COPY ./app/src .
 COPY ./app/main.ts .
 COPY ./app/nodemon.json .
 COPY ./app/package* ./
-COPY ./app/test.js .
+COPY ./app/test.ts .
 COPY ./app/tsconfig.json .
 
 COPY ./scripts/server /scripts
