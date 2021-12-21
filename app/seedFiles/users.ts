@@ -67,7 +67,7 @@ export const clients = Array(clientCount).fill('').map((c, i): UserObject => {
     firstNameKana: randomName.firstName,
     lastNameKana: randomName.lastName,
     password: 'testtest',
-    email: `${randomName.lastName.toLowerCase}${randomName.firstName.toLowerCase}${i}@client.com`,
-    username: `${randomName.lastName.toLowerCase}${randomName.firstName.toLowerCase}${i}`,
+    email: `${randomName.lastName.toLowerCase()}${randomName.firstName.toLowerCase()}${i}@client.com`,
+    username: `${randomName.lastName.toLowerCase()}${randomName.firstName.toLowerCase()}${i}`,
   }
 })
