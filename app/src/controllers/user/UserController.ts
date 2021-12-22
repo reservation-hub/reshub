@@ -8,15 +8,15 @@ import {
 import { OrderBy } from '@/entities/Common'
 
 export type UserServiceInterface = {
-  fetchUsersWithTotalCount(page?: number, order?: OrderBy): Promise<{ users: User[], totalCount: number}>,
-  fetchUser(id: number): Promise<User>,
-  searchUser(keyword: string): Promise<User[]>,
+  fetchUsersWithTotalCount(page?: number, order?: OrderBy): Promise<{ users: User[], totalCount: number}>
+  fetchUser(id: number): Promise<User>
+  searchUser(keyword: string): Promise<User[]>
   insertUser(password: string, confirm: string, email: string, roleSlug: RoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string)
-    : Promise<void>,
+    : Promise<void>
   updateUser(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string, firstNameKanji: string,
-    lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string) : Promise<void>,
-  deleteUser(id: number): Promise<void>,
+    lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string) : Promise<void>
+  deleteUser(id: number): Promise<void>
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 

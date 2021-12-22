@@ -6,9 +6,9 @@ import { googleSchema } from '@auth/schemas'
 
 export type AuthServiceInterface = {
   createToken(user: Express.User, expiresIn: string): string,
-  verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>,
-  silentRefreshTokenChecks(authToken: string, refreshToken: string, headerToken?: string): Promise<void>,
-  googleAuthenticate(token: string): Promise<User>,
+  verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>
+  silentRefreshTokenChecks(authToken: string, refreshToken: string, headerToken?: string): Promise<void>
+  googleAuthenticate(token: string): Promise<User>
   hack(role?: RoleSlug): Promise<User>
 }
 

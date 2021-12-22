@@ -10,7 +10,6 @@ import UserService from '@shop/services/UserService'
 import { OrderBy } from '@request-response-types/Common'
 import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
-import { shopStylistUpsertSchema } from './schemas/stylist'
 import { searchSchema } from './schemas/search'
 
 import { reservationUpsertSchema } from './schemas/reservation'
@@ -32,14 +31,6 @@ export type ShopServiceInterface = {
     : Promise<{ shopId: number, count: number }[]>
   fetchShopStylistsWithReservationCount(user: UserForAuth, shopId: number)
     : Promise<(Stylist & { reservationCount: number})[]>
-  insertStylist(user: UserForAuth, shopId: number, name: string, price: number,
-    days:ScheduleDays[], startTime:string, endTime:string)
-    : Promise<Stylist>
-  updateStylist(user: UserForAuth, shopId: number, stylistId: number, name: string, price: number,
-    days: ScheduleDays[], startTime: string, endTime: string)
-    : Promise<Stylist>
-  deleteStylist(user: UserForAuth, shopId: number, stylistId: number)
-    : Promise<Stylist>
   searchShops(keyword: string): Promise<Shop[]>
   fetchShopMenus(user: UserForAuth, shopId: number): Promise<Menu[]>
   fetchShopReservationsForShopDetails(user: UserForAuth, shopId: number): Promise<Reservation[]>
@@ -166,30 +157,6 @@ const ShopController: ShopControllerInterface = {
     const { id } = query
     await ShopService.deleteShop(user, id)
     return 'Shop deleted'
-  },
-
-  async insertStylist(user, query) {
-    const {
-      name, price, days, startTime, endTime,
-    } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
-    const { shopId } = query
-    await ShopService.insertStylist(user, shopId, name, price, days, startTime, endTime)
-    return 'Stylist created'
-  },
-
-  async updateStylist(user, query) {
-    const {
-      name, price, days, startTime, endTime,
-    } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
-    const { shopId, stylistId } = query
-    await ShopService.updateStylist(user, shopId, stylistId, name, price, days, startTime, endTime)
-    return 'Stylist updated'
-  },
-
-  async deleteStylist(user, query) {
-    const { shopId, stylistId } = query
-    await ShopService.deleteStylist(user, shopId, stylistId)
-    return 'Stylist deleted'
   },
 
   async searchShops(query) {

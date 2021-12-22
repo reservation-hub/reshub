@@ -13,7 +13,7 @@ export type ShopRepositoryInterface = {
 }
 
 export type StylistRepositoryInterface = {
-  fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ shopId: number, stylistCount: number }[]>,
+  fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ shopId: number, stylistCount: number }[]>
 }
 
 export type ReservationRepositoryInterface = {

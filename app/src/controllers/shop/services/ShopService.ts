@@ -19,13 +19,13 @@ export type ShopRepositoryInterface = {
   totalCount(): Promise<number>
   insertShop(
     name: string, areaId: number, prefectureId: number, cityId: number, address: string,
-    phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>,
+    phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>
   updateShop(
     id: number, name: string, areaId: number, prefectureId: number, cityId: number, address: string,
-    phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>,
-  deleteShop(id: number): Promise<Shop>,
+    phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>
+  deleteShop(id: number): Promise<Shop>
   fetchShopMenus(shopId: number): Promise<Menu[]>
-  searchShops(keyword: string): Promise<Shop[]>,
+  searchShops(keyword: string): Promise<Shop[]>
   fetchStaffShops(userId: number, page: number, order: OrderBy): Promise<Shop[]>
   fetchStaffTotalShopsCount(userId: number): Promise<number>
   fetchUserShopIds(userId: number): Promise<number[]>
@@ -37,13 +37,13 @@ export type StylistRepositoryInterface = {
   fetchStylist(stylistId: number): Promise<Stylist | null>
   fetchShopTotalStylistCount(shopId: number): Promise<number>
   insertStylist(name: string, price: number, shopId: number, days:ScheduleDays[],
-    startTime:string, endTime:string): Promise<Stylist>,
+    startTime:string, endTime:string): Promise<Stylist>
   updateStylist(id: number, name: string, price: number, shopId: number,
-    days: ScheduleDays[], startTime: string, endTime: string) :Promise<Stylist>,
-  deleteStylist(id: number): Promise<Stylist>,
+    days: ScheduleDays[], startTime: string, endTime: string) :Promise<Stylist>
+  deleteStylist(id: number): Promise<Stylist>
   fetchStylistsByShopId(shopId: number): Promise<Stylist[]>
   fetchShopStylistsForShopDetails(shopId: number, limit: number): Promise<Stylist[]>
-  fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ shopId: number, count: number }[]>,
+  fetchStylistsCountByShopIds(shopIds: number[]): Promise<{ shopId: number, count: number }[]>
 }
 
 export type ReservationRepositoryInterface = {
@@ -243,64 +243,6 @@ export const ShopService: ShopServiceInterface = {
       ...s,
       reservationCount: reservations.find(r => r.stylistId === s.id)!.reservationCount,
     }))
-  },
-
-  async insertStylist(user, shopId, name, price, days, startTime, endTime) {
-    const shop = await ShopRepository.fetchShop(shopId)
-    if (!shop) {
-      console.error('shop not found')
-      throw new NotFoundError()
-    }
-
-    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
-      console.error('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
-
-    const stylist = await StylistRepository.insertStylist(name, price, shopId, days, startTime, endTime)
-    return stylist
-  },
-
-  async updateStylist(user, shopId, stylistId, name, price, days, startTime, endTime) {
-    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
-      console.error('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
-
-    const shop = await ShopRepository.fetchShop(shopId)
-    if (!shop) {
-      console.error('shop not found')
-      throw new NotFoundError()
-    }
-
-    const stylist = await StylistRepository.fetchStylist(stylistId)
-    if (!stylist) {
-      console.error('stylist not found')
-      throw new NotFoundError()
-    }
-
-    return StylistRepository.updateStylist(stylistId, name, price, shopId, days, startTime, endTime)
-  },
-
-  async deleteStylist(user, shopId, stylistId) {
-    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
-      console.error('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
-
-    const shop = await ShopRepository.fetchShop(shopId)
-    if (!shop) {
-      console.error('shop not found')
-      throw new NotFoundError()
-    }
-
-    const stylist = await StylistRepository.fetchStylist(stylistId)
-    if (!stylist) {
-      console.error('stylist not found')
-      throw new NotFoundError()
-    }
-
-    return StylistRepository.deleteStylist(stylistId)
   },
 
   async fetchShopReservationsForShopDetails(user, shopId) {

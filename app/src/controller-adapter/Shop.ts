@@ -1,7 +1,6 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-import ShopController from '@shop/ShopController'
 import { parseIntIdMiddleware } from '@routes/utils'
 import {
   InsertShopQuery, UpdateShopQuery, ShopQuery, ShopListResponse, ShopListQuery, ShopResponse,
@@ -22,7 +21,9 @@ import {
 } from '@request-response-types/Shop'
 import { UserForAuth } from '@entities/User'
 import { ResponseMessage } from '@request-response-types/Common'
+import ShopController from '@shop/ShopController'
 import MenuController from '@menu/MenuController'
+import StylistController from '@stylist/StylistController'
 
 export type ShopControllerInterface = {
   index(user: UserForAuth, query: ShopListQuery): Promise<ShopListResponse>
@@ -30,11 +31,6 @@ export type ShopControllerInterface = {
   insert(user: UserForAuth, query: InsertShopQuery): Promise<ResponseMessage>
   update(user: UserForAuth, query: UpdateShopQuery): Promise<ResponseMessage>
   delete(user: UserForAuth, query: DeleteShopQuery): Promise<ResponseMessage>
-  // showStylists(user: UserForAuth, query: StylistListQuery): Promise<StylistListResponse>
-  // showStylist(user: UserForAuth, query: StylistQuery): Promise<StylistResponse>
-  insertStylist(user: UserForAuth, query: InsertStylistQuery): Promise<ResponseMessage>
-  updateStylist(user: UserForAuth, query: UpdateStylistQuery): Promise<ResponseMessage>
-  deleteStylist(user: UserForAuth, query: DeleteStylistQuery): Promise<ResponseMessage>
   searchShops(query: ShopSearchQuery): Promise<ShopListResponse>
   showReservations(user: UserForAuth, query: ReservationListQuery): Promise<ReservationListResponse>
   // showReservation(user: UserForAuth, query: ReservationQuery): Promise<ReservationResponse>
@@ -49,6 +45,14 @@ export type MenuControllerInterface = {
   insert(user: UserForAuth, query: InsertMenuQuery): Promise<ResponseMessage>
   update(user: UserForAuth, query: UpdateMenuQuery): Promise<ResponseMessage>
   delete(user: UserForAuth, query: DeleteMenuQuery): Promise<ResponseMessage>
+}
+
+export type StylistControllerInterface = {
+  index(user: UserForAuth, query: StylistListQuery): Promise<StylistListResponse>
+  show(user: UserForAuth, query: StylistQuery): Promise<StylistResponse>
+  insert(user: UserForAuth, query: InsertStylistQuery): Promise<ResponseMessage>
+  update(user: UserForAuth, query: UpdateStylistQuery): Promise<ResponseMessage>
+  delete(user: UserForAuth, query: DeleteStylistQuery): Promise<ResponseMessage>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -92,12 +96,29 @@ const deleteShop = async (req: Request, res: Response, next: NextFunction) : Pro
   } catch (e) { return next(e) }
 }
 
+const showStylists = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { page, order } = req.query
+    const { shopId } = res.locals
+    const user = req.user as UserForAuth
+    return res.send(await StylistController.index(user, { shopId, page, order }))
+  } catch (e) { return next(e) }
+}
+
+const showStylist = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { shopId, stylistId } = res.locals
+    const user = req.user as UserForAuth
+    return res.send(await StylistController.show(user, { shopId, stylistId }))
+  } catch (e) { return next(e) }
+}
+
 const insertStylist = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { shopId } = res.locals
     const { body: params } = req
     const user = req.user as UserForAuth
-    return res.send(await ShopController.insertStylist(user, { shopId, params }))
+    return res.send(await StylistController.insert(user, { shopId, params }))
   } catch (e) { return next(e) }
 }
 
@@ -106,7 +127,7 @@ const updateStylist = async (req: Request, res: Response, next: NextFunction) : 
     const { shopId, stylistId } = res.locals
     const { body: params } = req
     const user = req.user as UserForAuth
-    return res.send(await ShopController.updateStylist(user, { shopId, stylistId, params }))
+    return res.send(await StylistController.update(user, { shopId, stylistId, params }))
   } catch (e) { return next(e) }
 }
 
@@ -114,7 +135,7 @@ const deleteStylist = async (req: Request, res: Response, next: NextFunction) : 
   try {
     const { shopId, stylistId } = res.locals
     const user = req.user as UserForAuth
-    return res.send(await ShopController.deleteStylist(user, { shopId, stylistId }))
+    return res.send(await StylistController.delete(user, { shopId, stylistId }))
   } catch (e) { return next(e) }
 }
 
@@ -214,6 +235,8 @@ routes.delete('/:id', parseIntIdMiddleware, deleteShop)
 routes.post('/search', searchShops)
 
 // stylist routes
+routes.get('/:shopId/stylist', parseIntIdMiddleware, showStylists)
+routes.get('/:shopId/stylist/:stylistId', parseIntIdMiddleware, showStylist)
 routes.post('/:shopId/stylist', parseIntIdMiddleware, insertStylist)
 routes.patch('/:shopId/stylist/:stylistId', parseIntIdMiddleware, updateStylist)
 routes.delete('/:shopId/stylist/:stylistId', parseIntIdMiddleware, deleteStylist)

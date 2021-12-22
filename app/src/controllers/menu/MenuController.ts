@@ -7,7 +7,7 @@ import { MenuControllerInterface } from '@/controller-adapter/Shop'
 
 export type MenuServiceInterface = {
   fetchShopMenusWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
-    : Promise<{ values: Menu[], totalCount: number}>
+    : Promise<{ menus: Menu[], totalCount: number}>
   fetchShopMenu(user: UserForAuth, shopId: number, menuId: number): Promise<Menu>
   insertMenu(user: UserForAuth, shopId: number, name: string, description: string, price: number
     , duration: number)
@@ -23,7 +23,7 @@ const MenuController: MenuControllerInterface = {
   async index(user, query) {
     const { page, order } = await indexSchema.validateAsync(query, joiOptions)
     const { shopId } = query
-    const { values: menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(user, shopId, page, order)
+    const { menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(user, shopId, page, order)
     return {
       values: menus.map(m => ({
         id: m.id,

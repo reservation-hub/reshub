@@ -1,10 +1,9 @@
-import { ScheduleDays } from '@entities/Common'
 import Joi from 'joi'
+import { ScheduleDays, OrderBy } from '@entities/Common'
 
-export const stylistUpsertSchema = Joi.object({
-  name: Joi.string().required(),
-  shopId: Joi.number().required(),
-  price: Joi.number().min(0).required(),
+export const indexSchema = Joi.object({
+  page: Joi.string().pattern(/^[0-9]+$/),
+  order: Joi.string().valid(OrderBy.ASC, OrderBy.DESC),
 })
 
 export const shopStylistUpsertSchema = Joi.object({

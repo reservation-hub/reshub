@@ -7,7 +7,7 @@ import { roleCheck, parseIntIdMiddleware } from '@routes/utils'
 import { AreaPrefecturesResponse, AreaResponse, PrefectureCitiesResponse } from '@request-response-types/Location'
 
 export type LocationControllerInterface = {
-  areaList() : Promise<AreaResponse>,
+  areaList() : Promise<AreaResponse>
   areaPrefectures(areaId: number) : Promise<AreaPrefecturesResponse>
   prefectureCities(prefectureId: number) : Promise<PrefectureCitiesResponse>
 }
