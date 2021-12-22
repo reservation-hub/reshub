@@ -1,7 +1,7 @@
 import {
   Request, Response, NextFunction, CookieOptions, Router,
 } from 'express'
-import AuthController from '@controllers/auth/AuthController'
+import AuthController from '@auth/AuthController'
 import { RoleSlug } from '@entities/Role'
 import { UserForAuth } from '@request-response-types/models/User'
 import { UnknownServerError } from '@routes/errors'

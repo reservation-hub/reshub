@@ -1,4 +1,4 @@
-import { ShopServiceInterface } from '@controllers/shop/ShopController'
+import { ShopServiceInterface } from '@shop/ShopController'
 import { ScheduleDays, OrderBy } from '@entities/Common'
 import { Menu } from '@entities/Menu'
 import { Reservation } from '@entities/Reservation'
@@ -25,10 +25,6 @@ export type ShopRepositoryInterface = {
     phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>,
   deleteShop(id: number): Promise<Shop>,
   fetchShopMenus(shopId: number): Promise<Menu[]>
-  insertMenu(shopId: number, name: string, description: string, price: number, duration: number): Promise<Menu>,
-  updateMenu(menuId: number, name: string, description: string, price: number,
-    duration: number): Promise<Menu>,
-  deleteMenu(menuId: number): Promise<Menu>
   searchShops(keyword: string): Promise<Shop[]>,
   fetchStaffShops(userId: number, page: number, order: OrderBy): Promise<Shop[]>
   fetchStaffTotalShopsCount(userId: number): Promise<number>
@@ -52,8 +48,8 @@ export type StylistRepositoryInterface = {
 
 export type ReservationRepositoryInterface = {
   fetchAllShopReservations(shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
-  fetchReservation(reservationId: number): Promise<Reservation | null>
   fetchShopTotalReservationCount(shopId: number): Promise<number>
+  fetchReservation(reservationId: number): Promise<Reservation | null>
   insertReservation(reservationDate: Date, userId: number, shopId: number, menuId: number, stylistId?: number)
     : Promise<Reservation>
   updateReservation(id: number, reservationDate: Date, userId: number, shopId: number,
@@ -83,7 +79,7 @@ export const nextAvailableDate = (reservationDate: Date, menuDuration: number): 
 
 const isUserOwnedShop = async (userId: number, shopIds: number[]): Promise<boolean> => {
   const userShopIds = await ShopRepository.fetchUserShopIds(userId)
-  const result = shopIds.every(id => userShopIds.find(usid => usid === id))
+  const result = shopIds.some(id => userShopIds.find(usid => usid === id))
   return result
 }
 
@@ -229,62 +225,6 @@ export const ShopService: ShopServiceInterface = {
     return ShopRepository.fetchShopMenus(shopId)
   },
 
-  async insertMenu(user, shopId, name, description, price, duration) {
-    const shop = await ShopRepository.fetchShop(shopId)
-    if (!shop) {
-      console.error('Shop does not exist')
-      throw new NotFoundError()
-    }
-
-    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
-      console.error('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
-
-    const menu = await ShopRepository.insertMenu(shopId, name,
-      description, price, duration)
-    return menu
-  },
-
-  async updateMenu(user, shopId, menuId, name, description, price, duration) {
-    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
-      console.error('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
-
-    const shop = await ShopRepository.fetchShop(shopId)
-    if (!shop) {
-      console.error('Shop does not exist')
-      throw new NotFoundError()
-    }
-    if (!await isValidMenuId(shopId, menuId)) {
-      console.error('Menu is not of the shop')
-      throw new NotFoundError()
-    }
-
-    return ShopRepository.updateMenu(menuId, name,
-      description, price, duration)
-  },
-
-  async deleteMenu(user, shopId, menuId) {
-    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
-      console.error('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
-
-    const shop = await ShopRepository.fetchShop(shopId)
-    if (!shop) {
-      console.error('shop not found')
-      throw new NotFoundError()
-    }
-    if (!await isValidMenuId(shopId, menuId)) {
-      console.error('Menu not found')
-      throw new NotFoundError()
-    }
-
-    return ShopRepository.deleteMenu(menuId)
-  },
-
   async fetchShopStylistsWithReservationCount(user, shopId) {
     const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
@@ -374,6 +314,24 @@ export const ShopService: ShopServiceInterface = {
       throw new NotFoundError()
     }
     return ReservationRepository.fetchShopReservationsForShopDetails(shopId)
+  },
+
+  async fetchShopReservationsWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC) {
+    const shop = await ShopRepository.fetchShop(shopId)
+    if (!shop) {
+      console.error('shop not found')
+      throw new NotFoundError()
+    }
+
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, [shopId])) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+
+    const reservations = await ReservationRepository.fetchAllShopReservations(shopId, page, order)
+    const fetchShopTotalReservationCount = await ReservationRepository.fetchShopTotalReservationCount(shopId)
+
+    return { values: reservations, totalCount: fetchShopTotalReservationCount }
   },
 
   async insertReservation(user, shopId, reservationDate, clientId, menuId, stylistId?) {

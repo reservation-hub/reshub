@@ -2,11 +2,11 @@ import { Request } from 'express'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
-import { localStrategySchema } from '@auth/schemas/auth'
 import { User } from '@entities/User'
 import { localAuthenticationQuery } from '@request-response-types/Auth'
 import AuthService from '@auth/services/AuthService'
 import UserService from '@auth/services/UserService'
+import { localStrategySchema } from '@/controllers/auth/schemas'
 
 export type AuthServiceInterface = {
   authenticateByEmailAndPassword(query: localAuthenticationQuery): Promise<User>
