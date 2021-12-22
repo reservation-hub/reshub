@@ -14,10 +14,10 @@ export type ShopRepositoryInterface = {
 export type MenuRepositoryInterface = {
   fetchAllShopMenus(shopId: number, page: number, order: OrderBy): Promise<Menu[]>
   totalShopMenuCount(shopId: number): Promise<number>
-  fetchMenu(menuId: number): Promise<Menu | null>
-  insertShopMenu(shopId: number, name: string, description: string, price: number, duration: number): Promise<Menu>,
+  fetchMenu(shopId: number, menuId: number): Promise<Menu | null>
+  insertShopMenu(shopId: number, name: string, description: string, price: number, duration: number): Promise<Menu>
   updateShopMenu(menuId: number, name: string, description: string, price: number,
-    duration: number): Promise<Menu>,
+    duration: number): Promise<Menu>
   deleteShopMenu(menuId: number): Promise<Menu>
   fetchShopMenuIds(shopId: number): Promise<number[]>
 }
@@ -47,7 +47,7 @@ const MenuService: MenuServiceInterface = {
 
     const menus = await MenuRepository.fetchAllShopMenus(shopId, page, order)
     const totalCount = await MenuRepository.totalShopMenuCount(shopId)
-    return { values: menus, totalCount }
+    return { menus, totalCount }
   },
 
   async fetchShopMenu(user, shopId, menuId) {
@@ -61,7 +61,7 @@ const MenuService: MenuServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const menu = await MenuRepository.fetchMenu(menuId)
+    const menu = await MenuRepository.fetchMenu(shopId, menuId)
     if (!menu) {
       console.error('Menu does not exist')
       throw new NotFoundError()

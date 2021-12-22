@@ -8,7 +8,7 @@ import { DuplicateModelError, InvalidParamsError } from '@client/services/Servic
 import MailService from './MailService'
 
 export type UserRepositoryInterface = {
-  insertUser(email: string, username: string, password: string): Promise<User>,
+  insertUser(email: string, username: string, password: string): Promise<User>
   emailIsAvailable(email: string): Promise<boolean>
 }
 

@@ -7,17 +7,17 @@ import * as AuthError from '@auth/services/ServiceError'
 export type UserRepositoryInterface = {
   insertUserWithProfile(email: string, password: string, roleSlug: RoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: string, gender: Gender,)
-    : Promise<User>,
+    : Promise<User>
   updateUserFromAdmin(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: string, gender: Gender)
-    : Promise<User>,
-  deleteUserFromAdmin(id: number): Promise<User>,
-  searchUser(keyword: string): Promise<User[]>,
+    : Promise<User>
+  deleteUserFromAdmin(id: number): Promise<User>
+  searchUser(keyword: string): Promise<User[]>
   fetchUsersByIds(userIds: number[]): Promise<User[]>
 }
 
 export type RoleRepositoryInterface = {
-  isValidRole(slug: RoleSlug): Promise<boolean>,
+  isValidRole(slug: RoleSlug): Promise<boolean>
   extractValidRoleSlugs(roleSlugs: RoleSlug[]): Promise<RoleSlug[]>
 }
 

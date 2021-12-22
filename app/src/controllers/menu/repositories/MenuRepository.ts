@@ -20,9 +20,9 @@ const MenuRepository: MenuRepositoryInterface = {
     })
   },
 
-  async fetchMenu(menuId) {
-    return prisma.menu.findUnique({
-      where: { id: menuId },
+  async fetchMenu(shopId, menuId) {
+    return prisma.menu.findFirst({
+      where: { id: menuId, AND: { shopId } },
     })
   },
 

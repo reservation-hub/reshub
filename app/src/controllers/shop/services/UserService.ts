@@ -8,7 +8,7 @@ export type UserRepositoryInterface = {
 }
 
 export type RoleRepositoryInterface = {
-  isValidRole(slug: RoleSlug): Promise<boolean>,
+  isValidRole(slug: RoleSlug): Promise<boolean>
   extractValidRoleSlugs(roleSlugs: RoleSlug[]): Promise<RoleSlug[]>
 }
 

@@ -10,6 +10,7 @@
       "@shop/*": ["src/controllers/shop/*"],
       "@user/*": ["src/controllers/user/*"],
       "@menu/*": ["src/controllers/menu/*"],
+      "@stylist/*": ["src/controllers/stylist/*"],
       "@client/*": ["src/controllers/client/*"],
       "@config": ["src/config"],
       "@routes/*": ["src/routes/*"],
