@@ -37,9 +37,10 @@ export const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
 
 export const StylistRepository: ShopServiceSocket & ReservationServiceSocket & StylistServiceSocket = {
 
-  async fetchStylists() {
+  async fetchShopStaffStylists(userId) {
     const limit = 5
     const stylists = await prisma.stylist.findMany({
+      where: { shop: { shopUser: { userId } } },
       take: limit,
     })
     return stylists.map(reconstructStylist)

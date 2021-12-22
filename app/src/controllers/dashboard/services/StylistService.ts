@@ -4,7 +4,7 @@ import StylistRepository from '@dashboard/repositories/StylistRepository'
 import ReservationRepository from '@dashboard/repositories/ReservationRepository'
 
 export type StylistRepositoryInterface = {
-  fetchStylists(): Promise<Stylist[]>
+  fetchShopStaffStylists(userId: number): Promise<Stylist[]>
 }
 
 export type ReservationRepositoryInterface = {
@@ -12,8 +12,8 @@ export type ReservationRepositoryInterface = {
 }
 
 const StylistService: StylistServiceInterface = {
-  async fetchStylistsWithReservationCount() {
-    const stylists = await StylistRepository.fetchStylists()
+  async fetchStylistsWithReservationCount(user) {
+    const stylists = await StylistRepository.fetchShopStaffStylists(user.id)
     const stylistReservationCounts = await ReservationRepository.fetchReservationsCountByStylistIds(
       stylists.map(s => s.id),
     )

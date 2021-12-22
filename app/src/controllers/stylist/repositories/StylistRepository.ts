@@ -57,6 +57,7 @@ export const StylistRepository: StylistRepositoryInterface = {
     const limit = 10
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const stylists = await prisma.stylist.findMany({
+      where: { shopId },
       skip: skipIndex,
       orderBy: { id: order },
       take: limit,
