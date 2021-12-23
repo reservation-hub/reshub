@@ -5,7 +5,7 @@ import { Stylist } from '@entities/Stylist'
 import { User, UserForAuth } from '@entities/User'
 import ReservationService from '@reservation/services/ReservationService'
 import { ReservationControllerInterface } from '@/controller-adapter/Shop'
-import { indexSchema } from './schemas'
+import { indexSchema, reservationUpsertSchema } from './schemas'
 import { OrderBy } from '@/request-response-types/Common'
 
 export type ReservationServiceInterface = {
@@ -14,6 +14,12 @@ export type ReservationServiceInterface = {
   fetchShopReservationTotalCount(user: UserForAuth, shopId: number): Promise<number>
   fetchReservationWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, reservationId: number)
     : Promise<Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist }>
+  insertReservation(user: UserForAuth, shopId: number, reservationDate: Date,
+    clientId: number, menuId: number, stylistId?: number): Promise<Reservation>
+  updateReservation(user: UserForAuth, shopId: number, reservationId: number,
+    reservationDate: Date, clientId: number, menuId: number, stylistId?: number)
+    : Promise<Reservation>
+  cancelReservation(user: UserForAuth, shopId: number, reservationId: number): Promise<Reservation>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -55,6 +61,31 @@ const ReservationController: ReservationControllerInterface = {
       reservationDate: r.reservationDate,
     }
   },
+
+  async insert(user, query) {
+    const {
+      reservationDate, userId, menuId, stylistId,
+    } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
+    const { shopId } = query
+    await ReservationService.insertReservation(user, shopId, reservationDate, userId, menuId, stylistId)
+    return 'Reservation created'
+  },
+
+  async update(user, query) {
+    const {
+      reservationDate, userId, menuId, stylistId,
+    } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
+    const { shopId, reservationId } = query
+    await ReservationService.updateReservation(user, shopId, reservationId, reservationDate, userId, menuId, stylistId)
+    return 'Reservation updated'
+  },
+
+  async delete(user, query) {
+    const { shopId, reservationId } = query
+    await ReservationService.cancelReservation(user, shopId, reservationId)
+    return 'Reservation deleted'
+  },
+
 }
 
 export default ReservationController

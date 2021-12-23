@@ -62,6 +62,13 @@ const UserRepository: ReservationServiceSocket = {
     })
     return users.map(u => reconstructUser(u))
   },
+
+  async userExists(userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    })
+    return Boolean(user)
+  },
 }
 
 export default UserRepository

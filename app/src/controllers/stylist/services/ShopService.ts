@@ -10,8 +10,7 @@ export type ShopRepositoryInterface = {
 
 const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean> => {
   const userShopIds = await ShopRepository.fetchUserShopIds(userId)
-  const result = userShopIds.some(id => id === shopId)
-  return result
+  return userShopIds.some(id => id === shopId)
 }
 
 const ShopService: ShopServiceInterface = {
