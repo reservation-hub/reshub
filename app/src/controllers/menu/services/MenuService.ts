@@ -29,8 +29,7 @@ const isValidMenuId = async (shopId: number, menuId: number): Promise<boolean> =
 
 const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean> => {
   const userShopIds = await ShopRepository.fetchUserShopIds(userId)
-  const result = userShopIds.some(id => id === shopId)
-  return result
+  return userShopIds.some(id => id === shopId)
 }
 
 const MenuService: MenuServiceInterface = {

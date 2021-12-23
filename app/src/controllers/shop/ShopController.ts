@@ -12,8 +12,6 @@ import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import { searchSchema } from './schemas/search'
 
-import { reservationUpsertSchema } from '../reservation/schemas'
-
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: OrderBy)
     : Promise<{ values: Shop[], totalCount: number }>
@@ -36,12 +34,6 @@ export type ShopServiceInterface = {
   fetchShopReservationsForShopDetails(user: UserForAuth, shopId: number): Promise<Reservation[]>
   fetchShopReservationsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
     : Promise<{ values: Reservation[], totalCount: number}>
-  insertReservation(user: UserForAuth, shopId: number, reservationDate: Date,
-    clientId: number, menuId: number, stylistId?: number): Promise<Reservation>
-  updateReservation(user: UserForAuth, shopId: number, reservationId: number,
-    reservationDate: Date, clientId: number, menuId: number, stylistId?: number)
-    : Promise<Reservation>
-  cancelReservation(user: UserForAuth, shopId: number, reservationId: number): Promise<Reservation>
 }
 
 export type UserServiceInterface = {
@@ -180,29 +172,6 @@ const ShopController: ShopControllerInterface = {
     return { values, totalCount: shops.length }
   },
 
-  async insertReservation(user, query) {
-    const {
-      reservationDate, userId, menuId, stylistId,
-    } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
-    const { shopId } = query
-    await ShopService.insertReservation(user, shopId, reservationDate, userId, menuId, stylistId)
-    return 'Reservation created'
-  },
-
-  async updateReservation(user, query) {
-    const {
-      reservationDate, userId, menuId, stylistId,
-    } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
-    const { shopId, reservationId } = query
-    await ShopService.updateReservation(user, shopId, reservationId, reservationDate, userId, menuId, stylistId)
-    return 'Reservation updated'
-  },
-
-  async deleteReservation(user, query) {
-    const { shopId, reservationId } = query
-    await ShopService.cancelReservation(user, shopId, reservationId)
-    return 'Reservation deleted'
-  },
 }
 
 export default ShopController

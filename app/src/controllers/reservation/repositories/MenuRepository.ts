@@ -7,6 +7,12 @@ const MenuRepository: MenuRepositoryInterface = {
       where: { id: { in: menuIds } },
     })
   },
+
+  async fetchMenuIdsByShopId(shopId) {
+    return (await prisma.menu.findMany({
+      where: { shopId },
+    })).map(m => m.id)
+  },
 }
 
 export default MenuRepository

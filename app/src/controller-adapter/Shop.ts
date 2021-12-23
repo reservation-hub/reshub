@@ -24,9 +24,6 @@ export type ShopControllerInterface = {
   update(user: UserForAuth, query: UpdateShopQuery): Promise<ResponseMessage>
   delete(user: UserForAuth, query: DeleteShopQuery): Promise<ResponseMessage>
   searchShops(query: ShopSearchQuery): Promise<ShopListResponse>
-  insertReservation(user: UserForAuth, query: InsertShopReservationQuery): Promise<ResponseMessage>
-  updateReservation(user: UserForAuth, query: UpdateShopReservationQuery): Promise<ResponseMessage>
-  deleteReservation(user: UserForAuth, query: DeleteShopReservationQuery): Promise<ResponseMessage>
 }
 
 export type MenuControllerInterface = {
@@ -48,9 +45,9 @@ export type StylistControllerInterface = {
 export type ReservationControllerInterface = {
   index(user: UserForAuth, query: ReservationListQuery): Promise<ReservationListResponse>
   show(user: UserForAuth, query: ReservationQuery): Promise<ReservationResponse>
-  // insert(user: UserForAuth, query: InsertStylistQuery): Promise<ResponseMessage>
-  // update(user: UserForAuth, query: UpdateStylistQuery): Promise<ResponseMessage>
-  // delete(user: UserForAuth, query: DeleteStylistQuery): Promise<ResponseMessage>
+  insert(user: UserForAuth, query: InsertShopReservationQuery): Promise<ResponseMessage>
+  update(user: UserForAuth, query: UpdateShopReservationQuery): Promise<ResponseMessage>
+  delete(user: UserForAuth, query: DeleteShopReservationQuery): Promise<ResponseMessage>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -209,7 +206,7 @@ const insertReservation = async (req: Request, res: Response, next: NextFunction
     const { body: params } = req
     const { shopId } = res.locals
     const user = req.user as UserForAuth
-    return res.send(await ShopController.insertReservation(user, { shopId, params }))
+    return res.send(await ReservationController.insert(user, { shopId, params }))
   } catch (e) { return next(e) }
 }
 
@@ -218,7 +215,7 @@ const updateReservation = async (req: Request, res: Response, next: NextFunction
     const { body: params } = req
     const { shopId, reservationId } = res.locals
     const user = req.user as UserForAuth
-    return res.send(await ShopController.updateReservation(user, { shopId, reservationId, params }))
+    return res.send(await ReservationController.update(user, { shopId, reservationId, params }))
   } catch (e) { return next(e) }
 }
 
@@ -226,7 +223,7 @@ const deleteReservation = async (req: Request, res: Response, next: NextFunction
   try {
     const { shopId, reservationId } = res.locals
     const user = req.user as UserForAuth
-    return res.send(await ShopController.deleteReservation(user, { shopId, reservationId }))
+    return res.send(await ReservationController.delete(user, { shopId, reservationId }))
   } catch (e) { return next(e) }
 }
 

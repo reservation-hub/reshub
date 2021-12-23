@@ -55,6 +55,69 @@ const ReservationRepository: ReservationServiceSocket = {
     return reservation ? reconstructReservation(reservation) : null
   },
 
+  async insertReservation(reservationDate, userId, shopId, menuId, stylistId?) {
+    const reservation = await prisma.reservation.create({
+      data: {
+        reservationDate,
+        shop: {
+          connect: { id: shopId },
+        },
+        stylist: stylistId ? {
+          connect: { id: stylistId },
+        } : undefined,
+        user: {
+          connect: { id: userId },
+        },
+        menu: {
+          connect: { id: menuId },
+        },
+      },
+    })
+    const cleanReservation = reconstructReservation(reservation)
+    return cleanReservation
+  },
+
+  async updateReservation(id, reservationDate, userId, shopId, menuId, stylistId) {
+    const reservation = await prisma.reservation.update({
+      where: { id },
+      data: {
+        reservationDate,
+        shop: {
+          connect: { id: shopId },
+        },
+        stylist: stylistId ? {
+          connect: { id: stylistId },
+        } : undefined,
+        user: {
+          connect: { id: userId },
+        },
+        menu: {
+          connect: { id: menuId },
+        },
+      },
+    })
+    const cleanReservation = reconstructReservation(reservation)
+    return cleanReservation
+  },
+
+  async cancelReservation(id) {
+    const reservation = await prisma.reservation.update({
+      where: { id },
+      data: {
+        status: PrismaReservationStatus.CANCELLED,
+      },
+    })
+    const cleanReservation = reconstructReservation(reservation)
+    return cleanReservation
+  },
+
+  async reservationExists(reservationId) {
+    const reservation = await prisma.reservation.findUnique({
+      where: { id: reservationId },
+    })
+    return Boolean(reservation)
+  },
+
 }
 
 export default ReservationRepository
