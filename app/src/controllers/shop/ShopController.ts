@@ -12,7 +12,7 @@ import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
 import { searchSchema } from './schemas/search'
 
-import { reservationUpsertSchema } from './schemas/reservation'
+import { reservationUpsertSchema } from '../reservation/schemas'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: OrderBy)
@@ -178,34 +178,6 @@ const ShopController: ShopControllerInterface = {
       stylistsCount: totalStylistsCount.find(item => item.shopId === shop.id)!.count,
     }))
     return { values, totalCount: shops.length }
-  },
-
-  async showReservations(user, query) {
-    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
-    const { shopId } = query
-    const shop = await ShopService.fetchShop(user, shopId)
-    const { values: reservations, totalCount } = await ShopService.fetchShopReservationsWithTotalCount(
-      user, shopId, page, order,
-    )
-    const users = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
-    const stylists = await ShopService.fetchShopStylistsWithReservationCount(user, shopId)
-    const menus = await ShopService.fetchShopMenus(user, shopId)
-    const reservationList = reservations.map(r => {
-      const user = users.find(u => u.id === r.clientId)!
-      const stylist = stylists.find(s => s.id === r.stylistId)
-      const menu = menus.find(m => m.id === r.menuId)!
-      return {
-        id: r.id,
-        shopId,
-        shopName: shop.name,
-        clientName: `${user.lastNameKana} ${user.firstNameKana}`,
-        stylistName: stylist?.name,
-        menuName: menu.name,
-        status: r.status,
-        reservationDate: r.reservationDate,
-      }
-    })
-    return { values: reservationList, totalCount }
   },
 
   async insertReservation(user, query) {

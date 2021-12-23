@@ -4,26 +4,18 @@ import {
 import { parseIntIdMiddleware } from '@routes/utils'
 import {
   InsertShopQuery, UpdateShopQuery, ShopQuery, ShopListResponse, ShopListQuery, ShopResponse,
-  DeleteShopQuery, InsertStylistQuery, UpdateStylistQuery, DeleteStylistQuery,
-  ShopSearchQuery, InsertMenuQuery, UpdateMenuQuery, DeleteMenuQuery, ReservationListQuery,
-  ReservationListResponse, InsertShopReservationQuery, UpdateShopReservationQuery,
-  DeleteShopReservationQuery,
-  StylistListQuery,
-  StylistListResponse,
-  StylistQuery,
-  StylistResponse,
-  MenuListQuery,
-  MenuListResponse,
-  MenuQuery,
-  MenuResponse,
-  ReservationResponse,
-  ReservationQuery,
+  DeleteShopQuery, InsertStylistQuery, UpdateStylistQuery, DeleteStylistQuery, ShopSearchQuery,
+  InsertMenuQuery, UpdateMenuQuery, DeleteMenuQuery, ReservationListQuery, ReservationListResponse,
+  InsertShopReservationQuery, UpdateShopReservationQuery, DeleteShopReservationQuery, StylistListQuery,
+  StylistListResponse, StylistQuery, StylistResponse, MenuListQuery, MenuListResponse, MenuQuery,
+  MenuResponse, ReservationResponse, ReservationQuery,
 } from '@request-response-types/Shop'
 import { UserForAuth } from '@entities/User'
 import { ResponseMessage } from '@request-response-types/Common'
 import ShopController from '@shop/ShopController'
 import MenuController from '@menu/MenuController'
 import StylistController from '@stylist/StylistController'
+import ReservationController from '@reservation/ReservationController'
 
 export type ShopControllerInterface = {
   index(user: UserForAuth, query: ShopListQuery): Promise<ShopListResponse>
@@ -32,8 +24,6 @@ export type ShopControllerInterface = {
   update(user: UserForAuth, query: UpdateShopQuery): Promise<ResponseMessage>
   delete(user: UserForAuth, query: DeleteShopQuery): Promise<ResponseMessage>
   searchShops(query: ShopSearchQuery): Promise<ShopListResponse>
-  showReservations(user: UserForAuth, query: ReservationListQuery): Promise<ReservationListResponse>
-  // showReservation(user: UserForAuth, query: ReservationQuery): Promise<ReservationResponse>
   insertReservation(user: UserForAuth, query: InsertShopReservationQuery): Promise<ResponseMessage>
   updateReservation(user: UserForAuth, query: UpdateShopReservationQuery): Promise<ResponseMessage>
   deleteReservation(user: UserForAuth, query: DeleteShopReservationQuery): Promise<ResponseMessage>
@@ -53,6 +43,14 @@ export type StylistControllerInterface = {
   insert(user: UserForAuth, query: InsertStylistQuery): Promise<ResponseMessage>
   update(user: UserForAuth, query: UpdateStylistQuery): Promise<ResponseMessage>
   delete(user: UserForAuth, query: DeleteStylistQuery): Promise<ResponseMessage>
+}
+
+export type ReservationControllerInterface = {
+  index(user: UserForAuth, query: ReservationListQuery): Promise<ReservationListResponse>
+  // show(user: UserForAuth, query: ReservationQuery): Promise<ReservationResponse>
+  // insert(user: UserForAuth, query: InsertStylistQuery): Promise<ResponseMessage>
+  // update(user: UserForAuth, query: UpdateStylistQuery): Promise<ResponseMessage>
+  // delete(user: UserForAuth, query: DeleteStylistQuery): Promise<ResponseMessage>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -194,7 +192,7 @@ const showReservations = async (req: Request, res: Response, next: NextFunction)
     const { page, order } = req.query
     const { shopId } = res.locals
     const user = req.user as UserForAuth
-    return res.send(await ShopController.showReservations(user, { shopId, page, order }))
+    return res.send(await ReservationController.index(user, { shopId, page, order }))
   } catch (e) { return next(e) }
 }
 
