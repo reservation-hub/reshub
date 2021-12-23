@@ -47,7 +47,7 @@ export type StylistControllerInterface = {
 
 export type ReservationControllerInterface = {
   index(user: UserForAuth, query: ReservationListQuery): Promise<ReservationListResponse>
-  // show(user: UserForAuth, query: ReservationQuery): Promise<ReservationResponse>
+  show(user: UserForAuth, query: ReservationQuery): Promise<ReservationResponse>
   // insert(user: UserForAuth, query: InsertStylistQuery): Promise<ResponseMessage>
   // update(user: UserForAuth, query: UpdateStylistQuery): Promise<ResponseMessage>
   // delete(user: UserForAuth, query: DeleteStylistQuery): Promise<ResponseMessage>
@@ -196,6 +196,14 @@ const showReservations = async (req: Request, res: Response, next: NextFunction)
   } catch (e) { return next(e) }
 }
 
+const showReservation = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { shopId, reservationId } = res.locals
+    const user = req.user as UserForAuth
+    return res.send(await ReservationController.show(user, { shopId, reservationId }))
+  } catch (e) { return next(e) }
+}
+
 const insertReservation = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body: params } = req
@@ -248,6 +256,7 @@ routes.delete('/:shopId/menu/:menuId', parseIntIdMiddleware, deleteMenu)
 
 // reservation routes
 routes.get('/:shopId/reservation', parseIntIdMiddleware, showReservations)
+routes.get('/:shopId/reservation/:reservationId', parseIntIdMiddleware, showReservation)
 routes.post('/:shopId/reservation', parseIntIdMiddleware, insertReservation)
 routes.patch('/:shopId/reservation/:reservationId', parseIntIdMiddleware, updateReservation)
 routes.delete('/:shopId/reservation/:reservationId', parseIntIdMiddleware, deleteReservation)

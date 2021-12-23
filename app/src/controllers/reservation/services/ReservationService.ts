@@ -12,11 +12,12 @@ import MenuRepository from '@reservation/repositories/MenuRepository'
 import UserRepository from '@reservation/repositories/UserRepository'
 import ShopRepository from '@reservation/repositories/ShopRepository'
 import StylistRepository from '@reservation/repositories/StylistRepository'
-import { AuthorizationError } from '@reservation/services/ServiceError'
+import { AuthorizationError, NotFoundError } from '@reservation/services/ServiceError'
 
 export type ReservationRepositoryInterface = {
   fetchShopReservations(userId: number, shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
   fetchShopTotalReservationCount(shopId: number): Promise<number>
+  fetchShopReservation(shopId: number, reservationId: number): Promise<Reservation | null>
 }
 
 export type MenuRepositoryInterface = {
@@ -83,6 +84,38 @@ const ReservationService: ReservationServiceInterface = {
     }
     return ReservationRepository.fetchShopTotalReservationCount(shopId)
   },
+
+  async fetchReservationWithClientAndStylistAndMenu(user, shopId, reservationId) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+
+    const reservation = await ReservationRepository.fetchShopReservation(shopId, reservationId)
+    if (!reservation) {
+      console.error('Reservation does not exist')
+      throw new NotFoundError()
+    }
+
+    const reservationMenus = await MenuRepository.fetchMenusByIds([reservation.menuId])
+    const reservationClients = await UserRepository.fetchUsersByIds([reservation.clientId])
+    const reservationShops = await ShopRepository.fetchShopsByIds([reservation.shopId])
+    let reservationStylists: Stylist[]
+    if (reservation.stylistId) {
+      reservationStylists = await StylistRepository.fetchStylistsByIds([reservation.stylistId])
+    } else {
+      reservationStylists = []
+    }
+
+    return {
+      ...reservation,
+      shop: reservationShops[0],
+      stylist: reservationStylists[0],
+      menu: reservationMenus[0],
+      client: reservationClients[0],
+    }
+  },
+
 }
 
 export default ReservationService
