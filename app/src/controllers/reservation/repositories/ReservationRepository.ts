@@ -4,9 +4,6 @@ import {
 } from '@prisma/client'
 import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface as ReservationServiceSocket } from '@reservation/services/ReservationService'
-// import { ReservationRepositoryInterface as ShopServiceSocket } from '@reservation/services/ShopService'
-// import { ReservationRepositoryInterface as UserServiceSocket } from '@reservation/services/UserService'
-// import { ReservationRepositoryInterface as StylistServiceSocket } from '@reservation/services/StylistService'
 
 import prisma from '@/prisma'
 
@@ -50,41 +47,13 @@ const ReservationRepository: ReservationServiceSocket = {
     return prisma.reservation.count({ where: { shopId } })
   },
 
-  // async fetchReservationsCountByShopIds(shopIds) {
-  //   const reservations = await prisma.reservation.groupBy({
-  //     by: ['shopId'],
-  //     where: { shopId: { in: shopIds } },
-  //     _count: true,
-  //   })
-  //   return reservations.map(r => ({
-  //     shopId: r.shopId,
-  //     reservationCount: r._count,
-  //   }))
-  // },
+  async fetchShopReservation(shopId, reservationID) {
+    const reservation = await prisma.reservation.findFirst({
+      where: { id: reservationID, AND: { shopId } },
+    })
 
-  // async fetchUsersReservationCounts(userIds) {
-  //   const reservations = await prisma.reservation.groupBy({
-  //     by: ['userId'],
-  //     where: { userId: { in: userIds } },
-  //     _count: true,
-  //   })
-  //   return reservations.map(r => ({
-  //     userId: r.userId,
-  //     reservationCount: r._count,
-  //   }))
-  // },
-
-  // async fetchReservationsCountByStylistIds(stylistIds) {
-  //   const reservations = await prisma.reservation.groupBy({
-  //     by: ['stylistId'],
-  //     where: { stylistId: { in: stylistIds } },
-  //     _count: true,
-  //   })
-  //   return reservations.map(r => ({
-  //     stylistId: r.stylistId!,
-  //     reservationCount: r._count,
-  //   }))
-  // },
+    return reservation ? reconstructReservation(reservation) : null
+  },
 
 }
 

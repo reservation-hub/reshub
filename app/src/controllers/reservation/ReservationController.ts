@@ -12,6 +12,8 @@ export type ReservationServiceInterface = {
   fetchReservationsWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
     : Promise<(Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
   fetchShopReservationTotalCount(user: UserForAuth, shopId: number): Promise<number>
+  fetchReservationWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, reservationId: number)
+    : Promise<Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist }>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -37,6 +39,21 @@ const ReservationController: ReservationControllerInterface = {
     }))
 
     return { values: reservationList, totalCount }
+  },
+
+  async show(user, query) {
+    const { shopId, reservationId } = query
+    const r = await ReservationService.fetchReservationWithClientAndStylistAndMenu(user, shopId, reservationId)
+    return {
+      id: r.id,
+      shopId: r.shopId,
+      shopName: r.shop.name,
+      clientName: `${r.client.lastNameKana!} ${r.client.firstNameKana!}`,
+      menuName: r.menu.name,
+      stylistName: r.stylist?.name,
+      status: r.status,
+      reservationDate: r.reservationDate,
+    }
   },
 }
 
