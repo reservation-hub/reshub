@@ -23,7 +23,7 @@ export type ShopControllerInterface = {
   insert(user: UserForAuth, query: InsertShopQuery): Promise<ResponseMessage>
   update(user: UserForAuth, query: UpdateShopQuery): Promise<ResponseMessage>
   delete(user: UserForAuth, query: DeleteShopQuery): Promise<ResponseMessage>
-  searchShops(query: ShopSearchQuery): Promise<ShopListResponse>
+  searchShops(user: UserForAuth, query: ShopSearchQuery): Promise<ShopListResponse>
 }
 
 export type MenuControllerInterface = {
@@ -137,7 +137,8 @@ const deleteStylist = async (req: Request, res: Response, next: NextFunction) : 
 const searchShops = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body } = req
-    return res.send(await ShopController.searchShops(body))
+    const user = req.user as UserForAuth
+    return res.send(await ShopController.searchShops(user, body))
   } catch (e) { return next(e) }
 }
 

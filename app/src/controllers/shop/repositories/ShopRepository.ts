@@ -1,7 +1,9 @@
 import { Prisma, Days } from '@prisma/client'
 import { Shop } from '@entities/Shop'
 import { ScheduleDays } from '@entities/Common'
-import { ShopRepositoryInterface as ShopServiceSocket } from '@/controllers/shop/services/ShopService'
+import { ShopRepositoryInterface as ShopServiceSocket } from '@shop/services/ShopService'
+import { ShopRepositoryInterface as MenuServiceSocket } from '@shop/services/MenuService'
+import { ShopRepositoryInterface as StylistServiceSocket } from '@shop/services/StylistService'
 import prisma from '@/prisma'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
@@ -78,7 +80,8 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
   details: shop.shopDetail?.details ?? undefined,
 })
 
-const ShopRepository: ShopServiceSocket = {
+const ShopRepository: ShopServiceSocket & MenuServiceSocket &
+StylistServiceSocket = {
   async fetchAllShops(page, order) {
     const limit = 10
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
@@ -184,12 +187,6 @@ const ShopRepository: ShopServiceSocket = {
     })
     const cleanShop = reconstructShop(shop)
     return cleanShop
-  },
-
-  async fetchShopMenus(shopId) {
-    return prisma.menu.findMany({
-      where: { shopId },
-    })
   },
 
   async fetchStaffShops(userId) {
