@@ -7,6 +7,9 @@ import { Reservation } from '@entities/Reservation'
 import { ScheduleDays } from '@entities/Common'
 import ShopService from '@shop/services/ShopService'
 import UserService from '@shop/services/UserService'
+import ReservationService from '@shop/services/ReservationService'
+import StylistService from '@shop/services/StylistService'
+import MenuService from '@shop/services/MenuService'
 import { OrderBy } from '@request-response-types/Common'
 import { shopUpsertSchema } from './schemas/shop'
 import indexSchema from './schemas/indexSchema'
@@ -23,17 +26,24 @@ export type ShopServiceInterface = {
     cityId: number, address: string, phoneNumber: string, days: ScheduleDays[],
     startTime: string, endTime: string, details: string): Promise<Shop>
   deleteShop(user: UserForAuth, id: number): Promise<Shop>
-  fetchStylistsCountByShopIds(shopIds: number[])
-    : Promise<{ shopId: number, count: number }[]>
-  fetchReservationsCountByShopIds(shopIds: number[])
-    : Promise<{ shopId: number, count: number }[]>
-  fetchShopStylistsWithReservationCount(user: UserForAuth, shopId: number)
+  searchShops(user: UserForAuth, keyword: string): Promise<Shop[]>
+}
+
+export type StylistServiceInterface = {
+  fetchShopStylistsWithReservationCount(user: UserForAuth, shopId: number, limit?: number)
     : Promise<(Stylist & { reservationCount: number})[]>
-  searchShops(keyword: string): Promise<Shop[]>
-  fetchShopMenus(user: UserForAuth, shopId: number): Promise<Menu[]>
-  fetchShopReservationsForShopDetails(user: UserForAuth, shopId: number): Promise<Reservation[]>
-  fetchShopReservationsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
-    : Promise<{ values: Reservation[], totalCount: number}>
+  fetchStylistsCountByShopIds(shopIds: number[])
+    : Promise<{ shopId: number, stylistCount: number }[]>
+}
+
+export type ReservationServiceInterface = {
+  fetchReservationsCountByShopIds(shopIds: number[])
+    : Promise<{ shopId: number, reservationCount: number }[]>
+  fetchShopReservations(user: UserForAuth, shopId: number, limit?: number): Promise<Reservation[]>
+}
+
+export type MenuServiceInterface = {
+  fetchShopMenus(user: UserForAuth, shopId: number, limit?: number): Promise<Menu[]>
 }
 
 export type UserServiceInterface = {
@@ -49,8 +59,8 @@ const ShopController: ShopControllerInterface = {
 
     const shopIds = shops.map(shop => shop.id)
 
-    const totalReservationsCount = await ShopService.fetchReservationsCountByShopIds(shopIds)
-    const totalStylistsCount = await ShopService.fetchStylistsCountByShopIds(shopIds)
+    const totalReservationsCount = await ReservationService.fetchReservationsCountByShopIds(shopIds)
+    const totalStylistsCount = await StylistService.fetchStylistsCountByShopIds(shopIds)
 
     // merge data
     const values = shops.map(shop => ({
@@ -60,19 +70,22 @@ const ShopController: ShopControllerInterface = {
       address: shop.address,
       prefectureName: shop.prefecture.name,
       cityName: shop.city.name,
-      reservationsCount: totalReservationsCount.find(item => item.shopId === shop.id)!.count,
-      stylistsCount: totalStylistsCount.find(item => item.shopId === shop.id)!.count,
+      reservationsCount: totalReservationsCount.find(item => item.shopId === shop.id)!.reservationCount,
+      stylistsCount: totalStylistsCount.find(item => item.shopId === shop.id)!.stylistCount,
     }))
 
     return { values, totalCount }
   },
 
   async show(user, query) {
+    const stylistLimit = 5
+    const reservationLimit = 5
+    const menuLimit = 5
     const { id } = query
     const shop = await ShopService.fetchShop(user, id)
-    const stylists = await ShopService.fetchShopStylistsWithReservationCount(user, shop.id)
-    const reservations = await ShopService.fetchShopReservationsForShopDetails(user, shop.id)
-    const menus = await ShopService.fetchShopMenus(user, shop.id)
+    const stylists = await StylistService.fetchShopStylistsWithReservationCount(user, shop.id, stylistLimit)
+    const reservations = await ReservationService.fetchShopReservations(user, shop.id, reservationLimit)
+    const menus = await MenuService.fetchShopMenus(user, shop.id, menuLimit)
     const users = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
 
     const stylistList = stylists.map(s => ({
@@ -151,12 +164,12 @@ const ShopController: ShopControllerInterface = {
     return 'Shop deleted'
   },
 
-  async searchShops(query) {
+  async searchShops(user, query) {
     const searchValues = await searchSchema.validateAsync(query, joiOptions)
-    const shops = await ShopService.searchShops(searchValues.keyword)
+    const shops = await ShopService.searchShops(user, searchValues.keyword)
     const shopIds = shops.map(s => s.id)
-    const totalReservationsCount = await ShopService.fetchReservationsCountByShopIds(shopIds)
-    const totalStylistsCount = await ShopService.fetchStylistsCountByShopIds(shopIds)
+    const totalReservationsCount = await ReservationService.fetchReservationsCountByShopIds(shopIds)
+    const totalStylistsCount = await StylistService.fetchStylistsCountByShopIds(shopIds)
 
     // merge data
     const values = shops.map(shop => ({
@@ -166,8 +179,8 @@ const ShopController: ShopControllerInterface = {
       address: shop.address,
       prefectureName: shop.prefecture.name,
       cityName: shop.city.name,
-      reservationsCount: totalReservationsCount.find(item => item.shopId === shop.id)!.count,
-      stylistsCount: totalStylistsCount.find(item => item.shopId === shop.id)!.count,
+      reservationsCount: totalReservationsCount.find(item => item.shopId === shop.id)!.reservationCount,
+      stylistsCount: totalStylistsCount.find(item => item.shopId === shop.id)!.stylistCount,
     }))
     return { values, totalCount: shops.length }
   },

@@ -27,9 +27,8 @@ type ServiceError = ShopServiceError | UserServiceError | DashboardServiceError 
 export type ResHubError =
   PrismaClientKnownRequestError | ValidationError | InvalidRouteError | ServiceError
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const errorHandler: ErrorRequestHandler = (error: ResHubError | MiddlewareError,
-  req, res, next) => {
+  req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
   console.error('error: ', error)
   if (error.name === 'ServiceError') {
     console.error('is service error')
