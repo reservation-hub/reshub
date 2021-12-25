@@ -46,6 +46,12 @@ export type StylistRepositoryInterface = {
   fetchStylistIdsByShopId(shopId: number): Promise<number[]>
 }
 
+export const getNextAvailableDate = (reservationDate: Date, menuDuration: number): Date => {
+  const nextAvailableDate = new Date(reservationDate)
+  nextAvailableDate.setMinutes(nextAvailableDate.getMinutes() + menuDuration)
+  return nextAvailableDate
+}
+
 const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean> => {
   const userShopIds = await ShopRepository.fetchUserShopIds(userId)
   return userShopIds.some(id => id === shopId)

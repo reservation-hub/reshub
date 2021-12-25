@@ -35,12 +35,6 @@ export type UserRepositoryInterface = {
 
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
-export const nextAvailableDate = (reservationDate: Date, menuDuration: number): Date => {
-  const nextAvailableDate = new Date(reservationDate)
-  nextAvailableDate.setMinutes(nextAvailableDate.getMinutes() + menuDuration)
-  return nextAvailableDate
-}
-
 const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean> => {
   const userShopIds = await ShopRepository.fetchUserShopIds(userId)
   return userShopIds.some(id => id === shopId)
