@@ -1,5 +1,10 @@
-import { ScheduleDays } from '@entities/Common'
 import Joi from 'joi'
+import { ScheduleDays, OrderBy } from '@entities/Common'
+
+export const indexSchema = Joi.object({
+  page: Joi.string().pattern(/^[0-9]+$/),
+  order: Joi.string().valid(OrderBy.ASC, OrderBy.DESC),
+})
 
 export const shopUpsertSchema = Joi.object({
   name: Joi.string().required(),
@@ -20,4 +25,8 @@ export const shopUpsertSchema = Joi.object({
   )).min(1).required(),
   startTime: Joi.string().pattern(/^(?:([01]?\d|2[0-3]):)?([0-5]?\d)$/).required(),
   endTime: Joi.string().pattern(/^(?:([01]?\d|2[0-3]):)?([0-5]?\d)$/).required(),
+})
+
+export const searchSchema = Joi.object({
+  keyword: Joi.string().required(),
 })

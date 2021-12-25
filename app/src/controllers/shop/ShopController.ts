@@ -11,9 +11,7 @@ import ReservationService from '@shop/services/ReservationService'
 import StylistService from '@shop/services/StylistService'
 import MenuService from '@shop/services/MenuService'
 import { OrderBy } from '@request-response-types/Common'
-import { shopUpsertSchema } from './schemas/shop'
-import indexSchema from './schemas/indexSchema'
-import { searchSchema } from './schemas/search'
+import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: OrderBy)
