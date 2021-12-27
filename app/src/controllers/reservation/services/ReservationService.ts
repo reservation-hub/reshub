@@ -18,6 +18,7 @@ import {
 
 export type ReservationRepositoryInterface = {
   fetchShopReservations(userId: number, shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
+  fetchShopReservationsForCalendar(userId: number, shopId: number, year: number, month: number): Promise<Reservation[]>
   fetchShopTotalReservationCount(shopId: number): Promise<number>
   fetchShopReservation(shopId: number, reservationId: number): Promise<Reservation | null>
   insertReservation(reservationDate: Date, userId: number, shopId: number, menuId: number, stylistId?: number)
@@ -114,6 +115,40 @@ const ReservationService: ReservationServiceInterface = {
     }
 
     const reservations = await ReservationRepository.fetchShopReservations(user.id, shopId, page, order)
+    const menuIds: number[] = []
+    const clientIds: number[] = []
+    const shopIds: number[] = []
+    const stylistIds: number[] = []
+    reservations.forEach(r => {
+      menuIds.push(r.menuId)
+      clientIds.push(r.clientId)
+      shopIds.push(r.shopId)
+      if (r.stylistId) {
+        stylistIds.push(r.stylistId)
+      }
+    })
+    const reservationMenus = await MenuRepository.fetchMenusByIds(menuIds)
+    const reservationClients = await UserRepository.fetchUsersByIds(clientIds)
+    const reservationShops = await ShopRepository.fetchShopsByIds(shopIds)
+    const reservationStylists = await StylistRepository.fetchStylistsByIds(stylistIds)
+
+    return reservations.map(r => ({
+      ...r,
+      shop: reservationShops.find(s => s.id === r.shopId)!,
+      stylist: reservationStylists.find(s => s.id === r.stylistId),
+      menu: reservationMenus.find(m => m.id === r.menuId)!,
+      client: reservationClients.find(c => c.id === r.clientId)!,
+    }))
+  },
+
+  async fetchReservationsWithClientAndStylistAndMenuForCalendar(user, shopId, year, month) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
+      console.error('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+
+    const reservations = await ReservationRepository.fetchShopReservationsForCalendar(user.id, shopId, year, month)
+
     const menuIds: number[] = []
     const clientIds: number[] = []
     const shopIds: number[] = []

@@ -43,6 +43,25 @@ const ReservationRepository: ReservationServiceSocket = {
     return reservations.map(r => reconstructReservation(r))
   },
 
+  async fetchShopReservationsForCalendar(userId, shopId, year, month) {
+    const requestDateTime = new Date(`${year}-${month}-1`)
+    const requestDateTimeNextMonth = new Date(requestDateTime)
+    requestDateTimeNextMonth.setMonth(requestDateTimeNextMonth.getMonth() + 1)
+    const reservations = await prisma.reservation.findMany({
+      where: {
+        shop: { shopUser: { userId } },
+        AND: {
+          shopId,
+          reservationDate: {
+            gte: requestDateTime,
+            lt: requestDateTimeNextMonth,
+          },
+        },
+      },
+    })
+    return reservations.map(r => reconstructReservation(r))
+  },
+
   async fetchShopTotalReservationCount(shopId) {
     return prisma.reservation.count({ where: { shopId } })
   },
