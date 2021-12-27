@@ -70,7 +70,7 @@ const isWithinShopSchedule = (shopSchedule: {startTime: string,
   const reservationEndTime = convertToUnixTime(timeToString(getNextAvailableDate(reservationDate, menuDuration)))
   const shopStartTime = convertToUnixTime(shopSchedule.startTime)
   const shopEndTime = convertToUnixTime(shopSchedule.endTime)
-  return !((shopStartTime > reservationStartTime || reservationEndTime >= shopEndTime))
+  return !((shopStartTime > reservationStartTime || reservationEndTime > shopEndTime))
 }
 
 const getStartAndEndDateFromReservationDate = (reservationDate: Date) => {
