@@ -23,6 +23,7 @@ export const shopUpsertSchema = Joi.object({
     ScheduleDays.SATURDAY,
     ScheduleDays.SUNDAY,
   )).min(1).required(),
+  seats: Joi.number().required(),
   startTime: Joi.string().pattern(/^(?:([01]?\d|2[0-3]):)?([0-5]?\d)$/).required(),
   endTime: Joi.string().pattern(/^(?:([01]?\d|2[0-3]):)?([0-5]?\d)$/).required(),
 })

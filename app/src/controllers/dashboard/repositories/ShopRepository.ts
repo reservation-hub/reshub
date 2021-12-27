@@ -55,6 +55,7 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
   address: shop.shopDetail?.address ?? undefined,
   phoneNumber: shop.shopDetail?.phoneNumber ?? undefined,
   days: shop.shopDetail?.days.map(d => convertPrismaDayToEntityDay(d)),
+  seats: shop.shopDetail.seats,
   startTime: shop.shopDetail.startTime,
   endTime: shop.shopDetail.endTime,
   details: shop.shopDetail?.details ?? undefined,
