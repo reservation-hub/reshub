@@ -13,6 +13,14 @@ const MenuRepository: MenuRepositoryInterface = {
       where: { shopId },
     })).map(m => m.id)
   },
+
+  async fetchMenuDuration(menuId, shopId) {
+    const menu = await prisma.menu.findFirst({
+      where: { id: menuId, AND: { shopId } },
+    })
+    return menu?.duration || null
+  },
+
 }
 
 export default MenuRepository

@@ -12,7 +12,9 @@ import MenuRepository from '@reservation/repositories/MenuRepository'
 import UserRepository from '@reservation/repositories/UserRepository'
 import ShopRepository from '@reservation/repositories/ShopRepository'
 import StylistRepository from '@reservation/repositories/StylistRepository'
-import { AuthorizationError, NotFoundError, InvalidParamsError } from '@reservation/services/ServiceError'
+import {
+  OutOfScheduleError, UnavailableError, AuthorizationError, NotFoundError, InvalidParamsError,
+} from '@reservation/services/ServiceError'
 
 export type ReservationRepositoryInterface = {
   fetchShopReservations(userId: number, shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
@@ -24,11 +26,14 @@ export type ReservationRepositoryInterface = {
     menuId: number, stylistId?: number): Promise<Reservation>
   cancelReservation(id: number): Promise<Reservation>
   reservationExists(reservationId: number): Promise<boolean>
+  fetchReservationsDateWithDuration(shopId: number, startDate: Date, eneDate: Date, stylistId?: number):
+  Promise<{reservationDate: Date, duration: number}[]>
 }
 
 export type MenuRepositoryInterface = {
   fetchMenusByIds(menuIds: number[]): Promise<Menu[]>
   fetchMenuIdsByShopId(shopId: number): Promise<number[]>
+  fetchMenuDuration(menuId: number, shopId: number): Promise<number | null>
 }
 
 export type UserRepositoryInterface = {
@@ -39,6 +44,7 @@ export type UserRepositoryInterface = {
 export type ShopRepositoryInterface = {
   fetchUserShopIds(userId: number): Promise<number[]>
   fetchShopsByIds(shopIds: number[]): Promise<Shop[]>
+  fetchShopSchedule(shopId: number): Promise<{startTime: string, endTime: string} | null >
 }
 
 export type StylistRepositoryInterface = {
@@ -46,10 +52,43 @@ export type StylistRepositoryInterface = {
   fetchStylistIdsByShopId(shopId: number): Promise<number[]>
 }
 
-export const getNextAvailableDate = (reservationDate: Date, menuDuration: number): Date => {
+const getNextAvailableDate = (reservationDate: Date, menuDuration: number): Date => {
   const nextAvailableDate = new Date(reservationDate)
   nextAvailableDate.setMinutes(nextAvailableDate.getMinutes() + menuDuration)
   return nextAvailableDate
+}
+
+const timeToString = (dateTime : Date): string => {
+  const hours = dateTime.getHours().toString()
+  const minutes = dateTime.getMinutes().toString()
+  return `${hours}:${minutes}`
+}
+const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
+const isWithinShopSchedule = (shopSchedule: {startTime: string,
+  endTime: string}, reservationDate: Date, menuDuration: number): boolean => {
+  const reservationStartTime = convertToUnixTime(timeToString(reservationDate))
+  const reservationEndTime = convertToUnixTime(timeToString(getNextAvailableDate(reservationDate, menuDuration)))
+  const shopStartTime = convertToUnixTime(shopSchedule.startTime)
+  const shopEndTime = convertToUnixTime(shopSchedule.endTime)
+  return !((shopStartTime > reservationStartTime || reservationEndTime >= shopEndTime))
+}
+
+const getStartAndEndDateFromReservationDate = (reservationDate: Date) => {
+  const startDate = new Date(reservationDate.toISOString().split('T')[0])
+  const endDate = new Date(startDate.getTime() + (3600 * 1000 * 24) /* one day in ms */)
+  return { startDate, endDate }
+}
+
+export const checkAvailablity = (reservationDates:{reservationDate: Date, duration: number}[],
+  wantedReservationDate: Date, wantedReservationMenu: number): boolean => {
+  if (reservationDates.length === 0) return true
+  return reservationDates.every(r => {
+    const rStartTime = r.reservationDate.getTime()
+    const rEndTime = getNextAvailableDate(r.reservationDate, r.duration).getTime()
+    const wantedReservationEnd = getNextAvailableDate(wantedReservationDate, wantedReservationMenu).getTime()
+    return !((rStartTime <= wantedReservationDate.getTime() && wantedReservationDate.getTime() < rEndTime)
+      || (rStartTime <= wantedReservationEnd && wantedReservationEnd < rEndTime))
+  })
 }
 
 const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean> => {
@@ -152,7 +191,8 @@ const ReservationService: ReservationServiceInterface = {
       throw new NotFoundError()
     }
 
-    if (!await isValidMenuId(shopId, menuId)) {
+    const menuDuration = await MenuRepository.fetchMenuDuration(menuId, shopId)
+    if (!menuDuration) {
       console.error('Menu does not exist in shop')
       throw new InvalidParamsError()
     }
@@ -166,6 +206,33 @@ const ReservationService: ReservationServiceInterface = {
     if (dateObj < new Date()) {
       console.error('Invalid date, earlier than today')
       throw new InvalidParamsError()
+    }
+
+    const shopSchedule = await ShopRepository.fetchShopSchedule(shopId)
+
+    if (!shopSchedule) {
+      console.error('The reservation Date/Time is unavailable')
+      throw new UnavailableError()
+    }
+
+    const { startDate, endDate } = getStartAndEndDateFromReservationDate(reservationDate)
+
+    const reservationDatesAndDuration = await ReservationRepository.fetchReservationsDateWithDuration(
+      shopId, startDate,
+      endDate, stylistId,
+    )
+
+    const checkWithShopSchedule = isWithinShopSchedule(shopSchedule, reservationDate, menuDuration)
+
+    if (!checkWithShopSchedule) {
+      console.error('The reservation Time doesnt match with Shop Schedule')
+      throw new OutOfScheduleError()
+    }
+    const isAvailability = checkAvailablity(reservationDatesAndDuration, reservationDate, menuDuration)
+
+    if (!isAvailability) {
+      console.error('The reservation Date/Time is unavailable')
+      throw new UnavailableError()
     }
     return ReservationRepository.insertReservation(reservationDate, clientId, shopId, menuId, stylistId)
   },
