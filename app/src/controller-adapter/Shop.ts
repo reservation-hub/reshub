@@ -8,7 +8,7 @@ import {
   InsertMenuQuery, UpdateMenuQuery, DeleteMenuQuery, ReservationListQuery, ReservationListResponse,
   InsertShopReservationQuery, UpdateShopReservationQuery, DeleteShopReservationQuery, StylistListQuery,
   StylistListResponse, StylistQuery, StylistResponse, MenuListQuery, MenuListResponse, MenuQuery,
-  MenuResponse, ReservationResponse, ReservationQuery,
+  MenuResponse, ReservationResponse, ReservationQuery, ReservationListForCalendarQuery,
 } from '@request-response-types/Shop'
 import { UserForAuth } from '@entities/User'
 import { ResponseMessage } from '@request-response-types/Common'
@@ -44,6 +44,7 @@ export type StylistControllerInterface = {
 
 export type ReservationControllerInterface = {
   index(user: UserForAuth, query: ReservationListQuery): Promise<ReservationListResponse>
+  indexForCalendar(user: UserForAuth, query: ReservationListForCalendarQuery): Promise<ReservationListResponse>
   show(user: UserForAuth, query: ReservationQuery): Promise<ReservationResponse>
   insert(user: UserForAuth, query: InsertShopReservationQuery): Promise<ResponseMessage>
   update(user: UserForAuth, query: UpdateShopReservationQuery): Promise<ResponseMessage>
@@ -194,6 +195,16 @@ const showReservations = async (req: Request, res: Response, next: NextFunction)
   } catch (e) { return next(e) }
 }
 
+const showReservationsForCalendar = async (req: Request, res: Response, next: NextFunction)
+ : Promise<Response | void> => {
+  try {
+    const { year, month } = req.query
+    const { shopId } = res.locals
+    const user = req.user as UserForAuth
+    return res.send(await ReservationController.indexForCalendar(user, { shopId, year, month }))
+  } catch (e) { return next(e) }
+}
+
 const showReservation = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { shopId, reservationId } = res.locals
@@ -254,6 +265,7 @@ routes.delete('/:shopId/menu/:menuId', parseIntIdMiddleware, deleteMenu)
 
 // reservation routes
 routes.get('/:shopId/reservation', parseIntIdMiddleware, showReservations)
+routes.get('/:shopId/reservation/calendar', parseIntIdMiddleware, showReservationsForCalendar)
 routes.get('/:shopId/reservation/:reservationId', parseIntIdMiddleware, showReservation)
 routes.post('/:shopId/reservation', parseIntIdMiddleware, insertReservation)
 routes.patch('/:shopId/reservation/:reservationId', parseIntIdMiddleware, updateReservation)

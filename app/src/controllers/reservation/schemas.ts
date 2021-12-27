@@ -9,6 +9,11 @@ export const indexSchema = Joi.object({
   order: Joi.string().valid(OrderBy.ASC, OrderBy.DESC),
 })
 
+export const indexCalendarSchema = Joi.object({
+  year: Joi.string().pattern(/^[12][09][0-9][0-9]$/).required(),
+  month: Joi.string().pattern(/^(1[0-2]|[1-9])$/).required(),
+})
+
 export const reservationUpsertSchema = Joi.object({
   reservationDate: Joi.date().format('YYYY-MM-DD HH:mm:ss').utc().required(),
   stylistId: Joi.number(),

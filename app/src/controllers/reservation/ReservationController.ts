@@ -5,12 +5,14 @@ import { Stylist } from '@entities/Stylist'
 import { User, UserForAuth } from '@entities/User'
 import ReservationService from '@reservation/services/ReservationService'
 import { ReservationControllerInterface } from '@/controller-adapter/Shop'
-import { indexSchema, reservationUpsertSchema } from './schemas'
+import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './schemas'
 import { OrderBy } from '@/request-response-types/Common'
 
 export type ReservationServiceInterface = {
   fetchReservationsWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
     : Promise<(Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
+  fetchReservationsWithClientAndStylistAndMenuForCalendar(user: UserForAuth, shopId: number,
+    year: number, month: number): Promise<(Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
   fetchShopReservationTotalCount(user: UserForAuth, shopId: number): Promise<number>
   fetchReservationWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, reservationId: number)
     : Promise<Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist }>
@@ -30,6 +32,28 @@ const ReservationController: ReservationControllerInterface = {
     const { shopId } = query
     const reservations = await ReservationService.fetchReservationsWithClientAndStylistAndMenu(
       user, shopId, page, order,
+    )
+    const totalCount = await ReservationService.fetchShopReservationTotalCount(user, shopId)
+
+    const reservationList = reservations.map(r => ({
+      id: r.id,
+      shopId: r.shopId,
+      shopName: r.shop.name,
+      clientName: `${r.client.lastNameKana!} ${r.client.firstNameKana!}`,
+      menuName: r.menu.name,
+      stylistName: r.stylist?.name,
+      status: r.status,
+      reservationDate: r.reservationDate,
+    }))
+
+    return { values: reservationList, totalCount }
+  },
+
+  async indexForCalendar(user, query) {
+    const { shopId } = query
+    const { year, month } = await indexCalendarSchema.validateAsync(query, joiOptions)
+    const reservations = await ReservationService.fetchReservationsWithClientAndStylistAndMenuForCalendar(
+      user, shopId, year, month,
     )
     const totalCount = await ReservationService.fetchShopReservationTotalCount(user, shopId)
 
