@@ -19,10 +19,10 @@ export type ShopServiceInterface = {
   fetchShop(user: UserForAuth, id: number): Promise<Shop>
   insertShop(user: UserForAuth, name: string, areaId: number, prefectureId: number,
     cityId: number, address: string, phoneNumber: string, days: ScheduleDays[],
-    startTime: string, endTime: string, details: string): Promise<Shop>
+    seats: number, startTime: string, endTime: string, details: string): Promise<Shop>
   updateShop(user: UserForAuth, id: number, name: string, areaId: number, prefectureId: number,
     cityId: number, address: string, phoneNumber: string, days: ScheduleDays[],
-    startTime: string, endTime: string, details: string): Promise<Shop>
+    seats:number, startTime: string, endTime: string, details: string): Promise<Shop>
   deleteShop(user: UserForAuth, id: number): Promise<Shop>
   searchShops(user: UserForAuth, keyword: string): Promise<Shop[]>
 }
@@ -118,6 +118,7 @@ const ShopController: ShopControllerInterface = {
       cityId: shop.city.id,
       cityName: shop.city.name,
       days: shop.days,
+      seats: shop.seats,
       startTime: shop.startTime,
       endTime: shop.endTime,
       name: shop.name,
@@ -134,11 +135,11 @@ const ShopController: ShopControllerInterface = {
   async insert(user, query) {
     const {
       name, areaId, prefectureId, cityId, address,
-      phoneNumber, days, startTime, endTime, details,
+      phoneNumber, days, seats, startTime, endTime, details,
     } = await shopUpsertSchema.validateAsync(query, joiOptions)
     await ShopService.insertShop(user,
       name, areaId, prefectureId, cityId, address,
-      phoneNumber, days, startTime, endTime, details)
+      phoneNumber, days, seats, startTime, endTime, details)
 
     return 'Shop created'
   },
@@ -146,12 +147,12 @@ const ShopController: ShopControllerInterface = {
   async update(user, query) {
     const {
       name, areaId, prefectureId, cityId, address, phoneNumber,
-      days, startTime, endTime, details,
+      seats, days, startTime, endTime, details,
     } = await shopUpsertSchema.validateAsync(query.params, joiOptions)
     const { id } = query
 
     await ShopService.updateShop(user, id, name, areaId, prefectureId, cityId,
-      address, phoneNumber, days, startTime, endTime, details)
+      address, phoneNumber, seats, days, startTime, endTime, details)
 
     return 'Shop updated'
   },

@@ -8,6 +8,7 @@ export type Shop = {
   prefecture: Prefecture
   city: City
   days: ScheduleDays[]
+  seats: number
   startTime: string
   endTime: string
   address?: string

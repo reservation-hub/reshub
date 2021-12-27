@@ -13,10 +13,12 @@ export type ShopRepositoryInterface = {
   totalCount(): Promise<number>
   insertShop(
     name: string, areaId: number, prefectureId: number, cityId: number, address: string,
-    phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>
+    phoneNumber: string, days: ScheduleDays[], seats:number, startTime: string, endTime: string, details: string)
+    : Promise<Shop>
   updateShop(
     id: number, name: string, areaId: number, prefectureId: number, cityId: number, address: string,
-    phoneNumber: string, days: ScheduleDays[], startTime: string, endTime: string, details: string) : Promise<Shop>
+    phoneNumber: string, days: ScheduleDays[], seats:number,
+    startTime: string, endTime: string, details: string) : Promise<Shop>
   deleteShop(id: number): Promise<Shop>
   searchShops(keyword: string): Promise<Shop[]>
   fetchStaffShops(userId: number, page: number, order: OrderBy): Promise<Shop[]>
@@ -69,7 +71,8 @@ export const ShopService: ShopServiceInterface = {
     return shop
   },
 
-  async insertShop(user, name, areaId, prefectureId, cityId, address, phoneNumber, days, startTime, endTime, details) {
+  async insertShop(user, name, areaId, prefectureId, cityId, address, phoneNumber,
+    days, seats, startTime, endTime, details) {
     const isValidLocation = await LocationRepository.isValidLocation(areaId, prefectureId, cityId)
     if (!isValidLocation) {
       console.error('Location provided is incorrect')
@@ -87,7 +90,7 @@ export const ShopService: ShopServiceInterface = {
 
     const shop = await ShopRepository.insertShop(
       name, areaId, prefectureId, cityId, address,
-      phoneNumber, uniqueDays, startTime, endTime, details,
+      phoneNumber, uniqueDays, seats, startTime, endTime, details,
     )
     if (user.role.slug === RoleSlug.SHOP_STAFF) {
       await ShopRepository.assignShopToStaff(user.id, shop.id)
@@ -96,7 +99,7 @@ export const ShopService: ShopServiceInterface = {
   },
 
   async updateShop(user, id, name, areaId, prefectureId, cityId, address,
-    phoneNumber, days, startTime, endTime, details) {
+    phoneNumber, days, seats, startTime, endTime, details) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, id)) {
       console.error('Shop is not owned by user')
       throw new AuthorizationError()
@@ -126,7 +129,7 @@ export const ShopService: ShopServiceInterface = {
     return ShopRepository.updateShop(
       id,
       name, areaId, prefectureId, cityId, address,
-      phoneNumber, uniqueDays, startTime, endTime, details,
+      phoneNumber, uniqueDays, seats, startTime, endTime, details,
     )
   },
 

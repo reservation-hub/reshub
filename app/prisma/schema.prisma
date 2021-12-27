@@ -155,6 +155,7 @@ model ShopDetail {
   shop        Shop?
   details     String?      @db.VarChar(255)
   days        Days[]
+  seats       Int
   startTime   String       @map("start_time")
   endTime     String       @map("end_time")
   images      ModelImage[]

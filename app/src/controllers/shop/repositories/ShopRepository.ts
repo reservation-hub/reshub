@@ -4,6 +4,7 @@ import { ScheduleDays } from '@entities/Common'
 import { ShopRepositoryInterface as ShopServiceSocket } from '@shop/services/ShopService'
 import { ShopRepositoryInterface as MenuServiceSocket } from '@shop/services/MenuService'
 import { ShopRepositoryInterface as StylistServiceSocket } from '@shop/services/StylistService'
+import { number } from 'joi'
 import prisma from '@/prisma'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
@@ -75,6 +76,7 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
   address: shop.shopDetail?.address ?? undefined,
   phoneNumber: shop.shopDetail?.phoneNumber ?? undefined,
   days: shop.shopDetail?.days.map(d => convertPrismaDayToEntityDay(d)),
+  seats: shop.shopDetail.seats,
   startTime: shop.shopDetail.startTime,
   endTime: shop.shopDetail.endTime,
   details: shop.shopDetail?.details ?? undefined,
@@ -115,7 +117,7 @@ StylistServiceSocket = {
   },
 
   async insertShop(name, areaId, prefectureId, cityId, address,
-    phoneNumber, days, startTime, endTime, details) {
+    phoneNumber, days, seats, startTime, endTime, details) {
     const shop = await prisma.shop.create({
       data: {
         area: {
@@ -133,6 +135,7 @@ StylistServiceSocket = {
             address,
             phoneNumber,
             days: days.map(convertEntityDayToPrismaDay),
+            seats,
             startTime,
             endTime,
             details,
@@ -147,7 +150,7 @@ StylistServiceSocket = {
     return cleanShop
   },
   async updateShop(id, name, areaId, prefectureId, cityId, address,
-    phoneNumber, days, startTime, endTime, details) {
+    phoneNumber, days, seats, startTime, endTime, details) {
     const shop = await prisma.shop.update({
       where: { id },
       data: {
@@ -160,6 +163,7 @@ StylistServiceSocket = {
             address,
             phoneNumber,
             days: days.map(d => convertEntityDayToPrismaDay(d)),
+            seats,
             startTime,
             endTime,
             details,
