@@ -27,3 +27,14 @@ export class AuthorizationError extends ServiceError {
     super('User not Authorized', ErrorCode.Authorization)
   }
 }
+export class UnavailableError extends ServiceError {
+  constructor() {
+    super('Reservation is already taken', ErrorCode.Unavailable)
+  }
+}
+
+export class OutOfScheduleError extends ServiceError {
+  constructor() {
+    super('Reservation is not within Shop Schedule', ErrorCode.OutOfSchedule)
+  }
+}

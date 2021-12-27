@@ -117,6 +117,25 @@ const ReservationRepository: ReservationServiceSocket = {
     })
     return Boolean(reservation)
   },
+  async fetchReservationsWithDateDuration(shopId, startDate, endDate, stylistId?) {
+    const reservations = await prisma.reservation.findMany({
+      where: {
+        reservationDate: {
+          gte: startDate,
+          lt: endDate,
+        },
+        AND: { stylistId, shopId },
+      },
+      include: {
+        menu: true,
+        shop: true,
+      },
+    })
+    return reservations.map(r => ({
+      reservationDate: r.reservationDate,
+      duration: r.menu.duration,
+    }))
+  },
 
 }
 

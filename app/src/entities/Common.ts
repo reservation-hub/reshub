@@ -21,4 +21,6 @@ export enum ErrorCode {
   DuplicateModel = 'Duplicate Model',
   LoggedIn = 'Logged In',
   Authentication = 'Authentication',
+  Unavailable = 'Unavailable',
+  OutOfSchedule = 'OutOfSchedule'
 }

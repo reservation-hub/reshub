@@ -78,6 +78,16 @@ const ShopRepository: ReservationServiceSocket = {
     })).map(s => s.id)
   },
 
+  async fetchShopSchedule(shopId) {
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      include: {
+        shopDetail: true,
+      },
+    })
+    return shop ? { startTime: shop.shopDetail.startTime, endTime: shop.shopDetail.endTime } : null
+  },
+
 }
 
 export default ShopRepository
