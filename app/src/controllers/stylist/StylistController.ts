@@ -39,7 +39,7 @@ const StylistController: StylistControllerInterface = {
       shopId: s.shopId,
       name: s.name,
       price: s.price,
-      reservationCount: stylistReservationCounts.find(src => src.stylistId === s.id)!.reservationCount,
+      reservationCount: stylistReservationCounts.find(src => src.stylistId === s.id)?.reservationCount ?? 0,
     }))
     return { values: stylistList, totalCount }
   },
