@@ -36,7 +36,7 @@ const MailService: MailServiceInterface = {
       })
       Logger.debug(info)
     } catch (e) {
-      Logger.debug(e)
+      Logger.error(e)
     }
   },
 }
