@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import prisma from '../src/prisma'
 import areas, { AreaObject } from './areas-db'
 import prefectures, { PrefectureObject } from './prefec-db'
+import Logger from '../src/lib/Logger'
 
 import cities, { CityObject } from './cities-db'
 import {
@@ -41,7 +42,7 @@ const roleSeeder = async (rs: RoleObject[]): Promise<void> => {
   try {
     await Promise.all(rs.map(async r => prisma.role.create({ data: r })))
   } catch (e) {
-    console.error(`Roles Seed Error : ${e}`)
+    Logger.debug(`Roles Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -50,7 +51,7 @@ const userSeeder = async (r: Role, us: UserObject[]): Promise<void> => {
   try {
     await Promise.all(us.map(async u => prisma.user.create({ data: userDataObject(r, u) })))
   } catch (e) {
-    console.error(`${r.name} Seed Error : ${e}`)
+    Logger.debug(`${r.name} Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -64,7 +65,7 @@ const areaSeeder = async (as: AreaObject[]): Promise<void> => {
       },
     })))
   } catch (e) {
-    console.error(`Area Seed Error : ${e}`)
+    Logger.debug(`Area Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -79,7 +80,7 @@ const prefectureSeeder = async (ps: PrefectureObject[]): Promise<void> => {
       },
     })))
   } catch (e) {
-    console.error(`Prefecture Seed Error : ${e}`)
+    Logger.debug(`Prefecture Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -94,7 +95,7 @@ const citySeeder = async (cs: CityObject[]): Promise<void> => {
       },
     })))
   } catch (e) {
-    console.error(`City Seed Error: ${e}`)
+    Logger.debug(`City Seed Error: ${e}`)
     process.exit(1)
   }
 }
@@ -148,7 +149,7 @@ const shopSeeder = async (count: number, shopCities: (City & {
       },
     })))
   } catch (e) {
-    console.error(`Shop Seed error : ${e}`)
+    Logger.debug(`Shop Seed error : ${e}`)
     process.exit(1)
   }
 }
@@ -167,7 +168,7 @@ const shopUserConnectionSeeder = async (shopStaffIds: number[], shopIds: number[
       })
     }))
   } catch (e) {
-    console.error(`Staff Connection Error : ${e}`)
+    Logger.debug(`Staff Connection Error : ${e}`)
     process.exit(1)
   }
 }
@@ -196,7 +197,7 @@ const menuSeeder = async (shopsForMenuSeed: Shop[]): Promise<void> => {
       }],
     })))
   } catch (e) {
-    console.error(`Menu Seed Error : ${e}`)
+    Logger.debug(`Menu Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -230,7 +231,7 @@ const stylistSeeder = async (shopsForStylistSeed: Shop[]): Promise<void> => {
       })))
     }))
   } catch (e) {
-    console.error(`Stylist Seed Error : ${e}`)
+    Logger.debug(`Stylist Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -268,7 +269,7 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
       }))
     }))
   } catch (e) {
-    console.error(`Reservation Seed Error : ${e}`)
+    Logger.debug(`Reservation Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -287,7 +288,7 @@ const main = async () => {
     where: { slug: RoleSlug.ADMIN },
   })
   if (!adminRole) {
-    console.error('Admin role does not exist')
+    Logger.debug('Admin role does not exist')
     process.exit(1)
   }
   await userSeeder(adminRole, admins)
@@ -393,7 +394,7 @@ const main = async () => {
   })
 
   if (shopsForReservationSeed.length < 1) {
-    console.error('No Shops Found')
+    Logger.debug('No Shops Found')
     process.exit(1)
   }
 
@@ -402,7 +403,7 @@ const main = async () => {
   })
 
   if (clientsForReservation.length < 1) {
-    console.error('No Shops Found')
+    Logger.debug('No Shops Found')
     process.exit(1)
   }
 

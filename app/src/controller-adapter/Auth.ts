@@ -7,6 +7,7 @@ import { UserForAuth } from '@request-response-types/models/User'
 import { UnknownServerError } from '@routes/errors'
 import passport from '@auth/middlewares/passport'
 import config from '@config'
+import Logger from '@lib/Logger'
 
 export type AuthControllerInterface = {
   hack(role?: RoleSlug): Promise<UserForAuth>
@@ -29,7 +30,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) : P
   try {
     const user = req.user as UserForAuth
     if (!user) {
-      console.error('User not found in request')
+      Logger.debug('User not found in request')
       throw new UnknownServerError()
     }
 
@@ -48,7 +49,7 @@ export const refreshLogin = async (req: Request, res: Response, next: NextFuncti
   try {
     const user = req.user as UserForAuth
     if (!user) {
-      console.error('User not found in request')
+      Logger.debug('User not found in request')
       throw new UnknownServerError()
     }
     const token = AuthController.createOneDayToken(user)

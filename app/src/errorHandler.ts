@@ -11,7 +11,8 @@ import { ServiceError as AuthServiceError } from '@location/services/ServiceErro
 import { ServiceError as LocationServiceError } from '@auth/services/ServiceError'
 
 import { ErrorCode as EntityErrorCode } from '@entities/Common'
-import { MiddlewareError, InvalidRouteError } from './routes/errors'
+import { MiddlewareError, InvalidRouteError } from '@routes/errors'
+import Logger from '@lib/Logger'
 
 enum ErrorCode {
   BadRequest = 400,
@@ -29,9 +30,9 @@ export type ResHubError =
 
 export const errorHandler: ErrorRequestHandler = (error: ResHubError | MiddlewareError,
   req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
-  console.error('error: ', error)
+  Logger.debug('error: ', error)
   if (error.name === 'ServiceError') {
-    console.error('is service error')
+    Logger.debug('is service error')
     error as ServiceError
     let code: ErrorCode
     switch (error.code) {
@@ -72,7 +73,7 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
 
   if (error instanceof ValidationError) {
     // Joi Validation エラー処理
-    console.error(error)
+    Logger.debug(error)
     const keys = error.details.map((e: ValidationErrorItem) => e.path.toString())
     return res.status(ErrorCode.BadRequest).send({ keys, message: 'Invalid values error' })
   }

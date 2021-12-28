@@ -2,6 +2,7 @@ import { LocationServiceInterface } from '@location/LocationController'
 import { LocationRepository } from '@location/repositories/LocationRepository'
 import { Area, City, Prefecture } from '@entities/Location'
 import { NotFoundError } from '@location/services/ServiceError'
+import Logger from '@lib/Logger'
 
 export type LocationRepositoryInterface = {
   fetchAreas() : Promise<Area[]>
@@ -20,7 +21,7 @@ const LocationService: LocationServiceInterface = {
   async fetchAreaWithPrefectures(areaId) {
     const area = await LocationRepository.fetchArea(areaId)
     if (!area) {
-      console.error('Area does not exist')
+      Logger.debug('Area does not exist')
       throw new NotFoundError()
     }
     const prefectures = await LocationRepository.fetchAreaPrefectures(area.id)
@@ -30,7 +31,7 @@ const LocationService: LocationServiceInterface = {
   async fetchPrefectureWithCities(prefectureId) {
     const prefecture = await LocationRepository.fetchPrefecture(prefectureId)
     if (!prefecture) {
-      console.error('Prefecture does not exist')
+      Logger.debug('Prefecture does not exist')
       throw new NotFoundError()
     }
     const cities = await LocationRepository.fetchPrefectureCities(prefecture.id)

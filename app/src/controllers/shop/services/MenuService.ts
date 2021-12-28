@@ -4,6 +4,7 @@ import { Menu } from '@entities/Menu'
 import { RoleSlug } from '@entities/Role'
 import MenuRepository from '@shop/repositories/MenuRepository'
 import { AuthorizationError } from '@shop/services/ServiceError'
+import Logger from '@lib/Logger'
 
 export type ShopRepositoryInterface = {
   fetchUserShopIds(userId: number): Promise<number[]>
@@ -21,7 +22,7 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 const MenuService: MenuServiceInterface = {
   async fetchShopMenus(user, shopId, limit = 10) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
     return MenuRepository.fetchShopMenus(shopId, limit)

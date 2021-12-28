@@ -5,6 +5,7 @@ import { StylistServiceInterface } from '@stylist/StylistController'
 import { AuthorizationError, NotFoundError } from '@stylist/services/ServiceError'
 import ShopRepository from '@stylist/repositories/ShopRepository'
 import StylistRepository from '@stylist/repositories/StylistRepository'
+import Logger from '@lib/Logger'
 
 export type StylistRepositoryInterface = {
   fetchShopStylists(shopId: number, page: number, order: OrderBy): Promise<Stylist[]>
@@ -30,7 +31,7 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 const StylistService: StylistServiceInterface = {
   async fetchShopStylistsWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
@@ -41,13 +42,13 @@ const StylistService: StylistServiceInterface = {
 
   async fetchStylist(user, shopId, stylistId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const stylist = await StylistRepository.fetchShopStylist(shopId, stylistId)
     if (!stylist) {
-      console.error('stylist not found')
+      Logger.debug('stylist not found')
       throw new NotFoundError()
     }
 
@@ -56,7 +57,7 @@ const StylistService: StylistServiceInterface = {
 
   async insertStylist(user, shopId, name, price, days, startTime, endTime) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
@@ -66,13 +67,13 @@ const StylistService: StylistServiceInterface = {
 
   async updateStylist(user, shopId, stylistId, name, price, days, startTime, endTime) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const stylist = await StylistRepository.fetchShopStylist(shopId, stylistId)
     if (!stylist) {
-      console.error('stylist not found')
+      Logger.debug('stylist not found')
       throw new NotFoundError()
     }
 
@@ -81,13 +82,13 @@ const StylistService: StylistServiceInterface = {
 
   async deleteStylist(user, shopId, stylistId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const stylist = await StylistRepository.fetchShopStylist(shopId, stylistId)
     if (!stylist) {
-      console.error('stylist not found')
+      Logger.debug('stylist not found')
       throw new NotFoundError()
     }
 
