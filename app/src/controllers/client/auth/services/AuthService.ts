@@ -28,7 +28,7 @@ const AuthService: PassportSocket & AuthControllerSocket = {
     })
   },
 
-  async authenticateByUsernameAndPassword({ username, password }) {
+  async authenticateByUsernameAndPassword(username, password) {
     if (!username || !password) {
       console.error('username or password is not filled')
       throw new InvalidParamsError()

@@ -4,8 +4,8 @@ import {
 import config from '@config'
 import { UserForAuth } from '@request-response-types/models/User'
 import { UnknownServerError } from '@routes/errors'
-import passport from '@/controllers/client/auth/middlewares/passport'
-import AuthController from '@/controllers/client/auth/AuthController'
+import passport from '@client/auth/middlewares/passport'
+import AuthController from '@client/auth/AuthController'
 
 export type AuthControllerInterface = {
   hack(): Promise<UserForAuth>

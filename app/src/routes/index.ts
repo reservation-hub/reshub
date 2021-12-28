@@ -16,12 +16,14 @@ import { InvalidRouteError } from './errors'
 const router = Router()
 export default router
 
+// client api
+router.use('/api/', apiRoutes)
+router.use('/api/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404s
+
 router.use('/auth', authController)
 router.use('/dashboard', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), dashboardController)
 router.use('/shops', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), shopController)
 router.use('/users', protectAdminRoute, roleCheck([RoleSlug.ADMIN]), userController)
 router.use('/', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), LocationController)
-// client api
-router.use('/api/', roleCheck(['client']), apiRoutes)
 
 router.use('/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404s

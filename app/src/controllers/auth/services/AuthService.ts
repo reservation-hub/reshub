@@ -76,7 +76,7 @@ const AuthService: AuthControllerSocket & PassportSocket = {
     return user
   },
 
-  async authenticateByEmailAndPassword({ email, password }) {
+  async authenticateByEmailAndPassword(email, password) {
     if (!email || !password) {
       console.error('email or password is required')
       throw new AuthError.InvalidParamsError()

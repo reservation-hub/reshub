@@ -3,13 +3,12 @@ import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
 import { User } from '@entities/User'
-import { localAuthenticationQuery } from '@request-response-types/client/Auth'
 import UserService from '@client/auth/services/UserService'
 import AuthService from '@/controllers/client/auth/services/AuthService'
 import { localStrategySchema } from '@/controllers/client/auth/schemas'
 
 export type AuthServiceInterface = {
-  authenticateByUsernameAndPassword(query: localAuthenticationQuery): Promise<User>
+  authenticateByUsernameAndPassword(username: string, password: string): Promise<User>
 }
 
 export type UserServiceInterface = {
@@ -77,8 +76,8 @@ passport.use('refresh-jwt', new JWTStrategy(jwtOptionsRefresh, jwtStrategyLogic)
 
 passport.use('client-local', new LocalStrategy(async (username, password, done) => {
   try {
-    const schemaValues = await localStrategySchema.validateAsync({ username, password }, joiOptions)
-    const user = await AuthService.authenticateByUsernameAndPassword(schemaValues)
+    const { cleanUsername, cleanPassword } = await localStrategySchema.validateAsync({ username, password }, joiOptions)
+    const user = await AuthService.authenticateByUsernameAndPassword(cleanUsername, cleanPassword)
     return done(null, user)
   } catch (error) { return done(error) }
 }))
