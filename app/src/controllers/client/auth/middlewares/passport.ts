@@ -4,7 +4,7 @@ import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
 import { User } from '@entities/User'
 import { localAuthenticationQuery } from '@request-response-types/client/Auth'
-import UserService from '@client/services/UserService'
+import UserService from '@client/auth/services/UserService'
 import AuthService from '@/controllers/client/auth/services/AuthService'
 import { localStrategySchema } from '@/controllers/client/auth/schemas'
 
@@ -13,7 +13,7 @@ export type AuthServiceInterface = {
 }
 
 export type UserServiceInterface = {
-  fetch(id: number): Promise<User | null>
+  fetch(id: number): Promise<User>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
