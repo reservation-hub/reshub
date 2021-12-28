@@ -2,7 +2,7 @@ import Joi from 'joi'
 import { Request, Response, NextFunction } from 'express'
 import { UserForAuth } from '@entities/User'
 import adminPassport from '@/controllers/auth/middlewares/passport'
-import clientPassport from '@/controllers/client/middlewares/passport'
+import clientPassport from '@/controllers/client/auth/middlewares/passport'
 import { UnauthorizedError } from './errors'
 
 export const protectAdminRoute = adminPassport.authenticate('admin-jwt', { session: false })

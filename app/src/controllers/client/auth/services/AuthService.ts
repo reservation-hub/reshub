@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import config from '@config'
-import { AuthServiceInterface as AuthControllerSocket } from '@client/controllers/authController'
-import UserRepository from '@client/repositories/UserRepository'
 import { User } from '@entities/User'
+import UserRepository from '@client/auth/repositories/UserRepository'
+import { AuthServiceInterface as AuthControllerSocket } from '@client/auth/AuthController'
+import { AuthServiceInterface as PassportSocket } from '@client/auth/middlewares/passport'
 import {
-  InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError,
-} from '@client/services/ServiceError'
-import { AuthServiceInterface as PassportSocket } from '@client/middlewares/passport'
+  InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError, AuthorizationError,
+} from '@client/auth/services/ServiceError'
 
 export type UserRepositoryInterface = {
   fetch(id: number): Promise<User | null>
@@ -20,10 +20,10 @@ interface JwtPayload {
 
 const AuthService: PassportSocket & AuthControllerSocket = {
 
-  createToken(user) {
+  createToken(user, expiresIn) {
     return jwt.sign({ user }, config.JWT_TOKEN_SECRET, {
-      audience: 'http://localhost:3000',
-      expiresIn: '30d',
+      audience: 'http://localhost:8080',
+      expiresIn,
       issuer: process.env.RESHUB_URL,
     })
   },
@@ -47,6 +47,13 @@ const AuthService: PassportSocket & AuthControllerSocket = {
     return user
   },
 
+  async silentRefreshTokenChecks(authToken, refreshToken, headerToken?) {
+    if (!(!authToken && !headerToken && refreshToken)) {
+      console.error('Necessary tokens are not complete')
+      throw new AuthorizationError()
+    }
+  },
+
   async verifyIfUserInTokenIsLoggedIn(authToken, headerToken?) {
     if (headerToken && headerToken !== authToken) {
       console.error('header token does not match auth token')
@@ -60,6 +67,15 @@ const AuthService: PassportSocket & AuthControllerSocket = {
     }
     console.error('User is already logged in')
     throw new UserIsLoggedInError()
+  },
+
+  async hack() {
+    const user = await UserRepository.fetchByUsername('eugene.sinamban@gmail.com')
+    if (!user) {
+      console.error('User for hack not found')
+      throw new NotFoundError()
+    }
+    return user
   },
 }
 
