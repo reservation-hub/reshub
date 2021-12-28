@@ -1,6 +1,6 @@
 import { User } from '@entities/User'
-import AuthService from '@/controllers/client/auth/services/AuthService'
-import { AuthControllerInterface } from '@/controller-adapter/client/Auth'
+import AuthService from '@client/auth/services/AuthService'
+import { AuthControllerInterface } from '@controller-adapter/client/Auth'
 
 export type AuthServiceInterface = {
   hack(): Promise<User>

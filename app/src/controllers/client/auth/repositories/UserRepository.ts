@@ -1,7 +1,7 @@
 import { Prisma, RoleSlug as PrismaRoleSlug } from '@prisma/client'
 import { RoleSlug } from '@entities/Role'
 import { User } from '@entities/User'
-import { UserRepositoryInterface as AuthServiceSocket } from '@/controllers/client/auth/services/AuthService'
+import { UserRepositoryInterface as AuthServiceSocket } from '@client/auth/services/AuthService'
 import { UserRepositoryInterface as UserServiceSocket } from '../services/UserService'
 import prisma from '@/prisma'
 

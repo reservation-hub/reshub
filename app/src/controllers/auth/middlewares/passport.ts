@@ -3,17 +3,16 @@ import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
 import { User } from '@entities/User'
-import { localAuthenticationQuery } from '@request-response-types/Auth'
 import AuthService from '@auth/services/AuthService'
 import UserService from '@auth/services/UserService'
-import { localStrategySchema } from '@/controllers/auth/schemas'
+import { localStrategySchema } from '@auth/schemas'
 
 export type AuthServiceInterface = {
-  authenticateByEmailAndPassword(query: localAuthenticationQuery): Promise<User>
+  authenticateByEmailAndPassword(email: string, password: string): Promise<User>
 }
 
 export type UserServiceInterface = {
-  fetch(id: number): Promise<User | null>
+  fetch(id: number): Promise<User>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -68,17 +67,22 @@ const jwtStrategyLogic = async (jwtPayload: any, done: any) => {
   try {
     const user = await UserService.fetch(jwtPayload.user.id)
     return done(null, user)
-  } catch (error) { return done(error) }
+  } catch (e) { return done(e) }
 }
 
 passport.use('admin-jwt', new JWTStrategy(jwtOptionsAdmin, jwtStrategyLogic))
 passport.use('refresh-jwt', new JWTStrategy(jwtOptionsRefresh, jwtStrategyLogic))
 passport.use('admin-local', new LocalStrategy({ usernameField: 'email' }, async (username, password, done) => {
   try {
-    const schemaValues = await localStrategySchema.validateAsync({ email: username, password }, joiOptions)
-    const user = await AuthService.authenticateByEmailAndPassword(schemaValues)
-    return done(null, user)
-  } catch (error) { return done(error) }
+    const {
+      email, password: cleanPassword,
+    } = await localStrategySchema.validateAsync({ email: username, password }, joiOptions)
+    const user = await AuthService.authenticateByEmailAndPassword(email, cleanPassword)
+    return done(null, {
+      id: user.id,
+      role: user.role,
+    })
+  } catch (e) { return done(e) }
 }))
 
 export default passport

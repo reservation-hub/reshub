@@ -2,8 +2,8 @@ import { UserForAuth } from '@entities/User'
 import { Menu } from '@entities/Menu'
 import { OrderBy } from '@request-response-types/Common'
 import MenuService from '@menu/services/MenuService'
+import { MenuControllerInterface } from '@controller-adapter/Shop'
 import { menuUpsertSchema, indexSchema } from './schemas'
-import { MenuControllerInterface } from '@/controller-adapter/Shop'
 
 export type MenuServiceInterface = {
   fetchShopMenusWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)

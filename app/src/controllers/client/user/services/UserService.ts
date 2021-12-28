@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt'
 import { User } from '@entities/User'
-import UserRepository from '@/controllers/client/user/repositories/UserRepository'
-import { DuplicateModelError, InvalidParamsError } from '@/controllers/client/user/services/ServiceError'
-import { SignUpServiceInterface } from '@/controllers/client/user/UserController'
+import UserRepository from '@client/user/repositories/UserRepository'
+import { DuplicateModelError, InvalidParamsError } from '@client/user/services/ServiceError'
+import { SignUpServiceInterface } from '@client/user/UserController'
 
 export type UserRepositoryInterface = {
   insertUser(email: string, username: string, password: string): Promise<User>

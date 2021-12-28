@@ -4,9 +4,9 @@ import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
 import { User, UserForAuth } from '@entities/User'
 import ReservationService from '@reservation/services/ReservationService'
-import { ReservationControllerInterface } from '@/controller-adapter/Shop'
+import { ReservationControllerInterface } from '@controller-adapter/Shop'
+import { OrderBy } from '@request-response-types/Common'
 import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './schemas'
-import { OrderBy } from '@/request-response-types/Common'
 
 export type ReservationServiceInterface = {
   fetchReservationsWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
