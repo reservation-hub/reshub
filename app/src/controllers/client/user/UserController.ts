@@ -5,7 +5,7 @@ import {
 import SignUpService, { signUpQuery } from '@client/services/SignUpService'
 import { User } from '@entities/User'
 import { verifyIfNotLoggedInYet } from '@controller-adapter/Auth'
-import { signUpSchema } from './schemas/signup'
+import { signUpSchema } from './schemas'
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 

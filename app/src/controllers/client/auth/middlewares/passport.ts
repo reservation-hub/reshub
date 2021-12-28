@@ -4,9 +4,9 @@ import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
 import { User } from '@entities/User'
 import { localAuthenticationQuery } from '@request-response-types/client/Auth'
-import AuthService from '@client/services/AuthService'
 import UserService from '@client/services/UserService'
-import { localStrategySchema } from '@client/controllers/schemas/auth'
+import AuthService from '@/controllers/client/auth/services/AuthService'
+import { localStrategySchema } from '@/controllers/client/auth/schemas'
 
 export type AuthServiceInterface = {
   authenticateByUsernameAndPassword(query: localAuthenticationQuery): Promise<User>

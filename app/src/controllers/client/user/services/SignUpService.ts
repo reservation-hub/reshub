@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import config from '@config'
-import { SignUpServiceInterface } from '@client/controllers/signUpController'
-import UserRepository from '@client/repositories/UserRepository'
 import { User } from '@entities/User'
-import { DuplicateModelError, InvalidParamsError } from '@client/services/ServiceError'
+import UserRepository from '@/controllers/client/user/repositories/UserRepository'
+import { DuplicateModelError, InvalidParamsError } from '@/controllers/client/user/services/ServiceError'
+import { SignUpServiceInterface } from '@/controllers/client/user/UserController'
 import MailService from './MailService'
 
 export type UserRepositoryInterface = {
