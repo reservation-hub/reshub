@@ -4,7 +4,7 @@ import { RoleSlug } from '@entities/Role'
 import UserService from '@user/services/UserService'
 import {
   userInsertSchema, userUpdateSchema, indexSchema, searchSchema,
-} from '@/controllers/user/schemas'
+} from '@user/schemas'
 import { OrderBy } from '@/entities/Common'
 
 export type UserServiceInterface = {

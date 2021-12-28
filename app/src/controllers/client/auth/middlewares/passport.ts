@@ -4,8 +4,8 @@ import { Strategy as LocalStrategy } from 'passport-local'
 import { Strategy as JWTStrategy } from 'passport-jwt'
 import { User } from '@entities/User'
 import UserService from '@client/auth/services/UserService'
-import AuthService from '@/controllers/client/auth/services/AuthService'
-import { localStrategySchema } from '@/controllers/client/auth/schemas'
+import AuthService from '@client/auth/services/AuthService'
+import { localStrategySchema } from '@client/auth/schemas'
 
 export type AuthServiceInterface = {
   authenticateByUsernameAndPassword(username: string, password: string): Promise<User>
@@ -76,7 +76,11 @@ passport.use('refresh-jwt', new JWTStrategy(jwtOptionsRefresh, jwtStrategyLogic)
 
 passport.use('client-local', new LocalStrategy(async (username, password, done) => {
   try {
-    const { cleanUsername, cleanPassword } = await localStrategySchema.validateAsync({ username, password }, joiOptions)
+    const {
+      username: cleanUsername, password: cleanPassword,
+    } = await localStrategySchema.validateAsync({ username, password }, joiOptions)
+    // eslint-disable-next-line
+    console.log(cleanUsername, cleanPassword)
     const user = await AuthService.authenticateByUsernameAndPassword(cleanUsername, cleanPassword)
     return done(null, user)
   } catch (error) { return done(error) }

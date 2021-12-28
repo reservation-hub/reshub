@@ -4,8 +4,8 @@ import { OrderBy } from '@request-response-types/Common'
 import { indexSchema, shopStylistUpsertSchema } from '@stylist/schemas'
 import StylistService from '@stylist/services/StylistService'
 import ShopService from '@stylist/services/ShopService'
-import { StylistControllerInterface } from '@/controller-adapter/Shop'
-import { ScheduleDays } from '@/request-response-types/models/Common'
+import { StylistControllerInterface } from '@controller-adapter/Shop'
+import { ScheduleDays } from '@request-response-types/models/Common'
 
 export type StylistServiceInterface = {
   fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)

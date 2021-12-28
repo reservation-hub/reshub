@@ -5,7 +5,7 @@ import { Strategy as JWTStrategy } from 'passport-jwt'
 import { User } from '@entities/User'
 import AuthService from '@auth/services/AuthService'
 import UserService from '@auth/services/UserService'
-import { localStrategySchema } from '@/controllers/auth/schemas'
+import { localStrategySchema } from '@auth/schemas'
 
 export type AuthServiceInterface = {
   authenticateByEmailAndPassword(email: string, password: string): Promise<User>
@@ -74,7 +74,9 @@ passport.use('admin-jwt', new JWTStrategy(jwtOptionsAdmin, jwtStrategyLogic))
 passport.use('refresh-jwt', new JWTStrategy(jwtOptionsRefresh, jwtStrategyLogic))
 passport.use('admin-local', new LocalStrategy({ usernameField: 'email' }, async (username, password, done) => {
   try {
-    const { email, cleanPassword } = await localStrategySchema.validateAsync({ email: username, password }, joiOptions)
+    const {
+      email, password: cleanPassword,
+    } = await localStrategySchema.validateAsync({ email: username, password }, joiOptions)
     const user = await AuthService.authenticateByEmailAndPassword(email, cleanPassword)
     return done(null, user)
   } catch (error) { return done(error) }
