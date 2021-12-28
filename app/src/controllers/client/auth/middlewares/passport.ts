@@ -67,7 +67,7 @@ const jwtStrategyLogic = async (jwtPayload: any, done: any) => {
   try {
     const user = await UserService.fetch(jwtPayload.user.id)
     return done(null, user)
-  } catch (error) { return done(error) }
+  } catch (e) { return done(e) }
 }
 
 passport.use('client-jwt', new JWTStrategy(jwtOptionsClient, jwtStrategyLogic))
@@ -79,11 +79,12 @@ passport.use('client-local', new LocalStrategy(async (username, password, done) 
     const {
       username: cleanUsername, password: cleanPassword,
     } = await localStrategySchema.validateAsync({ username, password }, joiOptions)
-    // eslint-disable-next-line
-    console.log(cleanUsername, cleanPassword)
     const user = await AuthService.authenticateByUsernameAndPassword(cleanUsername, cleanPassword)
-    return done(null, user)
-  } catch (error) { return done(error) }
+    return done(null, {
+      id: user.id,
+      role: user.role,
+    })
+  } catch (e) { return done(e) }
 }))
 
 export default passport

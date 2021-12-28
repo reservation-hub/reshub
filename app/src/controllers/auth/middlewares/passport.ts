@@ -12,7 +12,7 @@ export type AuthServiceInterface = {
 }
 
 export type UserServiceInterface = {
-  fetch(id: number): Promise<User | null>
+  fetch(id: number): Promise<User>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -67,7 +67,7 @@ const jwtStrategyLogic = async (jwtPayload: any, done: any) => {
   try {
     const user = await UserService.fetch(jwtPayload.user.id)
     return done(null, user)
-  } catch (error) { return done(error) }
+  } catch (e) { return done(e) }
 }
 
 passport.use('admin-jwt', new JWTStrategy(jwtOptionsAdmin, jwtStrategyLogic))
@@ -78,8 +78,11 @@ passport.use('admin-local', new LocalStrategy({ usernameField: 'email' }, async 
       email, password: cleanPassword,
     } = await localStrategySchema.validateAsync({ email: username, password }, joiOptions)
     const user = await AuthService.authenticateByEmailAndPassword(email, cleanPassword)
-    return done(null, user)
-  } catch (error) { return done(error) }
+    return done(null, {
+      id: user.id,
+      role: user.role,
+    })
+  } catch (e) { return done(e) }
 }))
 
 export default passport

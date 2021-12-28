@@ -22,7 +22,7 @@ const AuthService: PassportSocket & AuthControllerSocket = {
 
   createToken(user, expiresIn) {
     return jwt.sign({ user }, config.JWT_TOKEN_SECRET, {
-      audience: 'http://localhost:8080',
+      audience: 'http://localhost:3000',
       expiresIn,
       issuer: process.env.RESHUB_URL,
     })
