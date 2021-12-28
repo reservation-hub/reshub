@@ -18,7 +18,7 @@ export default router
 
 // client api
 router.use('/api/', apiRoutes)
-router.use('/api/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404s
+router.use('/api/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404
 
 router.use('/auth', authController)
 router.use('/dashboard', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), dashboardController)
@@ -26,4 +26,4 @@ router.use('/shops', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP
 router.use('/users', protectAdminRoute, roleCheck([RoleSlug.ADMIN]), userController)
 router.use('/', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), LocationController)
 
-router.use('/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404s
+router.use('/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404

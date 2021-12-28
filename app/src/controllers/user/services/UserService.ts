@@ -5,7 +5,8 @@ import { UserServiceInterface } from '@user/UserController'
 import UserRepository from '@user/repositories/UserRepository'
 import ReservationRepository from '@user/repositories/ReservationRepository'
 import { InvalidParamsError, NotFoundError } from '@user/services/ServiceError'
-import { OrderBy } from '@/entities/Common'
+import Logger from '@lib/Logger'
+import { OrderBy } from '@entities/Common'
 
 export type UserRepositoryInterface = {
   fetchAllUsers(page: number, order: OrderBy): Promise<User[]>
@@ -42,7 +43,7 @@ const UserService: UserServiceInterface = {
   async fetchUser(id) {
     const user = await UserRepository.fetchUser(id)
     if (!user) {
-      console.error('User does not exist')
+      Logger.debug('User does not exist')
       throw new NotFoundError()
     }
     return user
@@ -51,13 +52,13 @@ const UserService: UserServiceInterface = {
   async insertUser(password, confirm, email, roleSlug, lastNameKanji,
     firstNameKanji, lastNameKana, firstNameKana, gender, birthday) {
     if (password !== confirm) {
-      console.error('Passwords do not match')
+      Logger.debug('Passwords do not match')
       throw new InvalidParamsError()
     }
 
     const duplicate = await UserRepository.fetchUserByEmail(email)
     if (duplicate) {
-      console.error('Email is not available')
+      Logger.debug('Email is not available')
       throw new InvalidParamsError()
     }
 
@@ -73,7 +74,7 @@ const UserService: UserServiceInterface = {
     lastNameKana, firstNameKana, gender, birthday) {
     const user = await UserRepository.fetchUser(id)
     if (!user) {
-      console.error('User does not exist')
+      Logger.debug('User does not exist')
       throw new NotFoundError()
     }
 
@@ -86,7 +87,7 @@ const UserService: UserServiceInterface = {
   async deleteUser(id) {
     const user = await UserRepository.fetchUser(id)
     if (!user) {
-      console.error('User does not exist')
+      Logger.debug('User does not exist')
       throw new NotFoundError()
     }
     await UserRepository.deleteUser(id)

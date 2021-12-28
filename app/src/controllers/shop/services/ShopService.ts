@@ -6,6 +6,7 @@ import { User } from '@entities/User'
 import ShopRepository from '@shop/repositories/ShopRepository'
 import LocationRepository from '@shop/repositories/LocationRepository'
 import { AuthorizationError, InvalidParamsError, NotFoundError } from '@shop/services/ServiceError'
+import Logger from '@lib/Logger'
 
 export type ShopRepositoryInterface = {
   fetchAllShops(page: number, order: OrderBy): Promise<Shop[]>
@@ -59,13 +60,13 @@ export const ShopService: ShopServiceInterface = {
 
   async fetchShop(user, id) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, id)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const shop = await ShopRepository.fetchShop(id)
     if (!shop) {
-      console.error('Shop does not exist')
+      Logger.debug('Shop does not exist')
       throw new NotFoundError()
     }
     return shop
@@ -75,14 +76,14 @@ export const ShopService: ShopServiceInterface = {
     days, seats, startTime, endTime, details) {
     const isValidLocation = await LocationRepository.isValidLocation(areaId, prefectureId, cityId)
     if (!isValidLocation) {
-      console.error('Location provided is incorrect')
+      Logger.debug('Location provided is incorrect')
       throw new InvalidParamsError()
     }
 
     const startHour = convertToUnixTime(startTime)
     const endHour = convertToUnixTime(endTime)
     if (days.length === 0 || endHour <= startHour) {
-      console.error('Days are empty | end time is less than or equal to start hour')
+      Logger.debug('Days are empty | end time is less than or equal to start hour')
       throw new InvalidParamsError()
     }
 
@@ -101,26 +102,26 @@ export const ShopService: ShopServiceInterface = {
   async updateShop(user, id, name, areaId, prefectureId, cityId, address,
     phoneNumber, days, seats, startTime, endTime, details) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, id)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const isValidLocation = await LocationRepository.isValidLocation(areaId, prefectureId, cityId)
     if (!isValidLocation) {
-      console.error('Location provided is incorrect')
+      Logger.debug('Location provided is incorrect')
       throw new InvalidParamsError()
     }
 
     const shop = await ShopRepository.fetchShop(id)
     if (!shop) {
-      console.error('Shop does not exist')
+      Logger.debug('Shop does not exist')
       throw new NotFoundError()
     }
 
     const startHour = convertToUnixTime(startTime)
     const endHour = convertToUnixTime(endTime)
     if (days.length === 0 || endHour <= startHour) {
-      console.error('Days are empty | end time is less than or equal to start hour')
+      Logger.debug('Days are empty | end time is less than or equal to start hour')
       throw new InvalidParamsError()
     }
 
@@ -135,13 +136,13 @@ export const ShopService: ShopServiceInterface = {
 
   async deleteShop(user, id) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, id)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const shop = await ShopRepository.fetchShop(id)
     if (!shop) {
-      console.error('Shop does not exist')
+      Logger.debug('Shop does not exist')
       throw new NotFoundError()
     }
     return ShopRepository.deleteShop(id)

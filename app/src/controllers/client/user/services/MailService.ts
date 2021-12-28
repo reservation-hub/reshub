@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer'
 import jwt from 'jsonwebtoken'
 import { MailServiceInterface } from '@client/user/UserController'
 import config from '@config'
+import Logger from '@lib/Logger'
 
 const MailService: MailServiceInterface = {
   async sendSignUpEmail(email: string) {
@@ -33,10 +34,9 @@ const MailService: MailServiceInterface = {
         <a href = "${process.env.CLIENT_URL}?tkn=${(token)}" > Your Validation </a>
         `,
       })
-      // eslint-disable-next-line
-      console.log(info)
+      Logger.debug(info)
     } catch (e) {
-      console.error(e)
+      Logger.debug(e)
     }
   },
 }

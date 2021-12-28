@@ -4,6 +4,7 @@ import MenuRepository from '@menu/repositories/MenuRepository'
 import { RoleSlug } from '@entities/Role'
 import { Menu } from '@entities/Menu'
 import { OrderBy } from '@entities/Common'
+import Logger from '@lib/Logger'
 import { MenuServiceInterface } from '../MenuController'
 
 export type ShopRepositoryInterface = {
@@ -35,12 +36,12 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 const MenuService: MenuServiceInterface = {
   async fetchShopMenusWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC) {
     if (!await ShopRepository.shopExists(shopId)) {
-      console.error('Shop does not exist')
+      Logger.debug('Shop does not exist')
       throw new NotFoundError()
     }
 
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
@@ -51,18 +52,18 @@ const MenuService: MenuServiceInterface = {
 
   async fetchShopMenu(user, shopId, menuId) {
     if (!await ShopRepository.shopExists(shopId)) {
-      console.error('Shop does not exist')
+      Logger.debug('Shop does not exist')
       throw new NotFoundError()
     }
 
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const menu = await MenuRepository.fetchMenu(shopId, menuId)
     if (!menu) {
-      console.error('Menu does not exist')
+      Logger.debug('Menu does not exist')
       throw new NotFoundError()
     }
 
@@ -71,12 +72,12 @@ const MenuService: MenuServiceInterface = {
 
   async insertMenu(user, shopId, name, description, price, duration) {
     if (!await ShopRepository.shopExists(shopId)) {
-      console.error('Shop does not exist')
+      Logger.debug('Shop does not exist')
       throw new NotFoundError()
     }
 
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
@@ -87,16 +88,16 @@ const MenuService: MenuServiceInterface = {
 
   async updateMenu(user, shopId, menuId, name, description, price, duration) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     if (!await ShopRepository.shopExists(shopId)) {
-      console.error('Shop does not exist')
+      Logger.debug('Shop does not exist')
       throw new NotFoundError()
     }
     if (!await isValidMenuId(shopId, menuId)) {
-      console.error('Menu is not of the shop')
+      Logger.debug('Menu is not of the shop')
       throw new NotFoundError()
     }
 
@@ -106,16 +107,16 @@ const MenuService: MenuServiceInterface = {
 
   async deleteMenu(user, shopId, menuId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     if (!await ShopRepository.shopExists(shopId)) {
-      console.error('shop not found')
+      Logger.debug('shop not found')
       throw new NotFoundError()
     }
     if (!await isValidMenuId(shopId, menuId)) {
-      console.error('Menu not found')
+      Logger.debug('Menu not found')
       throw new NotFoundError()
     }
 

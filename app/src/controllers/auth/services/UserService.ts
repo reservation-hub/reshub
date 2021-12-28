@@ -3,6 +3,7 @@ import { Gender, User } from '@entities/User'
 import UserRepository from '@auth/repositories/UserRepository'
 import { RoleSlug } from '@entities/Role'
 import * as AuthError from '@auth/services/ServiceError'
+import Logger from '@lib/Logger'
 
 export type UserRepositoryInterface = {
   insertUserWithProfile(email: string, password: string, roleSlug: RoleSlug, lastNameKanji: string,
@@ -30,7 +31,7 @@ const UserService: UserServiceInterface = {
   async fetch(id) {
     const user = await UserRepository.fetch(id)
     if (!user) {
-      console.error('User does not exist')
+      Logger.debug('User does not exist')
       throw new AuthError.NotFoundError()
     }
     return user

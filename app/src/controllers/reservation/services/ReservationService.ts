@@ -15,6 +15,7 @@ import StylistRepository from '@reservation/repositories/StylistRepository'
 import {
   OutOfScheduleError, UnavailableError, AuthorizationError, NotFoundError, InvalidParamsError,
 } from '@reservation/services/ServiceError'
+import Logger from '@lib/Logger'
 
 export type ReservationRepositoryInterface = {
   fetchShopReservations(userId: number, shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
@@ -137,7 +138,7 @@ const recreateReservationList = async (reservations: Reservation[]) => {
 const ReservationService: ReservationServiceInterface = {
   async fetchReservationsWithClientAndStylistAndMenu(user, shopId, page = 1, order = OrderBy.DESC) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
@@ -147,7 +148,7 @@ const ReservationService: ReservationServiceInterface = {
 
   async fetchReservationsWithClientAndStylistAndMenuForCalendar(user, shopId, year, month) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
@@ -158,7 +159,7 @@ const ReservationService: ReservationServiceInterface = {
 
   async fetchShopReservationTotalCount(user, shopId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
     return ReservationRepository.fetchShopTotalReservationCount(shopId)
@@ -166,13 +167,13 @@ const ReservationService: ReservationServiceInterface = {
 
   async fetchReservationWithClientAndStylistAndMenu(user, shopId, reservationId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const reservation = await ReservationRepository.fetchShopReservation(shopId, reservationId)
     if (!reservation) {
-      console.error('Reservation does not exist')
+      Logger.debug('Reservation does not exist')
       throw new NotFoundError()
     }
 
@@ -197,37 +198,37 @@ const ReservationService: ReservationServiceInterface = {
 
   async insertReservation(user, shopId, reservationDate, clientId, menuId, stylistId?) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const clientExists = await UserRepository.userExists(clientId)
     if (!clientExists) {
-      console.error('User does not exist')
+      Logger.debug('User does not exist')
       throw new NotFoundError()
     }
 
     const menuDuration = await MenuRepository.fetchMenuDuration(menuId, shopId)
     if (!menuDuration) {
-      console.error('Menu does not exist in shop')
+      Logger.debug('Menu does not exist in shop')
       throw new InvalidParamsError()
     }
 
     if (stylistId && !isValidStylistId(shopId, stylistId)) {
-      console.error('Stylist does not exist in shop')
+      Logger.debug('Stylist does not exist in shop')
       throw new InvalidParamsError()
     }
 
     const dateObj = new Date(reservationDate)
     if (dateObj < new Date()) {
-      console.error('Invalid date, earlier than today')
+      Logger.debug('Invalid date, earlier than today')
       throw new InvalidParamsError()
     }
 
     const shopSchedule = await ShopRepository.fetchShopSchedule(shopId)
 
     if (!shopSchedule) {
-      console.error('The reservation Date/Time is unavailable')
+      Logger.debug('The reservation Date/Time is unavailable')
       throw new UnavailableError()
     }
 
@@ -241,13 +242,13 @@ const ReservationService: ReservationServiceInterface = {
     const checkWithShopSchedule = isWithinShopSchedule(shopSchedule, reservationDate, menuDuration)
 
     if (!checkWithShopSchedule) {
-      console.error('The reservation Time doesnt match with Shop Schedule')
+      Logger.debug('The reservation Time doesnt match with Shop Schedule')
       throw new OutOfScheduleError()
     }
     const isAvailability = checkAvailablity(reservationDatesAndDuration, reservationDate, menuDuration)
 
     if (!isAvailability) {
-      console.error('The reservation Date/Time is unavailable')
+      Logger.debug('The reservation Date/Time is unavailable')
       throw new UnavailableError()
     }
     return ReservationRepository.insertReservation(reservationDate, clientId, shopId, menuId, stylistId)
@@ -255,35 +256,35 @@ const ReservationService: ReservationServiceInterface = {
 
   async updateReservation(user, shopId, reservationId, reservationDate, clientId, menuId, stylistId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const reservationExists = await ReservationRepository.reservationExists(reservationId)
     if (!reservationExists) {
-      console.error('Reservation does not exist')
+      Logger.debug('Reservation does not exist')
       throw new NotFoundError()
     }
 
     const clientExists = await UserRepository.userExists(clientId)
     if (!clientExists) {
-      console.error('User does not exist')
+      Logger.debug('User does not exist')
       throw new NotFoundError()
     }
 
     if (!await isValidMenuId(shopId, menuId)) {
-      console.error('Menu does not exist in shop')
+      Logger.debug('Menu does not exist in shop')
       throw new InvalidParamsError()
     }
 
     if (stylistId && !isValidStylistId(shopId, stylistId)) {
-      console.error('Stylist does not exist in shop')
+      Logger.debug('Stylist does not exist in shop')
       throw new InvalidParamsError()
     }
 
     const dateObj = new Date(reservationDate)
     if (dateObj < new Date()) {
-      console.error('Invalid date, earlier than today')
+      Logger.debug('Invalid date, earlier than today')
       throw new InvalidParamsError()
     }
 
@@ -293,13 +294,13 @@ const ReservationService: ReservationServiceInterface = {
 
   async cancelReservation(user, shopId, reservationId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      console.error('Shop is not owned by user')
+      Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
     const reservationExists = await ReservationRepository.reservationExists(reservationId)
     if (!reservationExists) {
-      console.error('Reservation does not exist')
+      Logger.debug('Reservation does not exist')
       throw new NotFoundError()
     }
 
