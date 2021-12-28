@@ -1,29 +1,28 @@
-import {
-  Router, Response, Request, NextFunction,
-} from 'express'
-
-import SignUpService, { signUpQuery } from '@client/services/SignUpService'
+import { UserControllerInterface } from '@controller-adapter/client/User'
+import UserService from '@client/user/services/UserService'
 import { User } from '@entities/User'
-import { verifyIfNotLoggedInYet } from '@controller-adapter/Auth'
-import { signUpSchema } from './schemas'
+import { signUpSchema } from '@client/user/schemas'
+import MailService from '@client/user/services/MailService'
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 export type SignUpServiceInterface = {
-  signUpUser(query: signUpQuery): Promise<User>
+  signUpUser(email: string, username: string, password: string, confirm: string): Promise<User>
 }
 
-// validate the signUp values with joi schema
-export const signUp = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
-  try {
-    const userValues = await signUpSchema.validateAsync(req.body, joiOptions)
-    const user = await SignUpService.signUpUser(userValues)
-    return res.send({ data: user })
-  } catch (e) { return next(e) }
+export type MailServiceInterface = {
+  sendSignUpEmail(email: string): Promise<void>
 }
 
-const routes = Router()
+const UserController: UserControllerInterface = {
+  async signUp(query) {
+    const {
+      email, username, password, confirm,
+    } = await signUpSchema.validateAsync(query, joiOptions)
+    await UserService.signUpUser(email, username, password, confirm)
+    await MailService.sendSignUpEmail(email)
+    return 'User created'
+  },
+}
 
-routes.post('/', verifyIfNotLoggedInYet, signUp)
-
-export default routes
+export default UserController

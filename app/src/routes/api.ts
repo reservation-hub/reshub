@@ -1,11 +1,11 @@
 import { Router } from 'express'
 
-import signUpController from '@/controllers/client/user/UserController'
-import authController from '@/controllers/client/auth/AuthController'
+import signUpController from '@controller-adapter/client/User'
+import AuthController from '@controller-adapter/client/Auth'
 
 const router = Router()
 
-router.use('/signup', signUpController)
-router.use('/auth', authController)
+router.use('/user', signUpController)
+router.use('/auth', AuthController)
 
 export default router

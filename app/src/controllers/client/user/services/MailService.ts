@@ -1,8 +1,16 @@
 import nodemailer from 'nodemailer'
-import { MailServiceInterface } from './SignUpService'
+import jwt from 'jsonwebtoken'
+import { MailServiceInterface } from '@client/user/UserController'
+import config from '@config'
 
 const MailService: MailServiceInterface = {
-  SendSignupEmail(email: string, token: string) {
+  async sendSignUpEmail(email: string) {
+    const token = jwt.sign({ email },
+      config.JWT_TOKEN_SECRET,
+      {
+        expiresIn: '12h',
+      })
+
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 587,

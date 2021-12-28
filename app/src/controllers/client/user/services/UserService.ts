@@ -1,40 +1,29 @@
-import { UserServiceInterface } from '@client/middlewares/passport'
-import { Gender, User } from '@entities/User'
-import UserRepository from '@client/repositories/UserRepository'
-import { RoleSlug } from '@entities/Role'
-import { NotFoundError } from '@client/services/ServiceError'
+import bcrypt from 'bcrypt'
+import { User } from '@entities/User'
+import UserRepository from '@/controllers/client/user/repositories/UserRepository'
+import { DuplicateModelError, InvalidParamsError } from '@/controllers/client/user/services/ServiceError'
+import { SignUpServiceInterface } from '@/controllers/client/user/UserController'
 
 export type UserRepositoryInterface = {
-  insertUserWithProfile(email: string, password: string, roleSlug: RoleSlug, lastNameKanji: string,
-    firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: string, gender: Gender,)
-    : Promise<User>
-  updateUserFromAdmin(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string,
-    firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: string, gender: Gender)
-    : Promise<User>
-  deleteUserFromAdmin(id: number): Promise<User>
-  searchUser(keyword: string): Promise<User[]>
-  fetchUsersByIds(userIds: number[]): Promise<User[]>
+  insertUser(email: string, username: string, password: string): Promise<User>
+  emailIsAvailable(email: string): Promise<boolean>
 }
 
-export type RoleRepositoryInterface = {
-  isValidRole(slug: RoleSlug): Promise<boolean>
-  extractValidRoleSlugs(roleSlugs: RoleSlug[]): Promise<RoleSlug[]>
-}
-
-export type ReservationRepositoryInterface = {
-  fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
-}
-
-const UserService: UserServiceInterface = {
-
-  async fetch(id) {
-    const user = await UserRepository.fetch(id)
-    if (!user) {
-      console.error('User does not exist')
-      throw new NotFoundError()
+const SignUpService: SignUpServiceInterface = {
+  async signUpUser(email, username, password, confirm) {
+    if (password !== confirm) {
+      console.error('passwords did not match')
+      throw new InvalidParamsError()
     }
-    return user
+
+    const isAvailable = await UserRepository.emailIsAvailable(email)
+    if (!isAvailable) {
+      console.error('Email is not available')
+      throw new DuplicateModelError()
+    }
+    const hash = bcrypt.hashSync(password, 10 /* hash rounds */)
+    return UserRepository.insertUser(email, username, hash)
   },
 }
 
-export default UserService
+export default SignUpService
