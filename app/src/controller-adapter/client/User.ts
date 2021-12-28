@@ -19,6 +19,6 @@ const signUp = async (req: Request, res: Response, next: NextFunction) : Promise
 
 const routes = Router()
 
-routes.use('/create', verifyIfNotLoggedInYet, signUp)
+routes.post('/create', verifyIfNotLoggedInYet, signUp)
 
 export default routes
