@@ -8,6 +8,7 @@ export type MenuRepositoryInterface = {
 
 const MenuService: MenuServiceInterface = {
   async popularMenus(user) {
+    console.log('user', user) // eslint-disable-line
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth()
