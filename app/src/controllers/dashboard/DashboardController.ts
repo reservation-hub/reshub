@@ -10,6 +10,7 @@ import { salonIndexAdminResponse, salonIndexShopStaffResponse } from '@request-r
 import { Menu } from '@entities/Menu'
 import ReservationService from '@dashboard/services/ReservationService'
 import StylistService from '@dashboard/services/StylistService'
+import MenuService from '@dashboard/services/MenuService'
 
 export type UserServiceInterface = {
   fetchUsersWithReservationCounts(): Promise<{ users: (User & { reservationCount: number })[], totalCount: number }>
@@ -28,6 +29,10 @@ export type ReservationServiceInterface = {
 
 export type StylistServiceInterface = {
   fetchStylistsWithReservationCount(user: UserForAuth): Promise<(Stylist & { reservationCount: number })[]>
+}
+
+export type MenuServiceInterface = {
+  fetchPopularMenus(user: UserForAuth): Promise<Menu[]>
 }
 
 const salonIndexForAdmin = async (): Promise<salonIndexAdminResponse> => {
@@ -97,9 +102,10 @@ const salonIndexForShopStaff = async (user: UserForAuth): Promise<salonIndexShop
   }))
 
   // popular menu
-  // TODO: implement
+  const popularMenus = await MenuService.fetchPopularMenus(user)
+
   return {
-    shops: shopData, shopTotalCount, stylists: stylistList, reservations: reservationList,
+    shops: shopData, shopTotalCount, stylists: stylistList, reservations: reservationList, popularMenus,
   }
 }
 

@@ -81,7 +81,7 @@ const getStartAndEndDateFromReservationDate = (reservationDate: Date) => {
   return { startDate, endDate }
 }
 
-export const checkAvailablity = (reservationDates:{reservationDate: Date, duration: number}[],
+export const checkAvailability = (reservationDates:{reservationDate: Date, duration: number}[],
   wantedReservationDate: Date, wantedReservationMenu: number): boolean => {
   if (reservationDates.length === 0) return true
   return reservationDates.every(r => {
@@ -245,7 +245,7 @@ const ReservationService: ReservationServiceInterface = {
       Logger.debug('The reservation Time doesnt match with Shop Schedule')
       throw new OutOfScheduleError()
     }
-    const isAvailability = checkAvailablity(reservationDatesAndDuration, reservationDate, menuDuration)
+    const isAvailability = checkAvailability(reservationDatesAndDuration, reservationDate, menuDuration)
 
     if (!isAvailability) {
       Logger.debug('The reservation Date/Time is unavailable')
