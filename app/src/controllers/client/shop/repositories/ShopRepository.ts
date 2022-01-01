@@ -75,8 +75,19 @@ const ShopRepository: ShopRepositoryInterface = {
 
     return shops.map(reconstructShop)
   },
+
   async fetchShopsTotalCount() {
     return prisma.shop.count()
+  },
+
+  async fetchShop(shopId) {
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true,
+      },
+    })
+    return shop ? reconstructShop(shop) : null
   },
 }
 

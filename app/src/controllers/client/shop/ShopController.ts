@@ -8,6 +8,7 @@ import { indexSchema } from './schemas'
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: OrderBy)
     : Promise<{ shops: Shop[], totalCount: number }>
+  fetchShop(user: UserForAuth, shopId: number): Promise<Shop>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -24,6 +25,19 @@ const ShopController: ShopControllerInterface = {
       cityName: s.city.name,
     }))
     return { values, totalCount }
+  },
+
+  async detail(user, query) {
+    const { shopId } = query
+    const shop = await ShopService.fetchShop(user, shopId)
+    return {
+      id: shop.id,
+      name: shop.name,
+      phoneNumber: shop.phoneNumber,
+      address: shop.address,
+      prefectureName: shop.prefecture.name,
+      cityName: shop.city.name,
+    }
   },
 }
 
