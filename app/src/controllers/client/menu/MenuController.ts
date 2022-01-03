@@ -8,7 +8,7 @@ import { indexSchema } from './schemas'
 
 export type MenuServiceInterface = {
   popularMenus(user: UserForAuth): Promise<Menu[]>
-  fetchShopMenusWithTotalCount(user: UserForAuth, shopId: number, page: number, order: OrderBy)
+  fetchShopMenusWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
     :Promise<{ menus: Menu[], totalCount: number}>
 }
 const joiOptions = { abortEarly: false, stripUnknown: true }
