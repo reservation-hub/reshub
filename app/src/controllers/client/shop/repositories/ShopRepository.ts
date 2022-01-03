@@ -2,7 +2,9 @@ import { Prisma, Days } from '@prisma/client'
 import { Shop } from '@entities/Shop'
 import { ScheduleDays } from '@entities/Common'
 import prisma from '@/prisma'
-import { ShopRepositoryInterface } from '../services/ShopService'
+import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
+import { ShopRepositoryInterface as MenuServiceSocket } from '../services/MenuService'
+import { ShopRepositoryInterface as StylistServiceSocket } from '../services/StylistService'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {
@@ -60,7 +62,7 @@ const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAndCity): 
   details: shop.shopDetail?.details ?? undefined,
 })
 
-const ShopRepository: ShopRepositoryInterface = {
+const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSocket = {
   async fetchShops(page, order) {
     const limit = 10
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
@@ -75,8 +77,23 @@ const ShopRepository: ShopRepositoryInterface = {
 
     return shops.map(reconstructShop)
   },
+
   async fetchShopsTotalCount() {
     return prisma.shop.count()
+  },
+
+  async fetchShop(shopId) {
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true,
+      },
+    })
+    return shop ? reconstructShop(shop) : null
+  },
+
+  async shopExists(shopId) {
+    return (await prisma.shop.count({ where: { id: shopId } })) > 0
   },
 }
 

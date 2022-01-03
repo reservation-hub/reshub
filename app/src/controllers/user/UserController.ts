@@ -5,7 +5,7 @@ import UserService from '@user/services/UserService'
 import {
   userInsertSchema, userUpdateSchema, indexSchema, searchSchema,
 } from '@user/schemas'
-import { OrderBy } from '@/entities/Common'
+import { OrderBy } from '@entities/Common'
 
 export type UserServiceInterface = {
   fetchUsersWithTotalCount(page?: number, order?: OrderBy): Promise<{ users: User[], totalCount: number}>
