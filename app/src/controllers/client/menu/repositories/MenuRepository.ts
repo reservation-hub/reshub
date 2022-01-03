@@ -38,6 +38,24 @@ const MenuRepository: MenuRepositoryInterface = {
       description: m.description,
     }))
   },
+
+  async fetchMenus(shopId, page, order) {
+    const limit = 10
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const menus = await prisma.menu.findMany({
+      where: { shopId },
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
+    })
+    return menus
+  },
+
+  async fetchMenuTotalCount(shopId) {
+    return prisma.menu.count({
+      where: { shopId },
+    })
+  },
 }
 
 export default MenuRepository
