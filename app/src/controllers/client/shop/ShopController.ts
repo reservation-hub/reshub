@@ -51,8 +51,19 @@ const ShopController: ShopControllerInterface = {
       address: shop.address,
       prefectureName: shop.prefecture.name,
       cityName: shop.city.name,
-      menus,
-      stylists,
+      menus: menus.map(m => ({
+        id: m.id,
+        shopId: m.shopId,
+        name: m.name,
+        price: m.price,
+        duration: m.duration,
+      })),
+      stylists: stylists.map(s => ({
+        id: s.id,
+        shopId: s.shopId,
+        name: s.name,
+        price: s.price,
+      })),
     }
   },
 }
