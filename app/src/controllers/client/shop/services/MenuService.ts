@@ -1,8 +1,8 @@
 import { Menu } from '@entities/Menu'
 import MenuRepository from '@client/shop/repositories/MenuRepository'
 import ShopRepository from '@client/shop/repositories/ShopRepository'
+import Logger from '@lib/Logger'
 import { MenuServiceInterface } from '../ShopController'
-import Logger from '@/lib/Logger'
 import { NotFoundError } from './ServiceError'
 
 export type ShopRepositoryInterface = {

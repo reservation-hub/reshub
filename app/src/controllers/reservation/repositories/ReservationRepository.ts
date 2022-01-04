@@ -7,7 +7,7 @@ import { ReservationRepositoryInterface as ReservationServiceSocket } from '@res
 
 import prisma from '@/prisma'
 
-export const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
+const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
   switch (status) {
     case PrismaReservationStatus.CANCELLED:
       return ReservationStatus.CANCELLED
@@ -18,7 +18,7 @@ export const convertReservationStatus = (status: PrismaReservationStatus): Reser
   }
 }
 
-export const reconstructReservation = (reservation: PrismaReservation)
+const reconstructReservation = (reservation: PrismaReservation)
 : Reservation => ({
   id: reservation.id,
   shopId: reservation.shopId,
