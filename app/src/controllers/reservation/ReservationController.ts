@@ -7,6 +7,7 @@ import ReservationService from '@reservation/services/ReservationService'
 import { ReservationControllerInterface } from '@controller-adapter/Shop'
 import { OrderBy } from '@request-response-types/Common'
 import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './schemas'
+import ShopService from './services/ShopService'
 
 export type ReservationServiceInterface = {
   fetchReservationsWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
@@ -22,6 +23,10 @@ export type ReservationServiceInterface = {
     reservationDate: Date, clientId: number, menuId: number, stylistId?: number)
     : Promise<Reservation>
   cancelReservation(user: UserForAuth, shopId: number, reservationId: number): Promise<Reservation>
+}
+
+export type ShopServiceInterface = {
+  fetchShopSeatCount(user: UserForAuth, shopId: number): Promise<number>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -46,7 +51,9 @@ const ReservationController: ReservationControllerInterface = {
       reservationDate: r.reservationDate,
     }))
 
-    return { values: reservationList, totalCount }
+    const seats = await ShopService.fetchShopSeatCount(user, shopId)
+
+    return { values: reservationList, totalCount, seats }
   },
 
   async indexForCalendar(user, query) {
@@ -68,7 +75,9 @@ const ReservationController: ReservationControllerInterface = {
       reservationDate: r.reservationDate,
     }))
 
-    return { values: reservationList, totalCount }
+    const seats = await ShopService.fetchShopSeatCount(user, shopId)
+
+    return { values: reservationList, totalCount, seats }
   },
 
   async show(user, query) {

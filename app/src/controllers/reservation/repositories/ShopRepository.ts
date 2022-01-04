@@ -1,6 +1,7 @@
 import { Prisma, Days } from '@prisma/client'
 import { Shop } from '@entities/Shop'
 import { ShopRepositoryInterface as ReservationServiceSocket } from '@reservation/services/ReservationService'
+import { ShopRepositoryInterface as ShopServiceSocket } from '@reservation/services/ShopService'
 import { ScheduleDays } from '@entities/Common'
 import prisma from '@/prisma'
 
@@ -60,7 +61,7 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
   details: shop.shopDetail?.details ?? undefined,
 })
 
-const ShopRepository: ReservationServiceSocket = {
+const ShopRepository: ReservationServiceSocket & ShopServiceSocket = {
 
   async fetchShopsByIds(shopIds) {
     const shops = await prisma.shop.findMany({
@@ -87,6 +88,15 @@ const ShopRepository: ReservationServiceSocket = {
       },
     })
     return shop ? { startTime: shop.shopDetail.startTime, endTime: shop.shopDetail.endTime } : null
+  },
+
+  async fetchShopSeatCount(shopId) {
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      include: { shopDetail: true },
+    })
+
+    return shop ? shop.shopDetail.seats : null
   },
 
 }

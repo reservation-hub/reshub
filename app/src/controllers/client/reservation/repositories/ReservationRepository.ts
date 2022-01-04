@@ -15,7 +15,7 @@ const convertReservationStatus = (status: PrismaReservationStatus): ReservationS
 }
 
 const ReservationRepository: ReservationRepositoryInterface = {
-  async fetchShopReservationsForAvailabilityWithMenuDuration(shopId, reservationDate, rangeInDays, stylistId?) {
+  async fetchShopReservationsForAvailabilityWithMenuDuration(shopId, reservationDate, rangeInDays) {
     const year = reservationDate.getFullYear()
     const month = reservationDate.getMonth()
     const date = reservationDate.getDate()
@@ -25,7 +25,6 @@ const ReservationRepository: ReservationRepositoryInterface = {
     const reservations = await prisma.reservation.findMany({
       where: {
         shopId,
-        stylistId,
         AND: {
           reservationDate: {
             gte: startDate,
