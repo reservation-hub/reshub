@@ -1,8 +1,8 @@
 import { Shop } from '@entities/Shop'
 import { OrderBy } from '@entities/Common'
 import ShopRepository from '@client/shop/repositories/ShopRepository'
+import Logger from '@lib/Logger'
 import { ShopServiceInterface } from '../ShopController'
-import Logger from '@/lib/Logger'
 import { NotFoundError } from './ServiceError'
 
 export type ShopRepositoryInterface = {

@@ -42,7 +42,7 @@ const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
   }
 }
 
-export const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
+const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
   id: stylist.id,
   shopId: stylist.shopId,
   name: stylist.name,
