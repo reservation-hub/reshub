@@ -7,8 +7,8 @@ import StylistRepository from '@client/reservation/repositories/StylistRepositor
 import Logger from '@lib/Logger'
 
 export type ReservationRepositoryInterface = {
-  fetchShopReservationsForAvailabilityWithMenuDuration(shopId: number, reservationDate: Date, rangeInDays: number,
-    stylistId?: number) :Promise<(Reservation & { duration: number})[]>
+  fetchShopReservationsForAvailabilityWithMenuDuration(shopId: number, reservationDate: Date,
+    rangeInDays: number) :Promise<(Reservation & { duration: number})[]>
 }
 
 export type MenuRepositoryInterface = {
@@ -30,21 +30,13 @@ const isValidStylistId = async (shopId: number, stylistId: number): Promise<bool
 }
 
 const ReservationService: ReservationServiceInterface = {
-  async fetchShopReservationsForAvailability(user, shopId, reservationDate, menuId, stylistId) {
+  async fetchShopReservationsForAvailability(user, shopId, reservationDate, menuId) {
     const numberOfDays = 7
 
     const menuIsValid = await isValidMenuId(shopId, menuId)
     if (!menuIsValid) {
       Logger.debug('Menu does not exist in shop')
       throw new InvalidParamsError()
-    }
-
-    if (stylistId) {
-      const stylistIsValid = await isValidStylistId(shopId, stylistId)
-      if (!stylistIsValid) {
-        Logger.debug('Stylist does not exist in shop')
-        throw new InvalidParamsError()
-      }
     }
 
     const reservations = await ReservationRepository.fetchShopReservationsForAvailabilityWithMenuDuration(
@@ -55,6 +47,7 @@ const ReservationService: ReservationServiceInterface = {
       id: r.id,
       reservationStartDate: r.reservationDate,
       reservationEndDate: new Date(r.reservationDate.getTime() + r.duration),
+      stylistId: r.stylistId,
     }))
   },
 }
