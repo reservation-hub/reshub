@@ -6,8 +6,8 @@ import { ValidationError, ValidationErrorItem } from 'joi'
 
 import EntityErrorCode from '@errors/ErrorCodes'
 import { ServiceError } from '@errors/ServiceErrors'
-import { MiddlewareError, InvalidRouteError } from '@routes/errors'
 import Logger from '@lib/Logger'
+import { MiddlewareError, InvalidRouteError } from '@errors/RouteErrors'
 
 enum ErrorCode {
   BadRequest = 400,

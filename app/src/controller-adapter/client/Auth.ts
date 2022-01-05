@@ -3,7 +3,7 @@ import {
 } from 'express'
 import config from '@config'
 import { UserForAuth } from '@entities/User'
-import { UnknownServerError } from '@routes/errors'
+import { UnknownServerError } from '@errors/RouteErrors'
 import passport from '@client/auth/middlewares/passport'
 import AuthController from '@client/auth/AuthController'
 import Logger from '@lib/Logger'
