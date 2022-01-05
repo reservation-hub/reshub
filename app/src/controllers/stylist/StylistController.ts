@@ -6,6 +6,8 @@ import StylistService from '@stylist/services/StylistService'
 import ShopService from '@stylist/services/ShopService'
 import { StylistControllerInterface } from '@controller-adapter/Shop'
 import { ScheduleDays } from '@request-response-types/models/Common'
+import { UnauthorizedError } from '@errors/ControllerErrors'
+import Logger from '@lib/Logger'
 
 export type StylistServiceInterface = {
   fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
@@ -30,6 +32,10 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const StylistController: StylistControllerInterface = {
   async index(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { page, order } = await indexSchema.validateAsync(query, joiOptions)
     const { shopId } = query
     const { stylists, totalCount } = await StylistService.fetchShopStylistsWithTotalCount(user, shopId, page, order)
@@ -45,6 +51,10 @@ const StylistController: StylistControllerInterface = {
   },
 
   async show(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { shopId, stylistId } = query
     const stylist = await StylistService.fetchStylist(user, shopId, stylistId)
     const shopName = await ShopService.fetchShopName(user, shopId)
@@ -52,6 +62,10 @@ const StylistController: StylistControllerInterface = {
   },
 
   async insert(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const {
       name, price, days, startTime, endTime,
     } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
@@ -61,6 +75,10 @@ const StylistController: StylistControllerInterface = {
   },
 
   async update(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const {
       name, price, days, startTime, endTime,
     } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
@@ -70,6 +88,10 @@ const StylistController: StylistControllerInterface = {
   },
 
   async delete(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { shopId, stylistId } = query
     await StylistService.deleteStylist(user, shopId, stylistId)
     return 'Stylist deleted'

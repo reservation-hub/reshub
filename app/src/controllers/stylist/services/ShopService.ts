@@ -1,5 +1,5 @@
 import { ShopServiceInterface } from '@stylist/StylistController'
-import { AuthorizationError, NotFoundError } from '@stylist/services/ServiceError'
+import { AuthorizationError, NotFoundError } from '@errors/ServiceErrors'
 import { RoleSlug } from '@entities/Role'
 import ShopRepository from '@stylist/repositories/ShopRepository'
 import Logger from '@lib/Logger'

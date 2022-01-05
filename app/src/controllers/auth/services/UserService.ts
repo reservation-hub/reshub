@@ -2,7 +2,7 @@ import { UserServiceInterface } from '@auth/middlewares/passport'
 import { Gender, User } from '@entities/User'
 import UserRepository from '@auth/repositories/UserRepository'
 import { RoleSlug } from '@entities/Role'
-import * as AuthError from '@auth/services/ServiceError'
+import { NotFoundError } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 
 export type UserRepositoryInterface = {
@@ -32,7 +32,7 @@ const UserService: UserServiceInterface = {
     const user = await UserRepository.fetch(id)
     if (!user) {
       Logger.debug('User does not exist')
-      throw new AuthError.NotFoundError()
+      throw new NotFoundError()
     }
     return user
   },

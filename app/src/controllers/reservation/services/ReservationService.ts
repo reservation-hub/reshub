@@ -14,7 +14,7 @@ import ShopRepository from '@reservation/repositories/ShopRepository'
 import StylistRepository from '@reservation/repositories/StylistRepository'
 import {
   OutOfScheduleError, UnavailableError, AuthorizationError, NotFoundError, InvalidParamsError,
-} from '@reservation/services/ServiceError'
+} from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 
 export type ReservationRepositoryInterface = {

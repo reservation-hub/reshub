@@ -10,9 +10,9 @@ import { ShopControllerInterface } from '@controller-adapter/client/Shop'
 import { indexSchema } from './schemas'
 
 export type ShopServiceInterface = {
-  fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: OrderBy)
+  fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: OrderBy)
     : Promise<{ shops: Shop[], totalCount: number }>
-  fetchShop(user: UserForAuth, shopId: number): Promise<Shop>
+  fetchShop(user: UserForAuth | undefined, shopId: number): Promise<Shop>
 }
 
 export type MenuServiceInterface = {

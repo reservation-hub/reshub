@@ -7,8 +7,8 @@ import { MenuControllerInterface as ShopSocket } from '@controller-adapter/clien
 import { indexSchema } from './schemas'
 
 export type MenuServiceInterface = {
-  popularMenus(user: UserForAuth): Promise<Menu[]>
-  fetchShopMenusWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
+  popularMenus(user: UserForAuth | undefined): Promise<Menu[]>
+  fetchShopMenusWithTotalCount(user: UserForAuth | undefined, shopId: number, page?: number, order?: OrderBy)
     :Promise<{ menus: Menu[], totalCount: number}>
 }
 const joiOptions = { abortEarly: false, stripUnknown: true }

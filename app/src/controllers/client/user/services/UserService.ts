@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import { User } from '@entities/User'
 import UserRepository from '@client/user/repositories/UserRepository'
-import { DuplicateModelError, InvalidParamsError } from '@client/user/services/ServiceError'
+import { DuplicateModelError, InvalidParamsError } from '@errors/ServiceErrors'
 import { SignUpServiceInterface } from '@client/user/UserController'
 import Logger from '@lib/Logger'
 

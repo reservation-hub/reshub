@@ -3,7 +3,7 @@ import ShopRepository from '@shop/repositories/ShopRepository'
 import { Menu } from '@entities/Menu'
 import { RoleSlug } from '@entities/Role'
 import MenuRepository from '@shop/repositories/MenuRepository'
-import { AuthorizationError } from '@shop/services/ServiceError'
+import { AuthorizationError } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 
 export type ShopRepositoryInterface = {

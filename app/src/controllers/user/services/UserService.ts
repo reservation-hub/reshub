@@ -4,7 +4,7 @@ import { RoleSlug } from '@entities/Role'
 import { UserServiceInterface } from '@user/UserController'
 import UserRepository from '@user/repositories/UserRepository'
 import ReservationRepository from '@user/repositories/ReservationRepository'
-import { InvalidParamsError, NotFoundError } from '@user/services/ServiceError'
+import { InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 import { OrderBy } from '@entities/Common'
 

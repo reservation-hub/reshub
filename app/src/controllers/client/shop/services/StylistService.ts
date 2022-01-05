@@ -1,9 +1,9 @@
 import { Stylist } from '@entities/Stylist'
 import ShopRepository from '@client/shop/repositories/ShopRepository'
 import Logger from '@lib/Logger'
-import { StylistServiceInterface } from '../ShopController'
-import { NotFoundError } from './ServiceError'
-import StylistRepository from '../repositories/StylistRepository'
+import { NotFoundError } from '@errors/ServiceErrors'
+import StylistRepository from '@client/shop/repositories/StylistRepository'
+import { StylistServiceInterface } from '@client/shop/ShopController'
 
 export type ShopRepositoryInterface = {
   shopExists(shopId: number): Promise<boolean>

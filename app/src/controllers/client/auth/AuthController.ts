@@ -1,10 +1,10 @@
-import { User } from '@entities/User'
+import { UserForAuth } from '@entities/User'
 import AuthService from '@client/auth/services/AuthService'
 import { AuthControllerInterface } from '@controller-adapter/client/Auth'
 
 export type AuthServiceInterface = {
-  hack(): Promise<User>
-  createToken(user: Express.User, expiresIn: string): string,
+  hack(): Promise<UserForAuth>
+  createToken(user: UserForAuth, expiresIn: string): string,
   verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>
   silentRefreshTokenChecks(authToken: string, refreshToken: string, headerToken?: string): Promise<void>
 }

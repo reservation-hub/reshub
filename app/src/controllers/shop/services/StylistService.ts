@@ -4,7 +4,7 @@ import { RoleSlug } from '@entities/Role'
 import { Stylist } from '@entities/Stylist'
 import ShopRepository from '@shop/repositories/ShopRepository'
 import StylistRepository from '@shop/repositories/StylistRepository'
-import { AuthorizationError } from '@shop/services/ServiceError'
+import { AuthorizationError } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 
 export type StylistRepositoryInterface = {

@@ -1,6 +1,6 @@
 import { Reservation } from '@entities/Reservation'
 import { ReservationServiceInterface } from '@client/reservation/ReservationController'
-import { InvalidParamsError } from '@client/reservation/services/ServiceError'
+import { InvalidParamsError } from '@errors/ServiceErrors'
 import ReservationRepository from '@client/reservation/repositories/ReservationRepository'
 import MenuRepository from '@client/reservation/repositories/MenuRepository'
 import StylistRepository from '@client/reservation/repositories/StylistRepository'

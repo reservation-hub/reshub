@@ -3,6 +3,8 @@ import { Menu } from '@entities/Menu'
 import { OrderBy } from '@request-response-types/Common'
 import MenuService from '@menu/services/MenuService'
 import { MenuControllerInterface } from '@controller-adapter/Shop'
+import Logger from '@lib/Logger'
+import { UnauthorizedError } from '@errors/ControllerErrors'
 import { menuUpsertSchema, indexSchema } from './schemas'
 
 export type MenuServiceInterface = {
@@ -21,6 +23,10 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const MenuController: MenuControllerInterface = {
   async index(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { page, order } = await indexSchema.validateAsync(query, joiOptions)
     const { shopId } = query
     const { menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(user, shopId, page, order)
@@ -37,11 +43,19 @@ const MenuController: MenuControllerInterface = {
   },
 
   async show(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { shopId, menuId } = query
     return MenuService.fetchShopMenu(user, shopId, menuId)
   },
 
   async insert(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const {
       name, description, price, duration,
     } = await menuUpsertSchema.validateAsync(query.params, joiOptions)
@@ -51,6 +65,10 @@ const MenuController: MenuControllerInterface = {
   },
 
   async update(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const {
       name, description, price, duration,
     } = await menuUpsertSchema.validateAsync(query.params, joiOptions)
@@ -60,6 +78,10 @@ const MenuController: MenuControllerInterface = {
   },
 
   async delete(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { shopId, menuId } = query
     await MenuService.deleteMenu(user, shopId, menuId)
     return 'Menu deleted'

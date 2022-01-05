@@ -3,8 +3,8 @@ import {
 } from 'express'
 import AuthController from '@auth/AuthController'
 import { RoleSlug } from '@entities/Role'
-import { UserForAuth } from '@request-response-types/models/User'
-import { UnknownServerError } from '@routes/errors'
+import { UserForAuth } from '@entities/User'
+import { UnauthorizedError } from '@routes/errors'
 import passport from '@auth/middlewares/passport'
 import config from '@config'
 import Logger from '@lib/Logger'
@@ -28,10 +28,10 @@ const cookieOptions: CookieOptions = {
 
 export const login = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const user = req.user as UserForAuth
+    const { user } = req
     if (!user) {
       Logger.debug('User not found in request')
-      throw new UnknownServerError()
+      throw new UnauthorizedError()
     }
 
     // トークン生成
@@ -47,10 +47,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) : P
 
 export const refreshLogin = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const user = req.user as UserForAuth
+    const { user } = req
     if (!user) {
       Logger.debug('User not found in request')
-      throw new UnknownServerError()
+      throw new UnauthorizedError()
     }
     const token = AuthController.createOneDayToken(user)
     res.cookie('authToken', token, cookieOptions)
@@ -93,9 +93,7 @@ export const silentRefreshParamsCheck = async (req: Request, res: Response, next
 export const googleAuthenticate = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
   try {
     const { body } = req
-    const user = await AuthController.googleAuthenticate(body)
-
-    req.user = user
+    req.user = await AuthController.googleAuthenticate(body)
     return next()
   } catch (e) { return next(e) }
 }
@@ -107,8 +105,7 @@ export const logout = (req: Request, res: Response): void => {
 
 export const hack = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const user = await AuthController.hack()
-    req.user = user
+    req.user = await AuthController.hack()
     return next()
   } catch (e) { return next(e) }
 }

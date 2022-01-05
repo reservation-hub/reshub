@@ -4,13 +4,8 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 import { JsonWebTokenError } from 'jsonwebtoken'
 import { ValidationError, ValidationErrorItem } from 'joi'
 
-import { ServiceError as ShopServiceError } from '@shop/services/ServiceError'
-import { ServiceError as UserServiceError } from '@user/services/ServiceError'
-import { ServiceError as DashboardServiceError } from '@dashboard/services/ServiceError'
-import { ServiceError as AuthServiceError } from '@location/services/ServiceError'
-import { ServiceError as LocationServiceError } from '@auth/services/ServiceError'
-
-import { ErrorCode as EntityErrorCode } from '@entities/Common'
+import EntityErrorCode from '@errors/ErrorCodes'
+import { ServiceError } from '@errors/ServiceErrors'
 import { MiddlewareError, InvalidRouteError } from '@routes/errors'
 import Logger from '@lib/Logger'
 
@@ -21,9 +16,6 @@ enum ErrorCode {
   NotFound = 404,
   InternalServerError = 500,
 }
-
-type ServiceError = ShopServiceError | UserServiceError | DashboardServiceError |
-  AuthServiceError | LocationServiceError
 
 export type ResHubError =
   PrismaClientKnownRequestError | ValidationError | InvalidRouteError | ServiceError

@@ -1,4 +1,4 @@
-import { ErrorCode } from '@entities/Common'
+import ErrorCode from '@errors/ErrorCodes'
 
 export class ServiceError extends Error {
   constructor(message: string, code: ErrorCode) {
@@ -50,5 +50,17 @@ export class AuthenticationError extends ServiceError {
 export class AuthorizationError extends ServiceError {
   constructor() {
     super('User not Authorized', ErrorCode.Authorization)
+  }
+}
+
+export class UnavailableError extends ServiceError {
+  constructor() {
+    super('Reservation is already taken', ErrorCode.Unavailable)
+  }
+}
+
+export class OutOfScheduleError extends ServiceError {
+  constructor() {
+    super('Reservation is not within Shop Schedule', ErrorCode.OutOfSchedule)
   }
 }
