@@ -1,3 +1,4 @@
+import { OrderBy } from '@entities/Common'
 import 'express'
 
 declare module 'express' {
@@ -6,7 +7,8 @@ declare module 'express' {
     query: {
       page: number,
       limit: number,
-      order: any,
+      order: OrderBy,
     } | any
   }
+
 }

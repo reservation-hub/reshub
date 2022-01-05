@@ -6,6 +6,8 @@ import { User, UserForAuth } from '@entities/User'
 import ReservationService from '@reservation/services/ReservationService'
 import { ReservationControllerInterface } from '@controller-adapter/Shop'
 import { OrderBy } from '@request-response-types/Common'
+import Logger from '@lib/Logger'
+import { UnauthorizedError } from '@errors/ControllerErrors'
 import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './schemas'
 import ShopService from './services/ShopService'
 
@@ -33,6 +35,10 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const ReservationController: ReservationControllerInterface = {
   async index(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { page, order } = await indexSchema.validateAsync(query, joiOptions)
     const { shopId } = query
     const reservations = await ReservationService.fetchReservationsWithClientAndStylistAndMenu(
@@ -57,6 +63,10 @@ const ReservationController: ReservationControllerInterface = {
   },
 
   async indexForCalendar(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { shopId } = query
     const { year, month } = await indexCalendarSchema.validateAsync(query, joiOptions)
     const reservations = await ReservationService.fetchReservationsWithClientAndStylistAndMenuForCalendar(
@@ -81,6 +91,10 @@ const ReservationController: ReservationControllerInterface = {
   },
 
   async show(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { shopId, reservationId } = query
     const r = await ReservationService.fetchReservationWithClientAndStylistAndMenu(user, shopId, reservationId)
     return {
@@ -96,6 +110,10 @@ const ReservationController: ReservationControllerInterface = {
   },
 
   async insert(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const {
       reservationDate, userId, menuId, stylistId,
     } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
@@ -105,6 +123,10 @@ const ReservationController: ReservationControllerInterface = {
   },
 
   async update(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const {
       reservationDate, userId, menuId, stylistId,
     } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
@@ -114,6 +136,10 @@ const ReservationController: ReservationControllerInterface = {
   },
 
   async delete(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { shopId, reservationId } = query
     await ReservationService.cancelReservation(user, shopId, reservationId)
     return 'Reservation deleted'

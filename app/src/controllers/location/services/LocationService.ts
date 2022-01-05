@@ -1,7 +1,7 @@
 import { LocationServiceInterface } from '@location/LocationController'
 import { LocationRepository } from '@location/repositories/LocationRepository'
 import { Area, City, Prefecture } from '@entities/Location'
-import { NotFoundError } from '@location/services/ServiceError'
+import { NotFoundError } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 
 export type LocationRepositoryInterface = {

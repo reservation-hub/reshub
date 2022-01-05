@@ -11,6 +11,8 @@ import ReservationService from '@shop/services/ReservationService'
 import StylistService from '@shop/services/StylistService'
 import MenuService from '@shop/services/MenuService'
 import { OrderBy } from '@request-response-types/Common'
+import Logger from '@lib/Logger'
+import { UnauthorizedError } from '@errors/ControllerErrors'
 import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
@@ -52,6 +54,10 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { page, order } = await indexSchema.validateAsync(query, joiOptions)
     const { values: shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order)
 
@@ -76,6 +82,10 @@ const ShopController: ShopControllerInterface = {
   },
 
   async show(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const stylistLimit = 5
     const reservationLimit = 5
     const menuLimit = 5
@@ -133,6 +143,10 @@ const ShopController: ShopControllerInterface = {
   },
 
   async insert(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const {
       name, areaId, prefectureId, cityId, address,
       phoneNumber, days, seats, startTime, endTime, details,
@@ -145,6 +159,10 @@ const ShopController: ShopControllerInterface = {
   },
 
   async update(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const {
       name, areaId, prefectureId, cityId, address, phoneNumber,
       seats, days, startTime, endTime, details,
@@ -158,12 +176,20 @@ const ShopController: ShopControllerInterface = {
   },
 
   async delete(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const { id } = query
     await ShopService.deleteShop(user, id)
     return 'Shop deleted'
   },
 
   async searchShops(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     const searchValues = await searchSchema.validateAsync(query, joiOptions)
     const shops = await ShopService.searchShops(user, searchValues.keyword)
     const shopIds = shops.map(s => s.id)

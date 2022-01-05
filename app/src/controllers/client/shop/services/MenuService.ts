@@ -2,8 +2,8 @@ import { Menu } from '@entities/Menu'
 import MenuRepository from '@client/shop/repositories/MenuRepository'
 import ShopRepository from '@client/shop/repositories/ShopRepository'
 import Logger from '@lib/Logger'
-import { MenuServiceInterface } from '../ShopController'
-import { NotFoundError } from './ServiceError'
+import { NotFoundError } from '@errors/ServiceErrors'
+import { MenuServiceInterface } from '@client/shop/ShopController'
 
 export type ShopRepositoryInterface = {
   shopExists(shopId: number): Promise<boolean>

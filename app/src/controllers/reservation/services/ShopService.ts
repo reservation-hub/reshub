@@ -2,7 +2,7 @@ import { ShopServiceInterface } from '@reservation/ReservationController'
 import { RoleSlug } from '@entities/Role'
 import ShopRepository from '@reservation/repositories/ShopRepository'
 import Logger from '@lib/Logger'
-import { AuthorizationError, NotFoundError } from '@reservation/services/ServiceError'
+import { AuthorizationError, NotFoundError } from '@errors/ServiceErrors'
 
 export type ShopRepositoryInterface = {
   fetchUserShopIds(userId: number): Promise<number[]>

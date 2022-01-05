@@ -1,7 +1,7 @@
 import { User } from '@entities/User'
 import { UserServiceInterface } from '@client/auth/middlewares/passport'
 import UserRepository from '@client/auth/repositories/UserRepository'
-import { NotFoundError } from '@client/auth/services/ServiceError'
+import { NotFoundError } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 
 export type UserRepositoryInterface = {

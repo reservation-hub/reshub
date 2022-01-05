@@ -5,7 +5,7 @@ import { Shop } from '@entities/Shop'
 import { User } from '@entities/User'
 import ShopRepository from '@shop/repositories/ShopRepository'
 import LocationRepository from '@shop/repositories/LocationRepository'
-import { AuthorizationError, InvalidParamsError, NotFoundError } from '@shop/services/ServiceError'
+import { AuthorizationError, InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 
 export type ShopRepositoryInterface = {

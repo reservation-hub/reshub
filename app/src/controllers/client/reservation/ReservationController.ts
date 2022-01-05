@@ -5,12 +5,12 @@ import ReservationService from '@client/reservation/services/ReservationService'
 import ShopService from '@client/reservation/services/ShopService'
 
 export type ReservationServiceInterface = {
-  fetchShopReservationsForAvailability(user: UserForAuth, shopId: number, reservationDate: Date,
+  fetchShopReservationsForAvailability(user: UserForAuth | undefined, shopId: number, reservationDate: Date,
     menuId: number): Promise<{ id: number, reservationStartDate: Date, reservationEndDate: Date, stylistId?: number}[]>
 }
 
 export type ShopServiceInterface = {
-  fetchShopSeatCount(user: UserForAuth, shopId: number): Promise<number>
+  fetchShopSeatCount(user: UserForAuth | undefined, shopId: number): Promise<number>
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }

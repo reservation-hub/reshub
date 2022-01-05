@@ -2,7 +2,7 @@ import {
   Request, Response, NextFunction, CookieOptions, Router,
 } from 'express'
 import config from '@config'
-import { UserForAuth } from '@request-response-types/models/User'
+import { UserForAuth } from '@entities/User'
 import { UnknownServerError } from '@routes/errors'
 import passport from '@client/auth/middlewares/passport'
 import AuthController from '@client/auth/AuthController'
@@ -27,7 +27,7 @@ const cookieOptions: CookieOptions = {
 
 export const login = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const user = req.user as UserForAuth
+    const { user } = req
     if (!user) {
       Logger.debug('User not found in request')
       throw new UnknownServerError()
@@ -46,7 +46,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) : P
 
 export const refreshLogin = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const user = req.user as UserForAuth
+    const { user } = req
     if (!user) {
       Logger.debug('User not found in request')
       throw new UnknownServerError()

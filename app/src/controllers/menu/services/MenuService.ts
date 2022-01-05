@@ -1,11 +1,11 @@
-import { NotFoundError, AuthorizationError } from '@menu/services/ServiceError'
+import { NotFoundError, AuthorizationError } from '@errors/ServiceErrors'
+import { MenuServiceInterface } from '@menu/MenuController'
 import ShopRepository from '@menu/repositories/ShopRepository'
 import MenuRepository from '@menu/repositories/MenuRepository'
 import { RoleSlug } from '@entities/Role'
 import { Menu } from '@entities/Menu'
 import { OrderBy } from '@entities/Common'
 import Logger from '@lib/Logger'
-import { MenuServiceInterface } from '../MenuController'
 
 export type ShopRepositoryInterface = {
   shopExists(shopId: number): Promise<boolean>

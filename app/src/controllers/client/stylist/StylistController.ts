@@ -6,7 +6,7 @@ import { StylistControllerInterface } from '@/controller-adapter/client/Shop'
 import { indexSchema } from './schemas'
 
 export type StylistServiceInterface = {
-  fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
+  fetchShopStylistsWithTotalCount(user: UserForAuth | undefined, shopId: number, page?: number, order?: OrderBy)
     :Promise<{ stylists: Stylist[], totalCount: number }>
 }
 

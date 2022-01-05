@@ -1,15 +1,15 @@
-import { User } from '@entities/User'
+import { UserForAuth } from '@entities/User'
 import AuthService from '@auth/services/AuthService'
 import { AuthControllerInterface } from '@controller-adapter/Auth'
 import { RoleSlug } from '@entities/Role'
 import { googleSchema } from '@auth/schemas'
 
 export type AuthServiceInterface = {
-  createToken(user: Express.User, expiresIn: string): string,
+  createToken(user: UserForAuth, expiresIn: string): string,
   verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>
   silentRefreshTokenChecks(authToken: string, refreshToken: string, headerToken?: string): Promise<void>
-  googleAuthenticate(token: string): Promise<User>
-  hack(role?: RoleSlug): Promise<User>
+  googleAuthenticate(token: string): Promise<UserForAuth>
+  hack(role?: RoleSlug): Promise<UserForAuth>
 }
 
 enum CookieDuration {
@@ -21,7 +21,7 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const AuthController : AuthControllerInterface = {
   async hack(role) {
-    let user: User
+    let user: UserForAuth
     if (role && role === RoleSlug.SHOP_STAFF) {
       user = await AuthService.hack(RoleSlug.SHOP_STAFF)
     } else {

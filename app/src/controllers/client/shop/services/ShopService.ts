@@ -2,8 +2,8 @@ import { Shop } from '@entities/Shop'
 import { OrderBy } from '@entities/Common'
 import ShopRepository from '@client/shop/repositories/ShopRepository'
 import Logger from '@lib/Logger'
-import { ShopServiceInterface } from '../ShopController'
-import { NotFoundError } from './ServiceError'
+import { NotFoundError } from '@errors/ServiceErrors'
+import { ShopServiceInterface } from '@client/shop/ShopController'
 
 export type ShopRepositoryInterface = {
   fetchShops(page: number, order: OrderBy): Promise<Shop[]>

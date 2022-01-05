@@ -11,6 +11,8 @@ import { Menu } from '@entities/Menu'
 import ReservationService from '@dashboard/services/ReservationService'
 import StylistService from '@dashboard/services/StylistService'
 import MenuService from '@dashboard/services/MenuService'
+import Logger from '@lib/Logger'
+import { UnauthorizedError } from '@errors/ControllerErrors'
 
 export type UserServiceInterface = {
   fetchUsersWithReservationCounts(): Promise<{ users: (User & { reservationCount: number })[], totalCount: number }>
@@ -111,6 +113,10 @@ const salonIndexForShopStaff = async (user: UserForAuth): Promise<salonIndexShop
 
 const DashboardController : DashboardControllerInterface = {
   async salon(user) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
     if (user.role.slug === RoleSlug.SHOP_STAFF) {
       return salonIndexForShopStaff(user)
     }

@@ -7,7 +7,7 @@ import { AuthServiceInterface as AuthControllerSocket } from '@client/auth/AuthC
 import { AuthServiceInterface as PassportSocket } from '@client/auth/middlewares/passport'
 import {
   InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError, AuthorizationError,
-} from '@client/auth/services/ServiceError'
+} from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 
 export type UserRepositoryInterface = {

@@ -1,6 +1,6 @@
 import { ShopServiceInterface } from '@client/reservation/ReservationController'
 import Logger from '@lib/Logger'
-import { NotFoundError } from '@client/reservation/services/ServiceError'
+import { NotFoundError } from '@errors/ServiceErrors'
 import ShopRepository from '@client/reservation/repositories/ShopRepository'
 
 export type ShopRepositoryInterface = {
