@@ -7,6 +7,12 @@ const MenuRepository: MenuRepositoryInterface = {
       where: { shopId },
     })).map(m => m.id)
   },
+
+  async fetchMenu(menuId) {
+    return prisma.menu.findUnique({
+      where: { id: menuId },
+    })
+  },
 }
 
 export default MenuRepository
