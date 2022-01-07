@@ -22,7 +22,11 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 
 const ReservationService: ReservationServiceInterface = {
   async fetchReservationsCountByShopIds(shopIds) {
-    return ReservationRepository.fetchReservationsCountByShopIds(shopIds)
+    const reservationCounts = await ReservationRepository.fetchReservationsCountByShopIds(shopIds)
+    return shopIds.map(id => ({
+      shopId: id,
+      reservationCount: reservationCounts.find(rc => rc.shopId === id)?.reservationCount ?? 0,
+    }))
   },
 
   async fetchShopReservations(user, shopId, limit = 10) {

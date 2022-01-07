@@ -250,7 +250,7 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
         const randomDate = getRandomDate(start, end)
         const randomHour = Math.floor(Math.random() * shopClosingHours[0]) + shopOpeningHours[0]
         const randomMinutes = Math.floor(Math.random() * 2) === 0 ? 30 : 0
-        randomDate.setHours(randomHour, randomMinutes, 0)
+        randomDate.setHours(randomHour, randomMinutes, 0, 0)
         return randomDate
       })
       return Promise.all(dates.map(async d => {

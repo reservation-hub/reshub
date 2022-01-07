@@ -1,6 +1,6 @@
 import { ScheduleDays } from '@entities/Common'
 import { Menu } from '@entities/Menu'
-import { Reservation } from '@entities/Reservation'
+import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationServiceInterface } from '@client/reservation/ReservationController'
 import { InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import ReservationRepository from '@client/reservation/repositories/ReservationRepository'
@@ -42,13 +42,13 @@ const isValidStylistId = async (shopId: number, stylistId: number): Promise<bool
 const checkAvailability = (reservationDate: Date, menuDuration: number, shopReservations:
   (Reservation & { duration: number })[]): boolean => {
   if (shopReservations.length === 0) return true
+  const reservationStartTime = reservationDate.getTime()
+  const reservationEndTime = reservationDate.getTime() + (menuDuration * 1000 * 60)
   return shopReservations.every(r => {
     const shopReservationStartTime = r.reservationDate.getTime()
-    const shopReservationEndTime = (new Date(r.reservationDate.getTime() + r.duration)).getTime()
-    const reservationStartTime = reservationDate.getTime()
-    const reservationEndTime = reservationDate.getTime() + menuDuration
+    const shopReservationEndTime = r.reservationDate.getTime() + (r.duration * 1000 * 60)
     return !((shopReservationStartTime <= reservationStartTime && reservationStartTime < shopReservationEndTime)
-        || (shopReservationStartTime <= reservationEndTime && reservationEndTime < shopReservationEndTime))
+      || (shopReservationStartTime < reservationEndTime && reservationEndTime <= shopReservationEndTime))
   })
 }
 
@@ -63,7 +63,9 @@ const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${t
 const isWithinShopSchedule = (startTime: string, endTime: string, days: ScheduleDays[],
   reservationDate: Date, menuDuration: number): boolean => {
   const reservationStartTime = convertToUnixTime(timeToString(reservationDate))
-  const reservationEndTime = convertToUnixTime(timeToString(new Date(reservationDate.getTime() + menuDuration)))
+  const reservationEndTime = convertToUnixTime(timeToString(
+    new Date(reservationDate.getTime() + (menuDuration * 1000 * 60)),
+  ))
   const shopStartTime = convertToUnixTime(startTime)
   const shopEndTime = convertToUnixTime(endTime)
 
@@ -76,14 +78,8 @@ const isWithinShopSchedule = (startTime: string, endTime: string, days: Schedule
 }
 
 const ReservationService: ReservationServiceInterface = {
-  async fetchShopReservationsForAvailability(user, shopId, reservationDate, menuId) {
+  async fetchShopReservationsForAvailability(user, shopId, reservationDate) {
     const numberOfDays = 7
-
-    const menuIsValid = await isValidMenuId(shopId, menuId)
-    if (!menuIsValid) {
-      Logger.debug('Menu does not exist in shop')
-      throw new InvalidParamsError()
-    }
 
     const reservations = await ReservationRepository.fetchShopReservationsForAvailabilityWithMenuDuration(
       shopId, reservationDate, numberOfDays,
@@ -92,7 +88,7 @@ const ReservationService: ReservationServiceInterface = {
     return reservations.map(r => ({
       id: r.id,
       reservationStartDate: r.reservationDate,
-      reservationEndDate: new Date(r.reservationDate.getTime() + r.duration),
+      reservationEndDate: new Date(r.reservationDate.getTime() + (r.duration * 1000 * 60)),
       stylistId: r.stylistId,
     }))
   },

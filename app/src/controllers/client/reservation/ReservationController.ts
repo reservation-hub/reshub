@@ -8,8 +8,8 @@ import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 
 export type ReservationServiceInterface = {
-  fetchShopReservationsForAvailability(user: UserForAuth | undefined, shopId: number, reservationDate: Date,
-    menuId: number): Promise<{ id: number, reservationStartDate: Date, reservationEndDate: Date, stylistId?: number}[]>
+  fetchShopReservationsForAvailability(user: UserForAuth | undefined, shopId: number, reservationDate: Date)
+    : Promise<{ id: number, reservationStartDate: Date, reservationEndDate: Date, stylistId?: number}[]>
   createReservation(user: UserForAuth, shopId: number, reservationDate: Date, menuId: number, stylistId?: number)
     : Promise<Reservation>
 }
@@ -23,11 +23,9 @@ const joiOptions = { abortEarly: false, stripUnknown: true }
 const ReservationController: ReservationControllerInterface = {
   async list(user, query) {
     const { shopId } = query
-    const {
-      reservationDate, menuId,
-    } = await reservationQuerySchema.validateAsync(query.params, joiOptions)
+    const { reservationDate } = await reservationQuerySchema.validateAsync(query.params, joiOptions)
     const reservations = await ReservationService.fetchShopReservationsForAvailability(
-      user, shopId, reservationDate, menuId,
+      user, shopId, reservationDate,
     )
 
     const seats = await ShopService.fetchShopSeatCount(user, shopId)
@@ -47,7 +45,7 @@ const ReservationController: ReservationControllerInterface = {
 
     await ReservationService.createReservation(user, shopId, reservationDate, menuId, stylistId)
 
-    return 'Not yet implemented'
+    return 'Reservation created successfully'
   },
 }
 
