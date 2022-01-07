@@ -26,19 +26,19 @@ export type StylistRepositoryInterface = {
 }
 
 export type ShopRepositoryInterface = {
-  fetchShopSchedule(shopId: number): Promise<{startTime: string, endTime: string, days: ScheduleDays[]} | null>
+  fetchShopDetailsForReservation(shopId: number)
+    : Promise<{ startTime: string, endTime: string, days: ScheduleDays[], seats: number} | null>
 }
 
-const checkAvailability = (reservationDate: Date, menuDuration: number, shopReservations:
-  (Reservation & { duration: number })[]): boolean => {
-  if (shopReservations.length === 0) return true
+const getConflictingReservations = (reservationDate: Date, menuDuration: number, shopReservations:
+  (Reservation & { duration: number })[]): (Reservation & { duration: number })[] => {
   const reservationStartTime = reservationDate.getTime()
   const reservationEndTime = reservationDate.getTime() + (menuDuration * 1000 * 60)
-  return shopReservations.every(r => {
+  return shopReservations.filter(r => {
     const shopReservationStartTime = r.reservationDate.getTime()
     const shopReservationEndTime = r.reservationDate.getTime() + (r.duration * 1000 * 60)
-    return !((shopReservationStartTime <= reservationStartTime && reservationStartTime < shopReservationEndTime)
-      || (shopReservationStartTime < reservationEndTime && reservationEndTime <= shopReservationEndTime))
+    return (shopReservationStartTime <= reservationStartTime && reservationStartTime < shopReservationEndTime)
+      || (shopReservationStartTime < reservationEndTime && reservationEndTime <= shopReservationEndTime)
   })
 }
 
@@ -84,8 +84,8 @@ const ReservationService: ReservationServiceInterface = {
   },
 
   async createReservation(user, shopId, reservationDate, menuId, stylistId) {
-    const shopSchedule = await ShopRepository.fetchShopSchedule(shopId)
-    if (!shopSchedule) {
+    const shopDetails = await ShopRepository.fetchShopDetailsForReservation(shopId)
+    if (!shopDetails) {
       Logger.debug('Shop does not exist')
       throw new NotFoundError()
     }
@@ -101,20 +101,10 @@ const ReservationService: ReservationServiceInterface = {
       throw new InvalidParamsError()
     }
 
-    // stylist related checks
-    let stylist
-    if (stylistId) {
-      stylist = await StylistRepository.fetchShopStylist(shopId, stylistId)
-      if (!stylist) {
-        Logger.debug('Stylist does not exist in shop')
-        throw new InvalidParamsError()
-      }
-    }
-
     // check shop schedule availability
 
-    const reservationIsWithinShopSchedule = isWithinShopSchedule(shopSchedule.startTime, shopSchedule.endTime,
-      shopSchedule.days, reservationDate, menu.duration)
+    const reservationIsWithinShopSchedule = isWithinShopSchedule(shopDetails.startTime, shopDetails.endTime,
+      shopDetails.days, reservationDate, menu.duration)
 
     if (!reservationIsWithinShopSchedule) {
       Logger.debug('Reservation date is not within shop schedule')
@@ -127,10 +117,31 @@ const ReservationService: ReservationServiceInterface = {
       shopId, reservationDate, 1,
     )
 
-    const isAvailable = checkAvailability(reservationDate, menu.duration, reservationsForSameDay)
-    if (!isAvailable) {
+    const conflictingReservations = getConflictingReservations(reservationDate, menu.duration, reservationsForSameDay)
+    if (conflictingReservations.length >= shopDetails.seats) {
       Logger.debug('Provided time is not available')
       throw new InvalidParamsError()
+    }
+
+    // stylist related checks
+    let stylist
+    if (stylistId) {
+      stylist = await StylistRepository.fetchShopStylist(shopId, stylistId)
+      if (!stylist) {
+        Logger.debug('Stylist does not exist in shop')
+        throw new InvalidParamsError()
+      }
+    }
+
+    Logger.info('Reservation created')
+
+    return {
+      id: 1,
+      clientId: 1,
+      reservationDate,
+      menuId,
+      shopId,
+      status: ReservationStatus.RESERVED,
     }
 
     return ReservationRepository.createReservation(user.id, shopId, reservationDate,

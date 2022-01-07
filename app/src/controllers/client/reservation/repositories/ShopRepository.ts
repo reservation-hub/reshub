@@ -40,7 +40,7 @@ const ShopRepository: ShopServiceSocket & ReservationServiceSocket = {
     return shop ? shop.shopDetail.seats : null
   },
 
-  async fetchShopSchedule(shopId) {
+  async fetchShopDetailsForReservation(shopId) {
     const shop = await prisma.shop.findUnique({
       where: { id: shopId },
       include: { shopDetail: true },
@@ -51,6 +51,7 @@ const ShopRepository: ShopServiceSocket & ReservationServiceSocket = {
         startTime: shop.shopDetail.startTime,
         endTime: shop.shopDetail.endTime,
         days: shop.shopDetail.days.map(convertPrismaDayToEntityDay),
+        seats: shop.shopDetail.seats,
       }
       : null
   },
