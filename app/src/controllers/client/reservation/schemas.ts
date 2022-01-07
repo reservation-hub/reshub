@@ -11,5 +11,4 @@ export const reservationUpsertSchema = Joi.object({
 
 export const reservationQuerySchema = Joi.object({
   reservationDate: Joi.date().format('YYYY-MM-DD HH:mm:ss').utc().required(),
-  menuId: Joi.number().required(),
 })

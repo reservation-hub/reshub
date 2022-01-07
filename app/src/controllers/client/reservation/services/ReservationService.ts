@@ -8,6 +8,7 @@ import MenuRepository from '@client/reservation/repositories/MenuRepository'
 import StylistRepository from '@client/reservation/repositories/StylistRepository'
 import ShopRepository from '@client/reservation/repositories/ShopRepository'
 import Logger from '@lib/Logger'
+import { Stylist } from '@entities/Stylist'
 
 export type ReservationRepositoryInterface = {
   fetchShopReservationsForAvailabilityWithMenuDuration(shopId: number, reservationDate: Date,
@@ -17,26 +18,15 @@ export type ReservationRepositoryInterface = {
 }
 
 export type MenuRepositoryInterface = {
-  fetchShopMenuIds(shopId: number): Promise<number[]>
-  fetchMenu(menuId: number): Promise<Menu | null>
+  fetchShopMenu(shopId: number, menuId: number): Promise<Menu | null>
 }
 
 export type StylistRepositoryInterface = {
-  fetchShopStylistIds(shopId: number): Promise<number[]>
+  fetchShopStylist(shopId: number, stylistId: number): Promise<Stylist | null>
 }
 
 export type ShopRepositoryInterface = {
   fetchShopSchedule(shopId: number): Promise<{startTime: string, endTime: string, days: ScheduleDays[]} | null>
-}
-
-const isValidMenuId = async (shopId: number, menuId: number): Promise<boolean> => {
-  const menuIds = await MenuRepository.fetchShopMenuIds(shopId)
-  return menuIds.some(id => id === menuId)
-}
-
-const isValidStylistId = async (shopId: number, stylistId: number): Promise<boolean> => {
-  const stylistIds = await StylistRepository.fetchShopStylistIds(shopId)
-  return stylistIds.some(id => id === stylistId)
 }
 
 const checkAvailability = (reservationDate: Date, menuDuration: number, shopReservations:
@@ -105,10 +95,20 @@ const ReservationService: ReservationServiceInterface = {
       throw new InvalidParamsError()
     }
 
-    const menu = await MenuRepository.fetchMenu(menuId)
-    if (!menu || menu.shopId !== shopId) {
+    const menu = await MenuRepository.fetchShopMenu(shopId, menuId)
+    if (!menu) {
       Logger.debug('Menu does not exist in shop')
       throw new InvalidParamsError()
+    }
+
+    // stylist related checks
+    let stylist
+    if (stylistId) {
+      stylist = await StylistRepository.fetchShopStylist(shopId, stylistId)
+      if (!stylist) {
+        Logger.debug('Stylist does not exist in shop')
+        throw new InvalidParamsError()
+      }
     }
 
     // check shop schedule availability
