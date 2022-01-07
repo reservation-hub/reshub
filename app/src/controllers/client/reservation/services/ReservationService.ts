@@ -1,6 +1,6 @@
 import { ScheduleDays } from '@entities/Common'
 import { Menu } from '@entities/Menu'
-import { Reservation, ReservationStatus } from '@entities/Reservation'
+import { Reservation } from '@entities/Reservation'
 import { ReservationServiceInterface } from '@client/reservation/ReservationController'
 import { InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import ReservationRepository from '@client/reservation/repositories/ReservationRepository'
@@ -26,19 +26,19 @@ export type StylistRepositoryInterface = {
 }
 
 export type ShopRepositoryInterface = {
-  fetchShopSchedule(shopId: number): Promise<{startTime: string, endTime: string, days: ScheduleDays[]} | null>
+  fetchShopDetailsForReservation(shopId: number)
+    : Promise<{ startTime: string, endTime: string, days: ScheduleDays[], seats: number} | null>
 }
 
-const checkAvailability = (reservationDate: Date, menuDuration: number, shopReservations:
-  (Reservation & { duration: number })[]): boolean => {
-  if (shopReservations.length === 0) return true
+const getConflictingReservations = (reservationDate: Date, menuDuration: number, shopReservations:
+  (Reservation & { duration: number })[]): (Reservation & { duration: number })[] => {
   const reservationStartTime = reservationDate.getTime()
   const reservationEndTime = reservationDate.getTime() + (menuDuration * 1000 * 60)
-  return shopReservations.every(r => {
+  return shopReservations.filter(r => {
     const shopReservationStartTime = r.reservationDate.getTime()
     const shopReservationEndTime = r.reservationDate.getTime() + (r.duration * 1000 * 60)
-    return !((shopReservationStartTime <= reservationStartTime && reservationStartTime < shopReservationEndTime)
-      || (shopReservationStartTime < reservationEndTime && reservationEndTime <= shopReservationEndTime))
+    return (shopReservationStartTime <= reservationStartTime && reservationStartTime < shopReservationEndTime)
+      || (shopReservationStartTime < reservationEndTime && reservationEndTime <= shopReservationEndTime)
   })
 }
 
@@ -50,7 +50,7 @@ const timeToString = (dateTime : Date): string => {
 
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
-const isWithinShopSchedule = (startTime: string, endTime: string, days: ScheduleDays[],
+const isWithinSchedule = (startTime: string, endTime: string, days: ScheduleDays[],
   reservationDate: Date, menuDuration: number): boolean => {
   const reservationStartTime = convertToUnixTime(timeToString(reservationDate))
   const reservationEndTime = convertToUnixTime(timeToString(
@@ -84,8 +84,8 @@ const ReservationService: ReservationServiceInterface = {
   },
 
   async createReservation(user, shopId, reservationDate, menuId, stylistId) {
-    const shopSchedule = await ShopRepository.fetchShopSchedule(shopId)
-    if (!shopSchedule) {
+    const shopDetails = await ShopRepository.fetchShopDetailsForReservation(shopId)
+    if (!shopDetails) {
       Logger.debug('Shop does not exist')
       throw new NotFoundError()
     }
@@ -101,20 +101,10 @@ const ReservationService: ReservationServiceInterface = {
       throw new InvalidParamsError()
     }
 
-    // stylist related checks
-    let stylist
-    if (stylistId) {
-      stylist = await StylistRepository.fetchShopStylist(shopId, stylistId)
-      if (!stylist) {
-        Logger.debug('Stylist does not exist in shop')
-        throw new InvalidParamsError()
-      }
-    }
-
     // check shop schedule availability
 
-    const reservationIsWithinShopSchedule = isWithinShopSchedule(shopSchedule.startTime, shopSchedule.endTime,
-      shopSchedule.days, reservationDate, menu.duration)
+    const reservationIsWithinShopSchedule = isWithinSchedule(shopDetails.startTime, shopDetails.endTime,
+      shopDetails.days, reservationDate, menu.duration)
 
     if (!reservationIsWithinShopSchedule) {
       Logger.debug('Reservation date is not within shop schedule')
@@ -127,10 +117,36 @@ const ReservationService: ReservationServiceInterface = {
       shopId, reservationDate, 1,
     )
 
-    const isAvailable = checkAvailability(reservationDate, menu.duration, reservationsForSameDay)
-    if (!isAvailable) {
+    const conflictingReservations = getConflictingReservations(reservationDate, menu.duration, reservationsForSameDay)
+    if (conflictingReservations.length >= shopDetails.seats) {
       Logger.debug('Provided time is not available')
       throw new InvalidParamsError()
+    }
+
+    // stylist related checks
+    let stylist
+    if (stylistId) {
+      stylist = await StylistRepository.fetchShopStylist(shopId, stylistId)
+      if (!stylist) {
+        Logger.debug('Stylist does not exist in shop')
+        throw new InvalidParamsError()
+      }
+
+      const reservationIsWithinStylistSchedule = isWithinSchedule(stylist.startTime, stylist.endTime,
+        stylist.days, reservationDate, menu.duration)
+      if (!reservationIsWithinStylistSchedule) {
+        Logger.debug('Reservation date is not within stylist schedule')
+        throw new InvalidParamsError()
+      }
+
+      const stylistReservationsForSameDay = reservationsForSameDay.filter(rfs => rfs.stylistId === stylistId)
+      const conflictingReservations = getConflictingReservations(
+        reservationDate, menu.duration, stylistReservationsForSameDay,
+      )
+      if (conflictingReservations.length > 0) {
+        Logger.debug('Stylist is not available for this reservation')
+        throw new InvalidParamsError()
+      }
     }
 
     return ReservationRepository.createReservation(user.id, shopId, reservationDate,
