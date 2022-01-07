@@ -4,7 +4,7 @@ import {
 import AuthController from '@auth/AuthController'
 import { RoleSlug } from '@entities/Role'
 import { UserForAuth } from '@entities/User'
-import { UnauthorizedError } from '@routes/errors'
+import { UnauthorizedError } from '@errors/RouteErrors'
 import passport from '@auth/middlewares/passport'
 import config from '@config'
 import Logger from '@lib/Logger'
