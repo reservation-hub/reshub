@@ -21,7 +21,7 @@ const UserService: UserServiceInterface = {
     return {
       users: users.map(u => ({
         ...u,
-        reservationCount: userReservationCounts.find(urc => urc.userId === u.id)!.reservationCount,
+        reservationCount: userReservationCounts.find(urc => urc.userId === u.id)?.reservationCount ?? 0,
       })),
       totalCount,
     }

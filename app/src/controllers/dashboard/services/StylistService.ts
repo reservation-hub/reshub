@@ -19,7 +19,7 @@ const StylistService: StylistServiceInterface = {
     )
     return stylists.map(s => ({
       ...s,
-      reservationCount: stylistReservationCounts.find(src => src.stylistId === s.id)!.reservationCount,
+      reservationCount: stylistReservationCounts.find(src => src.stylistId === s.id)?.reservationCount ?? 0,
     }))
   },
 }

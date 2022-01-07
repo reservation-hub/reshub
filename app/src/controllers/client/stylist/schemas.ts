@@ -1,5 +1,5 @@
 import Joi from 'joi'
-import { OrderBy } from '@entities/Common'
+import { OrderBy } from '@request-response-types/Common'
 
 export const indexSchema = Joi.object({
   page: Joi.string().pattern(/^[0-9]+$/),

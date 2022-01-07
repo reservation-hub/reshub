@@ -6,6 +6,7 @@ import StylistService from '@stylist/services/StylistService'
 import ShopService from '@stylist/services/ShopService'
 import { StylistControllerInterface } from '@controller-adapter/Shop'
 import { ScheduleDays } from '@request-response-types/models/Common'
+import { ScheduleDays as EntityScheduleDays } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import Logger from '@lib/Logger'
 
@@ -14,10 +15,10 @@ export type StylistServiceInterface = {
     : Promise<{ stylists: Stylist[], totalCount: number }>
   fetchStylist(user: UserForAuth, shopId: number, stylistId: number): Promise<Stylist>
   insertStylist(user: UserForAuth, shopId: number, name: string, price: number,
-    days:ScheduleDays[], startTime:string, endTime:string)
+    days:EntityScheduleDays[], startTime:string, endTime:string)
     : Promise<Stylist>
   updateStylist(user: UserForAuth, shopId: number, stylistId: number, name: string, price: number,
-    days: ScheduleDays[], startTime: string, endTime: string)
+    days: EntityScheduleDays[], startTime: string, endTime: string)
     : Promise<Stylist>
   deleteStylist(user: UserForAuth, shopId: number, stylistId: number)
     : Promise<Stylist>
@@ -26,6 +27,44 @@ export type StylistServiceInterface = {
 
 export type ShopServiceInterface = {
   fetchShopName(user: UserForAuth, shopId: number): Promise<string>
+}
+
+const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
+  switch (day) {
+    case EntityScheduleDays.SUNDAY:
+      return ScheduleDays.SUNDAY
+    case EntityScheduleDays.MONDAY:
+      return ScheduleDays.MONDAY
+    case EntityScheduleDays.TUESDAY:
+      return ScheduleDays.TUESDAY
+    case EntityScheduleDays.WEDNESDAY:
+      return ScheduleDays.WEDNESDAY
+    case EntityScheduleDays.THURSDAY:
+      return ScheduleDays.THURSDAY
+    case EntityScheduleDays.FRIDAY:
+      return ScheduleDays.FRIDAY
+    default:
+      return ScheduleDays.SATURDAY
+  }
+}
+
+const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays => {
+  switch (day) {
+    case ScheduleDays.SUNDAY:
+      return EntityScheduleDays.SUNDAY
+    case ScheduleDays.MONDAY:
+      return EntityScheduleDays.MONDAY
+    case ScheduleDays.TUESDAY:
+      return EntityScheduleDays.TUESDAY
+    case ScheduleDays.WEDNESDAY:
+      return EntityScheduleDays.WEDNESDAY
+    case ScheduleDays.THURSDAY:
+      return EntityScheduleDays.THURSDAY
+    case ScheduleDays.FRIDAY:
+      return EntityScheduleDays.FRIDAY
+    default:
+      return EntityScheduleDays.SATURDAY
+  }
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -58,7 +97,7 @@ const StylistController: StylistControllerInterface = {
     const { shopId, stylistId } = query
     const stylist = await StylistService.fetchStylist(user, shopId, stylistId)
     const shopName = await ShopService.fetchShopName(user, shopId)
-    return { ...stylist, shopName }
+    return { ...stylist, days: stylist.days.map(convertEntityDaysToOutboundDays), shopName }
   },
 
   async insert(user, query) {
@@ -70,7 +109,8 @@ const StylistController: StylistControllerInterface = {
       name, price, days, startTime, endTime,
     } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId } = query
-    await StylistService.insertStylist(user, shopId, name, price, days, startTime, endTime)
+    const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
+    await StylistService.insertStylist(user, shopId, name, price, entityDays, startTime, endTime)
     return 'Stylist created'
   },
 
@@ -83,7 +123,8 @@ const StylistController: StylistControllerInterface = {
       name, price, days, startTime, endTime,
     } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId, stylistId } = query
-    await StylistService.updateStylist(user, shopId, stylistId, name, price, days, startTime, endTime)
+    const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
+    await StylistService.updateStylist(user, shopId, stylistId, name, price, entityDays, startTime, endTime)
     return 'Stylist updated'
   },
 

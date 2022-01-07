@@ -33,7 +33,11 @@ const StylistService: StylistServiceInterface = {
   },
 
   async fetchStylistsCountByShopIds(shopIds) {
-    return StylistRepository.fetchStylistsCountByShopIds(shopIds)
+    const stylistCounts = await StylistRepository.fetchStylistsCountByShopIds(shopIds)
+    return shopIds.map(id => ({
+      shopId: id,
+      stylistCount: stylistCounts.find(sc => sc.shopId === id)?.stylistCount ?? 0,
+    }))
   },
 }
 

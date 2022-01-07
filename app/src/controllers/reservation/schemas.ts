@@ -1,6 +1,6 @@
 import joi from 'joi'
 import date from '@joi/date'
-import { OrderBy } from '@entities/Common'
+import { OrderBy } from '@request-response-types/Common'
 
 const Joi = joi.extend(date)
 

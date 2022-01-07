@@ -1,5 +1,8 @@
-import { ReservationStatus as PrismaReservationStatus } from '@prisma/client'
-import { ReservationStatus } from '@entities/Reservation'
+import {
+  ReservationStatus as PrismaReservationStatus,
+  Reservation as PrismaReservation,
+} from '@prisma/client'
+import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface } from '@client/reservation/services/ReservationService'
 import prisma from '@/prisma'
 
@@ -13,6 +16,17 @@ const convertReservationStatus = (status: PrismaReservationStatus): ReservationS
       return ReservationStatus.RESERVED
   }
 }
+
+const reconstructReservation = (reservation: PrismaReservation)
+: Reservation => ({
+  id: reservation.id,
+  shopId: reservation.shopId,
+  reservationDate: reservation.reservationDate,
+  status: convertReservationStatus(reservation.status),
+  clientId: reservation.userId,
+  menuId: reservation.menuId,
+  stylistId: reservation.stylistId ?? undefined,
+})
 
 const ReservationRepository: ReservationRepositoryInterface = {
   async fetchShopReservationsForAvailabilityWithMenuDuration(shopId, reservationDate, rangeInDays) {
@@ -45,6 +59,20 @@ const ReservationRepository: ReservationRepositoryInterface = {
       stylistId: r.stylistId ?? undefined,
       duration: r.menu.duration,
     }))
+  },
+
+  async createReservation(clientId, shopId, reservationDate, menuId, stylistId) {
+    const reservation = await prisma.reservation.create({
+      data: {
+        reservationDate,
+        shop: { connect: { id: shopId } },
+        stylist: stylistId ? { connect: { id: stylistId } } : undefined,
+        user: { connect: { id: clientId } },
+        menu: { connect: { id: menuId } },
+      },
+    })
+
+    return reconstructReservation(reservation)
   },
 }
 

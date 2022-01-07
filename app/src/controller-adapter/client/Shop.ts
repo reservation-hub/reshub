@@ -29,7 +29,7 @@ export type StylistControllerInterface = {
 
 export type ReservationControllerInterface = {
   list(user: UserForAuth | undefined, query: SalonAvailabilityQuery): Promise<SalonAvailabilityResponse>
-  // create(user: UserForAuth | undefined, query: SalonSetReservationQuery): Promise<ResponseMessage>
+  create(user: UserForAuth | undefined, query: SalonSetReservationQuery): Promise<ResponseMessage>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -80,7 +80,7 @@ const createReservation = async (req: Request, res: Response, next: NextFunction
     const { user } = req
     const { shopId } = res.locals
     const { body: params } = req
-    return res.send('Not yet implemented')
+    return res.send(await ReservationController.create(user, { shopId, params }))
   } catch (e) { return next(e) }
 }
 

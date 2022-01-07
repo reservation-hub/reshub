@@ -22,9 +22,8 @@ export type ResHubError =
 
 export const errorHandler: ErrorRequestHandler = (error: ResHubError | MiddlewareError,
   req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
-  Logger.debug('error: ', error)
   if (error.name === 'ServiceError') {
-    Logger.debug('is service error')
+    Logger.debug('Service error')
     error as ServiceError
     let code: ErrorCode
     switch (error.code) {
@@ -48,6 +47,8 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
   }
   // prisma errors
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    Logger.error('Prisma error')
+    Logger.error(error.message)
     if (error.code === 'P2002') {
       return res.status(ErrorCode.BadRequest).send(error.message)
     }
@@ -78,5 +79,7 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
     return res.status(ErrorCode.NotFound).send(error.message)
   }
 
+  Logger.error('Server Error')
+  Logger.error(error.message)
   return res.status(ErrorCode.InternalServerError).send('Internal Server Error')
 }

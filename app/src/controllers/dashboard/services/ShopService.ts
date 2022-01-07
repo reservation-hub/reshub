@@ -39,8 +39,8 @@ export const ShopService: ShopServiceInterface = {
     return {
       shops: shops.map(s => ({
         ...s,
-        reservationCount: shopReservationCounts.find(src => src.shopId === s.id)!.reservationCount,
-        stylistCount: shopStylistCounts.find(ssc => ssc.shopId === s.id)!.stylistCount,
+        reservationCount: shopReservationCounts.find(src => src.shopId === s.id)?.reservationCount ?? 0,
+        stylistCount: shopStylistCounts.find(ssc => ssc.shopId === s.id)?.stylistCount ?? 0,
       })),
       totalCount: shopsTotalCount,
     }

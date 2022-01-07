@@ -2,10 +2,10 @@ import { MenuRepositoryInterface } from '@client/reservation/services/Reservatio
 import prisma from '@/prisma'
 
 const MenuRepository: MenuRepositoryInterface = {
-  async fetchShopMenuIds(shopId) {
-    return (await prisma.menu.findMany({
-      where: { shopId },
-    })).map(m => m.id)
+  async fetchShopMenu(shopId, menuId) {
+    return prisma.menu.findFirst({
+      where: { id: menuId, AND: { shopId } },
+    })
   },
 }
 

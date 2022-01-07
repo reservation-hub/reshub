@@ -1,5 +1,6 @@
 import Joi from 'joi'
-import { ScheduleDays, OrderBy } from '@entities/Common'
+import { ScheduleDays } from '@request-response-types/models/Common'
+import { OrderBy } from '@request-response-types/Common'
 
 export const indexSchema = Joi.object({
   page: Joi.string().pattern(/^[0-9]+$/),
