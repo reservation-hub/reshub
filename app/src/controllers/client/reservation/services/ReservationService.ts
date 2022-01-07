@@ -1,6 +1,6 @@
 import { ScheduleDays } from '@entities/Common'
 import { Menu } from '@entities/Menu'
-import { Reservation, ReservationStatus } from '@entities/Reservation'
+import { Reservation } from '@entities/Reservation'
 import { ReservationServiceInterface } from '@client/reservation/ReservationController'
 import { InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import ReservationRepository from '@client/reservation/repositories/ReservationRepository'
@@ -50,7 +50,7 @@ const timeToString = (dateTime : Date): string => {
 
 const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
-const isWithinShopSchedule = (startTime: string, endTime: string, days: ScheduleDays[],
+const isWithinSchedule = (startTime: string, endTime: string, days: ScheduleDays[],
   reservationDate: Date, menuDuration: number): boolean => {
   const reservationStartTime = convertToUnixTime(timeToString(reservationDate))
   const reservationEndTime = convertToUnixTime(timeToString(
@@ -103,7 +103,7 @@ const ReservationService: ReservationServiceInterface = {
 
     // check shop schedule availability
 
-    const reservationIsWithinShopSchedule = isWithinShopSchedule(shopDetails.startTime, shopDetails.endTime,
+    const reservationIsWithinShopSchedule = isWithinSchedule(shopDetails.startTime, shopDetails.endTime,
       shopDetails.days, reservationDate, menu.duration)
 
     if (!reservationIsWithinShopSchedule) {
@@ -131,17 +131,22 @@ const ReservationService: ReservationServiceInterface = {
         Logger.debug('Stylist does not exist in shop')
         throw new InvalidParamsError()
       }
-    }
 
-    Logger.info('Reservation created')
+      const reservationIsWithinStylistSchedule = isWithinSchedule(stylist.startTime, stylist.endTime,
+        stylist.days, reservationDate, menu.duration)
+      if (!reservationIsWithinStylistSchedule) {
+        Logger.debug('Reservation date is not within stylist schedule')
+        throw new InvalidParamsError()
+      }
 
-    return {
-      id: 1,
-      clientId: 1,
-      reservationDate,
-      menuId,
-      shopId,
-      status: ReservationStatus.RESERVED,
+      const stylistReservationsForSameDay = reservationsForSameDay.filter(rfs => rfs.stylistId === stylistId)
+      const conflictingReservations = getConflictingReservations(
+        reservationDate, menu.duration, stylistReservationsForSameDay,
+      )
+      if (conflictingReservations.length > 0) {
+        Logger.debug('Stylist is not available for this reservation')
+        throw new InvalidParamsError()
+      }
     }
 
     return ReservationRepository.createReservation(user.id, shopId, reservationDate,
