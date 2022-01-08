@@ -28,8 +28,8 @@ export const shopUpsertSchema = Joi.object({
     ScheduleDays.SUNDAY,
   )).min(1).required(),
   seats: Joi.number().required(),
-  startTime: Joi.date().format('YYYY-MM-DD hh:mm:ss').required(),
-  endTime: Joi.date().format('YYYY-MM-DD hh:mm:ss').required(),
+  startTime: Joi.date().format('YYYY-MM-DD HH:mm:ss').required(),
+  endTime: Joi.date().format('YYYY-MM-DD HH:mm:ss').required(),
 })
 
 export const searchSchema = Joi.object({

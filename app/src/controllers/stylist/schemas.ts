@@ -22,6 +22,6 @@ export const shopStylistUpsertSchema = Joi.object({
     ScheduleDays.SATURDAY,
     ScheduleDays.SUNDAY,
   )).min(1).required(),
-  startTime: Joi.date().format('YYYY-MM-DD hh:mm:ss').required(),
-  endTime: Joi.date().format('YYYY-MM-DD hh:mm:ss').required(),
+  startTime: Joi.date().format('YYYY-MM-DD HH:mm:ss').required(),
+  endTime: Joi.date().format('YYYY-MM-DD HH:mm:ss').required(),
 })

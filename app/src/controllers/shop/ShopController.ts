@@ -222,7 +222,7 @@ const ShopController: ShopControllerInterface = {
     const startTimeString = convertDateObjectToString(startTime)
     const endTimeString = convertDateObjectToString(endTime)
     await ShopService.updateShop(user, id, name, areaId, prefectureId, cityId,
-      address, phoneNumber, seats, entityDays, startTimeString, endTimeString, details)
+      address, phoneNumber, entityDays, seats, startTimeString, endTimeString, details)
 
     return 'Shop updated'
   },
