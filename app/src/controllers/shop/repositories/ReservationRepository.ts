@@ -1,6 +1,7 @@
 import {
   ReservationStatus as PrismaReservationStatus,
   Reservation as PrismaReservation,
+  Prisma,
 } from '@prisma/client'
 import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface as ReservationServiceSocket } from '@shop/services/ReservationService'
@@ -34,6 +35,7 @@ const ReservationRepository: ReservationServiceSocket = {
     const reservations = await prisma.reservation.findMany({
       where: { shopId },
       take: limit,
+      orderBy: { reservationDate: Prisma.SortOrder.asc },
     })
     return reservations.map(r => reconstructReservation(r))
   },

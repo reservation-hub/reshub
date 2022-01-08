@@ -178,19 +178,19 @@ const menuSeeder = async (shopsForMenuSeed: Shop[]): Promise<void> => {
       data: [{
         name: 'フワ',
         description: 'ふわふわになる',
-        price: Math.floor(Math.random() * 100000) + 3000,
+        price: Math.floor(Math.random() * 10000) + 3000,
         shopId: s.id,
         duration: Math.floor(Math.random() * 2) === 0 ? 30 : 60,
       }, {
         name: 'ボウズ',
         description: 'ハゲになるやつ',
-        price: Math.floor(Math.random() * 100000) + 3000,
+        price: Math.floor(Math.random() * 10000) + 3000,
         shopId: s.id,
         duration: Math.floor(Math.random() * 2) === 0 ? 30 : 60,
       }, {
         name: 'アフロ',
         description: 'ファンキー',
-        price: Math.floor(Math.random() * 100000) + 3000,
+        price: Math.floor(Math.random() * 10000) + 3000,
         shopId: s.id,
         duration: Math.floor(Math.random() * 2) === 0 ? 30 : 60,
       }],
@@ -210,7 +210,7 @@ const stylistSeeder = async (shopsForStylistSeed: Shop[]): Promise<void> => {
       return Promise.all(stylistNames.map(async (sn, i) => prisma.stylist.create({
         data: {
           name: `${sn.lastName} ${sn.firstName}`,
-          price: Math.floor(Math.random() * 100000),
+          price: Math.floor(Math.random() * 1000 / 100) + 300,
           days: [
             Days.MONDAY,
             Days.WEDNESDAY,
@@ -244,7 +244,7 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
     await Promise.all(shopsForReservationSeed.map(async sfs => {
       const dates = Array(1000).fill(new Date()).map(d => {
         const start = d
-        const end = new Date('2025-12-31')
+        const end = new Date('2022-12-31')
         const shopOpeningHours = sfs.shopDetail.startTime.split(':').map(soh => parseInt(soh, 10))
         const shopClosingHours = sfs.shopDetail.endTime.split(':').map(sch => parseInt(sch, 10))
         const randomDate = getRandomDate(start, end)

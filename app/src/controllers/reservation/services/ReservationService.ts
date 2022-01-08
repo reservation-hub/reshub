@@ -136,7 +136,7 @@ const recreateReservationList = async (reservations: Reservation[]) => {
 }
 
 const ReservationService: ReservationServiceInterface = {
-  async fetchReservationsWithClientAndStylistAndMenu(user, shopId, page = 1, order = OrderBy.DESC) {
+  async fetchReservationsWithClientAndStylistAndMenu(user, shopId, page = 1, order = OrderBy.ASC) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
       Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()

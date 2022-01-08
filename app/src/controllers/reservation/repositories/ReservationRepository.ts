@@ -37,7 +37,7 @@ const ReservationRepository: ReservationServiceSocket = {
     const reservations = await prisma.reservation.findMany({
       where: { shop: { shopUser: { userId } }, AND: { shopId } },
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { reservationDate: order },
       take: limit,
     })
     return reservations.map(r => reconstructReservation(r))
