@@ -3,7 +3,7 @@ import { Gender, User } from '@entities/User'
 import { RoleSlug } from '@entities/Role'
 import UserService from '@user/services/UserService'
 import {
-  userInsertSchema, userUpdateSchema, indexSchema, searchSchema,
+  userInsertSchema, userUpdateSchema, indexSchema, searchSchema, userPasswordUpdateSchema,
 } from '@user/schemas'
 import { OrderBy } from '@entities/Common'
 
@@ -16,6 +16,7 @@ export type UserServiceInterface = {
     : Promise<void>
   updateUser(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string, firstNameKanji: string,
     lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string) : Promise<void>
+  updateUserPassword(id: number, oldPassword: string, newPassword: string, confirmNewPassword: string): Promise<void>
   deleteUser(id: number): Promise<void>
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
@@ -74,6 +75,15 @@ const UserController: UserControllerInterface = {
     await UserService.updateUser(query.id, email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, gender, birthday)
     return 'User updated'
+  },
+
+  async updatePassword(query) {
+    const { id } = query
+    const {
+      oldPassword, newPassword, confirmNewPassword,
+    } = await userPasswordUpdateSchema.validateAsync(query.params, joiOptions)
+    await UserService.updateUserPassword(id, oldPassword, newPassword, confirmNewPassword)
+    return 'User password updated'
   },
 
   async delete(query) {

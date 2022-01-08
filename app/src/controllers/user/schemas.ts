@@ -34,6 +34,12 @@ export const userUpdateSchema = joi.object({
   birthday: joi.date().format('YYYY-MM-DD').required(),
 })
 
+export const userPasswordUpdateSchema = joi.object({
+  oldPassword: Joi.string().trim().alphanum().required(),
+  newPassword: Joi.string().trim().alphanum().required(),
+  confirmNewPassword: Joi.string().trim().alphanum().required(),
+})
+
 export const userOAuthIdUpsertSchema = joi.object({
   googleId: joi.string().trim().allow('', null),
   lineId: joi.string().trim().allow('', null),

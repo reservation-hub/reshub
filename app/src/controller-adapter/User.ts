@@ -1,12 +1,12 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-import userController from '@user/UserController'
+import UserController from '@user/UserController'
 import { parseIntIdMiddleware, roleCheck } from '@routes/utils'
 import { RoleSlug } from '@entities/Role'
 import {
   UserListQuery, UserListResponse, UserQuery, UserResponse,
-  InsertUserQuery, UpdateUserQuery, deleteUserQuery, userSearchQuery,
+  InsertUserQuery, UpdateUserQuery, deleteUserQuery, userSearchQuery, UpdateUserPasswordQuery,
 } from '@request-response-types/User'
 import { ResponseMessage } from '@request-response-types/Common'
 
@@ -15,6 +15,7 @@ export type UserControllerInterface = {
   show(query: UserQuery): Promise<UserResponse>
   insert(query: InsertUserQuery): Promise<ResponseMessage>
   update(query: UpdateUserQuery): Promise<ResponseMessage>
+  updatePassword(query: UpdateUserPasswordQuery): Promise<ResponseMessage>
   delete(query: deleteUserQuery): Promise<ResponseMessage>
   searchUsers(query: userSearchQuery): Promise<UserListResponse>
 }
@@ -22,21 +23,21 @@ export type UserControllerInterface = {
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { page, order } = req.query
-    return res.send(await userController.index({ page, order }))
+    return res.send(await UserController.index({ page, order }))
   } catch (e) { return next(e) }
 }
 
 const showUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { id } = res.locals
-    return res.send(await userController.show({ id }))
+    return res.send(await UserController.show({ id }))
   } catch (e) { return next(e) }
 }
 
 const insertUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body } = req
-    return res.send(await userController.insert(body))
+    return res.send(await UserController.insert(body))
   } catch (e) { return next(e) }
 }
 
@@ -44,21 +45,29 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) : Pro
   try {
     const { body: params } = req
     const { id } = res.locals
-    return res.send(await userController.update({ id, params }))
+    return res.send(await UserController.update({ id, params }))
+  } catch (e) { return next(e) }
+}
+
+const updateUserPassword = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { body: params } = req
+    const { id } = res.locals
+    return res.send(await UserController.updatePassword({ id, params }))
   } catch (e) { return next(e) }
 }
 
 const deleteUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { id } = res.locals
-    return res.send(await userController.delete({ id }))
+    return res.send(await UserController.delete({ id }))
   } catch (e) { return next(e) }
 }
 
 const searchUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body } = req
-    return res.send(await userController.searchUsers(body))
+    return res.send(await UserController.searchUsers(body))
   } catch (e) { return next(e) }
 }
 
@@ -69,6 +78,7 @@ routes.get('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, showUser)
 routes.post('/', roleCheck([RoleSlug.ADMIN]), insertUser)
 routes.post('/search', searchUser)
 routes.patch('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, updateUser)
+routes.patch('/:id/password', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, updateUserPassword)
 routes.delete('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, deleteUser)
 
 export default routes
