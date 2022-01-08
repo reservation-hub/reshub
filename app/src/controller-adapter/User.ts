@@ -78,7 +78,8 @@ routes.get('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, showUser)
 routes.post('/', roleCheck([RoleSlug.ADMIN]), insertUser)
 routes.post('/search', searchUser)
 routes.patch('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, updateUser)
-routes.patch('/:id/password', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, updateUserPassword)
+routes.patch('/:id/password', roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]),
+  parseIntIdMiddleware, updateUserPassword)
 routes.delete('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, deleteUser)
 
 export default routes

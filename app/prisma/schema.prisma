@@ -142,8 +142,8 @@ model ShopUser {
   id     Int  @id @default(autoincrement())
   shopId Int  @unique @map("shop_id")
   userId Int  @map("user_id")
-  user   User @relation(fields: [userId], references: [id])
-  shop   Shop @relation(fields: [shopId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shop   Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
 }
 
 model ShopDetail {
