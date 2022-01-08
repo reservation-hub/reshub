@@ -89,6 +89,14 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
   }
 }
 
+const convertTimeToDateObject = (time: string): Date => new Date(`2021-01-01 ${time}:00`)
+const convertDateObjectToString = (date: Date): string => {
+  const convertToTwoDigitString = (number: number): string => (`0${number}`).slice(-2)
+  const hour = convertToTwoDigitString(date.getHours())
+  const minutes = convertToTwoDigitString(date.getMinutes())
+  return `${hour}:${minutes}`
+}
+
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const ShopController: ShopControllerInterface = {
@@ -168,8 +176,8 @@ const ShopController: ShopControllerInterface = {
       cityName: shop.city.name,
       days: shop.days.map(convertEntityDaysToOutboundDays),
       seats: shop.seats,
-      startTime: shop.startTime,
-      endTime: shop.endTime,
+      startTime: convertTimeToDateObject(shop.startTime),
+      endTime: convertTimeToDateObject(shop.endTime),
       name: shop.name,
       address: shop.address,
       details: shop.details,
@@ -191,9 +199,11 @@ const ShopController: ShopControllerInterface = {
       phoneNumber, days, seats, startTime, endTime, details,
     } = await shopUpsertSchema.validateAsync(query, joiOptions)
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
+    const startTimeString = convertDateObjectToString(startTime)
+    const endTimeString = convertDateObjectToString(endTime)
     await ShopService.insertShop(user,
       name, areaId, prefectureId, cityId, address,
-      phoneNumber, entityDays, seats, startTime, endTime, details)
+      phoneNumber, entityDays, seats, startTimeString, endTimeString, details)
 
     return 'Shop created'
   },
@@ -209,8 +219,10 @@ const ShopController: ShopControllerInterface = {
     } = await shopUpsertSchema.validateAsync(query.params, joiOptions)
     const { id } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
+    const startTimeString = convertDateObjectToString(startTime)
+    const endTimeString = convertDateObjectToString(endTime)
     await ShopService.updateShop(user, id, name, areaId, prefectureId, cityId,
-      address, phoneNumber, seats, entityDays, startTime, endTime, details)
+      address, phoneNumber, seats, entityDays, startTimeString, endTimeString, details)
 
     return 'Shop updated'
   },
