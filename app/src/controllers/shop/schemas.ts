@@ -1,6 +1,9 @@
-import Joi from 'joi'
+import joi from 'joi'
+import date from '@joi/date'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { OrderBy } from '@request-response-types/Common'
+
+const Joi = joi.extend(date)
 
 export const indexSchema = Joi.object({
   page: Joi.string().pattern(/^[0-9]+$/),
@@ -25,8 +28,8 @@ export const shopUpsertSchema = Joi.object({
     ScheduleDays.SUNDAY,
   )).min(1).required(),
   seats: Joi.number().required(),
-  startTime: Joi.string().pattern(/^(?:([01]?\d|2[0-3]):)?([0-5]?\d)$/).required(),
-  endTime: Joi.string().pattern(/^(?:([01]?\d|2[0-3]):)?([0-5]?\d)$/).required(),
+  startTime: Joi.date().format('YYYY-MM-DD hh:mm:ss').required(),
+  endTime: Joi.date().format('YYYY-MM-DD hh:mm:ss').required(),
 })
 
 export const searchSchema = Joi.object({

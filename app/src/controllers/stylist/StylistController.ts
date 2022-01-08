@@ -67,6 +67,8 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
   }
 }
 
+const convertTimeToDateObject = (time: string): Date => new Date(`2021-01-01 ${time}:00`)
+
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const StylistController: StylistControllerInterface = {
@@ -97,7 +99,13 @@ const StylistController: StylistControllerInterface = {
     const { shopId, stylistId } = query
     const stylist = await StylistService.fetchStylist(user, shopId, stylistId)
     const shopName = await ShopService.fetchShopName(user, shopId)
-    return { ...stylist, days: stylist.days.map(convertEntityDaysToOutboundDays), shopName }
+    return {
+      ...stylist,
+      startTime: convertTimeToDateObject(stylist.startTime),
+      endTime: convertTimeToDateObject(stylist.endTime),
+      days: stylist.days.map(convertEntityDaysToOutboundDays),
+      shopName,
+    }
   },
 
   async insert(user, query) {

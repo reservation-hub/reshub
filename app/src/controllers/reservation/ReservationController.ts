@@ -18,7 +18,7 @@ export type ReservationServiceInterface = {
     year: number, month: number): Promise<(Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
   fetchShopReservationTotalCount(user: UserForAuth, shopId: number): Promise<number>
   fetchReservationWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, reservationId: number)
-    : Promise<Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist }>
+    : Promise<Reservation & { reservationEndDate: Date, client: User, menu: Menu, shop: Shop, stylist?: Stylist }>
   insertReservation(user: UserForAuth, shopId: number, reservationDate: Date,
     clientId: number, menuId: number, stylistId?: number): Promise<Reservation>
   updateReservation(user: UserForAuth, shopId: number, reservationId: number,
@@ -106,6 +106,7 @@ const ReservationController: ReservationControllerInterface = {
       stylistName: r.stylist?.name,
       status: r.status,
       reservationDate: r.reservationDate,
+      reservationEndDate: r.reservationEndDate,
     }
   },
 
