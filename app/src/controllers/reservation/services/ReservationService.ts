@@ -177,22 +177,23 @@ const ReservationService: ReservationServiceInterface = {
       throw new NotFoundError()
     }
 
-    const reservationMenus = await MenuRepository.fetchMenusByIds([reservation.menuId])
-    const reservationClients = await UserRepository.fetchUsersByIds([reservation.clientId])
-    const reservationShops = await ShopRepository.fetchShopsByIds([reservation.shopId])
-    let reservationStylists: Stylist[]
+    const menu = (await MenuRepository.fetchMenusByIds([reservation.menuId]))[0]
+    const client = (await UserRepository.fetchUsersByIds([reservation.clientId]))[0]
+    const shop = (await ShopRepository.fetchShopsByIds([reservation.shopId]))[0]
+    let stylist: Stylist | undefined
     if (reservation.stylistId) {
-      reservationStylists = await StylistRepository.fetchStylistsByIds([reservation.stylistId])
-    } else {
-      reservationStylists = []
+      stylist = (await StylistRepository.fetchStylistsByIds([reservation.stylistId])).pop()
     }
+
+    const reservationEndDate = new Date(reservation.reservationDate.getTime() + menu.duration * 1000 * 60)
 
     return {
       ...reservation,
-      shop: reservationShops[0],
-      stylist: reservationStylists[0],
-      menu: reservationMenus[0],
-      client: reservationClients[0],
+      reservationEndDate,
+      shop,
+      stylist,
+      menu,
+      client,
     }
   },
 
