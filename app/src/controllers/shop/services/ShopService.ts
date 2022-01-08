@@ -125,8 +125,6 @@ export const ShopService: ShopServiceInterface = {
       throw new InvalidParamsError()
     }
 
-    // eslint-disable-next-line
-    console.log('DAYS : ', days)
     const uniqueDays: ScheduleDays[] = days.filter((n, i) => days.indexOf(n) === i)
 
     return ShopRepository.updateShop(
