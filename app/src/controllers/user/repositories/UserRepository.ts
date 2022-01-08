@@ -172,6 +172,21 @@ const UserRepository: UserRepositoryInterface = {
     return cleanUser
   },
 
+  async updateUserPassword(id, password) {
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        password,
+      },
+      include: {
+        oAuthIds: true,
+        profile: true,
+        role: true,
+      },
+    })
+    return reconstructUser(user)
+  },
+
   async deleteUser(id) {
     const user = await prisma.user.delete({
       where: { id },
