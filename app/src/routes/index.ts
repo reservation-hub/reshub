@@ -23,7 +23,7 @@ router.use('/api/*', (req: Request, res: Response, next: NextFunction) => next(n
 router.use('/auth', authController)
 router.use('/dashboard', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), dashboardController)
 router.use('/shops', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), shopController)
-router.use('/users', protectAdminRoute, roleCheck([RoleSlug.ADMIN]), userController)
+router.use('/users', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), userController)
 router.use('/', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), LocationController)
 
 router.use('/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404
