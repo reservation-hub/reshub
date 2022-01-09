@@ -1,6 +1,7 @@
 version: "3.7"
 volumes:
   postgres-data:
+  redis-data:
 
 services:
   # server
@@ -23,6 +24,7 @@ services:
     tty: true
     depends_on:
       - postgresql
+      - redis
 
   # prd
   production:
@@ -40,6 +42,7 @@ services:
       - 8091:8090
     depends_on:
       - postgresql
+      - redis
 
   postgresql:
     image: postgres:12
@@ -50,3 +53,11 @@ services:
       - postgres-data:/var/lib/postgresql/data
     env_file:
       - reshub-deploy/.env.dev
+  
+  redis:
+    image: redis:6.2
+    container_name: reshub-redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data

@@ -1,5 +1,5 @@
 import { ReservationRepositoryInterface } from '@user/services/UserService'
-import prisma from '@/prisma'
+import prisma from '@lib/prisma'
 
 const ReservationRepository: ReservationRepositoryInterface = {
 

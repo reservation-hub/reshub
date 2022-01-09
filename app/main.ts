@@ -1,6 +1,15 @@
 import Logger from '@lib/Logger'
+import config from '@config'
+import CronJobs from '@lib/Cron'
 import { app } from './src/app'
-import config from '@/config'
+
+/**
+ * start cron jobs
+ */
+
+CronJobs.forEach(job => {
+  job.start()
+})
 
 app.listen(8090, () => {
   Logger.info('server is up')

@@ -1,6 +1,6 @@
 import { ShopRepositoryInterface as ShopServiceSocket } from '@stylist/services/ShopService'
+import prisma from '@lib/prisma'
 import { ShopRepositoryInterface as StylistServiceSocket } from '../services/StylistService'
-import prisma from '@/prisma'
 
 const ShopRepository: ShopServiceSocket & StylistServiceSocket = {
   async fetchUserShopIds(userId) {

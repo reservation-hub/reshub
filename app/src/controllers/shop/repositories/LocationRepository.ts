@@ -1,5 +1,5 @@
 import { LocationRepositoryInterface } from '@shop/services/ShopService'
-import prisma from '@/prisma'
+import prisma from '@lib/prisma'
 
 const LocationRepository: LocationRepositoryInterface = {
   async isValidLocation(areaId, prefectureId, cityId) {

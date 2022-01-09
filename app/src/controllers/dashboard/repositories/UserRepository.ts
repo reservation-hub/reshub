@@ -3,7 +3,7 @@ import { Gender, User } from '@entities/User'
 import { UserRepositoryInterface as UserServiceSocket } from '@dashboard/services/UserService'
 import { RoleSlug } from '@entities/Role'
 import { UserRepositoryInterface as ReservationServiceSocket } from '@dashboard/services/ReservationService'
-import prisma from '@/prisma'
+import prisma from '@lib/prisma'
 
 export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
   switch (slug) {
