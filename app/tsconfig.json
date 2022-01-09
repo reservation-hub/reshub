@@ -2,6 +2,9 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
+      "@/*": [
+        "src/*"
+      ],
       "@lib/*": [
         "src/lib/*"
       ],
@@ -13,9 +16,6 @@
       ],
       "@auth/*": [
         "src/controllers/auth/*"
-      ],
-      "@cron/*": [
-        "src/controllers/cron/*"
       ],
       "@location/*": [
         "src/controllers/location/*"

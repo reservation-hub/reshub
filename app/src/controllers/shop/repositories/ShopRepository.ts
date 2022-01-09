@@ -4,7 +4,7 @@ import { ScheduleDays } from '@entities/Common'
 import { ShopRepositoryInterface as ShopServiceSocket } from '@shop/services/ShopService'
 import { ShopRepositoryInterface as MenuServiceSocket } from '@shop/services/MenuService'
 import { ShopRepositoryInterface as StylistServiceSocket } from '@shop/services/StylistService'
-import prisma from '@lib/prisma'
+import prisma from '@/prisma'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {
