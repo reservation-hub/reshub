@@ -5,7 +5,7 @@ import {
 import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface as ReservationServiceSocket } from '@reservation/services/ReservationService'
 
-import prisma from '@lib/prisma'
+import prisma from '@/prisma'
 
 const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
   switch (status) {

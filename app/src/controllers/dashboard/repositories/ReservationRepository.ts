@@ -8,7 +8,7 @@ import { ReservationRepositoryInterface as ShopServiceSocket } from '@dashboard/
 import { ReservationRepositoryInterface as UserServiceSocket } from '@dashboard/services/UserService'
 import { ReservationRepositoryInterface as StylistServiceSocket } from '@dashboard/services/StylistService'
 
-import prisma from '@lib/prisma'
+import prisma from '@/prisma'
 
 export const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
   switch (status) {
