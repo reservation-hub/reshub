@@ -1,5 +1,5 @@
 import { MenuRepositoryInterface } from '@shop/services/MenuService'
-import prisma from '@/prisma'
+import prisma from '@lib/prisma'
 
 const MenuRepository: MenuRepositoryInterface = {
   async fetchShopMenus(shopId, limit) {

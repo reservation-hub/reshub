@@ -1,7 +1,7 @@
 import Joi from 'joi'
 import date from '@joi/date'
 import { RoleSlug } from '@request-response-types/models/Role'
-import { OrderBy } from '@/request-response-types/Common'
+import { OrderBy } from '@request-response-types/Common'
 
 const joi = Joi.extend(date)
 

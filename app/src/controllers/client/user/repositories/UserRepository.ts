@@ -3,7 +3,7 @@ import { RoleSlug } from '@entities/Role'
 import { UserRepositoryInterface } from '@client/user/services/UserService'
 import { User } from '@entities/User'
 import { UserRepositoryInterface as AuthServiceSocket } from '@client/auth/services/AuthService'
-import prisma from '@/prisma'
+import prisma from '@lib/prisma'
 
 const userWithProfileAndOAuthIdsAndRole = Prisma.validator<Prisma.UserArgs>()(
   { include: { profile: true, oAuthIds: true, role: true } },

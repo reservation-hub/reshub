@@ -4,7 +4,7 @@ import { ScheduleDays } from '@entities/Common'
 import { StylistRepositoryInterface as ShopServiceSocket } from '@dashboard/services/ShopService'
 import { StylistRepositoryInterface as ReservationServiceSocket } from '@dashboard/services/ReservationService'
 import { StylistRepositoryInterface as StylistServiceSocket } from '@dashboard/services/StylistService'
-import prisma from '@/prisma'
+import prisma from '@lib/prisma'
 
 const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
   switch (day) {
