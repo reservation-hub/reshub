@@ -2,7 +2,7 @@ import { Prisma, Gender as PrismaGender, RoleSlug as PrismaRoleSlug } from '@pri
 import { RoleSlug } from '@entities/Role'
 import { Gender, User } from '@entities/User'
 import { UserRepositoryInterface } from '@user/services/UserService'
-import prisma from '@/prisma'
+import prisma from '@lib/prisma'
 
 export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
   switch (slug) {

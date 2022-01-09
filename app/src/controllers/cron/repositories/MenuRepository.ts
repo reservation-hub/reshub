@@ -1,16 +1,10 @@
-import { MenuRepositoryInterface as ReservationServiceSocket } from '@dashboard/services/ReservationService'
 import prisma from '@lib/prisma'
-import { MenuRepositoryInterface as MenuServiceSocket } from '../services/MenuService'
+import redis from '@lib/redis'
+import { MenuRepositoryInterface } from '@cron/services/MenuService'
 import { ReservationStatus } from '.prisma/client'
 
-const MenuRepository: ReservationServiceSocket & MenuServiceSocket = {
-  async fetchMenusByIds(menuIds) {
-    return prisma.menu.findMany({
-      where: { id: { in: menuIds } },
-    })
-  },
-
-  async fetchPopularMenusByStaffIdAndDate(userId, year, month) {
+const MenuRepository: MenuRepositoryInterface = {
+  async setPopularMenus(year, month) {
     const startDate = new Date(year, month, 1)
     const endDate = new Date(year, month + 1, 1)
     const menus = await prisma.$queryRaw<{
@@ -19,37 +13,32 @@ const MenuRepository: ReservationServiceSocket & MenuServiceSocket = {
       shop_id: number
       name: string
       description: string
-      image_id: number | null
       price: number
       duration: number
-      reservation_count: number
       /* eslint-enable */
     }[]>(`
-      SELECT m.*, 
+      SELECT m.*,
       (
-        SELECT COUNT(*) 
+        SELECT COUNT(*)
         FROM "Reservation" AS r
         WHERE r.menu_id = m.id
         AND r.reservation_date >= '${startDate.toISOString().split('T')[0]} 00:00:00'
         AND r.reservation_date < '${endDate.toISOString().split('T')[0]} 00:00:00'
         AND r.status = '${ReservationStatus.COMPLETED}'
       ) AS reservation_count
-      FROM "Menu" AS m 
-      INNER JOIN "Shop" AS s ON m.shop_id = s.id
-      INNER JOIN "ShopUser" AS su ON su.shop_id = s.id
-      WHERE su.user_id = ${userId}
+      FROM "Menu" AS m
       ORDER BY reservation_count DESC
       LIMIT 5
       `)
-    return menus.map(m => ({
+    const parsedMenus = menus.map(m => ({
       id: m.id,
       shopId: m.shop_id,
       name: m.name,
       price: m.price,
       duration: m.duration,
       description: m.description,
-      reservationCount: m.reservation_count,
     }))
+    await redis.set('popularMenus', JSON.stringify(parsedMenus))
   },
 }
 

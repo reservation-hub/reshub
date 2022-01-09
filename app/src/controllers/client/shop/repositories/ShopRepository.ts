@@ -1,7 +1,7 @@
 import { Prisma, Days } from '@prisma/client'
 import { Shop } from '@entities/Shop'
 import { ScheduleDays } from '@entities/Common'
-import prisma from '@/prisma'
+import prisma from '@lib/prisma'
 import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
 import { ShopRepositoryInterface as MenuServiceSocket } from '../services/MenuService'
 import { ShopRepositoryInterface as StylistServiceSocket } from '../services/StylistService'

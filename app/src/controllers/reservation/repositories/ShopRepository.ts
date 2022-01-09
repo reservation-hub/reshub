@@ -3,7 +3,7 @@ import { Shop } from '@entities/Shop'
 import { ShopRepositoryInterface as ReservationServiceSocket } from '@reservation/services/ReservationService'
 import { ShopRepositoryInterface as ShopServiceSocket } from '@reservation/services/ShopService'
 import { ScheduleDays } from '@entities/Common'
-import prisma from '@/prisma'
+import prisma from '@lib/prisma'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {

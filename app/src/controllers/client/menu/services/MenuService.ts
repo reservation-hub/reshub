@@ -4,17 +4,14 @@ import { MenuServiceInterface } from '@client/menu/MenuController'
 import MenuRepository from '@client/menu/repositories/MenuRepository'
 
 export type MenuRepositoryInterface = {
-  fetchPopularMenus(year: number, month: number): Promise<Menu[]>
+  fetchPopularMenus(): Promise<Menu[]>
   fetchMenus(shopId: number, page: number, order: OrderBy): Promise<Menu[]>
   fetchMenuTotalCount(shopId: number): Promise<number>
 }
 
 const MenuService: MenuServiceInterface = {
   async popularMenus(user) {
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = now.getMonth()
-    return MenuRepository.fetchPopularMenus(year, month)
+    return MenuRepository.fetchPopularMenus()
   },
 
   async fetchShopMenusWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC) {

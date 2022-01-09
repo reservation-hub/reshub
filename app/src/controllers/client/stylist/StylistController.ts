@@ -2,7 +2,7 @@ import { OrderBy } from '@entities/Common'
 import { Stylist } from '@entities/Stylist'
 import { UserForAuth } from '@entities/User'
 import StylistService from '@client/stylist/services/StylistService'
-import { StylistControllerInterface } from '@/controller-adapter/client/Shop'
+import { StylistControllerInterface } from '@controller-adapter/client/Shop'
 import { indexSchema } from './schemas'
 
 export type StylistServiceInterface = {
