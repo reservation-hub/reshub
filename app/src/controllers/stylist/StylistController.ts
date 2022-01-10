@@ -99,12 +99,15 @@ const StylistController: StylistControllerInterface = {
     const { shopId, stylistId } = query
     const stylist = await StylistService.fetchStylist(user, shopId, stylistId)
     const shopName = await ShopService.fetchShopName(user, shopId)
+    const stylistReservationCount = (
+      await StylistService.fetchStylistsReservationCounts([stylist.id]))[0].reservationCount
     return {
       ...stylist,
       startTime: convertTimeToDateObject(stylist.startTime),
       endTime: convertTimeToDateObject(stylist.endTime),
       days: stylist.days.map(convertEntityDaysToOutboundDays),
       shopName,
+      reservationCount: stylistReservationCount,
     }
   },
 
