@@ -63,6 +63,7 @@ const ShopController: ShopControllerInterface = {
         shopId: s.shopId,
         name: s.name,
         price: s.price,
+
       })),
     }
   },

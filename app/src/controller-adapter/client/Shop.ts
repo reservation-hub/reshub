@@ -4,7 +4,7 @@ import {
 import {
   SalonListQuery, SalonListResponse, SalonQuery, SalonResponse,
   SalonMenuListQuery, SalonMenuListResponse, SalonStylistListQuery, SalonStylistListResponse,
-  SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery,
+  SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -25,6 +25,8 @@ export type MenuControllerInterface = {
 
 export type StylistControllerInterface = {
   list(user: UserForAuth | undefined, query: SalonStylistListQuery): Promise<SalonStylistListResponse>
+  listForReservation(user: UserForAuth | undefined, query: SalonStylistListQuery)
+    : Promise<SalonStylistListForReservationResponse>
 }
 
 export type ReservationControllerInterface = {
@@ -66,6 +68,16 @@ const shopStylists = async (req: Request, res: Response, next: NextFunction) : P
   } catch (e) { return next(e) }
 }
 
+const shopStylistsForReservation = async (req: Request, res: Response, next: NextFunction)
+  : Promise<Response | void> => {
+  try {
+    const { user } = req
+    const { shopId } = res.locals
+    const { page, order } = req.query
+    return res.send(await StylistController.listForReservation(user, { shopId, page, order }))
+  } catch (e) { return next(e) }
+}
+
 const shopReservations = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { user } = req
@@ -100,6 +112,7 @@ routes.get('/:shopId/menus', parseIntIdMiddleware, shopMenus)
  */
 
 routes.get('/:shopId/stylists', parseIntIdMiddleware, shopStylists)
+routes.get('/:shopId/stylists/reservation', parseIntIdMiddleware, shopStylistsForReservation)
 
 /**
  * stylist routes
