@@ -5,13 +5,23 @@ import MenuRepository from '@client/menu/repositories/MenuRepository'
 
 export type MenuRepositoryInterface = {
   fetchPopularMenus(): Promise<Menu[]>
+  setPopularMenus(year: number, month: number): Promise<void>
   fetchMenus(shopId: number, page: number, order: OrderBy): Promise<Menu[]>
   fetchMenuTotalCount(shopId: number): Promise<number>
 }
 
 const MenuService: MenuServiceInterface = {
   async popularMenus(user) {
-    return MenuRepository.fetchPopularMenus()
+    let popularMenus:Menu[]
+    popularMenus = await MenuRepository.fetchPopularMenus()
+    if (popularMenus.length === 0) {
+      const today = new Date()
+      const year = today.getFullYear()
+      const month = today.getMonth()
+      await MenuRepository.setPopularMenus(year, month)
+      popularMenus = await MenuRepository.fetchPopularMenus()
+    }
+    return popularMenus
   },
 
   async fetchShopMenusWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC) {

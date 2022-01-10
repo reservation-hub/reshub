@@ -2,6 +2,7 @@ import { MenuRepositoryInterface } from '@client/menu/services/MenuService'
 import { Menu } from '@entities/Menu'
 import prisma from '@lib/prisma'
 import redis from '@lib/redis'
+import setPopularMenus from '@lib/PopularMenuSetter'
 
 const MenuRepository: MenuRepositoryInterface = {
   async fetchPopularMenus() {
@@ -12,6 +13,8 @@ const MenuRepository: MenuRepositoryInterface = {
     }
     return menus
   },
+
+  setPopularMenus,
 
   async fetchMenus(shopId, page, order) {
     const limit = 10
