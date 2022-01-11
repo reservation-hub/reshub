@@ -1,6 +1,7 @@
 .env*
 */node_modules
 app/logs
+.eslintcache
 
 # backup files
 rh-*
