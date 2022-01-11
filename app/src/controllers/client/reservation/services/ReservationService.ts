@@ -9,6 +9,7 @@ import StylistRepository from '@client/reservation/repositories/StylistRepositor
 import ShopRepository from '@client/reservation/repositories/ShopRepository'
 import Logger from '@lib/Logger'
 import { Stylist } from '@entities/Stylist'
+import isWithinSchedule from '@lib/ScheduleChecker'
 
 export type ReservationRepositoryInterface = {
   fetchShopReservationsForAvailabilityWithMenuDuration(shopId: number, reservationDate: Date,
@@ -40,31 +41,6 @@ const getConflictingReservations = (reservationDate: Date, menuDuration: number,
     return (shopReservationStartTime <= reservationStartTime && reservationStartTime < shopReservationEndTime)
       || (shopReservationStartTime < reservationEndTime && reservationEndTime <= shopReservationEndTime)
   })
-}
-
-const timeToString = (dateTime : Date): string => {
-  const hours = dateTime.getHours().toString()
-  const minutes = dateTime.getMinutes().toString()
-  return `${hours}:${minutes}`
-}
-
-const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
-
-const isWithinSchedule = (startTime: string, endTime: string, days: ScheduleDays[],
-  reservationDate: Date, menuDuration: number): boolean => {
-  const reservationStartTime = convertToUnixTime(timeToString(reservationDate))
-  const reservationEndTime = convertToUnixTime(timeToString(
-    new Date(reservationDate.getTime() + (menuDuration * 1000 * 60)),
-  ))
-  const shopStartTime = convertToUnixTime(startTime)
-  const shopEndTime = convertToUnixTime(endTime)
-
-  const isWithinShopTime = !(shopStartTime > reservationStartTime || reservationEndTime > shopEndTime)
-
-  const reservationDay = reservationDate.getDay()
-  const isWithinShopDays = days.some(d => d === reservationDay)
-
-  return isWithinShopTime && isWithinShopDays
 }
 
 const ReservationService: ReservationServiceInterface = {
@@ -102,9 +78,9 @@ const ReservationService: ReservationServiceInterface = {
     }
 
     // check shop schedule availability
-
+    const reservationEndDate = new Date(reservationDate.getTime() + menu.duration * 1000 * 60)
     const reservationIsWithinShopSchedule = isWithinSchedule(shopDetails.startTime, shopDetails.endTime,
-      shopDetails.days, reservationDate, menu.duration)
+      shopDetails.days, reservationDate, reservationEndDate, [reservationDate.getDay()])
 
     if (!reservationIsWithinShopSchedule) {
       Logger.debug('Reservation date is not within shop schedule')
@@ -133,7 +109,7 @@ const ReservationService: ReservationServiceInterface = {
       }
 
       const reservationIsWithinStylistSchedule = isWithinSchedule(stylist.startTime, stylist.endTime,
-        stylist.days, reservationDate, menu.duration)
+        stylist.days, reservationDate, reservationEndDate, [reservationDate.getDay()])
       if (!reservationIsWithinStylistSchedule) {
         Logger.debug('Reservation date is not within stylist schedule')
         throw new InvalidParamsError()

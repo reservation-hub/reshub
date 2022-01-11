@@ -16,6 +16,7 @@ import {
   OutOfScheduleError, UnavailableError, AuthorizationError, NotFoundError, InvalidParamsError,
 } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
+import { convertToUnixTime } from '@lib/ScheduleChecker'
 
 export type ReservationRepositoryInterface = {
   fetchShopReservations(userId: number, shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
@@ -65,7 +66,7 @@ const timeToString = (dateTime : Date): string => {
   const minutes = dateTime.getMinutes().toString()
   return `${hours}:${minutes}`
 }
-const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
+
 const isWithinShopSchedule = (shopSchedule: {startTime: string,
   endTime: string}, reservationDate: Date, menuDuration: number): boolean => {
   const reservationStartTime = convertToUnixTime(timeToString(reservationDate))
