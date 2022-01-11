@@ -7,6 +7,7 @@ import ShopRepository from '@shop/repositories/ShopRepository'
 import LocationRepository from '@shop/repositories/LocationRepository'
 import { AuthorizationError, InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
+import { convertToUnixTime } from '@lib/ScheduleChecker'
 
 export type ShopRepositoryInterface = {
   fetchAllShops(page: number, order: OrderBy): Promise<Shop[]>
@@ -35,8 +36,6 @@ export type LocationRepositoryInterface = {
 export type UserRepositoryInterface = {
   fetchUser(userId: number): Promise<User | null>
 }
-
-const convertToUnixTime = (time:string): number => new Date(`January 1, 2020 ${time}`).getTime()
 
 const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean> => {
   const userShopIds = await ShopRepository.fetchUserShopIds(userId)
