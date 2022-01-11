@@ -87,7 +87,12 @@ const ShopRepository: ReservationServiceSocket & ShopServiceSocket = {
         shopDetail: true,
       },
     })
-    return shop ? { startTime: shop.shopDetail.startTime, endTime: shop.shopDetail.endTime } : null
+    return shop ? {
+      startTime: shop.shopDetail.startTime,
+      endTime: shop.shopDetail.endTime,
+      seats: shop.shopDetail.seats,
+    }
+      : null
   },
 
   async fetchShopSeatCount(shopId) {
