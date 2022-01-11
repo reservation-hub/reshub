@@ -25,8 +25,10 @@ const colors = {
 
 winston.addColors(colors)
 
+const date = () => new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo', hour12: false })
+
 const format = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+  winston.format.timestamp({ format: date }),
   winston.format.colorize({ all: true }),
   winston.format.printf(
     info => `${info.timestamp} ${info.level}: ${info.message}`,
@@ -40,21 +42,25 @@ const transports = [
     datePattern: 'yyyy-MM-DD',
     handleExceptions: true,
     level: 'error',
-    zippedArchive: true,
     maxSize: '20m',
     maxFiles: '30d',
     dirname: '/app/logs/error',
   }),
-  // new winston.transports.File({ filename: 'logs/all.log' }),
+  new winston.transports.DailyRotateFile({
+    filename: '%DATE%.log',
+    datePattern: 'yyyy-MM-DD',
+    handleExceptions: true,
+    level: 'debug',
+    maxSize: '20m',
+    maxFiles: '30d',
+    dirname: '/app/logs/debug',
+  }),
   new winston.transports.DailyRotateFile({
     filename: '%DATE%.log',
     datePattern: 'yyyy-MM-DD',
     dirname: '/app/logs/all',
     level: 'info',
     handleExceptions: true,
-    // colorize: true,
-    // json: false,
-    zippedArchive: true,
     maxSize: '20m',
     maxFiles: '14d',
   }),

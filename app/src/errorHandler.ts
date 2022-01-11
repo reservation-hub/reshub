@@ -31,6 +31,8 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
       case EntityErrorCode.DuplicateModel:
         code = ErrorCode.BadRequest
         break
+      case EntityErrorCode.Authorization:
+      case EntityErrorCode.Authentication:
       case EntityErrorCode.InvalidToken:
         code = ErrorCode.Unauthorized
         break
@@ -38,6 +40,8 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
         code = ErrorCode.Forbidden
         break
       case EntityErrorCode.NotFound:
+      case EntityErrorCode.Unavailable:
+      case EntityErrorCode.OutOfSchedule:
         code = ErrorCode.NotFound
         break
       default:
