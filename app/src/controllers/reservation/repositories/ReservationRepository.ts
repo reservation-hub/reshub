@@ -155,6 +155,15 @@ const ReservationRepository: ReservationServiceSocket = {
       duration: r.menu.duration,
     }))
   },
+  async fetchReservationCountAtGivenTime(reservationDate, shopId) {
+    const reservations = await prisma.reservation.findMany({
+      where: {
+        reservationDate,
+        AND: { shopId },
+      },
+    })
+    return reservations.length
+  },
 
 }
 

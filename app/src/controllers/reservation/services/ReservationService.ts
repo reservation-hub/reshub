@@ -13,7 +13,7 @@ import UserRepository from '@reservation/repositories/UserRepository'
 import ShopRepository from '@reservation/repositories/ShopRepository'
 import StylistRepository from '@reservation/repositories/StylistRepository'
 import {
-  OutOfScheduleError, UnavailableError, AuthorizationError, NotFoundError, InvalidParamsError,
+  OutOfScheduleError, UnavailableError, AuthorizationError, NotFoundError, InvalidParamsError, NoSeatsAvailableError,
 } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 import { convertToUnixTime } from '@lib/ScheduleChecker'
@@ -31,6 +31,7 @@ export type ReservationRepositoryInterface = {
   reservationExists(reservationId: number): Promise<boolean>
   fetchReservationsDateWithDuration(shopId: number, startDate: Date, eneDate: Date, stylistId?: number):
   Promise<{reservationDate: Date, duration: number}[]>
+  fetchReservationCountAtGivenTime(reservationDate: Date, shopId: number): Promise<number>
 }
 
 export type MenuRepositoryInterface = {
@@ -47,7 +48,8 @@ export type UserRepositoryInterface = {
 export type ShopRepositoryInterface = {
   fetchUserShopIds(userId: number): Promise<number[]>
   fetchShopsByIds(shopIds: number[]): Promise<Shop[]>
-  fetchShopSchedule(shopId: number): Promise<{startTime: string, endTime: string} | null >
+  fetchShopSchedule(shopId: number): Promise<{startTime: string, endTime: string,
+  seats: number} | null >
 }
 
 export type StylistRepositoryInterface = {
@@ -55,6 +57,10 @@ export type StylistRepositoryInterface = {
   fetchStylistIdsByShopId(shopId: number): Promise<number[]>
 }
 
+const numberOfAvailableSeats = (numberOfSeats: number, reservationsCount: number) : number => {
+  const availableSeats = Math.abs(reservationsCount - numberOfSeats)
+  return availableSeats
+}
 const getNextAvailableDate = (reservationDate: Date, menuDuration: number): Date => {
   const nextAvailableDate = new Date(reservationDate)
   nextAvailableDate.setMinutes(nextAvailableDate.getMinutes() + menuDuration)
@@ -82,8 +88,8 @@ const getStartAndEndDateFromReservationDate = (reservationDate: Date) => {
   return { startDate, endDate }
 }
 
-export const checkAvailability = (reservationDates:{reservationDate: Date, duration: number}[],
-  wantedReservationDate: Date, wantedReservationMenu: number): boolean => {
+const checkAvailablity = (reservationDates:{reservationDate: Date, duration: number}[],
+  wantedReservationDate: Date, wantedReservationMenu: number) => {
   if (reservationDates.length === 0) return true
   return reservationDates.every(r => {
     const rStartTime = r.reservationDate.getTime()
@@ -241,14 +247,23 @@ const ReservationService: ReservationServiceInterface = {
       endDate, stylistId,
     )
 
-    const checkWithShopSchedule = isWithinShopSchedule(shopSchedule, reservationDate, menuDuration)
+    // At a given time
+    const reservationCount = await ReservationRepository.fetchReservationCountAtGivenTime(reservationDate, shopId)
 
+    const checkWithShopSchedule = isWithinShopSchedule(shopSchedule, reservationDate, menuDuration)
     if (!checkWithShopSchedule) {
       Logger.debug('The reservation Time doesnt match with Shop Schedule')
       throw new OutOfScheduleError()
     }
-    const isAvailability = checkAvailability(reservationDatesAndDuration, reservationDate, menuDuration)
+    const numberOfSeatsAvailable = numberOfAvailableSeats(shopSchedule.seats, reservationCount)
+    console.error(numberOfSeatsAvailable)
+    // check if seats are available
+    if (numberOfSeatsAvailable > shopSchedule.seats) {
+      Logger.debug('Seats not available')
+      throw new NoSeatsAvailableError()
+    }
 
+    const isAvailability = checkAvailablity(reservationDatesAndDuration, reservationDate, menuDuration)
     if (!isAvailability) {
       Logger.debug('The reservation Date/Time is unavailable')
       throw new UnavailableError()
