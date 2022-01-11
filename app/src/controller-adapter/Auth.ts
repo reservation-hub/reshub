@@ -123,7 +123,7 @@ const routes = Router()
 routes.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
 routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('admin-local', { session: false }), login)
 routes.post('/silent_refresh', silentRefreshParamsCheck,
-  passport.authenticate('refresh-jwt', { session: false }), login)
+  passport.authenticate('refresh-jwt', { session: false }), refreshLogin)
 routes.get('/logout', passport.authenticate('admin-jwt', { session: false }), logout)
 routes.get('/hack', hack, login)
 routes.get('/hack_staff', staffHack, login)
