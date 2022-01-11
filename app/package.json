@@ -5,12 +5,13 @@
   "repository": "https://github.com/reservation-hub/reshub",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon --legacy-watch --exec 'npm run lint && npm run build && node -r tsconfig-paths/register -r ts-node/register dist/main.js'",
-    "start": "node main.js",
+    "serve": "nodemon --legacy-watch --exec 'npm run lint && npm run dev'",
+    "start": "node -r tsconfig-paths/register -r ts-node/register dist/main.js",
+    "dev": "ts-node -r tsconfig-paths/register main.ts",
     "seed": "node seedFiles/seed.js",
     "build": "rm -rf dist && tsc",
     "seed-shop": "node seedFiles/shopSeeder.js",
-    "lint": "eslint --ignore-path /app/.eslintignore . --ext .ts",
+    "lint": "eslint --cache --ignore-path /app/.eslintignore . --ext .ts",
     "migrate": "prisma migrate dev",
     "db-reset": "yes | prisma migrate reset && node dist/seedFiles/seed.js"
   },
@@ -23,15 +24,6 @@
   "dependencies": {
     "@joi/date": "^2.1.0",
     "@prisma/client": "^2.29.1",
-    "@types/bcrypt": "^5.0.0",
-    "@types/joi": "^17.2.3",
-    "@types/jsonwebtoken": "^8.5.4",
-    "@types/morgan": "^1.9.3",
-    "@types/node-cron": "^3.0.1",
-    "@types/nodemailer": "^6.4.4",
-    "@types/passport-jwt": "^3.0.6",
-    "@types/passport-local": "^1.0.34",
-    "@types/winston": "^2.4.4",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
@@ -51,13 +43,21 @@
     "path": "^0.12.7",
     "pluralize": "^8.0.0",
     "tedis": "^0.1.12",
-    "ts-node": "^10.1.0",
     "tsconfig-paths": "^3.12.0",
     "typescript": "^4.3.5",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.5"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/joi": "^17.2.3",
+    "@types/jsonwebtoken": "^8.5.4",
+    "@types/morgan": "^1.9.3",
+    "@types/node-cron": "^3.0.1",
+    "@types/nodemailer": "^6.4.4",
+    "@types/passport-jwt": "^3.0.6",
+    "@types/passport-local": "^1.0.34",
+    "@types/winston": "^2.4.4",
     "@types/cookie-parser": "^1.4.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
@@ -72,6 +72,7 @@
     "eslint-plugin-import": "^2.23.4",
     "nodemon": "^2.0.7",
     "prisma": "^2.29.1",
-    "supertest": "^6.1.4"
+    "supertest": "^6.1.4",
+    "ts-node": "^10.4.0"
   }
 }
