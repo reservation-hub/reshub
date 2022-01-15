@@ -20,7 +20,7 @@ export type UserRepositoryInterface = {
     : Promise<User>
   updateUserPassword(id: number, password: string): Promise<User>
   deleteUser(id: number): Promise<User>
-  searchUser(keyword: string): Promise<User[]>
+  searchUser(keyword: string, page: number, order: OrderBy): Promise<User[]>
   fetchUserByEmail(email: string): Promise<User | null>
 }
 
@@ -36,8 +36,8 @@ const UserService: UserServiceInterface = {
     return { users, totalCount }
   },
 
-  async searchUser(keyword) {
-    const users = await UserRepository.searchUser(keyword)
+  async searchUser(keyword, page = 1, order = OrderBy.DESC) {
+    const users = await UserRepository.searchUser(keyword, page, order)
     return users
   },
 

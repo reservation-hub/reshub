@@ -176,9 +176,19 @@ StylistServiceSocket = {
     const cleanShop = reconstructShop(shop)
     return cleanShop
   },
-  async searchShops(keyword) {
-    const shopsResult = await prisma.$queryRaw('SELECT * FROM "ShopDetail" WHERE (name ILIKE $1)', `${keyword}%`)
-    return shopsResult
+  async searchShops(keyword, page, order) {
+    const limit = 10
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const shops = await prisma.shop.findMany({
+      where: { shopDetail: { name: { contains: keyword } } },
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true,
+      },
+    })
+    return shops.map(reconstructShop)
   },
 
   async deleteShop(id) {

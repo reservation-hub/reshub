@@ -28,7 +28,7 @@ export type ShopServiceInterface = {
     cityId: number, address: string, phoneNumber: string, days: EntityScheduleDays[],
     seats:number, startTime: string, endTime: string, details: string): Promise<Shop>
   deleteShop(user: UserForAuth, id: number): Promise<Shop>
-  searchShops(user: UserForAuth, keyword: string): Promise<Shop[]>
+  searchShops(user: UserForAuth, keyword: string, page?: number, order?: OrderBy): Promise<Shop[]>
 }
 
 export type StylistServiceInterface = {
@@ -236,8 +236,8 @@ const ShopController: ShopControllerInterface = {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const searchValues = await searchSchema.validateAsync(query, joiOptions)
-    const shops = await ShopService.searchShops(user, searchValues.keyword)
+    const { keyword, page, order } = await searchSchema.validateAsync(query, joiOptions)
+    const shops = await ShopService.searchShops(user, keyword, page, order)
     const shopIds = shops.map(s => s.id)
     const totalReservationsCount = await ReservationService.fetchReservationsCountByShopIds(shopIds)
     const totalStylistsCount = await StylistService.fetchStylistsCountByShopIds(shopIds)

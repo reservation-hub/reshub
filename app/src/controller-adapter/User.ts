@@ -66,17 +66,17 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) : Pro
 
 const searchUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { body } = req
-    return res.send(await UserController.searchUsers(body))
+    const { query } = req
+    return res.send(await UserController.searchUsers(query))
   } catch (e) { return next(e) }
 }
 
 const routes = Router()
 
 routes.get('/', roleCheck([RoleSlug.ADMIN]), index)
+routes.get('/search', roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), searchUser)
 routes.get('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, showUser)
 routes.post('/', roleCheck([RoleSlug.ADMIN]), insertUser)
-routes.post('/search', searchUser)
 routes.patch('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, updateUser)
 routes.patch('/:id/password', roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]),
   parseIntIdMiddleware, updateUserPassword)
