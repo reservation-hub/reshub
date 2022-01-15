@@ -9,6 +9,7 @@ import { ScheduleDays } from '@request-response-types/models/Common'
 import { ScheduleDays as EntityScheduleDays } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import Logger from '@lib/Logger'
+import { extractTimeFromInboundDateString, convertTimeToDateObjectString } from '@lib/Date'
 
 export type StylistServiceInterface = {
   fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
@@ -67,15 +68,6 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
   }
 }
 
-const convertTimeToDateObject = (time: string): Date => new Date(`2021-01-01 ${time}:00`)
-const extractTimeFromInboundDateString = (dateString: string): string => {
-  const date = new Date(dateString)
-  const convertToTwoDigitString = (number: number): string => (`0${number}`).slice(-2)
-  const hour = convertToTwoDigitString(date.getHours())
-  const minutes = convertToTwoDigitString(date.getMinutes())
-  return `${hour}:${minutes}`
-}
-
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const StylistController: StylistControllerInterface = {
@@ -110,8 +102,8 @@ const StylistController: StylistControllerInterface = {
       await StylistService.fetchStylistsReservationCounts([stylist.id]))[0].reservationCount
     return {
       ...stylist,
-      startTime: convertTimeToDateObject(stylist.startTime),
-      endTime: convertTimeToDateObject(stylist.endTime),
+      startTime: convertTimeToDateObjectString(stylist.startTime),
+      endTime: convertTimeToDateObjectString(stylist.endTime),
       days: stylist.days.map(convertEntityDaysToOutboundDays),
       shopName,
       reservationCount: stylistReservationCount,

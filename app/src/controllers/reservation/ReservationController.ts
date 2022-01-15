@@ -8,6 +8,7 @@ import { ReservationControllerInterface } from '@controller-adapter/Shop'
 import { OrderBy } from '@request-response-types/Common'
 import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
+import { convertDateStringToDateObject } from '@lib/Date'
 import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './schemas'
 import ShopService from './services/ShopService'
 
@@ -118,7 +119,7 @@ const ReservationController: ReservationControllerInterface = {
     const {
       reservationDate, userId, menuId, stylistId,
     } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
-    const reservationDateObject = new Date(reservationDate)
+    const reservationDateObject = convertDateStringToDateObject(reservationDate)
     const { shopId } = query
     await ReservationService.insertReservation(user, shopId, reservationDateObject, userId, menuId, stylistId)
     return 'Reservation created'
@@ -132,7 +133,7 @@ const ReservationController: ReservationControllerInterface = {
     const {
       reservationDate, userId, menuId, stylistId,
     } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
-    const reservationDateObject = new Date(reservationDate)
+    const reservationDateObject = convertDateStringToDateObject(reservationDate)
     const { shopId, reservationId } = query
     await ReservationService.updateReservation(user, shopId, reservationId, reservationDateObject,
       userId, menuId, stylistId)

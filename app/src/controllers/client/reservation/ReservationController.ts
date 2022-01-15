@@ -6,6 +6,7 @@ import ReservationService from '@client/reservation/services/ReservationService'
 import ShopService from '@client/reservation/services/ShopService'
 import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
+import { convertDateStringToDateObject } from '@lib/Date'
 
 export type ReservationServiceInterface = {
   fetchShopReservationsForAvailability(user: UserForAuth | undefined, shopId: number, reservationDate: Date)
@@ -24,7 +25,7 @@ const ReservationController: ReservationControllerInterface = {
   async list(user, query) {
     const { shopId } = query
     const { reservationDate } = await reservationQuerySchema.validateAsync(query.params, joiOptions)
-    const reservationDateObject = new Date(reservationDate)
+    const reservationDateObject = convertDateStringToDateObject(reservationDate)
     const reservations = await ReservationService.fetchShopReservationsForAvailability(
       user, shopId, reservationDateObject,
     )
@@ -43,7 +44,7 @@ const ReservationController: ReservationControllerInterface = {
     const {
       reservationDate, menuId, stylistId,
     } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
-    const reservationDateObject = new Date(reservationDate)
+    const reservationDateObject = convertDateStringToDateObject(reservationDate)
     await ReservationService.createReservation(user, shopId, reservationDateObject, menuId, stylistId)
 
     return 'Reservation created successfully'
