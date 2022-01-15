@@ -24,8 +24,9 @@ const ReservationController: ReservationControllerInterface = {
   async list(user, query) {
     const { shopId } = query
     const { reservationDate } = await reservationQuerySchema.validateAsync(query.params, joiOptions)
+    const reservationDateObject = new Date(reservationDate)
     const reservations = await ReservationService.fetchShopReservationsForAvailability(
-      user, shopId, reservationDate,
+      user, shopId, reservationDateObject,
     )
 
     const seats = await ShopService.fetchShopSeatCount(user, shopId)
@@ -42,8 +43,8 @@ const ReservationController: ReservationControllerInterface = {
     const {
       reservationDate, menuId, stylistId,
     } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
-
-    await ReservationService.createReservation(user, shopId, reservationDate, menuId, stylistId)
+    const reservationDateObject = new Date(reservationDate)
+    await ReservationService.createReservation(user, shopId, reservationDateObject, menuId, stylistId)
 
     return 'Reservation created successfully'
   },
