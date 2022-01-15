@@ -10,7 +10,7 @@ import { OrderBy } from '@entities/Common'
 export type UserServiceInterface = {
   fetchUsersWithTotalCount(page?: number, order?: OrderBy): Promise<{ users: User[], totalCount: number}>
   fetchUser(id: number): Promise<User>
-  searchUser(keyword: string): Promise<User[]>
+  searchUser(keyword: string, page?: number, order?: OrderBy): Promise<User[]>
   insertUser(password: string, confirm: string, email: string, roleSlug: RoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string)
     : Promise<void>
@@ -32,7 +32,10 @@ const UserController: UserControllerInterface = {
       id: u.id,
       username: u.username,
       email: u.email,
-      role: u.role,
+      role: {
+        slug: u.role.slug,
+        name: u.role.name,
+      },
       lastNameKana: u.lastNameKana,
       firstNameKana: u.firstNameKana,
       reservationCount: userReservationCounts.find(urc => urc.userId === u.id)!.reservationCount,
@@ -48,7 +51,10 @@ const UserController: UserControllerInterface = {
       id: u.id,
       username: u.username,
       email: u.email,
-      role: u.role,
+      role: {
+        slug: u.role.slug,
+        name: u.role.name,
+      },
       lastNameKana: u.lastNameKana,
       firstNameKana: u.firstNameKana,
       birthday: u.birthday,
@@ -93,14 +99,17 @@ const UserController: UserControllerInterface = {
   },
 
   async searchUsers(query) {
-    const searchValues = await searchSchema.validateAsync(query, joiOptions)
-    const users = await UserService.searchUser(searchValues.keyword)
+    const { keyword, page, order } = await searchSchema.validateAsync(query, joiOptions)
+    const users = await UserService.searchUser(keyword, page, order)
     const userReservationCounts = await UserService.fetchUsersReservationCounts(users.map(u => u.id))
     const userList = users.map(u => ({
       id: u.id,
       username: u.username,
       email: u.email,
-      role: u.role,
+      role: {
+        slug: u.role.slug,
+        name: u.role.name,
+      },
       lastNameKana: u.lastNameKana,
       firstNameKana: u.firstNameKana,
       reservationCount: userReservationCounts.find(urc => urc.userId === u.id)!.reservationCount,

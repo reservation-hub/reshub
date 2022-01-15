@@ -138,9 +138,9 @@ const deleteStylist = async (req: Request, res: Response, next: NextFunction) : 
 
 const searchShops = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { body } = req
+    const { query } = req
     const { user } = req
-    return res.send(await ShopController.searchShops(user, body))
+    return res.send(await ShopController.searchShops(user, query))
   } catch (e) { return next(e) }
 }
 
@@ -244,11 +244,11 @@ const routes = Router()
 
 // shop routes
 routes.get('/', index)
+routes.get('/search', searchShops)
 routes.get('/:id', parseIntIdMiddleware, showShop)
 routes.post('/', insertShop)
 routes.patch('/:id', parseIntIdMiddleware, updateShop)
 routes.delete('/:id', parseIntIdMiddleware, deleteShop)
-routes.post('/search', searchShops)
 
 // stylist routes
 routes.get('/:shopId/stylist', parseIntIdMiddleware, showStylists)

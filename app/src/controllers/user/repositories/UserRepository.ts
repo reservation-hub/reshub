@@ -199,18 +199,23 @@ const UserRepository: UserRepositoryInterface = {
     return reconstructUser(user)
   },
 
-  async searchUser(keyword) {
+  async searchUser(keyword, page, order) {
+    const limit = 10
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const usersResult = await prisma.user.findMany({
       where: { OR: [{ email: { contains: keyword } }, { username: { contains: keyword } }] },
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
       include: {
         oAuthIds: true,
         profile: true,
         role: true,
       },
     })
-    const users = usersResult.map(user => reconstructUser(user))
-    return users
+    return usersResult.map(reconstructUser)
   },
+
   async fetchUserByEmail(email) {
     const user = await prisma.user.findUnique({
       where: { email },

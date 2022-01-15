@@ -33,4 +33,6 @@ export const shopUpsertSchema = joi.object({
 
 export const searchSchema = joi.object({
   keyword: joi.string().required(),
+  page: joi.string().pattern(/^[0-9]+$/),
+  order: joi.string().valid(OrderBy.ASC, OrderBy.DESC),
 })

@@ -22,7 +22,7 @@ export type ShopRepositoryInterface = {
     phoneNumber: string, days: ScheduleDays[], seats:number,
     startTime: string, endTime: string, details: string) : Promise<Shop>
   deleteShop(id: number): Promise<Shop>
-  searchShops(keyword: string): Promise<Shop[]>
+  searchShops(keyword: string, page: number, order: OrderBy): Promise<Shop[]>
   fetchStaffShops(userId: number, page: number, order: OrderBy): Promise<Shop[]>
   fetchStaffTotalShopsCount(userId: number): Promise<number>
   fetchUserShopIds(userId: number): Promise<number[]>
@@ -147,9 +147,9 @@ export const ShopService: ShopServiceInterface = {
     return ShopRepository.deleteShop(id)
   },
 
-  async searchShops(user, keyword) {
+  async searchShops(user, keyword, page = 1, order = OrderBy.DESC) {
     let shops: Shop[]
-    shops = await ShopRepository.searchShops(keyword)
+    shops = await ShopRepository.searchShops(keyword, page, order)
     if (user.role.slug === RoleSlug.SHOP_STAFF) {
       const userShopIds = await ShopRepository.fetchUserShopIds(user.id)
       shops = shops.filter(s => userShopIds.some(usid => usid === s.id))
