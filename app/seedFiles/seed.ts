@@ -242,7 +242,7 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
 })[], clientsForReservation: User[]): Promise<void> => {
   try {
     await Promise.all(shopsForReservationSeed.map(async sfs => {
-      const dates = Array(1000).fill(new Date()).map(d => {
+      const dates = Array(5000).fill(new Date()).map(d => {
         const start = d
         const end = new Date('2022-12-31')
         const shopOpeningHours = sfs.shopDetail.startTime.split(':').map(soh => parseInt(soh, 10))

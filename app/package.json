@@ -13,7 +13,7 @@
     "seed-shop": "node seedFiles/shopSeeder.js",
     "lint": "eslint --cache --ignore-path /app/.eslintignore . --ext .ts",
     "migrate": "prisma migrate dev",
-    "db-reset": "yes | prisma migrate reset && node dist/seedFiles/seed.js"
+    "db-reset": "yes | prisma migrate reset && ts-node seedFiles/seed.ts"
   },
   "browser": {
     "crypto": false
@@ -53,8 +53,6 @@
     "@types/cookie-parser": "^1.4.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
-    "@types/helmet": "^4.0.0",
-    "@types/joi": "^17.2.3",
     "@types/jsonwebtoken": "^8.5.4",
     "@types/morgan": "^1.9.3",
     "@types/node": "^16.4.5",
@@ -63,7 +61,6 @@
     "@types/passport": "^1.0.7",
     "@types/passport-jwt": "^3.0.6",
     "@types/passport-local": "^1.0.34",
-    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^5.8.1",
     "@typescript-eslint/parser": "^5.8.1",
     "eslint": "^7.31.0",

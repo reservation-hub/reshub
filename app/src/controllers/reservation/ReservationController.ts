@@ -118,8 +118,9 @@ const ReservationController: ReservationControllerInterface = {
     const {
       reservationDate, userId, menuId, stylistId,
     } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
+    const reservationDateObject = new Date(reservationDate)
     const { shopId } = query
-    await ReservationService.insertReservation(user, shopId, reservationDate, userId, menuId, stylistId)
+    await ReservationService.insertReservation(user, shopId, reservationDateObject, userId, menuId, stylistId)
     return 'Reservation created'
   },
 
@@ -131,8 +132,10 @@ const ReservationController: ReservationControllerInterface = {
     const {
       reservationDate, userId, menuId, stylistId,
     } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
+    const reservationDateObject = new Date(reservationDate)
     const { shopId, reservationId } = query
-    await ReservationService.updateReservation(user, shopId, reservationId, reservationDate, userId, menuId, stylistId)
+    await ReservationService.updateReservation(user, shopId, reservationId, reservationDateObject,
+      userId, menuId, stylistId)
     return 'Reservation updated'
   },
 
