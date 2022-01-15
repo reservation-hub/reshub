@@ -2,7 +2,8 @@ import Joi from 'joi'
 import { Request, Response, NextFunction } from 'express'
 import adminPassport from '@auth/middlewares/passport'
 import clientPassport from '@client/auth/middlewares/passport'
-import { UnauthorizedError } from '@errors/RouteErrors'
+import { InvalidParamsError, UnauthorizedError } from '@errors/RouteErrors'
+import Logger from '@lib/Logger'
 
 export const protectAdminRoute = adminPassport.authenticate('admin-jwt', { session: false })
 export const protectClientRoute = clientPassport.authenticate('client-jwt', { session: false })
@@ -27,19 +28,24 @@ const idSchema = Joi.object({
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 export const parseIntIdMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const ids = await idSchema.validateAsync(req.params, joiOptions)
-  res.locals.id = parseInt(ids.id, 10)
-  if (ids.shopId) {
-    res.locals.shopId = parseInt(ids.shopId, 10)
+  try {
+    const ids = await idSchema.validateAsync(req.params, joiOptions)
+    res.locals.id = parseInt(ids.id, 10)
+    if (ids.shopId) {
+      res.locals.shopId = parseInt(ids.shopId, 10)
+    }
+    if (ids.menuId) {
+      res.locals.menuId = parseInt(ids.menuId, 10)
+    }
+    if (ids.stylistId) {
+      res.locals.stylistId = parseInt(ids.stylistId, 10)
+    }
+    if (ids.reservationId) {
+      res.locals.reservationId = parseInt(ids.reservationId, 10)
+    }
+    return next()
+  } catch (e) {
+    Logger.debug('Invalid parameter passed')
+    throw new InvalidParamsError()
   }
-  if (ids.menuId) {
-    res.locals.menuId = parseInt(ids.menuId, 10)
-  }
-  if (ids.stylistId) {
-    res.locals.stylistId = parseInt(ids.stylistId, 10)
-  }
-  if (ids.reservationId) {
-    res.locals.reservationId = parseInt(ids.reservationId, 10)
-  }
-  return next()
 }
