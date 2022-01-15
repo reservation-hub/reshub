@@ -14,6 +14,7 @@ import { OrderBy } from '@request-response-types/Common'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
+import { convertTimeToDateObjectString, extractTimeFromInboundDateString } from '@lib/Date'
 import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
@@ -87,15 +88,6 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
     default:
       return EntityScheduleDays.SATURDAY
   }
-}
-
-const convertTimeToDateObject = (time: string): Date => new Date(`2021-01-01 ${time}:00`)
-const extractTimeFromInboundDateString = (dateString: string): string => {
-  const date = new Date(dateString)
-  const convertToTwoDigitString = (number: number): string => (`0${number}`).slice(-2)
-  const hour = convertToTwoDigitString(date.getHours())
-  const minutes = convertToTwoDigitString(date.getMinutes())
-  return `${hour}:${minutes}`
 }
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
@@ -177,8 +169,8 @@ const ShopController: ShopControllerInterface = {
       cityName: shop.city.name,
       days: shop.days.map(convertEntityDaysToOutboundDays),
       seats: shop.seats,
-      startTime: convertTimeToDateObject(shop.startTime),
-      endTime: convertTimeToDateObject(shop.endTime),
+      startTime: convertTimeToDateObjectString(shop.startTime),
+      endTime: convertTimeToDateObjectString(shop.endTime),
       name: shop.name,
       address: shop.address,
       details: shop.details,

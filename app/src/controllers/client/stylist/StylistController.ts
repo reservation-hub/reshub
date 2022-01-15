@@ -4,6 +4,7 @@ import { UserForAuth } from '@entities/User'
 import StylistService from '@client/stylist/services/StylistService'
 import { StylistControllerInterface } from '@controller-adapter/client/Shop'
 import { ScheduleDays } from '@request-response-types/models/Common'
+import { convertTimeToDateObjectString } from '@lib/Date'
 import { indexSchema } from './schemas'
 
 export type StylistServiceInterface = {
@@ -30,8 +31,6 @@ const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays 
   }
 }
 
-const convertTimeToDateObject = (time: string): Date => new Date(`2021-01-01 ${time}:00`)
-
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const StylistController: StylistControllerInterface = {
@@ -57,8 +56,8 @@ const StylistController: StylistControllerInterface = {
       shopId: s.shopId,
       name: s.name,
       price: s.price,
-      startTime: convertTimeToDateObject(s.startTime),
-      endTime: convertTimeToDateObject(s.endTime),
+      startTime: convertTimeToDateObjectString(s.startTime),
+      endTime: convertTimeToDateObjectString(s.endTime),
       days: s.days.map(convertEntityDaysToOutboundDays),
     }))
     return { values, totalCount }
