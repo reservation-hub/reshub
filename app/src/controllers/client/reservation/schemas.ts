@@ -1,14 +1,13 @@
 import joi from 'joi'
-import date from '@joi/date'
 
-const Joi = joi.extend(date)
-
-export const reservationUpsertSchema = Joi.object({
-  reservationDate: Joi.date().format('YYYY-MM-DD HH:mm:ss').utc().required(),
-  menuId: Joi.number().required(),
-  stylistId: Joi.number(),
+export const reservationUpsertSchema = joi.object({
+  reservationDate:
+    joi.string().pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T\d\d:\d\d:\d\d$/).required(),
+  menuId: joi.number().required(),
+  stylistId: joi.number(),
 })
 
-export const reservationQuerySchema = Joi.object({
-  reservationDate: Joi.date().format('YYYY-MM-DD HH:mm:ss').utc().required(),
+export const reservationQuerySchema = joi.object({
+  reservationDate:
+    joi.string().pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T\d\d:\d\d:\d\d$/).required(),
 })

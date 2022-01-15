@@ -1,13 +1,10 @@
-import Joi from 'joi'
-import date from '@joi/date'
+import joi from 'joi'
 import { RoleSlug } from '@request-response-types/models/Role'
 import { OrderBy } from '@request-response-types/Common'
 
-const joi = Joi.extend(date)
-
-export const indexSchema = Joi.object({
-  page: Joi.string().pattern(/^[0-9]+$/),
-  order: Joi.string().valid(OrderBy.ASC, OrderBy.DESC),
+export const indexSchema = joi.object({
+  page: joi.string().pattern(/^[0-9]+$/),
+  order: joi.string().valid(OrderBy.ASC, OrderBy.DESC),
 })
 
 export const userInsertSchema = joi.object({
@@ -20,7 +17,7 @@ export const userInsertSchema = joi.object({
   firstNameKana: joi.string().trim().required(),
   lastNameKana: joi.string().trim().required(),
   gender: joi.string().valid('male', 'female').required(),
-  birthday: joi.date().format('YYYY-MM-DD').required(),
+  birthday: joi.string().pattern(/^[1-2][0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/).required(),
 })
 
 export const userUpdateSchema = joi.object({
@@ -31,13 +28,13 @@ export const userUpdateSchema = joi.object({
   firstNameKana: joi.string().trim().required(),
   lastNameKana: joi.string().trim().required(),
   gender: joi.string().valid('male', 'female').required(),
-  birthday: joi.date().format('YYYY-MM-DD').required(),
+  birthday: joi.string().pattern(/^[1-2][0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/).required(),
 })
 
 export const userPasswordUpdateSchema = joi.object({
-  oldPassword: Joi.string().trim().alphanum().required(),
-  newPassword: Joi.string().trim().alphanum().required(),
-  confirmNewPassword: Joi.string().trim().alphanum().required(),
+  oldPassword: joi.string().trim().alphanum().required(),
+  newPassword: joi.string().trim().alphanum().required(),
+  confirmNewPassword: joi.string().trim().alphanum().required(),
 })
 
 export const userOAuthIdUpsertSchema = joi.object({
@@ -46,6 +43,6 @@ export const userOAuthIdUpsertSchema = joi.object({
   twitterId: joi.string().trim().allow('', null),
 })
 
-export const searchSchema = Joi.object({
-  keyword: Joi.string().required(),
+export const searchSchema = joi.object({
+  keyword: joi.string().required(),
 })

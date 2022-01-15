@@ -194,6 +194,8 @@ const ShopController: ShopControllerInterface = {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
+    // eslint-disable-next-line
+    console.log(typeof query.startTime, query.endTime)
     const {
       name, areaId, prefectureId, cityId, address,
       phoneNumber, days, seats, startTime, endTime, details,
@@ -213,6 +215,8 @@ const ShopController: ShopControllerInterface = {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
+    // eslint-disable-next-line
+    console.log(typeof query.params.startTime, query.params.endTime)
     const {
       name, areaId, prefectureId, cityId, address, phoneNumber,
       seats, days, startTime, endTime, details,

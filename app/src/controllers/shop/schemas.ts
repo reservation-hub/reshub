@@ -1,24 +1,21 @@
 import joi from 'joi'
-import date from '@joi/date'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { OrderBy } from '@request-response-types/Common'
 
-const Joi = joi.extend(date)
-
-export const indexSchema = Joi.object({
-  page: Joi.string().pattern(/^[0-9]+$/),
-  order: Joi.string().valid(OrderBy.ASC, OrderBy.DESC),
+export const indexSchema = joi.object({
+  page: joi.string().pattern(/^[0-9]+$/),
+  order: joi.string().valid(OrderBy.ASC, OrderBy.DESC),
 })
 
-export const shopUpsertSchema = Joi.object({
-  name: Joi.string().required(),
-  address: Joi.string().allow('', null),
-  phoneNumber: Joi.string().allow('', null),
-  areaId: Joi.number().integer().required(),
-  prefectureId: Joi.number().integer().required(),
-  cityId: Joi.number().integer().required(),
-  details: Joi.string().allow('', null),
-  days: Joi.array().items(Joi.string().valid(
+export const shopUpsertSchema = joi.object({
+  name: joi.string().required(),
+  address: joi.string().allow('', null),
+  phoneNumber: joi.string().allow('', null),
+  areaId: joi.number().integer().required(),
+  prefectureId: joi.number().integer().required(),
+  cityId: joi.number().integer().required(),
+  details: joi.string().allow('', null),
+  days: joi.array().items(joi.string().valid(
     ScheduleDays.MONDAY,
     ScheduleDays.TUESDAY,
     ScheduleDays.WEDNESDAY,
@@ -27,11 +24,11 @@ export const shopUpsertSchema = Joi.object({
     ScheduleDays.SATURDAY,
     ScheduleDays.SUNDAY,
   )).min(1).required(),
-  seats: Joi.number().required(),
-  startTime: Joi.date().format('YYYY-MM-DD HH:mm:ss').required(),
-  endTime: Joi.date().format('YYYY-MM-DD HH:mm:ss').required(),
+  seats: joi.number().required(),
+  startTime: joi.string().pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T\d\d:\d\d:\d\d$/).required(),
+  endTime: joi.string().pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T\d\d:\d\d:\d\d$/).required(),
 })
 
-export const searchSchema = Joi.object({
-  keyword: Joi.string().required(),
+export const searchSchema = joi.object({
+  keyword: joi.string().required(),
 })
