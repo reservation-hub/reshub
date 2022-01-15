@@ -2,8 +2,7 @@ import Joi from 'joi'
 import { Request, Response, NextFunction } from 'express'
 import adminPassport from '@auth/middlewares/passport'
 import clientPassport from '@client/auth/middlewares/passport'
-import { InvalidParamsError, UnauthorizedError } from '@errors/RouteErrors'
-import Logger from '@lib/Logger'
+import { UnauthorizedError } from '@errors/RouteErrors'
 
 export const protectAdminRoute = adminPassport.authenticate('admin-jwt', { session: false })
 export const protectClientRoute = clientPassport.authenticate('client-jwt', { session: false })
@@ -44,8 +43,5 @@ export const parseIntIdMiddleware = async (req: Request, res: Response, next: Ne
       res.locals.reservationId = parseInt(ids.reservationId, 10)
     }
     return next()
-  } catch (e) {
-    Logger.debug('Invalid parameter passed')
-    throw new InvalidParamsError()
-  }
+  } catch (e) { return next(e) }
 }
