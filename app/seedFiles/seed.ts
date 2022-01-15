@@ -1,6 +1,6 @@
 /* eslint-disable  */
 import bcrypt from 'bcrypt'
-import prisma from '../src/lib/prisma'
+import { PrismaClient } from '@prisma/client'
 import areas, { AreaObject } from './areas-db'
 import prefectures, { PrefectureObject } from './prefec-db'
 
@@ -13,6 +13,10 @@ import {
 } from './users'
 import roles, { RoleObject } from './roles'
 import { Gender, randomNameGenerator } from './utils'
+
+const prisma = new PrismaClient({
+  errorFormat: 'minimal'
+})
 
 const getRandomDate = (from: Date, to: Date) => {
   const fromTime = from.getTime()
@@ -242,7 +246,7 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
 })[], clientsForReservation: User[]): Promise<void> => {
   try {
     await Promise.all(shopsForReservationSeed.map(async sfs => {
-      const dates = Array(5000).fill(new Date()).map(d => {
+      const dates = Array(1000).fill(new Date()).map(d => {
         const start = d
         const end = new Date('2022-12-31')
         const shopOpeningHours = sfs.shopDetail.startTime.split(':').map(soh => parseInt(soh, 10))
