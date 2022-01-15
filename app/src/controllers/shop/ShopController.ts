@@ -90,7 +90,8 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
 }
 
 const convertTimeToDateObject = (time: string): Date => new Date(`2021-01-01 ${time}:00`)
-const convertDateObjectToString = (date: Date): string => {
+const extractTimeFromInboundDateString = (dateString: string): string => {
+  const date = new Date(dateString)
   const convertToTwoDigitString = (number: number): string => (`0${number}`).slice(-2)
   const hour = convertToTwoDigitString(date.getHours())
   const minutes = convertToTwoDigitString(date.getMinutes())
@@ -198,9 +199,10 @@ const ShopController: ShopControllerInterface = {
       name, areaId, prefectureId, cityId, address,
       phoneNumber, days, seats, startTime, endTime, details,
     } = await shopUpsertSchema.validateAsync(query, joiOptions)
+
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    const startTimeString = convertDateObjectToString(startTime)
-    const endTimeString = convertDateObjectToString(endTime)
+    const startTimeString = extractTimeFromInboundDateString(startTime)
+    const endTimeString = extractTimeFromInboundDateString(endTime)
     await ShopService.insertShop(user,
       name, areaId, prefectureId, cityId, address,
       phoneNumber, entityDays, seats, startTimeString, endTimeString, details)
@@ -219,8 +221,8 @@ const ShopController: ShopControllerInterface = {
     } = await shopUpsertSchema.validateAsync(query.params, joiOptions)
     const { id } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    const startTimeString = convertDateObjectToString(startTime)
-    const endTimeString = convertDateObjectToString(endTime)
+    const startTimeString = extractTimeFromInboundDateString(startTime)
+    const endTimeString = extractTimeFromInboundDateString(endTime)
     await ShopService.updateShop(user, id, name, areaId, prefectureId, cityId,
       address, phoneNumber, entityDays, seats, startTimeString, endTimeString, details)
 

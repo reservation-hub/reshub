@@ -1,22 +1,20 @@
 import joi from 'joi'
-import date from '@joi/date'
 import { OrderBy } from '@request-response-types/Common'
 
-const Joi = joi.extend(date)
-
-export const indexSchema = Joi.object({
-  page: Joi.string().pattern(/^[0-9]+$/),
-  order: Joi.string().valid(OrderBy.ASC, OrderBy.DESC),
+export const indexSchema = joi.object({
+  page: joi.string().pattern(/^[0-9]+$/),
+  order: joi.string().valid(OrderBy.ASC, OrderBy.DESC),
 })
 
-export const indexCalendarSchema = Joi.object({
-  year: Joi.string().pattern(/^[12][09][0-9][0-9]$/).required(),
-  month: Joi.string().pattern(/^(1[0-2]|[1-9])$/).required(),
+export const indexCalendarSchema = joi.object({
+  year: joi.string().pattern(/^[12][09][0-9][0-9]$/).required(),
+  month: joi.string().pattern(/^(1[0-2]|[1-9])$/).required(),
 })
 
-export const reservationUpsertSchema = Joi.object({
-  reservationDate: Joi.date().format('YYYY-MM-DD HH:mm:ss').utc().required(),
-  stylistId: Joi.number(),
-  userId: Joi.number().required(),
-  menuId: Joi.number().required(),
+export const reservationUpsertSchema = joi.object({
+  reservationDate:
+    joi.string().pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T\d\d:\d\d:\d\d.\d\d\dZ$/).required(),
+  stylistId: joi.number(),
+  userId: joi.number().required(),
+  menuId: joi.number().required(),
 })
