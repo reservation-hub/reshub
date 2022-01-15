@@ -25,8 +25,10 @@ export const shopUpsertSchema = joi.object({
     ScheduleDays.SUNDAY,
   )).min(1).required(),
   seats: joi.number().required(),
-  startTime: joi.string().pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T\d\d:\d\d:\d\d$/).required(),
-  endTime: joi.string().pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T\d\d:\d\d:\d\d$/).required(),
+  startTime: joi.string()
+    .pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T\d\d:\d\d:\d\d.\d\d\dZ$/).required(),
+  endTime: joi.string()
+    .pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T\d\d:\d\d:\d\d.\d\d\dZ$/).required(),
 })
 
 export const searchSchema = joi.object({

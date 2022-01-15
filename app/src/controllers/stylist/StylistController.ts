@@ -8,7 +8,6 @@ import { StylistControllerInterface } from '@controller-adapter/Shop'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { ScheduleDays as EntityScheduleDays } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
-import { timeToString } from '@lib/ScheduleChecker'
 import Logger from '@lib/Logger'
 
 export type StylistServiceInterface = {
@@ -69,6 +68,13 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
 }
 
 const convertTimeToDateObject = (time: string): Date => new Date(`2021-01-01 ${time}:00`)
+const extractTimeFromInboundDateString = (dateString: string): string => {
+  const date = new Date(dateString)
+  const convertToTwoDigitString = (number: number): string => (`0${number}`).slice(-2)
+  const hour = convertToTwoDigitString(date.getHours())
+  const minutes = convertToTwoDigitString(date.getMinutes())
+  return `${hour}:${minutes}`
+}
 
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
@@ -122,8 +128,8 @@ const StylistController: StylistControllerInterface = {
     } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    const startTimeString = timeToString(startTime)
-    const endTimeString = timeToString(endTime)
+    const startTimeString = extractTimeFromInboundDateString(startTime)
+    const endTimeString = extractTimeFromInboundDateString(endTime)
     await StylistService.insertStylist(user, shopId, name, price, entityDays, startTimeString, endTimeString)
     return 'Stylist created'
   },
@@ -138,8 +144,8 @@ const StylistController: StylistControllerInterface = {
     } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
     const { shopId, stylistId } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    const startTimeString = timeToString(startTime)
-    const endTimeString = timeToString(endTime)
+    const startTimeString = extractTimeFromInboundDateString(startTime)
+    const endTimeString = extractTimeFromInboundDateString(endTime)
     await StylistService.updateStylist(user, shopId, stylistId, name, price, entityDays, startTimeString, endTimeString)
     return 'Stylist updated'
   },
