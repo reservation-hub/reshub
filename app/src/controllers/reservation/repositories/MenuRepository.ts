@@ -7,7 +7,11 @@ const MenuRepository: MenuRepositoryInterface = {
       where: { id: { in: menuIds } },
     })
   },
-
+  async fetchShopMenu(shopId, menuId) {
+    return prisma.menu.findFirst({
+      where: { id: menuId, AND: { shopId } },
+    })
+  },
   async fetchMenuIdsByShopId(shopId) {
     return (await prisma.menu.findMany({
       where: { shopId },

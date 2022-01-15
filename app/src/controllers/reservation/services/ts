@@ -1,0 +1,54 @@
+
+    const menuDuration = await MenuRepository.fetchMenuDuration(menuId, shopId)
+    if (!menuDuration) {
+      Logger.debug('Menu does not exist in shop')
+      throw new InvalidParamsError()
+    }
+
+    if (stylistId && !isValidStylistId(shopId, stylistId)) {
+      console.error(await isValidStylistId(shopId, 2))
+      Logger.debug('Stylist does not exist in shop')
+      throw new InvalidParamsError()
+    }
+
+    const dateObj = new Date(reservationDate)
+    if (dateObj < new Date()) {
+      Logger.debug('Invalid date, earlier than today')
+      throw new InvalidParamsError()
+    }
+
+    const shopSchedule = await ShopRepository.fetchShopSchedule(shopId)
+
+    if (!shopSchedule) {
+      Logger.debug('The reservation Date/Time is unavailable')
+      throw new UnavailableError()
+    }
+
+    const { startDate, endDate } = getStartAndEndDateFromReservationDate(reservationDate)
+
+    const reservationDatesAndDuration = await ReservationRepository.fetchReservationsDateWithDuration(
+      shopId, startDate,
+      endDate, stylistId,
+    )
+
+    // At a given time
+    const reservationCount = await ReservationRepository.fetchReservationCountAtGivenTime(reservationDate, shopId)
+
+    const checkWithShopSchedule = isWithinShopSchedule(shopSchedule, reservationDate, menuDuration)
+    if (!checkWithShopSchedule) {
+      Logger.debug('The reservation Time doesnt match with Shop Schedule')
+      throw new OutOfScheduleError()
+    }
+    const numberOfSeatsAvailable = numberOfAvailableSeats(shopSchedule.seats, reservationCount)
+
+    // check if seats are available
+    if (numberOfSeatsAvailable > shopSchedule.seats) {
+      Logger.debug('Seats not available')
+      throw new NoSeatsAvailableError()
+    }
+
+    const isAvailability = checkAvailablity(reservationDatesAndDuration, reservationDate, menuDuration)
+    if (!isAvailability) {
+      Logger.debug('The reservation Date/Time is unavailable')
+      throw new UnavailableError()
+    }

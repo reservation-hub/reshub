@@ -35,6 +35,12 @@ export const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
 
 export const StylistRepository: ReservationServiceSocket = {
 
+  async fetchShopStylist(shopId, stylistId) {
+    const stylist = await prisma.stylist.findFirst({
+      where: { id: stylistId, AND: { shopId } },
+    })
+    return stylist ? reconstructStylist(stylist) : null
+  },
   async fetchStylistsByIds(stylistIds) {
     const stylists = await prisma.stylist.findMany({
       where: { id: { in: stylistIds } },
