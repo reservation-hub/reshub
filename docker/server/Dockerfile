@@ -2,9 +2,10 @@ FROM node:14
 
 WORKDIR /app
 
-COPY ./app/prisma .
-COPY ./app/seedFiles .
-COPY ./app/src .
+COPY ./app/@types ./@types
+COPY ./app/prisma ./prisma
+COPY ./app/seedFiles ./seedFiles
+COPY ./app/src ./src
 COPY ./app/main.ts .
 COPY ./app/nodemon.json .
 COPY ./app/package* ./

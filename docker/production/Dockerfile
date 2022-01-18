@@ -1,14 +1,22 @@
-FROM reshub-client:latest AS builder
+FROM reshub:latest AS builder
 
-RUN yarn install && yarn build
+ENV NODE_ENV=dev
 
-FROM reshub-server:latest
+RUN npm install --prefer-offline --no-audit && npm run build
+
+FROM node:16-bullseye-slim
 
 WORKDIR /app
 
-COPY ./app/server .
+COPY ./app/package.json ./package.json
 
-COPY --from=builder /app/build/* ./src/public/
+COPY ./app/tsconfig.json ./tsconfig.json
+
+COPY ./app/prisma ./prisma
+
+COPY ./app/@types ./@types
+
+COPY --from=builder ./app/dist/ ./
 
 COPY ./scripts/production /scripts
 

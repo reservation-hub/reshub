@@ -1,0 +1,47 @@
+version: "3.3"
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  reshub:
+
+services:
+  # server
+  server:
+    container_name: reshub
+    environment:
+      - NODE_ENV=production
+      - COMMAND=${COMMAND:-start}
+    env_file:
+      - .env
+    image: reshubreshub/reshub_prd:latest
+    ports:
+      - 8090:8090
+    depends_on:
+      - postgresql
+      - redis
+    networks:
+      - reshub
+
+  postgresql:
+    image: postgres:12
+    container_name: reshub-db
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    networks:
+      - reshub
+
+  redis:
+    image: redis:6.2
+    container_name: reshub-redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+    networks:
+      - reshub
