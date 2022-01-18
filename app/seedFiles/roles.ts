@@ -1,4 +1,4 @@
-import { RoleSlug } from '.prisma/client'
+import { RoleSlug } from '@prisma/client'
 
 export type RoleObject = {
   name: string

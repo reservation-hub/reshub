@@ -7,7 +7,7 @@ import prefectures, { PrefectureObject } from './prefec-db'
 import cities, { CityObject } from './cities-db'
 import {
   RoleSlug, Days, Role, User, Area, Prefecture, City, Shop, Menu, ShopDetail, Stylist,
-} from '.prisma/client'
+} from '@prisma/client'
 import {
   UserObject, admins, staffs, clients,
 } from './users'
