@@ -68,17 +68,17 @@ function rh-db-restore() {
 }
 
 # prd
-alias reshub-prd="reshub-prd-build && docker-compose up production"
-alias reshub-prd-bash="docker-compose exec production bash"
+alias rh-prd="reshub-prd-build && docker-compose up production"
+alias rh-prd-bash="docker-compose exec production bash"
 
-alias reshub-prd-push=" \
-    docker tag reshub_prd codejunkie21/reshub_prd:latest && \
-    docker push codejunkie21/reshub_prd:latest
+alias rh-prd-push=" \
+    docker tag reshub_prd reshubreshub/reshub_prd:latest && \
+    docker push reshubreshub/reshub_prd:latest
 "
 # deploy
-alias reshub-prd-deploy="reshub-prd-build && reshub-prd-push"
+alias rh-prd-deploy="reshub-prd-build && reshub-prd-push"
 
-function reshub-prd-build() {
+function rh-prd-build() {
   # git fetch origin master
   # ORIGIN_MASTER=$(git show-ref origin/master -s)
   # CURRENT=$(git rev-parse HEAD)
