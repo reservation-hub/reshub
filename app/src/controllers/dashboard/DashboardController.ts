@@ -90,7 +90,7 @@ const salonIndexForShopStaff = async (user: UserForAuth): Promise<salonIndexShop
     menuName: r.menu.name,
     stylistName: r.stylist?.name,
     status: r.status,
-    reservationDate: r.reservationDate,
+    reservationDate: r.reservationDate.toDateString(),
   }))
 
   // stylists

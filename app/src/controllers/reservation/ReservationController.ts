@@ -55,7 +55,7 @@ const ReservationController: ReservationControllerInterface = {
       menuName: r.menu.name,
       stylistName: r.stylist?.name,
       status: r.status,
-      reservationDate: r.reservationDate,
+      reservationDate: r.reservationDate.toDateString(),
     }))
 
     const seats = await ShopService.fetchShopSeatCount(user, shopId)
@@ -83,7 +83,7 @@ const ReservationController: ReservationControllerInterface = {
       menuName: r.menu.name,
       stylistName: r.stylist?.name,
       status: r.status,
-      reservationDate: r.reservationDate,
+      reservationDate: r.reservationDate.toDateString(),
     }))
 
     const seats = await ShopService.fetchShopSeatCount(user, shopId)
@@ -106,8 +106,8 @@ const ReservationController: ReservationControllerInterface = {
       menuName: r.menu.name,
       stylistName: r.stylist?.name,
       status: r.status,
-      reservationDate: r.reservationDate,
-      reservationEndDate: r.reservationEndDate,
+      reservationDate: r.reservationDate.toDateString(),
+      reservationEndDate: r.reservationEndDate.toDateString(),
     }
   },
 

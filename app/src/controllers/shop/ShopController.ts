@@ -156,7 +156,7 @@ const ShopController: ShopControllerInterface = {
         stylistName: stylist?.name,
         menuName: menu.name,
         status: r.status,
-        reservationDate: r.reservationDate,
+        reservationDate: r.reservationDate.toDateString(),
       }
     })
 
