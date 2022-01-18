@@ -68,7 +68,7 @@ function rh-db-restore() {
 }
 
 # prd
-alias rh-prd="reshub-prd-build && docker-compose up production"
+alias rh-prd="rh-prd-build && docker-compose up production"
 alias rh-prd-bash="docker-compose exec production bash"
 
 alias rh-prd-push=" \
@@ -76,7 +76,7 @@ alias rh-prd-push=" \
     docker push reshubreshub/reshub_prd:latest
 "
 # deploy
-alias rh-prd-deploy="reshub-prd-build && reshub-prd-push"
+alias rh-prd-deploy="rh-prd-build && rh-prd-push"
 
 function rh-prd-build() {
   # git fetch origin master
@@ -91,6 +91,6 @@ function rh-prd-build() {
   #   echo 'git diff をチェックしてビルドします。コミットされてなければビルドできません';
   #   git diff --exit-code && \
   #   git diff --staged --exit-code && \
-    docker-compose build production
+    docker-compose build production --no-cache
   # fi
 }
