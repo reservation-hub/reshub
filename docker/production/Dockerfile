@@ -4,7 +4,7 @@ ENV NODE_ENV=dev
 
 RUN npm install --prefer-offline --no-audit && npm run build
 
-FROM node:16
+FROM node:16-bullseye-slim
 
 WORKDIR /app
 
