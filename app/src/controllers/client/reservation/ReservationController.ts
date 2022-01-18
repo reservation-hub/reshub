@@ -33,8 +33,8 @@ const ReservationController: ReservationControllerInterface = {
     const seats = await ShopService.fetchShopSeatCount(user, shopId)
     const values = reservations.map(r => ({
       id: r.id,
-      reservationStartDate: r.reservationStartDate.toDateString(),
-      reservationEndDate: r.reservationEndDate.toDateString(),
+      reservationStartDate: r.reservationStartDate.toISOString(),
+      reservationEndDate: r.reservationEndDate.toISOString(),
       stylistId: r.stylistId,
     }))
     return { values, seats }
