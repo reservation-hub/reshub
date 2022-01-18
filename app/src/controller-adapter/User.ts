@@ -73,7 +73,7 @@ const searchUser = async (req: Request, res: Response, next: NextFunction) : Pro
 
 const routes = Router()
 
-routes.get('/', roleCheck([RoleSlug.ADMIN]), index)
+routes.get('/', roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), index)
 routes.get('/search', roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), searchUser)
 routes.get('/:id', roleCheck([RoleSlug.ADMIN]), parseIntIdMiddleware, showUser)
 routes.post('/', roleCheck([RoleSlug.ADMIN]), insertUser)
