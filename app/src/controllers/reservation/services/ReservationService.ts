@@ -19,8 +19,8 @@ import Logger from '@lib/Logger'
 import isWithinSchedule from '@lib/ScheduleChecker'
 
 export type ReservationRepositoryInterface = {
-  fetchShopReservations(userId: number, shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
-  fetchShopReservationsForCalendar(userId: number, shopId: number, year: number, month: number): Promise<Reservation[]>
+  fetchShopReservations(shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
+  fetchShopReservationsForCalendar(shopId: number, year: number, month: number): Promise<Reservation[]>
   fetchShopTotalReservationCount(shopId: number): Promise<number>
   fetchShopReservation(shopId: number, reservationId: number): Promise<Reservation | null>
   insertReservation(reservationDate: Date, userId: number, shopId: number, menuId: number, stylistId?: number)
@@ -121,7 +121,7 @@ const ReservationService: ReservationServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const reservations = await ReservationRepository.fetchShopReservations(user.id, shopId, page, order)
+    const reservations = await ReservationRepository.fetchShopReservations(shopId, page, order)
     return recreateReservationList(reservations)
   },
 
@@ -131,7 +131,7 @@ const ReservationService: ReservationServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const reservations = await ReservationRepository.fetchShopReservationsForCalendar(user.id, shopId, year, month)
+    const reservations = await ReservationRepository.fetchShopReservationsForCalendar(shopId, year, month)
 
     return recreateReservationList(reservations)
   },
