@@ -4,7 +4,7 @@ import { ReservationStatus } from '@prisma/client'
 
 const ReservationRepository: ReservationRepositoryInterface = {
   async setReservationStatuses(date) {
-    const reservations = await prisma.reservation.updateMany({
+    await prisma.reservation.updateMany({
       where: {
         reservationDate: {
           lt: date,
@@ -17,8 +17,6 @@ const ReservationRepository: ReservationRepositoryInterface = {
         status: ReservationStatus.COMPLETED,
       },
     })
-    // eslint-disable-next-line
-    console.log(reservations)
   },
 }
 
