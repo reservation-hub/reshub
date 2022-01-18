@@ -31,11 +31,11 @@ const reconstructReservation = (reservation: PrismaReservation)
 
 const ReservationRepository: ReservationServiceSocket = {
 
-  async fetchShopReservations(userId, shopId, page, order) {
+  async fetchShopReservations(shopId, page, order) {
     const limit = 10
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const reservations = await prisma.reservation.findMany({
-      where: { shop: { shopUser: { userId } }, AND: { shopId } },
+      where: { shop: { id: shopId } },
       skip: skipIndex,
       orderBy: { reservationDate: order },
       take: limit,
@@ -43,15 +43,14 @@ const ReservationRepository: ReservationServiceSocket = {
     return reservations.map(r => reconstructReservation(r))
   },
 
-  async fetchShopReservationsForCalendar(userId, shopId, year, month) {
+  async fetchShopReservationsForCalendar(shopId, year, month) {
     const requestDateTime = new Date(`${year}-${month}-1`)
     const requestDateTimeNextMonth = new Date(requestDateTime)
     requestDateTimeNextMonth.setMonth(requestDateTimeNextMonth.getMonth() + 1)
     const reservations = await prisma.reservation.findMany({
       where: {
-        shop: { shopUser: { userId } },
+        id: shopId,
         AND: {
-          shopId,
           reservationDate: {
             gte: requestDateTime,
             lt: requestDateTimeNextMonth,
