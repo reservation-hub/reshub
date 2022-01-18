@@ -17,7 +17,7 @@ const setPopularMenus = Cron.schedule('0 0,30 * * * *', async () => {
   Logger.info('Popular menus set')
 })
 
-const setReservationStatuses = Cron.schedule('0 0,7,30,45 * * * *', async () => {
+const setReservationStatuses = Cron.schedule('0 0,30 * * * *', async () => {
   Logger.info('Setting reservation statuses')
   await CronController.setReservationStatuses()
   Logger.info('Reservation statuses set')
