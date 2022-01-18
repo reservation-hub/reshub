@@ -10,6 +10,7 @@ import ShopRepository from '@client/reservation/repositories/ShopRepository'
 import Logger from '@lib/Logger'
 import { Stylist } from '@entities/Stylist'
 import isWithinSchedule from '@lib/ScheduleChecker'
+import today from '@lib/Today'
 
 export type ReservationRepositoryInterface = {
   fetchShopReservationsForAvailabilityWithMenuDuration(shopId: number, reservationDate: Date,
@@ -66,7 +67,7 @@ const ReservationService: ReservationServiceInterface = {
       throw new NotFoundError()
     }
 
-    if (reservationDate < new Date()) {
+    if (reservationDate < today) {
       Logger.debug('Invalid date, earlier than today')
       throw new InvalidParamsError()
     }

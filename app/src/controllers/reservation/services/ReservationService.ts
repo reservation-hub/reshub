@@ -17,6 +17,7 @@ import {
 } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 import isWithinSchedule from '@lib/ScheduleChecker'
+import today from '@lib/Today'
 
 export type ReservationRepositoryInterface = {
   fetchShopReservations(shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
@@ -183,7 +184,7 @@ const ReservationService: ReservationServiceInterface = {
       throw new NotFoundError()
     }
 
-    if (reservationDate < new Date()) {
+    if (reservationDate < today) {
       Logger.debug('Invalid date, earlier than today')
       throw new InvalidParamsError()
     }
@@ -274,7 +275,7 @@ const ReservationService: ReservationServiceInterface = {
     }
 
     const dateObj = new Date(reservationDate)
-    if (dateObj < new Date()) {
+    if (dateObj < today) {
       Logger.debug('Invalid date, earlier than today')
       throw new InvalidParamsError()
     }
