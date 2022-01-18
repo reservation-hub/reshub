@@ -57,7 +57,7 @@ const UserController: UserControllerInterface = {
       },
       lastNameKana: u.lastNameKana,
       firstNameKana: u.firstNameKana,
-      birthday: u.birthday,
+      birthday: u.birthday?.toDateString(),
       gender: u.gender,
       reservationCount: userReservationCount[0].reservationCount,
     }
