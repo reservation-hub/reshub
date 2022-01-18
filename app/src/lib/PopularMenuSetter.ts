@@ -1,6 +1,6 @@
 import prisma from '@lib/prisma'
 import redis from '@lib/redis'
-import { ReservationStatus } from '.prisma/client'
+import { ReservationStatus } from '@prisma/client'
 
 const setPopularMenus = async (year: number, month: number): Promise<void> => {
   const startDate = new Date(year, month, 1)

@@ -2,7 +2,7 @@ import { ShopRepositoryInterface as ShopServiceSocket } from '@client/reservatio
 import { ShopRepositoryInterface as ReservationServiceSocket } from '@client/reservation/services/ReservationService'
 import { ScheduleDays } from '@entities/Common'
 import prisma from '@lib/prisma'
-import { Days } from '.prisma/client'
+import { Days } from '@prisma/client'
 
 const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
   switch (day) {
