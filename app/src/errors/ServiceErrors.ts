@@ -64,3 +64,9 @@ export class OutOfScheduleError extends ServiceError {
     super('Reservation is not within Shop Schedule', ErrorCode.OutOfSchedule)
   }
 }
+
+export class NoSeatsAvailableError extends ServiceError {
+  constructor() {
+    super('There are no seats available at the moment try diffrent date or time', ErrorCode.NoSeatsUnavailable)
+  }
+}

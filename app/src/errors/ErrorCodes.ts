@@ -7,7 +7,8 @@ enum ErrorCode {
   LoggedIn = 'Logged In',
   Authentication = 'Authentication',
   Unavailable = 'Unavailable',
-  OutOfSchedule = 'OutOfSchedule'
+  OutOfSchedule = 'OutOfSchedule',
+  NoSeatsUnavailable = 'NoSeatsUnavailables'
 }
 
 export default ErrorCode

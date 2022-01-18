@@ -121,7 +121,7 @@ const shopSeeder = async (count: number, shopCities: (City & {
           Days.SATURDAY,
           Days.SUNDAY,
         ],
-        seats: 1,
+        seats: 3,
         startTime: '10:00',
         endTime: '20:00',
       },

@@ -87,7 +87,28 @@ const ShopRepository: ReservationServiceSocket & ShopServiceSocket = {
         shopDetail: true,
       },
     })
-    return shop ? { startTime: shop.shopDetail.startTime, endTime: shop.shopDetail.endTime } : null
+    return shop ? {
+      startTime: shop.shopDetail.startTime,
+      endTime: shop.shopDetail.endTime,
+      seats: shop.shopDetail.seats,
+    }
+      : null
+  },
+
+  async fetchShopDetailsForReservation(shopId) {
+    const shop = await prisma.shop.findUnique({
+      where: { id: shopId },
+      include: { shopDetail: true },
+    })
+
+    return shop
+      ? {
+        startTime: shop.shopDetail.startTime,
+        endTime: shop.shopDetail.endTime,
+        days: shop.shopDetail.days.map(convertPrismaDayToEntityDay),
+        seats: shop.shopDetail.seats,
+      }
+      : null
   },
 
   async fetchShopSeatCount(shopId) {
@@ -95,7 +116,6 @@ const ShopRepository: ReservationServiceSocket & ShopServiceSocket = {
       where: { id: shopId },
       include: { shopDetail: true },
     })
-
     return shop ? shop.shopDetail.seats : null
   },
 
