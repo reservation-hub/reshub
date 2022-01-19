@@ -49,7 +49,7 @@ const ReservationRepository: ReservationServiceSocket = {
     requestDateTimeNextMonth.setMonth(requestDateTimeNextMonth.getMonth() + 1)
     const reservations = await prisma.reservation.findMany({
       where: {
-        id: shopId,
+        shop: { id: shopId },
         AND: {
           reservationDate: {
             gte: requestDateTime,
