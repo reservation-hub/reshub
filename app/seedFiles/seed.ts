@@ -13,6 +13,9 @@ import {
 } from './users'
 import roles, { RoleObject } from './roles'
 import { Gender, randomNameGenerator } from './utils'
+import Logger from './Logger'
+
+const concurrencyRate = 1000
 
 const prisma = new PrismaClient({
   errorFormat: 'minimal'
@@ -45,16 +48,24 @@ const roleSeeder = async (rs: RoleObject[]): Promise<void> => {
   try {
     await Promise.all(rs.map(async r => prisma.role.create({ data: r })))
   } catch (e) {
-    console.info(`Roles Seed Error : ${e}`)
+    Logger.info(`Roles Seed Error : ${e}`)
     process.exit(1)
   }
 }
 
 const userSeeder = async (r: Role, us: UserObject[]): Promise<void> => {
   try {
-    await Promise.all(us.map(async u => prisma.user.create({ data: userDataObject(r, u) })))
+    const totalUserCount = us.length
+    let counter = 0
+    while (us.length) {
+      await Promise.all(us.splice(0, concurrencyRate).map(async u => {
+        await prisma.user.create({ data: userDataObject(r, u) })
+      }))
+      counter += Math.min(concurrencyRate, totalUserCount)
+      Logger.info(`${counter} of ${totalUserCount} seeded`)
+    }
   } catch (e) {
-    console.info(`${r.name} Seed Error : ${e}`)
+    Logger.info(`${r.name} Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -68,7 +79,7 @@ const areaSeeder = async (as: AreaObject[]): Promise<void> => {
       },
     })))
   } catch (e) {
-    console.info(`Area Seed Error : ${e}`)
+    Logger.info(`Area Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -83,7 +94,7 @@ const prefectureSeeder = async (ps: PrefectureObject[]): Promise<void> => {
       },
     })))
   } catch (e) {
-    console.info(`Prefecture Seed Error : ${e}`)
+    Logger.info(`Prefecture Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -98,7 +109,7 @@ const citySeeder = async (cs: CityObject[]): Promise<void> => {
       },
     })))
   } catch (e) {
-    console.info(`City Seed Error: ${e}`)
+    Logger.info(`City Seed Error: ${e}`)
     process.exit(1)
   }
 }
@@ -152,7 +163,7 @@ const shopSeeder = async (count: number, shopCities: (City & {
       },
     })))
   } catch (e) {
-    console.info(`Shop Seed error : ${e}`)
+    Logger.info(`Shop Seed error : ${e}`)
     process.exit(1)
   }
 }
@@ -171,7 +182,7 @@ const shopUserConnectionSeeder = async (shopStaffIds: number[], shopIds: number[
       })
     }))
   } catch (e) {
-    console.info(`Staff Connection Error : ${e}`)
+    Logger.info(`Staff Connection Error : ${e}`)
     process.exit(1)
   }
 }
@@ -200,7 +211,7 @@ const menuSeeder = async (shopsForMenuSeed: Shop[]): Promise<void> => {
       }],
     })))
   } catch (e) {
-    console.info(`Menu Seed Error : ${e}`)
+    Logger.info(`Menu Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -234,7 +245,7 @@ const stylistSeeder = async (shopsForStylistSeed: Shop[]): Promise<void> => {
       })))
     }))
   } catch (e) {
-    console.info(`Stylist Seed Error : ${e}`)
+    Logger.info(`Stylist Seed Error : ${e}`)
     process.exit(1)
   }
 }
@@ -244,62 +255,67 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
   shopDetail: ShopDetail;
   stylists: Stylist[];
 })[], clientsForReservation: User[]): Promise<void> => {
+  const datesLength = 1000
+  const reservationTotal = datesLength * shopsForReservationSeed.length
+  let counter = 0
   try {
-    await Promise.all(shopsForReservationSeed.map(async sfs => {
-      const dates = Array(50).fill(new Date()).map(d => {
-        const start = d
-        const end = new Date('2022-12-31')
-        const shopOpeningHours = sfs.shopDetail.startTime.split(':').map(soh => parseInt(soh, 10))
-        const shopClosingHours = sfs.shopDetail.endTime.split(':').map(sch => parseInt(sch, 10))
-        const randomDate = getRandomDate(start, end)
-        const randomHour = Math.floor(Math.random() * shopClosingHours[0]) + shopOpeningHours[0]
-        const randomMinutes = Math.floor(Math.random() * 2) === 0 ? 30 : 0
-        randomDate.setHours(randomHour, randomMinutes, 0, 0)
-        return randomDate
-      })
-      return Promise.all(dates.map(async d => {
-        const randomClientIndex = Math.floor(Math.random() * clientsForReservation.length)
-        const randomStylistIndex = Math.floor(Math.random() * sfs.stylists.length)
-        return prisma.reservation.create({
-          data: {
-            reservationDate: d,
-            stylistId: sfs.stylists[randomStylistIndex]?.id,
-            shopId: sfs.id,
-            userId: clientsForReservation[randomClientIndex].id,
-            menuId: sfs.menu[0].id,
-          },
+    while (shopsForReservationSeed.length) {
+      await Promise.all(shopsForReservationSeed.splice(0, 1).map(async sfs => {
+        const dates = Array(1000).fill(new Date()).map(d => {
+          const start = d
+          const end = new Date('2022-12-31')
+          const shopOpeningHours = sfs.shopDetail.startTime.split(':').map(soh => parseInt(soh, 10))
+          const shopClosingHours = sfs.shopDetail.endTime.split(':').map(sch => parseInt(sch, 10))
+          const randomDate = getRandomDate(start, end)
+          const randomHour = Math.floor(Math.random() * shopClosingHours[0]) + shopOpeningHours[0]
+          const randomMinutes = Math.floor(Math.random() * 2) === 0 ? 30 : 0
+          randomDate.setHours(randomHour, randomMinutes, 0, 0)
+          return randomDate
         })
+        while (dates.length) {
+          await Promise.all(dates.splice(0, concurrencyRate).map(async d => {
+            const randomClientIndex = Math.floor(Math.random() * clientsForReservation.length)
+            const randomStylistIndex = Math.floor(Math.random() * sfs.stylists.length)
+            return prisma.reservation.create({
+              data: {
+                reservationDate: d,
+                stylistId: sfs.stylists[randomStylistIndex]?.id,
+                shopId: sfs.id,
+                userId: clientsForReservation[randomClientIndex].id,
+                menuId: sfs.menu[0].id,
+              },
+            })
+          }))
+          counter += Math.min(concurrencyRate, reservationTotal)
+          Logger.info(`${counter} of ${reservationTotal} seeded`)
+        }
       }))
-    }))
+    }
   } catch (e) {
-    console.info(`Reservation Seed Error : ${e}`)
+    Logger.info(`Reservation Seed Error : ${e}`)
     process.exit(1)
   }
 }
 
 const main = async () => {
-  console.log('running seeder')
+  Logger.info('running seeder')
 
-  console.log('running roles seeder')
+  Logger.info('running roles seeder')
   await roleSeeder(roles)
-  console.log('')
-  console.log('roles seeder done')
-  console.log('')
+  Logger.info('roles seeder done')
 
-  console.log('running admins seeder')
+  Logger.info('running admins seeder')
   const adminRole = await prisma.role.findUnique({
     where: { slug: RoleSlug.ADMIN },
   })
   if (!adminRole) {
-    console.info('Admin role does not exist')
+    Logger.info('Admin role does not exist')
     process.exit(1)
   }
   await userSeeder(adminRole, admins)
-  console.log('')
-  console.log('admin seeder done')
-  console.log('')
+  Logger.info('admin seeder done')
 
-  console.log('running staff seeder')
+  Logger.info('running staff seeder')
   const staffRole = await prisma.role.findUnique({
     where: { slug: RoleSlug.SHOP_STAFF },
   })
@@ -307,11 +323,9 @@ const main = async () => {
     throw new Error('Staff role does not exist')
   }
   await userSeeder(staffRole, staffs)
-  console.log('')
-  console.log('staff seeder done')
-  console.log('')
+  Logger.info('staff seeder done')
 
-  console.log('running client seeder')
+  Logger.info('running client seeder')
   const clientRole = await prisma.role.findUnique({
     where: { slug: RoleSlug.CLIENT },
   })
@@ -319,29 +333,21 @@ const main = async () => {
     throw new Error('Client role does not exist')
   }
   await userSeeder(clientRole, clients)
-  console.log('')
-  console.log('client seeder done')
-  console.log('')
+  Logger.info('client seeder done')
 
-  console.log('running area seeder')
+  Logger.info('running area seeder')
   await areaSeeder(areas)
-  console.log('')
-  console.log('area seeder done')
-  console.log('')
+  Logger.info('area seeder done')
 
-  console.log('running prefecture seeder')
+  Logger.info('running prefecture seeder')
   await prefectureSeeder(prefectures)
-  console.log('')
-  console.log('prefecture seeder done')
-  console.log('')
+  Logger.info('prefecture seeder done')
 
-  console.log('running city seeder')
+  Logger.info('running city seeder')
   await citySeeder(cities)
-  console.log('')
-  console.log('city seeder done')
-  console.log('')
+  Logger.info('city seeder done')
 
-  console.log('running shop seeder')
+  Logger.info('running shop seeder')
   const shopCount = 300
   const cityCount = 1747
   const cityIds = Array(shopCount * 2).fill(0).map(v => Math.floor(Math.random() * cityCount) + 1)
@@ -357,11 +363,9 @@ const main = async () => {
     take: shopCount,
   })
   await shopSeeder(shopCount, shopCities)
-  console.log('')
-  console.log('shop seeder done')
-  console.log('')
+  Logger.info('shop seeder done')
 
-  console.log('connecting staff to shops')
+  Logger.info('connecting staff to shops')
   const shopStaffs = await prisma.user.findMany({
     where: { role: { slug: RoleSlug.SHOP_STAFF } },
     select: { id: true },
@@ -371,33 +375,27 @@ const main = async () => {
     select: { id: true },
   })).map(s => s.id)
   await shopUserConnectionSeeder(shopStaffIds, staffShopTargetIds)
-  console.log('')
-  console.log('connecting staff to shop done')
-  console.log('')
+  Logger.info('connecting staff to shop done')
 
-  console.log('running menu seeder')
+  Logger.info('running menu seeder')
   const shopsForMenuSeed = await prisma.shop.findMany()
   await menuSeeder(shopsForMenuSeed)
-  console.log('')
-  console.log('menu seeder done')
-  console.log('')
+  Logger.info('menu seeder done')
 
-  console.log('running stylist seeder')
+  Logger.info('running stylist seeder')
   const shopsForStylistSeed = await prisma.shop.findMany({
     include: { menu: true },
   })
   await stylistSeeder(shopsForStylistSeed)
-  console.log('')
-  console.log('stylist seeder done')
-  console.log('')
+  Logger.info('stylist seeder done')
 
-  console.log('running reservation seeder')
+  Logger.info('running reservation seeder')
   const shopsForReservationSeed = await prisma.shop.findMany({
     include: { menu: true, stylists: true, shopDetail: true },
   })
 
   if (shopsForReservationSeed.length < 1) {
-    console.info('No Shops Found')
+    Logger.info('No Shops Found')
     process.exit(1)
   }
 
@@ -406,45 +404,14 @@ const main = async () => {
   })
 
   if (clientsForReservation.length < 1) {
-    console.info('No Shops Found')
+    Logger.info('No Shops Found')
     process.exit(1)
   }
 
   await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  await reservationSeeder(shopsForReservationSeed, clientsForReservation)
-  console.log('')
-  console.log('reservation seeder done')
-  console.log('')
+  Logger.info('reservation seeder done')
 
-  console.log('seed done')
+  Logger.info('seed done')
   process.exit(0)
 };
 
