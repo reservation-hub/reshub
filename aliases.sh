@@ -79,11 +79,11 @@ alias rh-prd-push=" \
 alias rh-prd-deploy="rh-prd-build && rh-prd-push"
 
 function rh-prd-build() {
-  git fetch origin master
-  ORIGIN_MASTER=$(git show-ref origin/master -s)
+  git fetch origin main
+  ORIGIN_MASTER=$(git show-ref origin/main -s)
   CURRENT=$(git rev-parse HEAD)
   if [[ "$ORIGIN_MASTER" != "$CURRENT" ]]; then
-    echo 'origin/master と一致していないのでビルドできません';
+    echo 'origin/main と一致していないのでビルドできません';
 
     # return error
     return 1
