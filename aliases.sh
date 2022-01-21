@@ -1,5 +1,5 @@
 # init
-alias rh-init="git submodule update --init reshub-deploy"
+alias rh-init="git submodule update --init"
 
 # lcl
 alias rh-build="docker-compose build server"
@@ -79,18 +79,18 @@ alias rh-prd-push=" \
 alias rh-prd-deploy="rh-prd-build && rh-prd-push"
 
 function rh-prd-build() {
-  # git fetch origin master
-  # ORIGIN_MASTER=$(git show-ref origin/master -s)
-  # CURRENT=$(git rev-parse HEAD)
-  # if [[ "$ORIGIN_MASTER" != "$CURRENT" ]]; then
-  #   echo 'origin/master と一致していないのでビルドできません';
+  git fetch origin master
+  ORIGIN_MASTER=$(git show-ref origin/master -s)
+  CURRENT=$(git rev-parse HEAD)
+  if [[ "$ORIGIN_MASTER" != "$CURRENT" ]]; then
+    echo 'origin/master と一致していないのでビルドできません';
 
-  #   # return error
-  #   return 1
-  # else
-  #   echo 'git diff をチェックしてビルドします。コミットされてなければビルドできません';
-  #   git diff --exit-code && \
-  #   git diff --staged --exit-code && \
+    # return error
+    return 1
+  else
+    echo 'git diff をチェックしてビルドします。コミットされてなければビルドできません';
+    git diff --exit-code && \
+    git diff --staged --exit-code && \
     docker-compose build production --no-cache
-  # fi
+  fi
 }

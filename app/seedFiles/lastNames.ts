@@ -1,4 +1,5 @@
-export default ['Smith',
+export default [
+  'Smith',
   'Johnson',
   'Williams',
   'Brown',
@@ -997,4 +998,5 @@ export default ['Smith',
   'Duarte',
   'Kidd',
   'Key',
-  'Cooke']
+  'Cooke',
+]

@@ -8,12 +8,10 @@
     "serve": "nodemon --legacy-watch --exec 'npm run lint && npm run dev'",
     "start": "node -r tsconfig-paths/register main.js",
     "dev": "ts-node -r tsconfig-paths/register main.ts",
-    "seed": "node seedFiles/seed.js",
     "build": "rm -rf dist && tsc",
-    "seed-shop": "node seedFiles/shopSeeder.js",
     "lint": "eslint --cache --ignore-path /app/.eslintignore . --ext .ts",
     "migrate": "prisma migrate dev",
-    "db-reset": "yes | prisma migrate reset && npm run build && node --max-old-space-size=4096 dist/seedFiles/seed.js"
+    "db-reset": "yes | prisma migrate reset && npm run build && node --max-old-space-size=4096 -r tsconfig-paths/register dist/seedFiles/seed.js"
   },
   "browser": {
     "crypto": false
