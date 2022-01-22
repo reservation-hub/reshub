@@ -56,6 +56,9 @@ const ReservationController: ReservationControllerInterface = {
       stylistName: r.stylist?.name,
       status: r.status,
       reservationDate: r.reservationDate.toISOString(),
+      userId: user.id,
+      menuId: r.menuId,
+      stylist: r.stylistId,
     }))
 
     const seats = await ShopService.fetchShopSeatCount(user, shopId)
