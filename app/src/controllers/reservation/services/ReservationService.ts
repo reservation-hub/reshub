@@ -178,6 +178,11 @@ const ReservationService: ReservationServiceInterface = {
   },
 
   async insertReservation(user, shopId, reservationDate, clientId, menuId, stylistId?) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
+      Logger.debug('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+
     const shopDetails = await ShopRepository.fetchShopDetailsForReservation(shopId)
     if (!shopDetails) {
       Logger.debug('Shop does not exist')
@@ -251,10 +256,25 @@ const ReservationService: ReservationServiceInterface = {
       Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
+    // check if shop exists
+    const shopDetails = await ShopRepository.fetchShopDetailsForReservation(shopId)
+    if (!shopDetails) {
+      Logger.debug('Shop does not exist')
+      throw new NotFoundError()
+    }
 
-    const reservationExists = await ReservationRepository.reservationExists(reservationId)
-    if (!reservationExists) {
+    // check if reservation exists
+
+    const currentReservation = await ReservationRepository.fetchShopReservation(shopId, reservationId)
+    if (!currentReservation) {
       Logger.debug('Reservation does not exist')
+      throw new NotFoundError()
+    }
+
+    // check if new reservation is valid
+
+    if (reservationDate < today) {
+      Logger.debug('Invalid date, earlier than today')
       throw new NotFoundError()
     }
 
@@ -264,20 +284,66 @@ const ReservationService: ReservationServiceInterface = {
       throw new NotFoundError()
     }
 
-    if (!await isValidMenuId(shopId, menuId)) {
-      Logger.debug('Menu does not exist in shop')
+    // check in menu exists
+    const menu = await MenuRepository.fetchShopMenu(shopId, menuId)
+    if (!menu) {
+      Logger.debug('Meny does not exist in shop')
       throw new InvalidParamsError()
     }
 
-    if (stylistId && !isValidStylistId(shopId, stylistId)) {
-      Logger.debug('Stylist does not exist in shop')
+    // check shop schedule availability
+    const reservationEndDate = new Date(reservationDate.getTime() + menu.duration * 1000 * 60)
+    const reservationIsWithinShopSchedule = isWithinSchedule(shopDetails.startTime, shopDetails.endTime,
+      shopDetails.days, reservationDate, reservationEndDate, [reservationDate.getDay()])
+
+    if (!reservationIsWithinShopSchedule) {
+      Logger.debug('Reservation date is not within shop schedule')
       throw new InvalidParamsError()
     }
 
-    const dateObj = new Date(reservationDate)
-    if (dateObj < today) {
-      Logger.debug('Invalid date, earlier than today')
+    // check availability
+    const reservationsForSameDay = await ReservationRepository.fetchShopReservationsForAvailabilityWithMenuDuration(
+      shopId, reservationDate, 1,
+    )
+
+    // remove current reservation from reservationsForThe same day
+    const reservationsWithoutCurrentReservation = reservationsForSameDay
+      .filter(reservation => reservation.id !== currentReservation.id)
+
+    const conflictingReservations = getConflictingReservations(reservationDate,
+      menu.duration, reservationsWithoutCurrentReservation)
+    if (conflictingReservations.length >= shopDetails.seats) {
+      Logger.debug('Provided time is not available')
       throw new InvalidParamsError()
+    }
+
+    // stylist related checks
+    let stylist
+    if (stylistId) {
+      stylist = await StylistRepository.fetchShopStylist(shopId, stylistId)
+      if (!stylist) {
+        Logger.debug('Stylist does not exist in shop')
+        throw new InvalidParamsError()
+      }
+
+      const reservationIsWithinStylistSchedule = isWithinSchedule(stylist.startTime, stylist.endTime,
+        stylist.days, reservationDate, reservationEndDate, [reservationDate.getDay()])
+      if (!reservationIsWithinStylistSchedule) {
+        Logger.debug('Reservation date is not within stylist schedule')
+        throw new InvalidParamsError()
+      }
+
+      const stylistReservationsForSameDay = reservationsWithoutCurrentReservation
+        .filter(rfs => rfs.stylistId === stylistId)
+
+      const conflictingReservations = getConflictingReservations(
+        reservationDate, menu.duration, stylistReservationsForSameDay,
+      )
+
+      if (conflictingReservations.length > 0) {
+        Logger.debug('Stylist is not available for this reservation')
+        throw new InvalidParamsError()
+      }
     }
 
     return ReservationRepository.updateReservation(reservationId, reservationDate,
