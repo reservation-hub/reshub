@@ -9,7 +9,7 @@ import { ScheduleDays } from '@request-response-types/models/Common'
 import { ScheduleDays as EntityScheduleDays } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import Logger from '@lib/Logger'
-import { extractTimeFromInboundDateString, convertTimeToDateObjectString } from '@lib/Date'
+import { extractTimeFromInboundDateString } from '@lib/Date'
 
 export type StylistServiceInterface = {
   fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
@@ -102,8 +102,8 @@ const StylistController: StylistControllerInterface = {
       await StylistService.fetchStylistsReservationCounts([stylist.id]))[0].reservationCount
     return {
       ...stylist,
-      startTime: convertTimeToDateObjectString(stylist.startTime),
-      endTime: convertTimeToDateObjectString(stylist.endTime),
+      startTime: stylist.startTime,
+      endTime: stylist.endTime,
       days: stylist.days.map(convertEntityDaysToOutboundDays),
       shopName,
       reservationCount: stylistReservationCount,
