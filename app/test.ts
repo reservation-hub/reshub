@@ -6,13 +6,10 @@ import today from '@lib/Today'
 (async () => {
   
   try {
-    const reservations = await prisma.reservation.findMany({
-      where: {
-        reservationDate: { lte: today},
-        AND: { status: ReservationStatus.RESERVED}
-      }
-    })
-    console.log(reservations)
+    const dateString = '2022-01-22T17:00:00+09:00'
+    const date = new Date(dateString)
+    const localDate = date.toLocaleString('en-US', { timeZone: 'Asia/Tokyo', hour12: false })
+    console.log(localDate, date.toISOString())
   } catch (e) { console.error(e) }
   
   process.exit(0)
