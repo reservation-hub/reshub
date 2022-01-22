@@ -113,7 +113,7 @@ const ReservationController: ReservationControllerInterface = {
       reservationEndDate: r.reservationEndDate.toISOString(),
       clientId: r.clientId,
       stylistId: r.stylistId,
-      menuId: r.menuId
+      menuId: r.menuId,
     }
   },
 
