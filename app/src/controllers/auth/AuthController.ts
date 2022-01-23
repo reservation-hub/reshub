@@ -9,7 +9,7 @@ export type AuthServiceInterface = {
   verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>
   silentRefreshTokenChecks(authToken: string, refreshToken: string, headerToken?: string): Promise<void>
   googleAuthenticate(token: string): Promise<UserForAuth>
-  hack(role?: RoleSlug): Promise<UserForAuth>
+  hack(role?: RoleSlug, userId?: number): Promise<UserForAuth>
 }
 
 enum CookieDuration {
@@ -20,10 +20,10 @@ enum CookieDuration {
 const joiOptions = { abortEarly: false, stripUnknown: true }
 
 const AuthController : AuthControllerInterface = {
-  async hack(role) {
+  async hack(role, userId) {
     let user: UserForAuth
     if (role && role === RoleSlug.SHOP_STAFF) {
-      user = await AuthService.hack(RoleSlug.SHOP_STAFF)
+      user = await AuthService.hack(RoleSlug.SHOP_STAFF, userId)
     } else {
       user = await AuthService.hack()
     }

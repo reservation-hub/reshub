@@ -10,7 +10,7 @@ import config from '@config'
 import Logger from '@lib/Logger'
 
 export type AuthControllerInterface = {
-  hack(role?: RoleSlug): Promise<UserForAuth>
+  hack(role?: RoleSlug, userId?: number): Promise<UserForAuth>
   createOneDayToken(user: UserForAuth): string
   createThirtyDaysToken(user: UserForAuth): string
   verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>
@@ -112,7 +112,9 @@ export const hack = async (req: Request, res: Response, next: NextFunction) : Pr
 
 export const staffHack = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const user = await AuthController.hack(RoleSlug.SHOP_STAFF)
+    const { userId } = req.query
+    const userIdInt = userId ? parseInt(userId, 10) : undefined
+    const user = await AuthController.hack(RoleSlug.SHOP_STAFF, userIdInt)
     req.user = user
     return next()
   } catch (e) { return next(e) }
