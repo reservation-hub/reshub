@@ -9,7 +9,6 @@ import { ScheduleDays } from '@request-response-types/models/Common'
 import { ScheduleDays as EntityScheduleDays } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import Logger from '@lib/Logger'
-import { extractTimeFromInboundDateString } from '@lib/Date'
 
 export type StylistServiceInterface = {
   fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
@@ -118,9 +117,7 @@ const StylistController: StylistControllerInterface = {
     } = await shopStylistUpsertSchema.parseAsync(query.params)
     const { shopId } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    const startTimeString = extractTimeFromInboundDateString(startTime)
-    const endTimeString = extractTimeFromInboundDateString(endTime)
-    await StylistService.insertStylist(user, shopId, name, price, entityDays, startTimeString, endTimeString)
+    await StylistService.insertStylist(user, shopId, name, price, entityDays, startTime, endTime)
     return 'Stylist created'
   },
 
@@ -134,9 +131,7 @@ const StylistController: StylistControllerInterface = {
     } = await shopStylistUpsertSchema.parseAsync(query.params)
     const { shopId, stylistId } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    const startTimeString = extractTimeFromInboundDateString(startTime)
-    const endTimeString = extractTimeFromInboundDateString(endTime)
-    await StylistService.updateStylist(user, shopId, stylistId, name, price, entityDays, startTimeString, endTimeString)
+    await StylistService.updateStylist(user, shopId, stylistId, name, price, entityDays, startTime, endTime)
     return 'Stylist updated'
   },
 

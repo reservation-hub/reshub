@@ -17,19 +17,6 @@ export const convertDateObjectToOutboundDateString = (date: Date)
 
 /**
  *
- * @param dateString string date data returned by Joi
- * @returns string of hours and minutes. e.g., 12:30; 18:00
- */
-export const extractTimeFromInboundDateString = (dateString: string): string => {
-  const date = convertDateStringToDateObject(dateString)
-  const convertToTwoDigitString = (number: number): string => (`0${number}`).slice(-2)
-  const hour = convertToTwoDigitString(date.getHours())
-  const minutes = convertToTwoDigitString(date.getMinutes())
-  return `${hour}:${minutes}`
-}
-
-/**
- *
  * @param hoursAndMinutes hours and minutes in string e.g., 12:30; 18:00
  * @returns returns date with default year, month, and date
  */
