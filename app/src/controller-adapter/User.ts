@@ -9,6 +9,7 @@ import {
   InsertUserQuery, UpdateUserQuery, deleteUserQuery, userSearchQuery, UpdateUserPasswordQuery,
 } from '@request-response-types/User'
 import { ResponseMessage } from '@request-response-types/Common'
+import parseToInt from '@lib/ParseInt'
 
 export type UserControllerInterface = {
   index(query: UserListQuery): Promise<UserListResponse>
@@ -23,7 +24,7 @@ export type UserControllerInterface = {
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { page, order } = req.query
-    return res.send(await UserController.index({ page, order }))
+    return res.send(await UserController.index({ page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 
