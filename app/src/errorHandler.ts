@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 import { JsonWebTokenError } from 'jsonwebtoken'
 import { ValidationError, ValidationErrorItem } from 'joi'
+import { ZodError } from 'zod'
 
 import EntityErrorCode from '@errors/ErrorCodes'
 import { ServiceError } from '@errors/ServiceErrors'
@@ -66,6 +67,12 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
       return res.status(ErrorCode.InternalServerError).send('Server Error')
     }
     return res.status(ErrorCode.BadRequest).send(error.message)
+  }
+
+  if (error instanceof ZodError) {
+    Logger.debug('zod error')
+    const keys = error.issues.map(e => e.path.toString())
+    return res.status(ErrorCode.BadRequest).send({ keys, message: 'Invalid values error' })
   }
 
   if (error instanceof ValidationError) {
