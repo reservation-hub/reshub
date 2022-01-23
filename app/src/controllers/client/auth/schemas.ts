@@ -1,6 +1,7 @@
+import { passwordPattern } from '@lib/RegexPatterns'
 import { z } from 'zod'
 
 export const localStrategySchema = z.object({
   username: z.string(),
-  password: z.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()+|=]{8,}$/),
+  password: z.string().regex(passwordPattern),
 })

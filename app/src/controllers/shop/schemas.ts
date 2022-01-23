@@ -1,6 +1,7 @@
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { OrderBy } from '@request-response-types/Common'
 import { z } from 'zod'
+import { hoursPattern } from '@lib/RegexPatterns'
 
 export const indexSchema = z.object({
   page: z.number().optional(),
@@ -18,9 +19,9 @@ export const shopUpsertSchema = z.object({
   days: z.nativeEnum(ScheduleDays).array().min(1),
   seats: z.number().positive().int(),
   startTime: z.string()
-    .regex(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) \d\d:\d\d:00$/),
+    .regex(hoursPattern),
   endTime: z.string()
-    .regex(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) \d\d:\d\d:00$/),
+    .regex(hoursPattern),
 })
 
 export const searchSchema = z.object({

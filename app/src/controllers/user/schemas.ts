@@ -2,6 +2,7 @@ import { RoleSlug } from '@request-response-types/models/Role'
 import { OrderBy } from '@request-response-types/Common'
 import { z } from 'zod'
 import { Gender } from '@request-response-types/models/User'
+import { birthdayDatePattern, passwordPattern } from '@lib/RegexPatterns'
 
 export const indexSchema = z.object({
   page: z.number().optional(),
@@ -9,8 +10,8 @@ export const indexSchema = z.object({
 })
 
 export const userInsertSchema = z.object({
-  password: z.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()+|=]{8,}$/),
-  confirm: z.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()+|=]{8,}$/),
+  password: z.string().regex(passwordPattern),
+  confirm: z.string().regex(passwordPattern),
   email: z.string().email(),
   roleSlug: z.nativeEnum(RoleSlug),
   firstNameKanji: z.string(),
@@ -18,7 +19,7 @@ export const userInsertSchema = z.object({
   firstNameKana: z.string(),
   lastNameKana: z.string(),
   gender: z.nativeEnum(Gender),
-  birthday: z.string().regex(/^[1-2][0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/),
+  birthday: z.string().regex(birthdayDatePattern),
 })
 
 export const userUpdateSchema = z.object({
@@ -29,13 +30,13 @@ export const userUpdateSchema = z.object({
   firstNameKana: z.string(),
   lastNameKana: z.string(),
   gender: z.nativeEnum(Gender),
-  birthday: z.string().regex(/^[1-2][0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/),
+  birthday: z.string().regex(birthdayDatePattern),
 })
 
 export const userPasswordUpdateSchema = z.object({
-  oldPassword: z.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()+|=]{8,}$/),
-  newPassword: z.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()+|=]{8,}$/),
-  confirmNewPassword: z.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()+|=]{8,}$/),
+  oldPassword: z.string().regex(passwordPattern),
+  newPassword: z.string().regex(passwordPattern),
+  confirmNewPassword: z.string().regex(passwordPattern),
 })
 
 export const userOAuthIdUpsertSchema = z.object({
