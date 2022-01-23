@@ -1,14 +1,14 @@
-import Joi from 'joi'
 import { OrderBy } from '@request-response-types/Common'
+import { z } from 'zod'
 
-export const indexSchema = Joi.object({
-  page: Joi.string().pattern(/^[0-9]+$/),
-  order: Joi.string().valid(OrderBy.ASC, OrderBy.DESC),
+export const indexSchema = z.object({
+  page: z.number().optional(),
+  order: z.nativeEnum(OrderBy).optional(),
 })
 
-export const menuUpsertSchema = Joi.object({
-  name: Joi.string().required(),
-  description: Joi.string().required(),
-  price: Joi.number().required(),
-  duration: Joi.number().required(),
+export const menuUpsertSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  price: z.number().min(0),
+  duration: z.number().multipleOf(30),
 })
