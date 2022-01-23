@@ -1,7 +1,7 @@
-import Joi from 'joi'
+import { z } from 'zod'
 import { OrderBy } from '@request-response-types/Common'
 
-export const indexSchema = Joi.object({
-  page: Joi.string().pattern(/^[0-9]+$/),
-  order: Joi.string().valid(OrderBy.ASC, OrderBy.DESC),
+export const indexSchema = z.object({
+  page: z.number().optional(),
+  order: z.nativeEnum(OrderBy).optional(),
 })
