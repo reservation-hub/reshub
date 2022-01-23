@@ -400,7 +400,7 @@ const main = async () => {
   }
 
   const clientsForReservation = await prisma.user.findMany({
-    where: { role: { slug: RoleSlug.SHOP_STAFF } },
+    where: { role: { slug: RoleSlug.CLIENT } },
   })
 
   if (clientsForReservation.length < 1) {
