@@ -1,4 +1,4 @@
-import Joi from 'joi'
+import { z } from 'zod'
 import { Request, Response, NextFunction } from 'express'
 import adminPassport from '@auth/middlewares/passport'
 import clientPassport from '@client/auth/middlewares/passport'
@@ -16,31 +16,29 @@ export const roleCheck = (roles: string[]) => (req: Request, res: Response, next
   return next()
 }
 
-const idSchema = Joi.object({
-  id: Joi.string().pattern(/^[0-9]+$/),
-  shopId: Joi.string().pattern(/^[0-9]+$/),
-  stylistId: Joi.string().pattern(/^[0-9]+$/),
-  menuId: Joi.string().pattern(/^[0-9]+$/),
-  reservationId: Joi.string().pattern(/^[0-9]+$/),
+const idSchema = z.object({
+  id: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()),
+  shopId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()),
+  stylistId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()),
+  menuId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()),
+  reservationId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()),
 })
-
-const joiOptions = { abortEarly: false, stripUnknown: true }
 
 export const parseIntIdMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const ids = await idSchema.validateAsync(req.params, joiOptions)
-    res.locals.id = parseInt(ids.id, 10)
+    const ids = await idSchema.parseAsync(req.params)
+    res.locals.id = ids.id
     if (ids.shopId) {
-      res.locals.shopId = parseInt(ids.shopId, 10)
+      res.locals.shopId = ids.shopId
     }
     if (ids.menuId) {
-      res.locals.menuId = parseInt(ids.menuId, 10)
+      res.locals.menuId = ids.menuId
     }
     if (ids.stylistId) {
-      res.locals.stylistId = parseInt(ids.stylistId, 10)
+      res.locals.stylistId = ids.stylistId
     }
     if (ids.reservationId) {
-      res.locals.reservationId = parseInt(ids.reservationId, 10)
+      res.locals.reservationId = ids.reservationId
     }
     return next()
   } catch (e) { return next(e) }
