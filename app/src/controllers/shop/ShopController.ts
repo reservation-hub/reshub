@@ -90,15 +90,13 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
   }
 }
 
-const joiOptions = { abortEarly: false, stripUnknown: true }
-
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
     if (!user) {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const { page, order } = await indexSchema.parseAsync(query)
     const { values: shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order)
 
     const shopIds = shops.map(shop => shop.id)
@@ -190,7 +188,7 @@ const ShopController: ShopControllerInterface = {
     const {
       name, areaId, prefectureId, cityId, address,
       phoneNumber, days, seats, startTime, endTime, details,
-    } = await shopUpsertSchema.validateAsync(query, joiOptions)
+    } = await shopUpsertSchema.parseAsync(query)
 
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
     const startTimeString = extractTimeFromInboundDateString(startTime)
@@ -210,7 +208,7 @@ const ShopController: ShopControllerInterface = {
     const {
       name, areaId, prefectureId, cityId, address, phoneNumber,
       seats, days, startTime, endTime, details,
-    } = await shopUpsertSchema.validateAsync(query.params, joiOptions)
+    } = await shopUpsertSchema.parseAsync(query.params)
     const { id } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
     const startTimeString = extractTimeFromInboundDateString(startTime)
@@ -236,7 +234,7 @@ const ShopController: ShopControllerInterface = {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const { keyword, page, order } = await searchSchema.validateAsync(query, joiOptions)
+    const { keyword, page, order } = await searchSchema.parseAsync(query)
     const shops = await ShopService.searchShops(user, keyword, page, order)
     const shopIds = shops.map(s => s.id)
     const totalReservationsCount = await ReservationService.fetchReservationsCountByShopIds(shopIds)
