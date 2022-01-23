@@ -14,7 +14,6 @@ import { OrderBy } from '@request-response-types/Common'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
-import { extractTimeFromInboundDateString } from '@lib/Date'
 import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
@@ -191,11 +190,9 @@ const ShopController: ShopControllerInterface = {
     } = await shopUpsertSchema.parseAsync(query)
 
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    const startTimeString = extractTimeFromInboundDateString(startTime)
-    const endTimeString = extractTimeFromInboundDateString(endTime)
     await ShopService.insertShop(user,
       name, areaId, prefectureId, cityId, address,
-      phoneNumber, entityDays, seats, startTimeString, endTimeString, details)
+      phoneNumber, entityDays, seats, startTime, endTime, details)
 
     return 'Shop created'
   },
@@ -211,10 +208,8 @@ const ShopController: ShopControllerInterface = {
     } = await shopUpsertSchema.parseAsync(query.params)
     const { id } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    const startTimeString = extractTimeFromInboundDateString(startTime)
-    const endTimeString = extractTimeFromInboundDateString(endTime)
     await ShopService.updateShop(user, id, name, areaId, prefectureId, cityId,
-      address, phoneNumber, entityDays, seats, startTimeString, endTimeString, details)
+      address, phoneNumber, entityDays, seats, startTime, endTime, details)
 
     return 'Shop updated'
   },
