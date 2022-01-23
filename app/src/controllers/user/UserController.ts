@@ -6,16 +6,17 @@ import {
   userInsertSchema, userUpdateSchema, indexSchema, searchSchema, userPasswordUpdateSchema,
 } from '@user/schemas'
 import { OrderBy } from '@entities/Common'
+import { convertDateObjectToOutboundDateString, convertDateStringToDateObject } from '@lib/Date'
 
 export type UserServiceInterface = {
   fetchUsersWithTotalCount(page?: number, order?: OrderBy): Promise<{ users: User[], totalCount: number}>
   fetchUser(id: number): Promise<User>
   searchUser(keyword: string, page?: number, order?: OrderBy): Promise<User[]>
   insertUser(password: string, confirm: string, email: string, roleSlug: RoleSlug, lastNameKanji: string,
-    firstNameKanji: string, lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string)
+    firstNameKanji: string, lastNameKana: string, firstNameKana: string, gender: Gender, birthday: Date)
     : Promise<void>
   updateUser(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string, firstNameKanji: string,
-    lastNameKana: string, firstNameKana: string, gender: Gender, birthday: string) : Promise<void>
+    lastNameKana: string, firstNameKana: string, gender: Gender, birthday: Date) : Promise<void>
   updateUserPassword(id: number, oldPassword: string, newPassword: string, confirmNewPassword: string): Promise<void>
   deleteUser(id: number): Promise<void>
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
@@ -57,7 +58,7 @@ const UserController: UserControllerInterface = {
       },
       lastNameKana: u.lastNameKana,
       firstNameKana: u.firstNameKana,
-      birthday: u.birthday?.toISOString(),
+      birthday: u.birthday ? convertDateObjectToOutboundDateString(u.birthday) : undefined,
       gender: u.gender,
       reservationCount: userReservationCount[0].reservationCount,
     }
@@ -68,8 +69,9 @@ const UserController: UserControllerInterface = {
       password, confirm, email, roleSlug, lastNameKanji,
       firstNameKanji, lastNameKana, firstNameKana, gender, birthday,
     } = await userInsertSchema.validateAsync(query, joiOptions)
+    const dateObject = convertDateStringToDateObject(birthday)
     await UserService.insertUser(password, confirm, email, roleSlug, lastNameKanji,
-      firstNameKanji, lastNameKana, firstNameKana, gender, birthday)
+      firstNameKanji, lastNameKana, firstNameKana, gender, dateObject)
     return 'User created'
   },
 
@@ -78,8 +80,9 @@ const UserController: UserControllerInterface = {
       email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, gender, birthday,
     } = await userUpdateSchema.validateAsync(query.params, joiOptions)
+    const dateObject = convertDateStringToDateObject(birthday)
     await UserService.updateUser(query.id, email, roleSlug, lastNameKanji, firstNameKanji,
-      lastNameKana, firstNameKana, gender, birthday)
+      lastNameKana, firstNameKana, gender, dateObject)
     return 'User updated'
   },
 
