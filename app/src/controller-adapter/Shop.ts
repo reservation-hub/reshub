@@ -203,7 +203,8 @@ const showReservationsForCalendar = async (req: Request, res: Response, next: Ne
     const { year, month } = req.query
     const { shopId } = res.locals
     const { user } = req
-    return res.send(await ReservationController.indexForCalendar(user, { shopId, year, month }))
+    return res.send(await ReservationController.indexForCalendar(user,
+      { shopId, year: parseInt(year, 10), month: parseInt(month, 10) }))
   } catch (e) { return next(e) }
 }
 

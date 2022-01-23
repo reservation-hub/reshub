@@ -32,15 +32,13 @@ export type ShopServiceInterface = {
   fetchShopSeatCount(user: UserForAuth, shopId: number): Promise<number>
 }
 
-const joiOptions = { abortEarly: false, stripUnknown: true }
-
 const ReservationController: ReservationControllerInterface = {
   async index(user, query) {
     if (!user) {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const { page, order } = await indexSchema.parseAsync(query)
     const { shopId } = query
     const reservations = await ReservationService.fetchReservationsWithClientAndStylistAndMenu(
       user, shopId, page, order,
@@ -72,7 +70,7 @@ const ReservationController: ReservationControllerInterface = {
       throw new UnauthorizedError()
     }
     const { shopId } = query
-    const { year, month } = await indexCalendarSchema.validateAsync(query, joiOptions)
+    const { year, month } = await indexCalendarSchema.parseAsync(query)
     const reservations = await ReservationService.fetchReservationsWithClientAndStylistAndMenuForCalendar(
       user, shopId, year, month,
     )
@@ -124,7 +122,7 @@ const ReservationController: ReservationControllerInterface = {
     }
     const {
       reservationDate, userId, menuId, stylistId,
-    } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
+    } = await reservationUpsertSchema.parseAsync(query.params)
     const reservationDateObject = convertDateStringToDateObject(reservationDate)
     const { shopId } = query
     await ReservationService.insertReservation(user, shopId, reservationDateObject, userId, menuId, stylistId)
@@ -138,7 +136,7 @@ const ReservationController: ReservationControllerInterface = {
     }
     const {
       reservationDate, userId, menuId, stylistId,
-    } = await reservationUpsertSchema.validateAsync(query.params, joiOptions)
+    } = await reservationUpsertSchema.parseAsync(query.params)
     const reservationDateObject = convertDateStringToDateObject(reservationDate)
     const { shopId, reservationId } = query
     await ReservationService.updateReservation(user, shopId, reservationId, reservationDateObject,
