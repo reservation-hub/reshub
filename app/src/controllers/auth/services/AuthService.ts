@@ -72,6 +72,11 @@ const AuthService: AuthControllerSocket & PassportSocket = {
       throw new NotFoundError()
     }
 
+    if (!(user.role.slug === RoleSlug.ADMIN || user.role.slug === RoleSlug.SHOP_STAFF)) {
+      Logger.debug('User is neither an admin nor a staff')
+      throw new AuthorizationError()
+    }
+
     if (!user.oAuthIds || !user.oAuthIds.googleId) {
       await UserRepository.addOAuthId(user.id, 'google', sub)
     }
@@ -90,6 +95,12 @@ const AuthService: AuthControllerSocket & PassportSocket = {
       Logger.debug('User does not exist')
       throw new NotFoundError()
     }
+
+    if (!(user.role.slug === RoleSlug.ADMIN || user.role.slug === RoleSlug.SHOP_STAFF)) {
+      Logger.debug('User is neither an admin nor a staff')
+      throw new AuthorizationError()
+    }
+
     if (user.password && !bcrypt.compareSync(password, user.password)) {
       Logger.debug('password does not match')
       throw new InvalidParamsError()
