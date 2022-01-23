@@ -30,12 +30,10 @@ const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays 
   }
 }
 
-const joiOptions = { abortEarly: false, stripUnknown: true }
-
 const StylistController: StylistControllerInterface = {
   async list(user, query) {
     const { shopId } = query
-    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const { page, order } = await indexSchema.parseAsync(query)
     const { stylists, totalCount } = await StylistService.fetchShopStylistsWithTotalCount(user, shopId, page, order)
     const values = stylists.map(s => ({
       id: s.id,
@@ -48,7 +46,7 @@ const StylistController: StylistControllerInterface = {
 
   async listForReservation(user, query) {
     const { shopId } = query
-    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const { page, order } = await indexSchema.parseAsync(query)
     const { stylists, totalCount } = await StylistService.fetchShopStylistsWithTotalCount(user, shopId, page, order)
     const values = stylists.map(s => ({
       id: s.id,

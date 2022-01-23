@@ -1,9 +1,8 @@
 import {
   Request, Response, NextFunction, Router,
 } from 'express'
-import { RoleSlug } from '@entities/Role'
 import LocationController from '@client/location/LocationController'
-import { roleCheck, parseIntIdMiddleware } from '@routes/utils'
+import { parseIntIdMiddleware } from '@routes/utils'
 import { AreaPrefecturesResponse, AreaResponse, PrefectureCitiesResponse } from '@request-response-types/Location'
 
 export type LocationControllerInterface = {

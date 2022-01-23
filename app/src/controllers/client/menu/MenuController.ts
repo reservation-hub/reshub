@@ -11,7 +11,7 @@ export type MenuServiceInterface = {
   fetchShopMenusWithTotalCount(user: UserForAuth | undefined, shopId: number, page?: number, order?: OrderBy)
     :Promise<{ menus: Menu[], totalCount: number}>
 }
-const joiOptions = { abortEarly: false, stripUnknown: true }
+
 const MenuController: MenuSocket & ShopSocket = {
   async popularMenus(user) {
     return MenuService.popularMenus(user)
@@ -19,7 +19,7 @@ const MenuController: MenuSocket & ShopSocket = {
 
   async list(user, query) {
     const { shopId } = query
-    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const { page, order } = await indexSchema.parseAsync(query)
     const { menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(user, shopId, page, order)
     const values = menus.map(m => ({
       id: m.id,

@@ -16,6 +16,7 @@ import ShopController from '@shop/ShopController'
 import MenuController from '@menu/MenuController'
 import StylistController from '@stylist/StylistController'
 import ReservationController from '@reservation/ReservationController'
+import parseToInt from '@lib/ParseInt'
 
 export type ShopControllerInterface = {
   index(user: UserForAuth | undefined, query: ShopListQuery): Promise<ShopListResponse>
@@ -56,7 +57,7 @@ const index = async (req: Request, res: Response, next: NextFunction) : Promise<
   try {
     const { page, order } = req.query
     const { user } = req
-    return res.send(await ShopController.index(user, { page, order }))
+    return res.send(await ShopController.index(user, { page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 
@@ -98,7 +99,7 @@ const showStylists = async (req: Request, res: Response, next: NextFunction) : P
     const { page, order } = req.query
     const { shopId } = res.locals
     const { user } = req
-    return res.send(await StylistController.index(user, { shopId, page, order }))
+    return res.send(await StylistController.index(user, { shopId, page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 
@@ -149,7 +150,7 @@ const showMenus = async (req: Request, res: Response, next: NextFunction) : Prom
     const { page, order } = req.query
     const { shopId } = res.locals
     const { user } = req
-    return res.send(await MenuController.index(user, { shopId, page, order }))
+    return res.send(await MenuController.index(user, { shopId, page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 
@@ -192,7 +193,7 @@ const showReservations = async (req: Request, res: Response, next: NextFunction)
     const { page, order } = req.query
     const { shopId } = res.locals
     const { user } = req
-    return res.send(await ReservationController.index(user, { shopId, page, order }))
+    return res.send(await ReservationController.index(user, { shopId, page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 
@@ -202,7 +203,8 @@ const showReservationsForCalendar = async (req: Request, res: Response, next: Ne
     const { year, month } = req.query
     const { shopId } = res.locals
     const { user } = req
-    return res.send(await ReservationController.indexForCalendar(user, { shopId, year, month }))
+    return res.send(await ReservationController.indexForCalendar(user,
+      { shopId, year: parseInt(year, 10), month: parseInt(month, 10) }))
   } catch (e) { return next(e) }
 }
 

@@ -1,8 +1,9 @@
-import Joi from 'joi'
+import { passwordPattern } from '@lib/RegexPatterns'
+import { z } from 'zod'
 
-export const signUpSchema = Joi.object({
-  username: Joi.string().trim().alphanum().required(),
-  password: Joi.string().trim().alphanum().required(),
-  confirm: Joi.string().trim().alphanum().required(),
-  email: Joi.string().email().trim().required(),
+export const signUpSchema = z.object({
+  username: z.string(),
+  password: z.string().regex(passwordPattern),
+  confirm: z.string().regex(passwordPattern),
+  email: z.string().email(),
 })

@@ -1,26 +1,19 @@
-import joi from 'joi'
+import { defaultDatePattern } from '@lib/RegexPatterns'
 import { OrderBy } from '@request-response-types/Common'
 import { ScheduleDays } from '@request-response-types/models/Common'
+import { z } from 'zod'
 
-export const indexSchema = joi.object({
-  page: joi.string().pattern(/^[0-9]+$/),
-  order: joi.string().valid(OrderBy.ASC, OrderBy.DESC),
+export const indexSchema = z.object({
+  page: z.number().optional(),
+  order: z.nativeEnum(OrderBy).optional(),
 })
 
-export const shopStylistUpsertSchema = joi.object({
-  name: joi.string().required(),
-  price: joi.number().min(0).required(),
-  days: joi.array().items(joi.string().valid(
-    ScheduleDays.MONDAY,
-    ScheduleDays.TUESDAY,
-    ScheduleDays.WEDNESDAY,
-    ScheduleDays.THURSDAY,
-    ScheduleDays.FRIDAY,
-    ScheduleDays.SATURDAY,
-    ScheduleDays.SUNDAY,
-  )).min(1).required(),
-  startTime: joi.string()
-    .pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) \d\d:\d\d:00$/).required(),
-  endTime: joi.string()
-    .pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) \d\d:\d\d:00$/).required(),
+export const shopStylistUpsertSchema = z.object({
+  name: z.string(),
+  price: z.number().min(0),
+  days: z.nativeEnum(ScheduleDays).array().min(1),
+  startTime: z.string()
+    .regex(defaultDatePattern),
+  endTime: z.string()
+    .regex(defaultDatePattern),
 })

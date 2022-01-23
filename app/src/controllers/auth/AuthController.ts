@@ -17,8 +17,6 @@ enum CookieDuration {
   THIRTY_DAYS = '30d'
 }
 
-const joiOptions = { abortEarly: false, stripUnknown: true }
-
 const AuthController : AuthControllerInterface = {
   async hack(role, userId) {
     let user: UserForAuth
@@ -50,7 +48,7 @@ const AuthController : AuthControllerInterface = {
   },
 
   async googleAuthenticate(body) {
-    const schemaValues = await googleSchema.validateAsync(body, joiOptions)
+    const schemaValues = await googleSchema.parseAsync(body)
     const user = await AuthService.googleAuthenticate(schemaValues.tokenId)
     return {
       id: user.id,

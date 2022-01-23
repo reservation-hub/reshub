@@ -2,7 +2,7 @@ import { ErrorRequestHandler } from 'express'
 import { Prisma } from '@prisma/client'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime'
 import { JsonWebTokenError } from 'jsonwebtoken'
-import { ValidationError, ValidationErrorItem } from 'joi'
+import { ZodError } from 'zod'
 
 import EntityErrorCode from '@errors/ErrorCodes'
 import { ServiceError } from '@errors/ServiceErrors'
@@ -18,7 +18,7 @@ enum ErrorCode {
 }
 
 export type ResHubError =
-  PrismaClientKnownRequestError | ValidationError | InvalidRouteError | ServiceError
+  PrismaClientKnownRequestError | InvalidRouteError | ServiceError
 
 export const errorHandler: ErrorRequestHandler = (error: ResHubError | MiddlewareError,
   req, res, next) => { // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -68,10 +68,9 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
     return res.status(ErrorCode.BadRequest).send(error.message)
   }
 
-  if (error instanceof ValidationError) {
-    // Joi Validation エラー処理
-    Logger.debug(error)
-    const keys = error.details.map((e: ValidationErrorItem) => e.path.toString())
+  if (error instanceof ZodError) {
+    Logger.debug('zod error')
+    const keys = error.issues.map(e => e.path.toString())
     return res.status(ErrorCode.BadRequest).send({ keys, message: 'Invalid values error' })
   }
 

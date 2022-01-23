@@ -4,8 +4,6 @@ import { User } from '@entities/User'
 import { signUpSchema } from '@client/user/schemas'
 import MailService from '@client/user/services/MailService'
 
-const joiOptions = { abortEarly: false, stripUnknown: true }
-
 export type SignUpServiceInterface = {
   signUpUser(email: string, username: string, password: string, confirm: string): Promise<User>
 }
@@ -18,7 +16,7 @@ const UserController: UserControllerInterface = {
   async signUp(query) {
     const {
       email, username, password, confirm,
-    } = await signUpSchema.validateAsync(query, joiOptions)
+    } = await signUpSchema.parseAsync(query)
     await UserService.signUpUser(email, username, password, confirm)
     await MailService.sendSignUpEmail(email)
     return 'User created'

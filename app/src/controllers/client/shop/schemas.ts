@@ -1,15 +1,15 @@
-import Joi from 'joi'
+import { z } from 'zod'
 import { OrderBy } from '@request-response-types/Common'
 
-export const indexSchema = Joi.object({
-  page: Joi.string().pattern(/^[0-9]+$/),
-  order: Joi.string().valid(OrderBy.ASC, OrderBy.DESC),
+export const indexSchema = z.object({
+  page: z.number().optional(),
+  order: z.nativeEnum(OrderBy).optional(),
 })
 
-export const searchByAreaSchema = Joi.object({
-  page: Joi.string().pattern(/^[0-9]+$/),
-  order: Joi.string().valid(OrderBy.ASC, OrderBy.DESC),
-  areaId: Joi.string().pattern(/^[0-9]+$/).required(),
-  prefectureId: Joi.string().pattern(/^[0-9]+$/),
-  cityId: Joi.string().pattern(/^[0-9]+$/),
+export const searchByAreaSchema = z.object({
+  page: z.number().optional(),
+  order: z.nativeEnum(OrderBy).optional(),
+  areaId: z.number().min(1),
+  prefectureId: z.number().min(1).optional(),
+  cityId: z.number().min(1).optional(),
 })

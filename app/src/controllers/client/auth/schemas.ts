@@ -1,6 +1,7 @@
-import Joi from 'joi'
+import { passwordPattern } from '@lib/RegexPatterns'
+import { z } from 'zod'
 
-export const localStrategySchema = Joi.object({
-  username: Joi.string().required(),
-  password: Joi.string().min(8).required(),
+export const localStrategySchema = z.object({
+  username: z.string(),
+  password: z.string().regex(passwordPattern),
 })

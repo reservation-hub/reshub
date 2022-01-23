@@ -1,20 +1,21 @@
-import joi from 'joi'
+import { defaultDatePattern } from '@lib/RegexPatterns'
 import { OrderBy } from '@request-response-types/Common'
+import { z } from 'zod'
 
-export const indexSchema = joi.object({
-  page: joi.string().pattern(/^[0-9]+$/),
-  order: joi.string().valid(OrderBy.ASC, OrderBy.DESC),
+export const indexSchema = z.object({
+  page: z.number().optional(),
+  order: z.nativeEnum(OrderBy).optional(),
 })
 
-export const indexCalendarSchema = joi.object({
-  year: joi.string().pattern(/^[12][09][0-9][0-9]$/).required(),
-  month: joi.string().pattern(/^(1[0-2]|[1-9])$/).required(),
+export const indexCalendarSchema = z.object({
+  year: z.number().min(2000),
+  month: z.number().min(1).max(12),
 })
 
-export const reservationUpsertSchema = joi.object({
+export const reservationUpsertSchema = z.object({
   reservationDate:
-    joi.string().pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) \d\d:\d\d:00$/).required(),
-  stylistId: joi.number(),
-  userId: joi.number().required(),
-  menuId: joi.number().required(),
+    z.string().regex(defaultDatePattern),
+  stylistId: z.number().positive().int(),
+  userId: z.number().positive().int(),
+  menuId: z.number().positive().int(),
 })

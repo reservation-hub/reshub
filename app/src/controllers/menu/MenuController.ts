@@ -19,15 +19,13 @@ export type MenuServiceInterface = {
   deleteMenu(user: UserForAuth, shopId: number, menuId: number): Promise<Menu>
 }
 
-const joiOptions = { abortEarly: false, stripUnknown: true }
-
 const MenuController: MenuControllerInterface = {
   async index(user, query) {
     if (!user) {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const { page, order } = await indexSchema.parseAsync(query)
     const { shopId } = query
     const { menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(user, shopId, page, order)
     return {
@@ -58,7 +56,7 @@ const MenuController: MenuControllerInterface = {
     }
     const {
       name, description, price, duration,
-    } = await menuUpsertSchema.validateAsync(query.params, joiOptions)
+    } = await menuUpsertSchema.parseAsync(query.params)
     const { shopId } = query
     await MenuService.insertMenu(user, shopId, name, description, price, duration)
     return 'Menu created'
@@ -71,7 +69,7 @@ const MenuController: MenuControllerInterface = {
     }
     const {
       name, description, price, duration,
-    } = await menuUpsertSchema.validateAsync(query.params, joiOptions)
+    } = await menuUpsertSchema.parseAsync(query.params)
     const { shopId, menuId } = query
     await MenuService.updateMenu(user, shopId, menuId, name, description, price, duration)
     return 'Menu updated'

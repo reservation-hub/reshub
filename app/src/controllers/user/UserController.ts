@@ -22,11 +22,9 @@ export type UserServiceInterface = {
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 
-const joiOptions = { abortEarly: false, stripUnknown: true }
-
 const UserController: UserControllerInterface = {
   async index(query) {
-    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const { page, order } = await indexSchema.parseAsync(query)
     const { users, totalCount } = await UserService.fetchUsersWithTotalCount(page, order)
     const userReservationCounts = await UserService.fetchUsersReservationCounts(users.map(u => u.id))
     const userList = users.map(u => ({
@@ -68,7 +66,7 @@ const UserController: UserControllerInterface = {
     const {
       password, confirm, email, roleSlug, lastNameKanji,
       firstNameKanji, lastNameKana, firstNameKana, gender, birthday,
-    } = await userInsertSchema.validateAsync(query, joiOptions)
+    } = await userInsertSchema.parseAsync(query)
     const dateObject = convertDateStringToDateObject(birthday)
     await UserService.insertUser(password, confirm, email, roleSlug, lastNameKanji,
       firstNameKanji, lastNameKana, firstNameKana, gender, dateObject)
@@ -79,7 +77,7 @@ const UserController: UserControllerInterface = {
     const {
       email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, gender, birthday,
-    } = await userUpdateSchema.validateAsync(query.params, joiOptions)
+    } = await userUpdateSchema.parseAsync(query.params)
     const dateObject = convertDateStringToDateObject(birthday)
     await UserService.updateUser(query.id, email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, gender, dateObject)
@@ -90,7 +88,7 @@ const UserController: UserControllerInterface = {
     const { id } = query
     const {
       oldPassword, newPassword, confirmNewPassword,
-    } = await userPasswordUpdateSchema.validateAsync(query.params, joiOptions)
+    } = await userPasswordUpdateSchema.parseAsync(query.params)
     await UserService.updateUserPassword(id, oldPassword, newPassword, confirmNewPassword)
     return 'User password updated'
   },
@@ -102,7 +100,7 @@ const UserController: UserControllerInterface = {
   },
 
   async searchUsers(query) {
-    const { keyword, page, order } = await searchSchema.validateAsync(query, joiOptions)
+    const { keyword, page, order } = await searchSchema.parseAsync(query)
     const users = await UserService.searchUser(keyword, page, order)
     const userReservationCounts = await UserService.fetchUsersReservationCounts(users.map(u => u.id))
     const userList = users.map(u => ({

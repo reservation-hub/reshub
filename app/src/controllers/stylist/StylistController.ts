@@ -68,15 +68,13 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
   }
 }
 
-const joiOptions = { abortEarly: false, stripUnknown: true }
-
 const StylistController: StylistControllerInterface = {
   async index(user, query) {
     if (!user) {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const { page, order } = await indexSchema.parseAsync(query)
     const { shopId } = query
     const { stylists, totalCount } = await StylistService.fetchShopStylistsWithTotalCount(user, shopId, page, order)
     const stylistReservationCounts = await StylistService.fetchStylistsReservationCounts(stylists.map(s => s.id))
@@ -117,7 +115,7 @@ const StylistController: StylistControllerInterface = {
     }
     const {
       name, price, days, startTime, endTime,
-    } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
+    } = await shopStylistUpsertSchema.parseAsync(query.params)
     const { shopId } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
     const startTimeString = extractTimeFromInboundDateString(startTime)
@@ -133,7 +131,7 @@ const StylistController: StylistControllerInterface = {
     }
     const {
       name, price, days, startTime, endTime,
-    } = await shopStylistUpsertSchema.validateAsync(query.params, joiOptions)
+    } = await shopStylistUpsertSchema.parseAsync(query.params)
     const { shopId, stylistId } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
     const startTimeString = extractTimeFromInboundDateString(startTime)

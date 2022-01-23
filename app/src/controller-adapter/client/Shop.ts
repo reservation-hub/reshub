@@ -14,6 +14,7 @@ import MenuController from '@client/menu/MenuController'
 import StylistController from '@client/stylist/StylistController'
 import ReservationController from '@client/reservation/ReservationController'
 import { ResponseMessage } from '@request-response-types/client/Common'
+import parseToInt from '@lib/ParseInt'
 
 export type ShopControllerInterface = {
   index(user: UserForAuth | undefined, query: SalonListQuery): Promise<SalonListResponse>
@@ -40,7 +41,7 @@ const index = async (req: Request, res: Response, next: NextFunction) : Promise<
   try {
     const { page, order } = req.query
     const { user } = req
-    return res.send(await ShopController.index(user, { page, order }))
+    return res.send(await ShopController.index(user, { page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 
@@ -59,7 +60,11 @@ const shopSearchByArea = async (req: Request, res: Response, next: NextFunction)
       page, order, areaId, prefectureId, cityId,
     } = req.query
     return res.send(await ShopController.searchByArea(user, {
-      page, order, areaId, prefectureId, cityId,
+      page: parseToInt(page),
+      order,
+      areaId: parseInt(areaId, 10),
+      prefectureId: parseToInt(prefectureId),
+      cityId: parseToInt(cityId),
     }))
   } catch (e) { return next(e) }
 }
@@ -69,7 +74,7 @@ const shopMenus = async (req: Request, res: Response, next: NextFunction) : Prom
     const { user } = req
     const { shopId } = res.locals
     const { page, order } = req.query
-    return res.send(await MenuController.list(user, { shopId, page, order }))
+    return res.send(await MenuController.list(user, { shopId, page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 
@@ -78,7 +83,7 @@ const shopStylists = async (req: Request, res: Response, next: NextFunction) : P
     const { user } = req
     const { shopId } = res.locals
     const { page, order } = req.query
-    return res.send(await StylistController.list(user, { shopId, page, order }))
+    return res.send(await StylistController.list(user, { shopId, page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 
@@ -88,7 +93,7 @@ const shopStylistsForReservation = async (req: Request, res: Response, next: Nex
     const { user } = req
     const { shopId } = res.locals
     const { page, order } = req.query
-    return res.send(await StylistController.listForReservation(user, { shopId, page, order }))
+    return res.send(await StylistController.listForReservation(user, { shopId, page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 

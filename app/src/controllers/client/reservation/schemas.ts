@@ -1,13 +1,14 @@
-import joi from 'joi'
+import { defaultDatePattern } from '@lib/RegexPatterns'
+import { z } from 'zod'
 
-export const reservationUpsertSchema = joi.object({
+export const reservationUpsertSchema = z.object({
   reservationDate:
-    joi.string().pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) \d\d:\d\d:00$/).required(),
-  menuId: joi.number().required(),
-  stylistId: joi.number(),
+    z.string().regex(defaultDatePattern),
+  menuId: z.number().min(1),
+  stylistId: z.number().min(1),
 })
 
-export const reservationQuerySchema = joi.object({
+export const reservationQuerySchema = z.object({
   reservationDate:
-    joi.string().pattern(/^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]) \d\d:\d\d:00$/).required(),
+    z.string().regex(defaultDatePattern),
 })

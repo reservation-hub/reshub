@@ -15,8 +15,6 @@ export type UserServiceInterface = {
   fetch(id: number): Promise<User>
 }
 
-const joiOptions = { abortEarly: false, stripUnknown: true }
-
 // JWT
 
 const cookieExtractor = (req: Request) => {
@@ -81,7 +79,7 @@ passport.use('client-local', new LocalStrategy(async (username, password, done) 
   try {
     const {
       username: cleanUsername, password: cleanPassword,
-    } = await localStrategySchema.validateAsync({ username, password }, joiOptions)
+    } = await localStrategySchema.parseAsync({ username, password })
     const user = await AuthService.authenticateByUsernameAndPassword(cleanUsername, cleanPassword)
     return done(null, {
       id: user.id,
