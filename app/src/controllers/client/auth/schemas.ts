@@ -1,6 +1,6 @@
-import Joi from 'joi'
+import { z } from 'zod'
 
-export const localStrategySchema = Joi.object({
-  username: Joi.string().required(),
-  password: Joi.string().min(8).required(),
+export const localStrategySchema = z.object({
+  username: z.string(),
+  password: z.string().regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d~!@#$%^&*()+|=]{8,}$/),
 })
