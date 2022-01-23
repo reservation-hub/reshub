@@ -1,4 +1,4 @@
-import { defaultDatePattern } from '@lib/RegexPatterns'
+import { hoursPattern } from '@lib/RegexPatterns'
 import { OrderBy } from '@request-response-types/Common'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { z } from 'zod'
@@ -13,7 +13,7 @@ export const shopStylistUpsertSchema = z.object({
   price: z.number().min(0),
   days: z.nativeEnum(ScheduleDays).array().min(1),
   startTime: z.string()
-    .regex(defaultDatePattern),
+    .regex(hoursPattern),
   endTime: z.string()
-    .regex(defaultDatePattern),
+    .regex(hoursPattern),
 })
