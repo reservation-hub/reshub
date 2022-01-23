@@ -1,5 +1,5 @@
 import prisma from '@lib/prisma'
-import { ShopRepositoryInterface } from '../services/MenuService'
+import { ShopRepositoryInterface } from '@menu/services/MenuService'
 
 const ShopRepository: ShopRepositoryInterface = {
   async shopExists(shopId) {

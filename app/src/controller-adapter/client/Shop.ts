@@ -5,6 +5,7 @@ import {
   SalonListQuery, SalonListResponse, SalonQuery, SalonResponse,
   SalonMenuListQuery, SalonMenuListResponse, SalonStylistListQuery, SalonStylistListResponse,
   SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
+  SalonListByAreaQuery,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -17,6 +18,7 @@ import { ResponseMessage } from '@request-response-types/client/Common'
 export type ShopControllerInterface = {
   index(user: UserForAuth | undefined, query: SalonListQuery): Promise<SalonListResponse>
   detail(user: UserForAuth | undefined, query: SalonQuery): Promise<SalonResponse>
+  searchByArea(user: UserForAuth | undefined, query: SalonListByAreaQuery): Promise<SalonListResponse>
 }
 
 export type MenuControllerInterface = {
@@ -37,7 +39,7 @@ export type ReservationControllerInterface = {
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { page, order } = req.query
-    const user = req.user as UserForAuth
+    const { user } = req
     return res.send(await ShopController.index(user, { page, order }))
   } catch (e) { return next(e) }
 }
@@ -47,6 +49,18 @@ const detail = async (req: Request, res: Response, next: NextFunction) : Promise
     const { shopId } = res.locals
     const { user } = req
     return res.send(await ShopController.detail(user, { shopId }))
+  } catch (e) { return next(e) }
+}
+
+const shopSearchByArea = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user } = req
+    const {
+      page, order, areaId, prefectureId, cityId,
+    } = req.query
+    return res.send(await ShopController.searchByArea(user, {
+      page, order, areaId, prefectureId, cityId,
+    }))
   } catch (e) { return next(e) }
 }
 
@@ -100,6 +114,12 @@ const routes = Router()
 
 routes.get('/', index)
 routes.get('/:shopId', parseIntIdMiddleware, detail)
+
+/**
+ * Search routes
+ */
+
+routes.get('/search/area', shopSearchByArea)
 
 /**
  * Menu routes
