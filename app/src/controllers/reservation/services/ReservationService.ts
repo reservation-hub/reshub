@@ -52,7 +52,7 @@ export type ShopRepositoryInterface = {
   fetchShopSchedule(shopId: number): Promise<{startTime: string, endTime: string,
   seats: number} | null >
   fetchShopDetailsForReservation(shopId: number)
-  : Promise<{ startTime: string, endTime: string, days: ScheduleDays[], seats: number} | null>
+  : Promise<{ staffId: number, startTime: string, endTime: string, days: ScheduleDays[], seats: number} | null>
 }
 
 export type StylistRepositoryInterface = {
@@ -76,16 +76,6 @@ const getConflictingReservations = (reservationDate: Date, menuDuration: number,
 const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean> => {
   const userShopIds = await ShopRepository.fetchUserShopIds(userId)
   return userShopIds.some(id => id === shopId)
-}
-
-const isValidMenuId = async (shopId: number, menuId: number): Promise<boolean> => {
-  const menuIds = await MenuRepository.fetchMenuIdsByShopId(shopId)
-  return menuIds.some(id => id === menuId)
-}
-
-const isValidStylistId = async (shopId: number, stylistId: number): Promise<boolean> => {
-  const stylistIds = await StylistRepository.fetchStylistIdsByShopId(shopId)
-  return stylistIds.some(id => id === stylistId)
 }
 
 const recreateReservationList = async (reservations: Reservation[]) => {
@@ -178,15 +168,15 @@ const ReservationService: ReservationServiceInterface = {
   },
 
   async insertReservation(user, shopId, reservationDate, clientId, menuId, stylistId?) {
-    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
-
     const shopDetails = await ShopRepository.fetchShopDetailsForReservation(shopId)
     if (!shopDetails) {
       Logger.debug('Shop does not exist')
       throw new NotFoundError()
+    }
+
+    if (user.role.slug === RoleSlug.SHOP_STAFF && shopDetails.staffId !== user.id) {
+      Logger.debug('Shop is not owned by user')
+      throw new AuthorizationError()
     }
 
     if (reservationDate < today) {
@@ -252,15 +242,16 @@ const ReservationService: ReservationServiceInterface = {
   },
 
   async updateReservation(user, shopId, reservationId, reservationDate, clientId, menuId, stylistId) {
-    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
-    }
     // check if shop exists
     const shopDetails = await ShopRepository.fetchShopDetailsForReservation(shopId)
     if (!shopDetails) {
       Logger.debug('Shop does not exist')
       throw new NotFoundError()
+    }
+
+    if (user.role.slug === RoleSlug.SHOP_STAFF && shopDetails.staffId !== user.id) {
+      Logger.debug('Shop is not owned by user')
+      throw new AuthorizationError()
     }
 
     // check if reservation exists
