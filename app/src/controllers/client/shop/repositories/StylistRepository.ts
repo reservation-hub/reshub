@@ -2,7 +2,7 @@ import { Stylist as PrismaStylist, Days } from '@prisma/client'
 import { ScheduleDays } from '@entities/Common'
 import { Stylist } from '@entities/Stylist'
 import prisma from '@lib/prisma'
-import { StylistRepositoryInterface } from '../services/StylistService'
+import { StylistRepositoryInterface } from '@client/shop/services/StylistService'
 
 const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
   switch (day) {

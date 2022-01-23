@@ -1,7 +1,7 @@
 import { MenuRepositoryInterface as ReservationServiceSocket } from '@dashboard/services/ReservationService'
 import prisma from '@lib/prisma'
 import { ReservationStatus } from '@prisma/client'
-import { MenuRepositoryInterface as MenuServiceSocket } from '../services/MenuService'
+import { MenuRepositoryInterface as MenuServiceSocket } from '@dashboard/services/MenuService'
 
 const MenuRepository: ReservationServiceSocket & MenuServiceSocket = {
   async fetchMenusByIds(menuIds) {

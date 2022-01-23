@@ -2,9 +2,9 @@ import { Prisma, Days } from '@prisma/client'
 import { Shop } from '@entities/Shop'
 import { ScheduleDays } from '@entities/Common'
 import prisma from '@lib/prisma'
-import { ShopRepositoryInterface as ShopServiceSocket } from '../services/ShopService'
-import { ShopRepositoryInterface as MenuServiceSocket } from '../services/MenuService'
-import { ShopRepositoryInterface as StylistServiceSocket } from '../services/StylistService'
+import { ShopRepositoryInterface as ShopServiceSocket } from '@client/shop/services/ShopService'
+import { ShopRepositoryInterface as MenuServiceSocket } from '@client/shop/services/MenuService'
+import { ShopRepositoryInterface as StylistServiceSocket } from '@client/shop/services/StylistService'
 
 const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
   {
@@ -95,6 +95,41 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
   async shopExists(shopId) {
     return (await prisma.shop.count({ where: { id: shopId } })) > 0
   },
+
+  async fetchShopsByArea(page, order, areaId, prefectureId, cityId) {
+    const limit = 10
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const shops = await prisma.shop.findMany({
+      where: {
+        areaId,
+        AND: {
+          prefectureId,
+          cityId,
+        },
+      },
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true,
+      },
+    })
+
+    return shops.map(reconstructShop)
+  },
+
+  async fetchShopsTotalCountByArea(areaId, prefectureId, cityId) {
+    return prisma.shop.count({
+      where: {
+        areaId,
+        AND: {
+          prefectureId,
+          cityId,
+        },
+      },
+    })
+  },
+
 }
 
 export default ShopRepository
