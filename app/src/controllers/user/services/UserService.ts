@@ -13,10 +13,10 @@ export type UserRepositoryInterface = {
   fetchUser(userId: number): Promise<User | null>
   totalCount(): Promise<number>
   insertUser(email: string, password: string, roleSlug: RoleSlug, lastNameKanji: string,
-    firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: string, gender: Gender,)
+    firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: Date, gender: Gender,)
     : Promise<User>
   updateUser(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string,
-    firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: string, gender: Gender)
+    firstNameKanji: string, lastNameKana: string, firstNameKana: string, birthday: Date, gender: Gender)
     : Promise<User>
   updateUserPassword(id: number, password: string): Promise<User>
   deleteUser(id: number): Promise<User>
