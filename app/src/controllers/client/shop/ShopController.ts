@@ -25,10 +25,9 @@ export type StylistServiceInterface = {
   fetchShopStylists(shopId: number): Promise<Stylist[]>
 }
 
-const joiOptions = { abortEarly: false, stripUnknown: true }
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
-    const { page, order } = await indexSchema.validateAsync(query, joiOptions)
+    const { page, order } = await indexSchema.parseAsync(query)
     const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order)
     const values = shops.map(s => ({
       id: s.id,
@@ -73,14 +72,10 @@ const ShopController: ShopControllerInterface = {
   async searchByArea(user, query) {
     const {
       page, order, areaId, prefectureId, cityId,
-    } = await searchByAreaSchema.validateAsync(query, joiOptions)
-
-    const areaIdInt = parseInt(areaId, 10)
-    const prefectureIdInt = prefectureId ? parseInt(prefectureId, 10) : undefined
-    const cityIdInt = cityId ? parseInt(cityId, 10) : undefined
+    } = await searchByAreaSchema.parseAsync(query)
 
     const { shops, totalCount } = await ShopService.fetchShopsByAreaWithTotalCount(
-      user, areaIdInt, page, order, prefectureIdInt, cityIdInt,
+      user, areaId, page, order, prefectureId, cityId,
     )
 
     const values = shops.map(s => ({
