@@ -1,3 +1,4 @@
+import { convertDateTimeObjectToDateTimeString, convertDateStringToDateObject } from '@lib/Date'
 import { Reservation } from '@entities/Reservation'
 import { UserForAuth } from '@entities/User'
 import { ReservationControllerInterface } from '@controller-adapter/client/Shop'
@@ -6,7 +7,6 @@ import ReservationService from '@client/reservation/services/ReservationService'
 import ShopService from '@client/reservation/services/ShopService'
 import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
-import { convertDateStringToDateObject } from '@lib/Date'
 
 export type ReservationServiceInterface = {
   fetchShopReservationsForAvailability(user: UserForAuth | undefined, shopId: number, reservationDate: Date)
@@ -31,8 +31,8 @@ const ReservationController: ReservationControllerInterface = {
     const seats = await ShopService.fetchShopSeatCount(user, shopId)
     const values = reservations.map(r => ({
       id: r.id,
-      reservationStartDate: r.reservationStartDate.toISOString(),
-      reservationEndDate: r.reservationEndDate.toISOString(),
+      reservationStartDate: convertDateTimeObjectToDateTimeString(r.reservationStartDate),
+      reservationEndDate: convertDateTimeObjectToDateTimeString(r.reservationEndDate),
       stylistId: r.stylistId,
     }))
     return { values, seats }

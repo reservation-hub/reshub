@@ -1,3 +1,4 @@
+import { convertDateTimeObjectToDateTimeString } from '@lib/Date'
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
 import { ShopControllerInterface } from '@controller-adapter/Shop'
@@ -153,7 +154,7 @@ const ShopController: ShopControllerInterface = {
         stylistName: stylist?.name,
         menuName: menu.name,
         status: r.status,
-        reservationDate: r.reservationDate.toISOString(),
+        reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
       }
     })
 

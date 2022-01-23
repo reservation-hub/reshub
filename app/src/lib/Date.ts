@@ -15,6 +15,9 @@ export const convertDateObjectToOutboundDateString = (date: Date)
   return `${dateString} ${time}`
 }
 
+export const convertDateTimeObjectToDateTimeString = (dateTime: Date) => dateTime.toISOString().replace('T', ' ')
+  .substring(0, 19)
+
 /**
  *
  * @param hoursAndMinutes hours and minutes in string e.g., 12:30; 18:00

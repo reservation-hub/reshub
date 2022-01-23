@@ -1,3 +1,4 @@
+import { convertDateTimeObjectToDateTimeString, convertDateStringToDateObject } from '@lib/Date'
 import { Menu } from '@entities/Menu'
 import { Reservation } from '@entities/Reservation'
 import { Shop } from '@entities/Shop'
@@ -8,7 +9,6 @@ import { ReservationControllerInterface } from '@controller-adapter/Shop'
 import { OrderBy } from '@request-response-types/Common'
 import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
-import { convertDateStringToDateObject } from '@lib/Date'
 import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './schemas'
 import ShopService from './services/ShopService'
 
@@ -53,7 +53,7 @@ const ReservationController: ReservationControllerInterface = {
       menuName: r.menu.name,
       stylistName: r.stylist?.name,
       status: r.status,
-      reservationDate: r.reservationDate.toISOString(),
+      reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
       clientId: r.clientId,
       menuId: r.menuId,
       stylist: r.stylistId,
@@ -84,7 +84,7 @@ const ReservationController: ReservationControllerInterface = {
       menuName: r.menu.name,
       stylistName: r.stylist?.name,
       status: r.status,
-      reservationDate: r.reservationDate.toISOString(),
+      reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
     }))
 
     const seats = await ShopService.fetchShopSeatCount(user, shopId)
@@ -107,8 +107,8 @@ const ReservationController: ReservationControllerInterface = {
       menuName: r.menu.name,
       stylistName: r.stylist?.name,
       status: r.status,
-      reservationDate: r.reservationDate.toISOString(),
-      reservationEndDate: r.reservationEndDate.toISOString(),
+      reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
+      reservationEndDate: convertDateTimeObjectToDateTimeString(r.reservationEndDate),
       clientId: r.clientId,
       stylistId: r.stylistId,
       menuId: r.menuId,
