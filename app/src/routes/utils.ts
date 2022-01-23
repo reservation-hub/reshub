@@ -17,11 +17,11 @@ export const roleCheck = (roles: string[]) => (req: Request, res: Response, next
 }
 
 const idSchema = z.object({
-  id: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()),
-  shopId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()),
-  stylistId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()),
-  menuId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()),
-  reservationId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()),
+  id: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()).optional(),
+  shopId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()).optional(),
+  stylistId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()).optional(),
+  menuId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()).optional(),
+  reservationId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()).optional(),
 })
 
 export const parseIntIdMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
