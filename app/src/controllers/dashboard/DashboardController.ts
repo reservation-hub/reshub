@@ -13,6 +13,7 @@ import StylistService from '@dashboard/services/StylistService'
 import MenuService from '@dashboard/services/MenuService'
 import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
+import { convertDateTimeObjectToDateTimeString } from '@lib/Date'
 
 export type UserServiceInterface = {
   fetchUsersWithReservationCounts(): Promise<{ users: (User & { reservationCount: number })[], totalCount: number }>
@@ -90,7 +91,7 @@ const salonIndexForShopStaff = async (user: UserForAuth): Promise<salonIndexShop
     menuName: r.menu.name,
     stylistName: r.stylist?.name,
     status: r.status,
-    reservationDate: r.reservationDate.toISOString(),
+    reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
   }))
 
   // stylists
