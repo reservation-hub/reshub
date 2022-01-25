@@ -1,6 +1,6 @@
 import { ReservationServiceInterface } from '@shop/ShopController'
 import ReservationRepository from '@shop/repositories/ReservationRepository'
-import { AuthorizationError } from '@errors/ServiceErrors'
+import { AuthorizationError, NotFoundError } from '@errors/ServiceErrors'
 import { RoleSlug } from '@entities/Role'
 import ShopRepository from '@shop/repositories/ShopRepository'
 import { Reservation } from '@entities/Reservation'
@@ -13,6 +13,8 @@ export type ShopRepositoryInterface = {
 export type ReservationRepositoryInterface = {
   fetchReservationsCountByShopIds(shopIds: number[]) : Promise<{ shopId: number, reservationCount: number }[]>
   fetchShopReservations(shopId: number, limit: number): Promise<Reservation[]>
+  fetchCompletedShopReservationsWithStyilstPriceAndMenuPrice(shopId: number)
+  :Promise< {id: number, shopId: number, stylistPrice?: number, menuPrice: number}[]>
 }
 
 const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean> => {
@@ -38,6 +40,13 @@ const ReservationService: ReservationServiceInterface = {
     return ReservationRepository.fetchShopReservations(shopId, limit)
   },
 
+  async getTotalsalesForShopForCurrentMonth(shopId) {
+    const completedReservations = await
+    ReservationRepository.fetchCompletedShopReservationsWithStyilstPriceAndMenuPrice(
+      shopId,
+    )
+    return completedReservations.reduce((sum, r) => sum + r.menuPrice + (r.stylistPrice ?? 0), 0)
+  },
 }
 
 export default ReservationService

@@ -42,6 +42,7 @@ export type ReservationServiceInterface = {
   fetchReservationsCountByShopIds(shopIds: number[])
     : Promise<{ shopId: number, reservationCount: number }[]>
   fetchShopReservations(user: UserForAuth, shopId: number, limit?: number): Promise<Reservation[]>
+  getTotalsalesForShopForCurrentMonth(shopId: number): Promise<number>
 }
 
 export type MenuServiceInterface = {
@@ -133,6 +134,7 @@ const ShopController: ShopControllerInterface = {
     const reservations = await ReservationService.fetchShopReservations(user, shop.id, reservationLimit)
     const menus = await MenuService.fetchShopMenus(user, shop.id, menuLimit)
     const users = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
+    const totalsalesForCurrentMonth = await ReservationService.getTotalsalesForShopForCurrentMonth(shop.id)
 
     const stylistList = stylists.map(s => ({
       id: s.id,
@@ -177,6 +179,7 @@ const ShopController: ShopControllerInterface = {
       reservations: reservationList,
       menu: menus,
       reservationCount: reservations.length,
+      totalsalesForCurrentMonth,
     }
   },
 
