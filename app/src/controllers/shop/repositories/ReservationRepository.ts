@@ -7,6 +7,7 @@ import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface as ReservationServiceSocket } from '@shop/services/ReservationService'
 
 import prisma from '@lib/prisma'
+import { createNoSubstitutionTemplateLiteral } from 'typescript'
 
 export const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
   switch (status) {
@@ -49,6 +50,35 @@ const ReservationRepository: ReservationServiceSocket = {
     return reservations.map(r => ({
       shopId: r.shopId,
       reservationCount: r._count,
+    }))
+  },
+
+  async fetchCompletedShopReservationsWithStyilstPriceAndMenuPrice(shopId) {
+    const date = new Date()
+    const year = date.getFullYear()
+    const month = date.getMonth()
+
+    const startOfMonth = new Date(year, month, 1)
+    const endOfMonth = new Date(year, month + 1, 0)
+    const completedReservations = await prisma.reservation.findMany({
+      where: {
+        shopId,
+        AND: {
+          status: 'COMPLETED',
+          reservationDate: {
+            gte: startOfMonth,
+            lt: endOfMonth,
+          },
+        },
+      },
+      include: { menu: true, stylist: true },
+    })
+
+    return completedReservations.map(r => ({
+      id: r.id,
+      shopId: r.shopId,
+      stylistPrice: r.stylist?.price,
+      menuPrice: r.menu.price,
     }))
   },
 
