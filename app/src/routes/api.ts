@@ -8,10 +8,10 @@ import LocationController from '@controller-adapter/client/Location'
 
 const router = Router()
 
-router.use('/user', UserController)
+router.use('/users', UserController)
 router.use('/auth', AuthController)
 router.use('/shops', ShopController)
-router.use('/menu', MenuController)
+router.use('/menus', MenuController)
 router.use('/', LocationController)
 
 export default router
