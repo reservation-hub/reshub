@@ -2,7 +2,6 @@ import { Prisma, RoleSlug as PrismaRoleSlug } from '@prisma/client'
 import { RoleSlug } from '@entities/Role'
 import { UserRepositoryInterface } from '@client/user/services/UserService'
 import { User } from '@entities/User'
-import { UserRepositoryInterface as AuthServiceSocket } from '@client/auth/services/AuthService'
 import prisma from '@lib/prisma'
 
 const userWithProfileAndOAuthIdsAndRole = Prisma.validator<Prisma.UserArgs>()(
@@ -44,15 +43,7 @@ const reconstructUser = (user: userWithProfileAndOAuthIdsAndRole): User => ({
   },
 })
 
-const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
-
-  async fetch(id) {
-    const user = await prisma.user.findUnique({
-      where: { id },
-      include: { profile: true, oAuthIds: true, role: true },
-    })
-    return user ? reconstructUser(user) : null
-  },
+const UserRepository: UserRepositoryInterface = {
 
   async insertUser(email, username, password) {
     const create = await prisma.user.create({
@@ -83,23 +74,18 @@ const UserRepository: UserRepositoryInterface & AuthServiceSocket = {
     return createdUser
   },
 
-  async emailIsAvailable(email) {
+  async emailAndUsernameAreAvailable(email, username) {
     const emailCount = await prisma.user.count(
       {
         where: {
           email,
+          OR: {
+            username,
+          },
         },
       },
     )
     return emailCount === 0
-  },
-
-  async fetchByUsername(username) {
-    const user = await prisma.user.findUnique({
-      where: { username },
-      include: { profile: true, oAuthIds: true, role: true },
-    })
-    return user ? reconstructUser(user) : null
   },
 
 }

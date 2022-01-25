@@ -14,7 +14,7 @@ export type AuthControllerInterface = {
   createThirtyDaysToken(user: UserForAuth): string
   verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>
   silentRefreshTokenChecks(authToken: string, refreshToken: string, headerToken?: string): Promise<void>
-  // googleAuthenticate(query: { provider: string, tokenId: string }): Promise<UserForAuth>
+  googleAuthenticate(query: { provider: string, tokenId: string }): Promise<UserForAuth>
 }
 
 const cookieOptions: CookieOptions = {
@@ -71,6 +71,14 @@ export const silentRefreshParamsCheck = async (req: Request, res: Response, next
   } catch (e) { return next(e) }
 }
 
+export const googleAuthenticate = async (req: Request, res: Response, next: NextFunction) : Promise<void> => {
+  try {
+    const { body } = req
+    req.user = await AuthController.googleAuthenticate(body)
+    return next()
+  } catch (e) { return next(e) }
+}
+
 export const verifyIfNotLoggedInYet = async (req: Request, res: Response, next: NextFunction)
  : Promise<void> => {
   try {
@@ -96,6 +104,7 @@ export const logout = (req: Request, res: Response): void => {
 
 const routes = Router()
 
+routes.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
 routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('client-local', { session: false }), login)
 routes.post('/silent_refresh', passport.authenticate('client-jwt', { session: false }), login)
 routes.get('/logout', passport.authenticate('client-jwt', { session: false }), logout)
