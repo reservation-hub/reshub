@@ -8,7 +8,7 @@ FROM node:16-bullseye-slim
 
 WORKDIR /app
 
-COPY ./app/package.json ./package.json
+COPY ./app/package* ./
 
 COPY ./app/tsconfig.json ./tsconfig.json
 

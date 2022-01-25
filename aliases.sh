@@ -91,6 +91,6 @@ function rh-prd-build() {
     echo 'git diff をチェックしてビルドします。コミットされてなければビルドできません';
     git diff --exit-code && \
     git diff --staged --exit-code && \
-    docker-compose build production --no-cache
+    docker-compose build production
   fi
 }
