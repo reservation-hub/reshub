@@ -1,17 +1,20 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import { OAuth2Client as GoogleAuthClient, TokenPayload } from 'google-auth-library'
 import config from '@config'
 import { User } from '@entities/User'
 import UserRepository from '@client/auth/repositories/UserRepository'
 import { AuthServiceInterface as AuthControllerSocket } from '@client/auth/AuthController'
 import { AuthServiceInterface as PassportSocket } from '@client/auth/middlewares/passport'
 import {
-  InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError, AuthorizationError,
+  InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError, AuthorizationError, InvalidTokenError,
 } from '@errors/ServiceErrors'
 import Logger from '@lib/Logger'
 
 export type UserRepositoryInterface = {
   fetch(id: number): Promise<User | null>
+  fetchByEmail(email: string): Promise<User | null>
+  addOAuthId(id: number, provider: string, authId: string): Promise<boolean | null>
   fetchByUsername(username: string): Promise<User | null>
 }
 
@@ -27,6 +30,32 @@ const AuthService: PassportSocket & AuthControllerSocket = {
       expiresIn,
       issuer: process.env.RESHUB_URL,
     })
+  },
+
+  async googleAuthenticate(tokenId) {
+    const client = new GoogleAuthClient(config.GOOGLE_CLIENT_ID)
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: config.GOOGLE_CLIENT_ID,
+    })
+
+    const { email, sub } = ticket.getPayload() as TokenPayload
+    if (!email) {
+      Logger.debug('Token does not have email')
+      throw new InvalidTokenError()
+    }
+
+    const user = await UserRepository.fetchByEmail(email)
+    if (!user) {
+      Logger.debug('User in token does not exist')
+      throw new NotFoundError()
+    }
+
+    if (!user.oAuthIds || !user.oAuthIds.googleId) {
+      await UserRepository.addOAuthId(user.id, 'google', sub)
+    }
+
+    return user
   },
 
   async authenticateByUsernameAndPassword(username, password) {

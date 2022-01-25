@@ -26,11 +26,11 @@ export const convertEntityRoleSlugToPrismaRoleSlug = (slug: RoleSlug): PrismaRol
   }
 }
 
-const userWithProfileAndOAuthIdsAndRoles = Prisma.validator<Prisma.UserArgs>()(
+const userWithProfileAndOAuthIdsAndRole = Prisma.validator<Prisma.UserArgs>()(
   { include: { profile: true, oAuthIds: true, role: true } },
 )
 
-type userWithProfileAndOAuthIdsAndRoles = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIdsAndRoles>
+type userWithProfileAndOAuthIdsAndRole = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIdsAndRole>
 
 export const convertEntityGenderToDBGender = (gender: Gender): PrismaGender => {
   switch (gender) {
@@ -50,7 +50,7 @@ const convertDBGenderToEntityGender = (gender: PrismaGender): Gender => {
   }
 }
 
-export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
+export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRole): User => ({
   id: user.id,
   email: user.email,
   username: user.username ?? undefined,
