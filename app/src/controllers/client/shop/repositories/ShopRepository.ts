@@ -64,8 +64,8 @@ const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAndCity): 
 
 const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSocket = {
   async fetchShops(page, order) {
-    const limit = 10
-    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const limit = 5
+    const skipIndex = page > 1 ? (page - 1) * 5 : 0
     const shops = await prisma.shop.findMany({
       skip: skipIndex,
       orderBy: { id: order },
