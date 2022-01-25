@@ -6,6 +6,7 @@ import { User } from '@entities/User'
 import UserService from '@client/auth/services/UserService'
 import AuthService from '@client/auth/services/AuthService'
 import { localStrategySchema } from '@client/auth/schemas'
+import config from '@config'
 
 export type AuthServiceInterface = {
   authenticateByUsernameAndPassword(username: string, password: string): Promise<User>
@@ -45,9 +46,9 @@ const refreshCookieExtractor = (req: Request) => {
 
 const commonJwtOptions = {
   jwtFromRequest: cookieExtractor,
-  secretOrKey: process.env.JWT_TOKEN_SECRET,
-  issuer: process.env.RESHUB_URL,
-  audience: 'http://localhost:3000',
+  secretOrKey: config.JWT_TOKEN_SECRET,
+  issuer: config.RESHUB_URL,
+  audience: config.CLIENT_URL,
 }
 
 const jwtOptionsRefresh = {
