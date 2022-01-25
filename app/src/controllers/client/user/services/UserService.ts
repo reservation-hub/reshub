@@ -7,7 +7,7 @@ import Logger from '@lib/Logger'
 
 export type UserRepositoryInterface = {
   insertUser(email: string, username: string, password: string): Promise<User>
-  emailIsAvailable(email: string): Promise<boolean>
+  emailAndUsernameAreAvailable(email: string, username: string): Promise<boolean>
 }
 
 const SignUpService: SignUpServiceInterface = {
@@ -17,9 +17,9 @@ const SignUpService: SignUpServiceInterface = {
       throw new InvalidParamsError()
     }
 
-    const isAvailable = await UserRepository.emailIsAvailable(email)
-    if (!isAvailable) {
-      Logger.debug('Email is not available')
+    const emailAndUsernameAreAvailable = await UserRepository.emailAndUsernameAreAvailable(email, username)
+    if (!emailAndUsernameAreAvailable) {
+      Logger.debug('Email / Username is not available')
       throw new DuplicateModelError()
     }
     const hash = bcrypt.hashSync(password, 10 /* hash rounds */)
