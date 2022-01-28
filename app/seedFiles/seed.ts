@@ -300,7 +300,7 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
 const tagSeeder = async () => {
   try {
     await prisma.tag.createMany({
-      data: words.map(w => ({ slug: w }))
+      data: Array.from(new Set(words)).map(w => ({ slug: w }))
     })
   } catch (e) {
     Logger.info(`Tag Seed Error : ${e}`)
