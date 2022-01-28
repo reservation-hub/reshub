@@ -1,6 +1,6 @@
 import { ReservationServiceInterface } from '@shop/ShopController'
 import ReservationRepository from '@shop/repositories/ReservationRepository'
-import { AuthorizationError, NotFoundError } from '@errors/ServiceErrors'
+import { AuthorizationError } from '@errors/ServiceErrors'
 import { RoleSlug } from '@entities/Role'
 import ShopRepository from '@shop/repositories/ShopRepository'
 import { Reservation } from '@entities/Reservation'

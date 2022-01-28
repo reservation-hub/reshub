@@ -123,6 +123,7 @@ model Shop {
   shopDetailId Int           @unique @map("shop_detail_id")
   stylists     Stylist[]
   shopUser     ShopUser?
+  ShopTags     ShopTags[]
 }
 
 model Menu {
@@ -206,4 +207,20 @@ model Reservation {
   shop            Shop              @relation(fields: [shopId], references: [id], onDelete: Cascade)
   stylist         Stylist?          @relation(fields: [stylistId], references: [id])
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Tag {
+  id        Int        @id @default(autoincrement())
+  slug      String     @unique
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  ShopTags  ShopTags[]
+}
+
+model ShopTags {
+  id     Int  @id @default(autoincrement())
+  shopId Int  @unique @map("shop_id")
+  tagId  Int  @map("tag_id")
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  shop   Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
 }

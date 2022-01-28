@@ -7,7 +7,6 @@ import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface as ReservationServiceSocket } from '@shop/services/ReservationService'
 
 import prisma from '@lib/prisma'
-import { createNoSubstitutionTemplateLiteral } from 'typescript'
 
 export const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
   switch (status) {
