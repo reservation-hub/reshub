@@ -41,6 +41,14 @@ const TagRepository: TagRepositoryInterface = {
     })
     return convertToEntityTag(tag)
   },
+
+  async updateTag(id, slug) {
+    const tag = await prisma.tag.update({
+      where: { id },
+      data: { slug },
+    })
+    return convertToEntityTag(tag)
+  },
 }
 
 export default TagRepository

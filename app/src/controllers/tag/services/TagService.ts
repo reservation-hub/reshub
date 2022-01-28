@@ -11,6 +11,7 @@ export type TagRepositoryInterface = {
   fetchTag(id: number): Promise<Tag | null>
   fetchTagBySlug(slug: string): Promise<Tag | null>
   insertTag(slug: string): Promise<Tag>
+  updateTag(id: number, slug: string): Promise<Tag>
 }
 
 const TagService: TagServiceInterface = {
@@ -36,6 +37,22 @@ const TagService: TagServiceInterface = {
       throw new DuplicateModelError()
     }
     return TagRepository.insertTag(slug)
+  },
+
+  async updateTag(id, slug) {
+    const tag = await TagRepository.fetchTag(id)
+    if (!tag) {
+      Logger.debug('No tag found')
+      throw new NotFoundError()
+    }
+
+    const duplicateSlug = await TagRepository.fetchTagBySlug(slug)
+    if (duplicateSlug && duplicateSlug.id !== tag.id) {
+      Logger.debug('Duplicate slug found')
+      throw new DuplicateModelError()
+    }
+
+    return TagRepository.updateTag(id, slug)
   },
 }
 
