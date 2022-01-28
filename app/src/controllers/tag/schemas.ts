@@ -1,3 +1,4 @@
+import { noWhiteSpaceInBetweenPattern } from '@lib/RegexPatterns'
 import { OrderBy } from '@request-response-types/Common'
 import { z } from 'zod'
 
@@ -7,5 +8,5 @@ export const indexSchema = z.object({
 })
 
 export const tagUpsertSchema = z.object({
-  slug: z.string(),
+  slug: z.string().regex(noWhiteSpaceInBetweenPattern),
 })
