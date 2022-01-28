@@ -216,6 +216,10 @@ const UserRepository: UserRepositoryInterface = {
     return usersResult.map(reconstructUser)
   },
 
+  async searchUserTotalCount(keyword) {
+    return prisma.user.count({ where: { OR: [{ email: { contains: keyword } }, { username: { contains: keyword } }] } })
+  },
+
   async fetchUserByEmail(email) {
     const user = await prisma.user.findUnique({
       where: { email },
