@@ -1,7 +1,6 @@
 import { Tag } from '@entities/Tag'
 import { TagServiceInterface } from '@shop/ShopController'
 import TagRepository from '@shop/repositories/TagRepository'
-import Logger from '@lib/Logger'
 
 export type TagRepositoryInterface = {
   fetchBySlugs(slugs: string[]): Promise<Tag[]>

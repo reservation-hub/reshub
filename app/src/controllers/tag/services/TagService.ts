@@ -13,6 +13,8 @@ export type TagRepositoryInterface = {
   insertTag(slug: string): Promise<Tag>
   updateTag(id: number, slug: string): Promise<Tag>
   deleteTag(id: number): Promise<Tag>
+  searchTag(keyword: string, page: number, order: OrderBy): Promise<Tag[]>
+  searchTagTotalCount(keyword: string): Promise<number>
 }
 
 const TagService: TagServiceInterface = {
@@ -63,6 +65,12 @@ const TagService: TagServiceInterface = {
       throw new NotFoundError()
     }
     return TagRepository.deleteTag(id)
+  },
+
+  async searchTag(keyword, page = 1, order = OrderBy.DESC) {
+    const tags = await TagRepository.searchTag(keyword, page, order)
+    const totalCount = await TagRepository.searchTagTotalCount(keyword)
+    return { tags, totalCount }
   },
 }
 

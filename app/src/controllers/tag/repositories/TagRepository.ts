@@ -56,6 +56,24 @@ const TagRepository: TagRepositoryInterface = {
     })
     return convertToEntityTag(tag)
   },
+
+  async searchTag(keyword, page, order) {
+    const limit = 10
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const tags = await prisma.tag.findMany({
+      where: { slug: { contains: keyword } },
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
+    })
+    return tags.map(convertToEntityTag)
+  },
+
+  async searchTagTotalCount(keyword) {
+    return prisma.tag.count({
+      where: { slug: { contains: keyword } },
+    })
+  },
 }
 
 export default TagRepository

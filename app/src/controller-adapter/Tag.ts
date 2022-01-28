@@ -4,10 +4,11 @@ import {
 import { parseIntIdMiddleware } from '@routes/utils'
 import {
   TagListQuery, TagListResponse, TagQuery, TagResponse,
-  InsertTagQuery, UpdateTagQuery, DeleteTagQuery,
+  InsertTagQuery, UpdateTagQuery, DeleteTagQuery, TagSearchQuery,
 } from '@request-response-types/Tag'
 import { ResponseMessage } from '@request-response-types/Common'
 import TagController from '@tag/TagController'
+import parseToInt from '@lib/ParseInt'
 
 export type TagControllerInterface = {
   index(query: TagListQuery): Promise<TagListResponse>
@@ -15,6 +16,7 @@ export type TagControllerInterface = {
   insert(query: InsertTagQuery): Promise<ResponseMessage>
   update(query: UpdateTagQuery): Promise<ResponseMessage>
   delete(query: DeleteTagQuery): Promise<ResponseMessage>
+  search(query: TagSearchQuery): Promise<TagListResponse>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -53,9 +55,17 @@ const deleteTag = async (req: Request, res: Response, next: NextFunction) : Prom
   } catch (e) { return next(e) }
 }
 
+const searchTag = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { keyword, page, order } = req.query
+    return res.send(await TagController.search({ keyword, page: parseToInt(page), order }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.get('/', index)
+routes.get('/search', searchTag)
 routes.get('/:id', parseIntIdMiddleware, show)
 routes.post('/', insertTag)
 routes.patch('/:id', parseIntIdMiddleware, updateTag)

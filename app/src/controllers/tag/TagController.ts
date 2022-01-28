@@ -10,6 +10,7 @@ export type TagServiceInterface = {
   insertTag(slug: string): Promise<Tag>
   updateTag(id: number, slug: string): Promise<Tag>
   deleteTag(id: number): Promise<Tag>
+  searchTag(keyword: string, page?: number, order?: OrderBy): Promise<{ tags: Tag[], totalCount: number }>
 }
 
 const TagController: TagControllerInterface = {
@@ -41,6 +42,12 @@ const TagController: TagControllerInterface = {
     const { id } = query
     await TagService.deleteTag(id)
     return 'Tag deleted'
+  },
+
+  async search(query) {
+    const { keyword, page, order } = query
+    const { tags: values, totalCount } = await TagService.searchTag(keyword, page, order)
+    return { values, totalCount }
   },
 }
 
