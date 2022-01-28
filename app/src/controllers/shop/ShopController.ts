@@ -21,7 +21,7 @@ import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: OrderBy)
-    : Promise<{ values: Shop[], totalCount: number }>
+    : Promise<{ shops: Shop[], totalCount: number }>
   fetchShop(user: UserForAuth, id: number): Promise<Shop>
   insertShop(user: UserForAuth, name: string, areaId: number, prefectureId: number,
     cityId: number, address: string, phoneNumber: string, days: EntityScheduleDays[],
@@ -30,7 +30,8 @@ export type ShopServiceInterface = {
     cityId: number, address: string, phoneNumber: string, days: EntityScheduleDays[],
     seats:number, startTime: string, endTime: string, details: string): Promise<Shop>
   deleteShop(user: UserForAuth, id: number): Promise<Shop>
-  searchShops(user: UserForAuth, keyword: string, page?: number, order?: OrderBy): Promise<Shop[]>
+  searchShops(user: UserForAuth, keyword: string, page?: number, order?: OrderBy)
+    : Promise<{ shops: Shop[], totalCount: number }>
 }
 
 export type StylistServiceInterface = {
@@ -105,7 +106,7 @@ const ShopController: ShopControllerInterface = {
       throw new UnauthorizedError()
     }
     const { page, order } = await indexSchema.parseAsync(query)
-    const { values: shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order)
+    const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order)
 
     const shopIds = shops.map(shop => shop.id)
 
@@ -248,7 +249,7 @@ const ShopController: ShopControllerInterface = {
       throw new UnauthorizedError()
     }
     const { keyword, page, order } = await searchSchema.parseAsync(query)
-    const shops = await ShopService.searchShops(user, keyword, page, order)
+    const { shops, totalCount } = await ShopService.searchShops(user, keyword, page, order)
     const shopIds = shops.map(s => s.id)
     const totalReservationsCount = await ReservationService.fetchReservationsCountByShopIds(shopIds)
     const totalStylistsCount = await StylistService.fetchStylistsCountByShopIds(shopIds)
@@ -264,7 +265,7 @@ const ShopController: ShopControllerInterface = {
       reservationsCount: totalReservationsCount.find(item => item.shopId === shop.id)!.reservationCount,
       stylistsCount: totalStylistsCount.find(item => item.shopId === shop.id)!.stylistCount,
     }))
-    return { values, totalCount: shops.length }
+    return { values, totalCount }
   },
 
 }

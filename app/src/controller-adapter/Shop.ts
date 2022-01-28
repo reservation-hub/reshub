@@ -139,9 +139,9 @@ const deleteStylist = async (req: Request, res: Response, next: NextFunction) : 
 
 const searchShops = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { query } = req
+    const { keyword, page, order } = req.query
     const { user } = req
-    return res.send(await ShopController.searchShops(user, query))
+    return res.send(await ShopController.searchShops(user, { keyword, page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 

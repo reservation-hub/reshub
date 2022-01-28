@@ -67,8 +67,8 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) : Pro
 
 const searchUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { query } = req
-    return res.send(await UserController.searchUsers(query))
+    const { keyword, page, order } = req.query
+    return res.send(await UserController.searchUsers({ keyword, page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 

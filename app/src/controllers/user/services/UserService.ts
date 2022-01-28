@@ -21,6 +21,7 @@ export type UserRepositoryInterface = {
   updateUserPassword(id: number, password: string): Promise<User>
   deleteUser(id: number): Promise<User>
   searchUser(keyword: string, page: number, order: OrderBy): Promise<User[]>
+  searchUserTotalCount(keyword: string): Promise<number>
   fetchUserByEmail(email: string): Promise<User | null>
 }
 
@@ -38,7 +39,8 @@ const UserService: UserServiceInterface = {
 
   async searchUser(keyword, page = 1, order = OrderBy.DESC) {
     const users = await UserRepository.searchUser(keyword, page, order)
-    return users
+    const totalCount = await UserRepository.searchUserTotalCount(keyword)
+    return { users, totalCount }
   },
 
   async fetchUser(id) {

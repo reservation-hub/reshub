@@ -176,6 +176,7 @@ StylistServiceSocket = {
     const cleanShop = reconstructShop(shop)
     return cleanShop
   },
+
   async searchShops(keyword, page, order) {
     const limit = 10
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
@@ -189,6 +190,14 @@ StylistServiceSocket = {
       },
     })
     return shops.map(reconstructShop)
+  },
+
+  async searchShopsTotalCount(keyword) {
+    return prisma.shop.count({ where: { shopDetail: { name: { contains: keyword } } } })
+  },
+
+  async staffShopSearchTotalCount(keyword, userId) {
+    return prisma.shop.count({ where: { shopDetail: { name: { contains: keyword } }, AND: { shopUser: { userId } } } })
   },
 
   async deleteShop(id) {
