@@ -219,7 +219,7 @@ model Tag {
 
 model ShopTags {
   id     Int  @id @default(autoincrement())
-  shopId Int  @unique @map("shop_id")
+  shopId Int  @map("shop_id")
   tagId  Int  @map("tag_id")
   tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
   shop   Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)

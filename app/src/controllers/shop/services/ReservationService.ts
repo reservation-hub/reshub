@@ -13,7 +13,7 @@ export type ShopRepositoryInterface = {
 export type ReservationRepositoryInterface = {
   fetchReservationsCountByShopIds(shopIds: number[]) : Promise<{ shopId: number, reservationCount: number }[]>
   fetchShopReservations(shopId: number, limit: number): Promise<Reservation[]>
-  fetchCompletedShopReservationsWithStyilstPriceAndMenuPrice(shopId: number)
+  fetchCompletedShopReservationsWithStylistPriceAndMenuPrice(shopId: number)
   :Promise< {id: number, shopId: number, stylistPrice?: number, menuPrice: number}[]>
 }
 
@@ -40,9 +40,9 @@ const ReservationService: ReservationServiceInterface = {
     return ReservationRepository.fetchShopReservations(shopId, limit)
   },
 
-  async getTotalsalesForShopForCurrentMonth(shopId) {
+  async getTotalSalesForShopForCurrentMonth(shopId) {
     const completedReservations = await
-    ReservationRepository.fetchCompletedShopReservationsWithStyilstPriceAndMenuPrice(
+    ReservationRepository.fetchCompletedShopReservationsWithStylistPriceAndMenuPrice(
       shopId,
     )
     return completedReservations.reduce((sum, r) => sum + r.menuPrice + (r.stylistPrice ?? 0), 0)

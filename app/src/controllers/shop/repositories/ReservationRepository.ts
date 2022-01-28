@@ -52,7 +52,7 @@ const ReservationRepository: ReservationServiceSocket = {
     }))
   },
 
-  async fetchCompletedShopReservationsWithStyilstPriceAndMenuPrice(shopId) {
+  async fetchCompletedShopReservationsWithStylistPriceAndMenuPrice(shopId) {
     const date = new Date()
     const year = date.getFullYear()
     const month = date.getMonth()

@@ -1,7 +1,7 @@
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { OrderBy } from '@request-response-types/Common'
 import { z } from 'zod'
-import { hoursPattern } from '@lib/RegexPatterns'
+import { hoursPattern, noWhiteSpaceInBetweenPattern } from '@lib/RegexPatterns'
 
 export const indexSchema = z.object({
   page: z.number().optional(),
@@ -22,6 +22,7 @@ export const shopUpsertSchema = z.object({
     .regex(hoursPattern),
   endTime: z.string()
     .regex(hoursPattern),
+  tags: z.array(z.string().regex(noWhiteSpaceInBetweenPattern)).optional(),
 })
 
 export const searchSchema = z.object({
