@@ -11,7 +11,7 @@ import TagController from '@tag/TagController'
 
 export type TagControllerInterface = {
   index(query: TagListQuery): Promise<TagListResponse>
-  // show(query: TagQuery): Promise<TagResponse>
+  show(query: TagQuery): Promise<TagResponse>
   // insert(query: InsertTagQuery): Promise<ResponseMessage>
   // update(query: UpdateTagQuery): Promise<ResponseMessage>
   // delete(query: DeleteTagQuery): Promise<ResponseMessage>
@@ -27,7 +27,7 @@ const index = async (req: Request, res: Response, next: NextFunction) : Promise<
 const show = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { id } = res.locals
-    return res.send('Not implemented yet!')
+    return res.send(await TagController.show({ id }))
   } catch (e) { return next(e) }
 }
 
