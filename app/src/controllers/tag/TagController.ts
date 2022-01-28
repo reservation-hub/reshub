@@ -9,6 +9,7 @@ export type TagServiceInterface = {
   fetchTag(id: number): Promise<Tag>
   insertTag(slug: string): Promise<Tag>
   updateTag(id: number, slug: string): Promise<Tag>
+  deleteTag(id: number): Promise<Tag>
 }
 
 const TagController: TagControllerInterface = {
@@ -34,6 +35,12 @@ const TagController: TagControllerInterface = {
     const { slug } = await tagUpsertSchema.parseAsync(params)
     await TagService.updateTag(id, slug)
     return 'Tag updated'
+  },
+
+  async delete(query) {
+    const { id } = query
+    await TagService.deleteTag(id)
+    return 'Tag deleted'
   },
 }
 

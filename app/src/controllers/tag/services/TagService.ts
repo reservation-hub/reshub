@@ -12,6 +12,7 @@ export type TagRepositoryInterface = {
   fetchTagBySlug(slug: string): Promise<Tag | null>
   insertTag(slug: string): Promise<Tag>
   updateTag(id: number, slug: string): Promise<Tag>
+  deleteTag(id: number): Promise<Tag>
 }
 
 const TagService: TagServiceInterface = {
@@ -53,6 +54,15 @@ const TagService: TagServiceInterface = {
     }
 
     return TagRepository.updateTag(id, slug)
+  },
+
+  async deleteTag(id) {
+    const tag = await TagRepository.fetchTag(id)
+    if (!tag) {
+      Logger.debug('No tag found')
+      throw new NotFoundError()
+    }
+    return TagRepository.deleteTag(id)
   },
 }
 

@@ -49,6 +49,13 @@ const TagRepository: TagRepositoryInterface = {
     })
     return convertToEntityTag(tag)
   },
+
+  async deleteTag(id) {
+    const tag = await prisma.tag.delete({
+      where: { id },
+    })
+    return convertToEntityTag(tag)
+  },
 }
 
 export default TagRepository
