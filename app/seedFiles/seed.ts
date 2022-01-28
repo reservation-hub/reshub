@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import { PrismaClient } from '@prisma/client'
 import areas, { AreaObject } from './areas-db'
 import prefectures, { PrefectureObject } from './prefec-db'
-
+import words from './words'
 import cities, { CityObject } from './cities-db'
 import {
   RoleSlug, Days, Role, User, Area, Prefecture, City, Shop, Menu, ShopDetail, Stylist,
@@ -297,6 +297,17 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
   }
 }
 
+const tagSeeder = async () => {
+  try {
+    await prisma.tag.createMany({
+      data: words.map(w => ({ slug: w }))
+    })
+  } catch (e) {
+    Logger.info(`Tag Seed Error : ${e}`)
+    process.exit(1)
+  }
+}
+
 const main = async () => {
   Logger.info('running seeder')
 
@@ -410,6 +421,9 @@ const main = async () => {
 
   await reservationSeeder(shopsForReservationSeed, clientsForReservation)
   Logger.info('reservation seeder done')
+
+  Logger.info('running tag seeder')
+  await tagSeeder()
 
   Logger.info('seed done')
   process.exit(0)

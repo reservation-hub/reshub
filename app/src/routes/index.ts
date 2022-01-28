@@ -8,6 +8,7 @@ import dashboardController from '@controller-adapter/Dashboard'
 import LocationController from '@controller-adapter/Location'
 import shopController from '@controller-adapter/Shop'
 import userController from '@controller-adapter/User'
+import TagController from '@controller-adapter/Tag'
 import { InvalidRouteError } from '@errors/RouteErrors'
 import { protectAdminRoute, roleCheck } from '@routes/utils'
 
@@ -24,6 +25,7 @@ router.use('/auth', authController)
 router.use('/dashboard', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), dashboardController)
 router.use('/shops', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), shopController)
 router.use('/users', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), userController)
+router.use('/tags', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), TagController)
 router.use('/', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), LocationController)
 
 router.use('/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404

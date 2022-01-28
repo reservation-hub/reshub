@@ -52,6 +52,9 @@
       ],
       "@controller-adapter/*": [
         "src/controller-adapter/*"
+      ],
+      "@tag/*": [
+        "src/controllers/tag/*"
       ]
     },
     /* Basic Options */
