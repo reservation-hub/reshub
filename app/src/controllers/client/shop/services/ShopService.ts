@@ -1,10 +1,12 @@
-import { Shop } from '@entities/Shop'
 import { OrderBy } from '@entities/Common'
+import { Shop } from '@entities/Shop'
+import { Tag } from '@entities/Tag'
 import ShopRepository from '@client/shop/repositories/ShopRepository'
 import Logger from '@lib/Logger'
 import { InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import { ShopServiceInterface } from '@client/shop/ShopController'
 import LocationRepository from '@client/shop/repositories/LocationRepository'
+import TagRepository from '@client/shop/repositories/TagRepository'
 
 export type ShopRepositoryInterface = {
   fetchShops(page: number, order: OrderBy): Promise<Shop[]>
@@ -12,10 +14,16 @@ export type ShopRepositoryInterface = {
   fetchShop(shopId: number): Promise<Shop | null>
   fetchShopsByArea(page:number, order: OrderBy, areaId: number, prefectureId?: number, cityId?: number): Promise<Shop[]>
   fetchShopsTotalCountByArea(areaId: number, prefectureId?: number, cityId?: number): Promise<number>
+  fetchShopsByTags(tagIds: number[], page: number, order: OrderBy): Promise<Shop[]>
+  fetchShopsTotalCountByTags(tagIds: number[]): Promise<number>
 }
 
 export type LocationRepositoryInterface = {
   isValidLocation(areaId: number, prefectureId?: number, cityId?: number): Promise<boolean>
+}
+
+export type TagRepositoryInterface = {
+  fetchValidTagsBySlugs(slugs: string[]): Promise<Tag[]>
 }
 
 const ShopService: ShopServiceInterface = {
@@ -44,6 +52,13 @@ const ShopService: ShopServiceInterface = {
 
     const shops = await ShopRepository.fetchShopsByArea(page, order, areaId, prefectureId, cityId)
     const totalCount = await ShopRepository.fetchShopsTotalCountByArea(areaId, prefectureId, cityId)
+    return { shops, totalCount }
+  },
+
+  async fetchShopsByTagsWithTotalCount(user, tags, page = 1, order = OrderBy.DESC) {
+    const existingTagIds = (await TagRepository.fetchValidTagsBySlugs(tags)).map(vt => vt.id)
+    const shops = await ShopRepository.fetchShopsByTags(existingTagIds, page, order)
+    const totalCount = await ShopRepository.fetchShopsTotalCountByTags(existingTagIds)
     return { shops, totalCount }
   },
 

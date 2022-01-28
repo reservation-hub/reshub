@@ -7,7 +7,7 @@ import { Stylist } from '@entities/Stylist'
 import MenuService from '@client/shop/services/MenuService'
 import StylistService from '@client/shop/services/StylistService'
 import { ShopControllerInterface } from '@controller-adapter/client/Shop'
-import { indexSchema, searchByAreaSchema } from './schemas'
+import { indexSchema, searchByAreaSchema, searchByTagsSchema } from './schemas'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: OrderBy)
@@ -15,6 +15,8 @@ export type ShopServiceInterface = {
   fetchShop(user: UserForAuth | undefined, shopId: number): Promise<Shop>
   fetchShopsByAreaWithTotalCount(user: UserForAuth | undefined, areaId: number, page?: number, order?: OrderBy,
     prefectureId?: number, cityId?: number): Promise<{ shops: Shop[], totalCount:number }>
+  fetchShopsByTagsWithTotalCount(user: UserForAuth | undefined, tags: string[], page?: number,
+    order?: OrderBy,): Promise<{ shops: Shop[], totalCount:number }>
 }
 
 export type MenuServiceInterface = {
@@ -76,6 +78,26 @@ const ShopController: ShopControllerInterface = {
 
     const { shops, totalCount } = await ShopService.fetchShopsByAreaWithTotalCount(
       user, areaId, page, order, prefectureId, cityId,
+    )
+
+    const values = shops.map(s => ({
+      id: s.id,
+      name: s.name,
+      phoneNumber: s.phoneNumber,
+      address: s.address,
+      prefectureName: s.prefecture.name,
+      cityName: s.city.name,
+    }))
+    return { values, totalCount }
+  },
+
+  async searchByTags(user, query) {
+    const {
+      tags, page, order,
+    } = await searchByTagsSchema.parseAsync(query)
+
+    const { shops, totalCount } = await ShopService.fetchShopsByTagsWithTotalCount(
+      user, tags, page, order,
     )
 
     const values = shops.map(s => ({

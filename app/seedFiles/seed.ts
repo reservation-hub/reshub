@@ -308,6 +308,25 @@ const tagSeeder = async () => {
   }
 }
 
+const shopTagLinker = async (shopIds: number[], tagIds: number[]) => {
+  const maxShopId = Math.max(...shopIds)
+  const minShopId = Math.min(...shopIds)
+  try {
+    await Promise.all(tagIds.map(async tagId => {
+      const randomShopId = Math.floor(Math.random() * maxShopId) + minShopId
+      return prisma.shopTags.create({
+        data: {
+          shopId: randomShopId,
+          tagId: tagId,
+        },
+      })
+    }))
+  } catch (e) {
+    Logger.info(`Shop Tag Link error : ${e}`)
+    process.exit(1)
+  }
+}
+
 const main = async () => {
   Logger.info('running seeder')
 
@@ -422,8 +441,22 @@ const main = async () => {
   await reservationSeeder(shopsForReservationSeed, clientsForReservation)
   Logger.info('reservation seeder done')
 
+
   Logger.info('running tag seeder')
   await tagSeeder()
+
+  const tagIds = (await prisma.tag.findMany({
+    select: { id: true }
+  })).map(t => t.id)
+
+  const shopIdsForTagLink = (await prisma.shop.findMany({
+    select: { id: true }
+  })).map(s => s.id)
+
+  Logger.info('linking tags to shops')
+  await shopTagLinker(shopIdsForTagLink, tagIds)
+  Logger.info('linking tags to shops done')
+  
 
   Logger.info('seed done')
   process.exit(0)

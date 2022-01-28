@@ -5,7 +5,7 @@ import {
   SalonListQuery, SalonListResponse, SalonQuery, SalonResponse,
   SalonMenuListQuery, SalonMenuListResponse, SalonStylistListQuery, SalonStylistListResponse,
   SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
-  SalonListByAreaQuery,
+  SalonListByAreaQuery, SalonListByTagsQuery,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -20,6 +20,7 @@ export type ShopControllerInterface = {
   index(user: UserForAuth | undefined, query: SalonListQuery): Promise<SalonListResponse>
   detail(user: UserForAuth | undefined, query: SalonQuery): Promise<SalonResponse>
   searchByArea(user: UserForAuth | undefined, query: SalonListByAreaQuery): Promise<SalonListResponse>
+  searchByTags(user: UserForAuth | undefined, query: SalonListByTagsQuery): Promise<SalonListResponse>
 }
 
 export type MenuControllerInterface = {
@@ -66,6 +67,14 @@ const shopSearchByArea = async (req: Request, res: Response, next: NextFunction)
       prefectureId: parseToInt(prefectureId),
       cityId: parseToInt(cityId),
     }))
+  } catch (e) { return next(e) }
+}
+
+const shopSearchByTags = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+  try {
+    const { user } = req
+    const { page, order, tags } = req.query
+    return res.send(await ShopController.searchByTags(user, { tags, page: parseToInt(page), order }))
   } catch (e) { return next(e) }
 }
 
@@ -125,6 +134,7 @@ routes.get('/:shopId', parseIntIdMiddleware, detail)
  */
 
 routes.get('/search/area', shopSearchByArea)
+routes.get('/search/tags', shopSearchByTags)
 
 /**
  * Menu routes

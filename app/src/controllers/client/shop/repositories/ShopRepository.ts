@@ -130,6 +130,33 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
     })
   },
 
+  async fetchShopsByTags(tagIds, page, order) {
+    const limit = 10
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const shops = (await prisma.shopTags.findMany({
+      where: { tagId: { in: tagIds } },
+      distinct: ['shopId'],
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
+      select: {
+        shop: {
+          include: {
+            shopDetail: true, area: true, prefecture: true, city: true,
+          },
+        },
+      },
+    })).map(s => ({ ...s.shop }))
+    return shops.map(reconstructShop)
+  },
+
+  async fetchShopsTotalCountByTags(tagIds) {
+    return (await prisma.shopTags.findMany({
+      where: { tagId: { in: tagIds } },
+      distinct: ['shopId'],
+    })).length
+  },
+
 }
 
 export default ShopRepository
