@@ -7,6 +7,7 @@ import { indexSchema, tagUpsertSchema } from '@tag/schemas'
 export type TagServiceInterface = {
   fetchTagsWithTotalCount(page?: number, order?: OrderBy): Promise<{ tags: Tag[], totalCount: number }>
   fetchTag(id: number): Promise<Tag>
+  insertTag(slug: string): Promise<Tag>
 }
 
 const TagController: TagControllerInterface = {
@@ -19,6 +20,12 @@ const TagController: TagControllerInterface = {
   async show(query) {
     const { id } = query
     return TagService.fetchTag(id)
+  },
+
+  async insert(query) {
+    const { slug } = await tagUpsertSchema.parseAsync(query)
+    await TagService.insertTag(slug)
+    return 'Tag created'
   },
 }
 

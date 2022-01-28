@@ -12,7 +12,7 @@ import TagController from '@tag/TagController'
 export type TagControllerInterface = {
   index(query: TagListQuery): Promise<TagListResponse>
   show(query: TagQuery): Promise<TagResponse>
-  // insert(query: InsertTagQuery): Promise<ResponseMessage>
+  insert(query: InsertTagQuery): Promise<ResponseMessage>
   // update(query: UpdateTagQuery): Promise<ResponseMessage>
   // delete(query: DeleteTagQuery): Promise<ResponseMessage>
 }
@@ -34,7 +34,7 @@ const show = async (req: Request, res: Response, next: NextFunction) : Promise<R
 const insertTag = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { body } = req
-    return res.send('Not implemented yet!')
+    return res.send(await TagController.insert(body))
   } catch (e) { return next(e) }
 }
 

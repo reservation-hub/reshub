@@ -3,12 +3,14 @@ import { Tag } from '@entities/Tag'
 import { TagServiceInterface } from '@tag/TagController'
 import TagRepository from '@tag/repositories/TagRepository'
 import Logger from '@lib/Logger'
-import { NotFoundError } from '@errors/ServiceErrors'
+import { DuplicateModelError, NotFoundError } from '@errors/ServiceErrors'
 
 export type TagRepositoryInterface = {
   fetchAllTags(page: number, order: OrderBy): Promise<Tag[]>
   fetchTagsTotalCount(): Promise<number>
   fetchTag(id: number): Promise<Tag | null>
+  fetchTagBySlug(slug: string): Promise<Tag | null>
+  insertTag(slug: string): Promise<Tag>
 }
 
 const TagService: TagServiceInterface = {
@@ -25,6 +27,15 @@ const TagService: TagServiceInterface = {
       throw new NotFoundError()
     }
     return tag
+  },
+
+  async insertTag(slug) {
+    const duplicateSlug = await TagRepository.fetchTagBySlug(slug)
+    if (duplicateSlug) {
+      Logger.debug('Duplicate slug found')
+      throw new DuplicateModelError()
+    }
+    return TagRepository.insertTag(slug)
   },
 }
 
