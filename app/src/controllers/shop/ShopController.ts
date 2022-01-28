@@ -15,6 +15,8 @@ import { OrderBy } from '@request-response-types/Common'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
+import { Tag } from '@entities/Tag'
+import TagService from '@shop/services/TagService'
 import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
@@ -42,7 +44,7 @@ export type ReservationServiceInterface = {
   fetchReservationsCountByShopIds(shopIds: number[])
     : Promise<{ shopId: number, reservationCount: number }[]>
   fetchShopReservations(user: UserForAuth, shopId: number, limit?: number): Promise<Reservation[]>
-  getTotalsalesForShopForCurrentMonth(shopId: number): Promise<number>
+  getTotalSalesForShopForCurrentMonth(shopId: number): Promise<number>
 }
 
 export type MenuServiceInterface = {
@@ -51,6 +53,11 @@ export type MenuServiceInterface = {
 
 export type UserServiceInterface = {
   fetchUsersByIds(userIds: number[]): Promise<User[]>
+}
+
+export type TagServiceInterface = {
+  setShopTags(shopId: number, slugs: string[]): Promise<void>
+  fetchShopTags(shopId: number): Promise<Tag[]>
 }
 
 const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
@@ -134,7 +141,8 @@ const ShopController: ShopControllerInterface = {
     const reservations = await ReservationService.fetchShopReservations(user, shop.id, reservationLimit)
     const menus = await MenuService.fetchShopMenus(user, shop.id, menuLimit)
     const users = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
-    const totalsalesForCurrentMonth = await ReservationService.getTotalsalesForShopForCurrentMonth(shop.id)
+    const totalSalesForCurrentMonth = await ReservationService.getTotalSalesForShopForCurrentMonth(shop.id)
+    const shopTags = await TagService.fetchShopTags(shop.id)
 
     const stylistList = stylists.map(s => ({
       id: s.id,
@@ -179,7 +187,8 @@ const ShopController: ShopControllerInterface = {
       reservations: reservationList,
       menu: menus,
       reservationCount: reservations.length,
-      totalsalesForCurrentMonth,
+      totalSalesForCurrentMonth,
+      tags: shopTags.map(st => ({ slug: st.slug })),
     }
   },
 
@@ -190,14 +199,17 @@ const ShopController: ShopControllerInterface = {
     }
     const {
       name, areaId, prefectureId, cityId, address,
-      phoneNumber, days, seats, startTime, endTime, details,
+      phoneNumber, days, seats, startTime, endTime, details, tags,
     } = await shopUpsertSchema.parseAsync(query)
 
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    await ShopService.insertShop(user,
+    const shop = await ShopService.insertShop(user,
       name, areaId, prefectureId, cityId, address,
       phoneNumber, entityDays, seats, startTime, endTime, details)
 
+    if (tags) {
+      await TagService.setShopTags(shop.id, tags)
+    }
     return 'Shop created'
   },
 
@@ -208,13 +220,15 @@ const ShopController: ShopControllerInterface = {
     }
     const {
       name, areaId, prefectureId, cityId, address, phoneNumber,
-      seats, days, startTime, endTime, details,
+      seats, days, startTime, endTime, details, tags,
     } = await shopUpsertSchema.parseAsync(query.params)
     const { id } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
     await ShopService.updateShop(user, id, name, areaId, prefectureId, cityId,
       address, phoneNumber, entityDays, seats, startTime, endTime, details)
-
+    if (tags) {
+      await TagService.setShopTags(id, tags)
+    }
     return 'Shop updated'
   },
 
