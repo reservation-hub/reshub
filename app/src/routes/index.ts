@@ -27,5 +27,6 @@ router.use('/shops', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP
 router.use('/users', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), userController)
 router.use('/tags', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), TagController)
 router.use('/', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), LocationController)
+router.use('/', (req: Request, res: Response) => res.send('Reshub'))
 
 router.use('/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404
