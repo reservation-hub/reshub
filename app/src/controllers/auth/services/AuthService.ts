@@ -25,9 +25,9 @@ interface JwtPayload {
 const AuthService: AuthControllerSocket & PassportSocket = {
   createToken(user, expiresIn) {
     return jwt.sign({ user }, config.JWT_TOKEN_SECRET, {
-      audience: 'http://localhost:8080',
+      audience: config.ADMIN_URL,
       expiresIn,
-      issuer: process.env.RESHUB_URL,
+      issuer: config.ADMIN_URL,
     })
   },
 
