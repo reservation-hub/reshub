@@ -11,6 +11,7 @@ export type ShopRepositoryInterface = {
 
 export type MenuRepositoryInterface = {
   fetchShopMenus(shopId: number, limit: number): Promise<Menu[]>
+  fetchShopsMenus(shopIds: number[]): Promise<{ shopId: number, menus: Menu[] }[]>
 }
 
 const MenuService: MenuServiceInterface = {
@@ -22,6 +23,24 @@ const MenuService: MenuServiceInterface = {
       throw new NotFoundError()
     }
     return MenuRepository.fetchShopMenus(shopId, limit)
+  },
+
+  async fetchShopAverageMenuPriceByShopIds(shopIds) {
+    const shopMenus = await MenuRepository.fetchShopsMenus(shopIds)
+    return shopIds.map(shopId => {
+      const shopMenu = shopMenus.find(sm => sm.shopId === shopId)
+      let average: number
+      if (!shopMenu) {
+        average = 0
+      } else {
+        const total = shopMenu.menus.reduce((sum, m) => sum + m.price, 0)
+        average = Math.floor(total / shopMenu.menus.length)
+      }
+      return {
+        shopId,
+        price: average,
+      }
+    })
   },
 }
 

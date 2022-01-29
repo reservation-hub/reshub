@@ -21,6 +21,7 @@ export type ShopServiceInterface = {
 
 export type MenuServiceInterface = {
   fetchShopMenus(shopId: number): Promise<Menu[]>
+  fetchShopAverageMenuPriceByShopIds(shopIds: number[]): Promise<{ shopId: number, price: number }[]>
 }
 
 export type StylistServiceInterface = {
@@ -31,6 +32,7 @@ const ShopController: ShopControllerInterface = {
   async index(user, query) {
     const { page, order } = await indexSchema.parseAsync(query)
     const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order)
+    const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
     const values = shops.map(s => ({
       id: s.id,
       name: s.name,
@@ -38,6 +40,9 @@ const ShopController: ShopControllerInterface = {
       address: s.address,
       prefectureName: s.prefecture.name,
       cityName: s.city.name,
+      startTime: s.startTime,
+      endTime: s.endTime,
+      averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
     }))
     return { values, totalCount }
   },
@@ -54,6 +59,8 @@ const ShopController: ShopControllerInterface = {
       address: shop.address,
       prefectureName: shop.prefecture.name,
       cityName: shop.city.name,
+      startTime: shop.startTime,
+      endTime: shop.endTime,
       menus: menus.map(m => ({
         id: m.id,
         shopId: m.shopId,
@@ -79,6 +86,7 @@ const ShopController: ShopControllerInterface = {
     const { shops, totalCount } = await ShopService.fetchShopsByAreaWithTotalCount(
       user, areaId, page, order, prefectureId, cityId,
     )
+    const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
 
     const values = shops.map(s => ({
       id: s.id,
@@ -87,6 +95,9 @@ const ShopController: ShopControllerInterface = {
       address: s.address,
       prefectureName: s.prefecture.name,
       cityName: s.city.name,
+      startTime: s.startTime,
+      endTime: s.endTime,
+      averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
     }))
     return { values, totalCount }
   },
@@ -99,6 +110,7 @@ const ShopController: ShopControllerInterface = {
     const { shops, totalCount } = await ShopService.fetchShopsByTagsWithTotalCount(
       user, tags, page, order,
     )
+    const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
 
     const values = shops.map(s => ({
       id: s.id,
@@ -107,6 +119,9 @@ const ShopController: ShopControllerInterface = {
       address: s.address,
       prefectureName: s.prefecture.name,
       cityName: s.city.name,
+      startTime: s.startTime,
+      endTime: s.endTime,
+      averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
     }))
     return { values, totalCount }
   },
