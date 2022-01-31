@@ -14,11 +14,11 @@ export type UserServiceInterface = {
   searchUser(keyword: string, page?: number, order?: OrderBy): Promise<{ users: User[], totalCount: number}>
   insertUser(password: string, confirm: string, email: string, roleSlug: RoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, gender: Gender, birthday: Date)
-    : Promise<void>
+    : Promise<User>
   updateUser(id: number, email: string, roleSlug: RoleSlug, lastNameKanji: string, firstNameKanji: string,
-    lastNameKana: string, firstNameKana: string, gender: Gender, birthday: Date) : Promise<void>
-  updateUserPassword(id: number, oldPassword: string, newPassword: string, confirmNewPassword: string): Promise<void>
-  deleteUser(id: number): Promise<void>
+    lastNameKana: string, firstNameKana: string, gender: Gender, birthday: Date) : Promise<User>
+  updateUserPassword(id: number, oldPassword: string, newPassword: string, confirmNewPassword: string): Promise<User>
+  deleteUser(id: number): Promise<User>
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 

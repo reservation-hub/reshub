@@ -1,7 +1,8 @@
 import { convertDateTimeObjectToDateTimeString, convertDateStringToDateObject } from '@lib/Date'
 import { Reservation } from '@entities/Reservation'
 import { UserForAuth } from '@entities/User'
-import { ReservationControllerInterface } from '@controller-adapter/client/Shop'
+import { ReservationControllerInterface as ShopEndpointSocket } from '@controller-adapter/client/Shop'
+import { ReservationControllerInterface as UserEndpointSocket } from '@controller-adapter/client/User'
 import { reservationQuerySchema, reservationUpsertSchema } from '@client/reservation/schemas'
 import ReservationService from '@client/reservation/services/ReservationService'
 import ShopService from '@client/reservation/services/ShopService'
@@ -19,7 +20,7 @@ export type ShopServiceInterface = {
   fetchShopSeatCount(user: UserForAuth | undefined, shopId: number): Promise<number>
 }
 
-const ReservationController: ReservationControllerInterface = {
+const ReservationController: ShopEndpointSocket = {
   async list(user, query) {
     const { shopId } = query
     const { reservationDate } = await reservationQuerySchema.parseAsync(query.params)

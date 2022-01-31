@@ -1,7 +1,7 @@
-import { Prisma, RoleSlug as PrismaRoleSlug } from '@prisma/client'
+import { Prisma, Gender as PrismaGender, RoleSlug as PrismaRoleSlug } from '@prisma/client'
 import { RoleSlug } from '@entities/Role'
 import { UserRepositoryInterface } from '@client/user/services/UserService'
-import { User } from '@entities/User'
+import { Gender, User } from '@entities/User'
 import prisma from '@lib/prisma'
 
 const userWithProfileAndOAuthIdsAndRole = Prisma.validator<Prisma.UserArgs>()(
@@ -18,6 +18,15 @@ export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
       return RoleSlug.CLIENT
     default:
       return RoleSlug.ADMIN
+  }
+}
+
+const convertEntityGenderToDBGender = (gender: Gender): PrismaGender => {
+  switch (gender) {
+    case Gender.FEMALE:
+      return PrismaGender.FEMALE
+    default:
+      return PrismaGender.MALE
   }
 }
 
@@ -44,6 +53,14 @@ const reconstructUser = (user: userWithProfileAndOAuthIdsAndRole): User => ({
 })
 
 const UserRepository: UserRepositoryInterface = {
+  async fetchUser(id) {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: { profile: true, oAuthIds: true, role: true },
+    })
+
+    return user ? reconstructUser(user) : null
+  },
 
   async insertUser(email, username, password) {
     const create = await prisma.user.create({
@@ -72,6 +89,31 @@ const UserRepository: UserRepositoryInterface = {
     })
     const createdUser = reconstructUser(create)
     return createdUser
+  },
+
+  async updateUser(id, lastNameKanji, firstNameKanji, lastNameKana, firstNameKana,
+    gender, birthday) {
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        profile: {
+          update: {
+            lastNameKanji,
+            firstNameKanji,
+            lastNameKana,
+            firstNameKana,
+            gender: convertEntityGenderToDBGender(gender),
+            birthday,
+          },
+        },
+      },
+      include: {
+        oAuthIds: true,
+        profile: true,
+        role: true,
+      },
+    })
+    return reconstructUser(user)
   },
 
   async emailAndUsernameAreAvailable(email, username) {

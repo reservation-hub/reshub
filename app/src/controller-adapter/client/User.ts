@@ -2,12 +2,19 @@ import {
   Request, Response, NextFunction, Router,
 } from 'express'
 import { ResponseMessage } from '@request-response-types/Common'
-import { InsertUserQuery } from '@request-response-types/client/User'
+import { InsertUserQuery, UpdateUserQuery } from '@request-response-types/client/User'
 import UserController from '@client/user/UserController'
+import { UserForAuth } from '@entities/User'
+import { protectClientRoute } from '@routes/utils'
 import { verifyIfNotLoggedInYet } from './Auth'
 
 export type UserControllerInterface = {
   signUp(query: InsertUserQuery): Promise<ResponseMessage>
+  update(user: UserForAuth | undefined, query: UpdateUserQuery): Promise<ResponseMessage>
+}
+
+export type ReservationControllerInterface = {
+  userReservationsList(user: UserForAuth | undefined, query: UpdateUserQuery): Promise<ResponseMessage>
 }
 
 const signUp = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -17,8 +24,16 @@ const signUp = async (req: Request, res: Response, next: NextFunction) : Promise
   } catch (e) { return next(e) }
 }
 
+const update = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user, body } = req
+    return res.send(await UserController.update(user, body))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.post('/create', verifyIfNotLoggedInYet, signUp)
+routes.patch('/', protectClientRoute, update)
 
 export default routes
