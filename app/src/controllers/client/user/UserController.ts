@@ -1,7 +1,7 @@
 import { UserControllerInterface } from '@controller-adapter/client/User'
 import UserService from '@client/user/services/UserService'
 import { Gender, User } from '@entities/User'
-import { signUpSchema, updateUserSchema } from '@client/user/schemas'
+import { signUpSchema, updateUserSchema, userPasswordUpdateSchema } from '@client/user/schemas'
 import MailService from '@client/user/services/MailService'
 import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
@@ -11,6 +11,7 @@ export type UserServiceInterface = {
   signUpUser(email: string, username: string, password: string, confirm: string): Promise<User>
   updateUser(id: number, lastNameKanji: string, firstNameKanji: string, lastNameKana: string,
     firstNameKana: string, gender: Gender, birthday: Date): Promise<User>
+  updateUserPassword(id: number, oldPassword: string, newPassword: string, confirmNewPassword: string): Promise<User>
 }
 
 export type MailServiceInterface = {
@@ -41,6 +42,20 @@ const UserController: UserControllerInterface = {
       gender, dateObject)
 
     return 'User updated'
+  },
+
+  async updatePassword(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
+
+    const {
+      oldPassword, newPassword, confirmNewPassword,
+    } = await userPasswordUpdateSchema.parseAsync(query)
+    await UserService.updateUserPassword(user.id, oldPassword, newPassword, confirmNewPassword)
+
+    return 'Password updated'
   },
 }
 

@@ -11,6 +11,7 @@ export type UserRepositoryInterface = {
   emailAndUsernameAreAvailable(email: string, username: string): Promise<boolean>
   updateUser(id: number, lastNameKanji: string, firstNameKanji: string, lastNameKana: string, firstNameKana: string,
     gender: Gender, birthday: Date): Promise<User>
+    updateUserPassword(id: number, password: string): Promise<User>
 }
 
 const UserService: UserServiceInterface = {
@@ -41,6 +42,29 @@ const UserService: UserServiceInterface = {
       id, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, gender, birthday,
     )
+  },
+
+  async updateUserPassword(id, oldPassword, newPassword, confirmNewPassword) {
+    const user = await UserRepository.fetchUser(id)
+    if (!user) {
+      Logger.debug('User does not exist')
+      throw new NotFoundError()
+    }
+
+    const passwordMatches = await bcrypt.compare(oldPassword, user.password)
+    if (!passwordMatches) {
+      Logger.debug('Old password do not match')
+      throw new InvalidParamsError()
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      Logger.debug('Passwords do not match')
+      throw new InvalidParamsError()
+    }
+
+    const hash = bcrypt.hashSync(newPassword, 10 /* hash rounds */)
+
+    return UserRepository.updateUserPassword(id, hash)
   },
 }
 
