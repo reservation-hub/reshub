@@ -69,8 +69,10 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
   }
 
   if (error instanceof ZodError) {
-    Logger.debug('zod error')
+    Logger.debug('Zod Error')
     const keys = error.issues.map(e => e.path.toString())
+    Logger.debug('Error on keys:')
+    Logger.debug(keys)
     return res.status(ErrorCode.BadRequest).send({ keys, message: 'Invalid values error' })
   }
 
