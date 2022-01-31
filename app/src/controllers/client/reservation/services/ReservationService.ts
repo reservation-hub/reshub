@@ -1,4 +1,4 @@
-import { ScheduleDays } from '@entities/Common'
+import { OrderBy, ScheduleDays } from '@entities/Common'
 import { Menu } from '@entities/Menu'
 import { Reservation } from '@entities/Reservation'
 import { ReservationServiceInterface } from '@client/reservation/ReservationController'
@@ -11,25 +11,31 @@ import Logger from '@lib/Logger'
 import { Stylist } from '@entities/Stylist'
 import isWithinSchedule from '@lib/ScheduleChecker'
 import today from '@lib/Today'
+import { Shop } from '@entities/Shop'
 
 export type ReservationRepositoryInterface = {
   fetchShopReservationsForAvailabilityWithMenuDuration(shopId: number, reservationDate: Date,
     rangeInDays: number) :Promise<(Reservation & { duration: number })[]>
   createReservation(clientId: number, shopId: number, reservationDate: Date, menuId: number, stylistId?: number)
     : Promise<Reservation>
+  fetchUserReservations(userId: number, page: number, order: OrderBy): Promise<Reservation[]>
+  fetchUserReservationTotalCount(id: number): Promise<number>
 }
 
 export type MenuRepositoryInterface = {
   fetchShopMenu(shopId: number, menuId: number): Promise<Menu | null>
+  fetchMenusByIds(ids: number[]): Promise<Menu[]>
 }
 
 export type StylistRepositoryInterface = {
   fetchShopStylist(shopId: number, stylistId: number): Promise<Stylist | null>
+  fetchStylistsByIds(ids: number[]): Promise<Stylist[]>
 }
 
 export type ShopRepositoryInterface = {
   fetchShopDetailsForReservation(shopId: number)
     : Promise<{ startTime: string, endTime: string, days: ScheduleDays[], seats: number} | null>
+  fetchShopsByIds(ids: number[]): Promise<Shop[]>
 }
 
 const getConflictingReservations = (reservationDate: Date, menuDuration: number, shopReservations:
@@ -128,6 +134,34 @@ const ReservationService: ReservationServiceInterface = {
 
     return ReservationRepository.createReservation(user.id, shopId, reservationDate,
       menuId, stylistId)
+  },
+
+  async fetchUserReservationsWithShopAndMenuAndStylist(user, page = 1, order = OrderBy.DESC) {
+    const reservations = await ReservationRepository.fetchUserReservations(user.id, page, order)
+    const menuIds: number[] = []
+    const shopIds: number[] = []
+    const stylistIds: number[] = []
+    reservations.forEach(r => {
+      menuIds.push(r.menuId)
+      shopIds.push(r.shopId)
+      if (r.stylistId) {
+        stylistIds.push(r.stylistId)
+      }
+    })
+    const reservationMenus = await MenuRepository.fetchMenusByIds(menuIds)
+    const reservationShops = await ShopRepository.fetchShopsByIds(shopIds)
+    const reservationStylists = await StylistRepository.fetchStylistsByIds(stylistIds)
+
+    return reservations.map(r => ({
+      ...r,
+      shop: reservationShops.find(s => s.id === r.shopId)!,
+      stylist: reservationStylists.find(s => s.id === r.stylistId),
+      menu: reservationMenus.find(m => m.id === r.menuId)!,
+    }))
+  },
+
+  async fetchUserReservationTotalCount(user) {
+    return ReservationRepository.fetchUserReservationTotalCount(user.id)
   },
 }
 

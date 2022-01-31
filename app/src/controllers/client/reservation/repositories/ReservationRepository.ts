@@ -74,6 +74,23 @@ const ReservationRepository: ReservationRepositoryInterface = {
 
     return reconstructReservation(reservation)
   },
+
+  async fetchUserReservations(userId, page, order) {
+    const limit = 10
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const reservations = await prisma.reservation.findMany({
+      where: { userId },
+      take: limit,
+      skip: skipIndex,
+      orderBy: { id: order },
+    })
+
+    return reservations.map(reconstructReservation)
+  },
+
+  async fetchUserReservationTotalCount(id) {
+    return prisma.reservation.count({ where: { userId: id } })
+  },
 }
 
 export default ReservationRepository

@@ -40,6 +40,13 @@ const StylistRepository: StylistRepositoryInterface = {
     })
     return stylist ? reconstructStylist(stylist) : null
   },
+
+  async fetchStylistsByIds(ids) {
+    const stylists = await prisma.stylist.findMany({
+      where: { id: { in: ids } },
+    })
+    return stylists.map(reconstructStylist)
+  },
 }
 
 export default StylistRepository
