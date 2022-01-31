@@ -15,11 +15,8 @@ app.use(express.json())
 app.use(cookieParser(config.JWT_TOKEN_SECRET))
 app.use(cors({
   origin: [
-    'http://localhost:8080',
-    'http://localhost:3001',
-    'http://localhost:8081',
-    'http://184.72.186.149:8080',
-    'http://184.72.186.149:8081',
+    config.ADMIN_URL,
+    config.CLIENT_URL,
   ],
   credentials: true,
 }))

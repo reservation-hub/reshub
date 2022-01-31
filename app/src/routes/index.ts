@@ -18,8 +18,8 @@ const router = Router()
 export default router
 
 // client api
-router.use('/api/', apiRoutes)
-router.use('/api/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404
+router.use('/client/', apiRoutes)
+router.use('/client/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404
 
 router.use('/auth', authController)
 router.use('/dashboard', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), dashboardController)
