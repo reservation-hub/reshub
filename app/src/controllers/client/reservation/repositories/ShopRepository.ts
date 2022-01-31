@@ -1,8 +1,19 @@
 import { ShopRepositoryInterface as ShopServiceSocket } from '@client/reservation/services/ShopService'
 import { ShopRepositoryInterface as ReservationServiceSocket } from '@client/reservation/services/ReservationService'
+import { Shop } from '@entities/Shop'
 import { ScheduleDays } from '@entities/Common'
 import prisma from '@lib/prisma'
-import { Days } from '@prisma/client'
+import { Prisma, Days } from '@prisma/client'
+
+const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
+  {
+    include: {
+      shopDetail: true, area: true, prefecture: true, city: true,
+    },
+  },
+)
+type shopWithShopDetailsAndAreaAndPrefectureAndCity =
+Prisma.ShopGetPayload<typeof shopWithShopDetailsAndAreaAndPrefectureAndCity>
 
 const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
   switch (day) {
@@ -22,6 +33,33 @@ const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
       return ScheduleDays.SUNDAY
   }
 }
+
+const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAndCity): Shop => ({
+  id: shop.id,
+  area: {
+    id: shop.area.id,
+    name: shop.area.name,
+    slug: shop.area.slug,
+  },
+  prefecture: {
+    id: shop.prefecture.id,
+    name: shop.prefecture.name,
+    slug: shop.prefecture.slug,
+  },
+  city: {
+    id: shop.city.id,
+    name: shop.city.name,
+    slug: shop.city.slug,
+  },
+  name: shop.shopDetail?.name,
+  address: shop.shopDetail?.address ?? undefined,
+  phoneNumber: shop.shopDetail?.phoneNumber ?? undefined,
+  days: shop.shopDetail?.days.map(d => convertPrismaDayToEntityDay(d)),
+  seats: shop.shopDetail.seats,
+  startTime: shop.shopDetail.startTime,
+  endTime: shop.shopDetail.endTime,
+  details: shop.shopDetail?.details ?? undefined,
+})
 
 const ShopRepository: ShopServiceSocket & ReservationServiceSocket = {
   async fetchUserShopIds(userId) {
@@ -54,6 +92,17 @@ const ShopRepository: ShopServiceSocket & ReservationServiceSocket = {
         seats: shop.shopDetail.seats,
       }
       : null
+  },
+
+  async fetchShopsByIds(ids) {
+    const shops = await prisma.shop.findMany({
+      where: { id: { in: ids } },
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true,
+      },
+    })
+
+    return shops.map(reconstructShop)
   },
 }
 
