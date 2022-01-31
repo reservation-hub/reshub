@@ -21,8 +21,8 @@ export type TagControllerInterface = {
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order } = req.query
-    return res.send(await TagController.index({ page, order }))
+    const { page, order, take } = req.query
+    return res.send(await TagController.index({ page: parseToInt(page), order, take: parseToInt(take) }))
   } catch (e) { return next(e) }
 }
 
@@ -57,8 +57,12 @@ const deleteTag = async (req: Request, res: Response, next: NextFunction) : Prom
 
 const searchTag = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { keyword, page, order } = req.query
-    return res.send(await TagController.search({ keyword, page: parseToInt(page), order }))
+    const {
+      keyword, page, order, take,
+    } = req.query
+    return res.send(await TagController.search({
+      keyword, page: parseToInt(page), order, take: parseToInt(take),
+    }))
   } catch (e) { return next(e) }
 }
 

@@ -23,8 +23,8 @@ export type UserControllerInterface = {
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order } = req.query
-    return res.send(await UserController.index({ page: parseToInt(page), order }))
+    const { page, order, take } = req.query
+    return res.send(await UserController.index({ page: parseToInt(page), order, take: parseToInt(take) }))
   } catch (e) { return next(e) }
 }
 
@@ -67,8 +67,12 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) : Pro
 
 const searchUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { keyword, page, order } = req.query
-    return res.send(await UserController.searchUsers({ keyword, page: parseToInt(page), order }))
+    const {
+      keyword, page, order, take,
+    } = req.query
+    return res.send(await UserController.searchUsers({
+      keyword, page: parseToInt(page), order, take: parseToInt(take),
+    }))
   } catch (e) { return next(e) }
 }
 
