@@ -7,7 +7,9 @@ import { Stylist } from '@entities/Stylist'
 import MenuService from '@client/shop/services/MenuService'
 import StylistService from '@client/shop/services/StylistService'
 import { ShopControllerInterface } from '@controller-adapter/client/Shop'
-import { indexSchema, searchByAreaSchema, searchByTagsSchema } from './schemas'
+import {
+  indexSchema, searchByAreaSchema, searchByTagsSchema, searchByNameSchema,
+} from './schemas'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: OrderBy)
@@ -16,6 +18,8 @@ export type ShopServiceInterface = {
   fetchShopsByAreaWithTotalCount(user: UserForAuth | undefined, areaId: number, page?: number, order?: OrderBy,
     prefectureId?: number, cityId?: number): Promise<{ shops: Shop[], totalCount:number }>
   fetchShopsByTagsWithTotalCount(user: UserForAuth | undefined, tags: string[], page?: number,
+    order?: OrderBy,): Promise<{ shops: Shop[], totalCount:number }>
+  fetchShopsByNameWithTotalCount(user: UserForAuth | undefined, name: string, page?: number,
     order?: OrderBy,): Promise<{ shops: Shop[], totalCount:number }>
 }
 
@@ -109,6 +113,29 @@ const ShopController: ShopControllerInterface = {
 
     const { shops, totalCount } = await ShopService.fetchShopsByTagsWithTotalCount(
       user, tags, page, order,
+    )
+    const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
+
+    const values = shops.map(s => ({
+      id: s.id,
+      name: s.name,
+      phoneNumber: s.phoneNumber,
+      address: s.address,
+      prefectureName: s.prefecture.name,
+      cityName: s.city.name,
+      startTime: s.startTime,
+      endTime: s.endTime,
+      averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
+    }))
+    return { values, totalCount }
+  },
+
+  async searchByName(user, query) {
+    const {
+      name, page, order,
+    } = await searchByNameSchema.parseAsync(query)
+    const { shops, totalCount } = await ShopService.fetchShopsByNameWithTotalCount(
+      user, name, page, order,
     )
     const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
 
