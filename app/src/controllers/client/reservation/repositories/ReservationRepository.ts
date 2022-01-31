@@ -75,12 +75,11 @@ const ReservationRepository: ReservationRepositoryInterface = {
     return reconstructReservation(reservation)
   },
 
-  async fetchUserReservations(userId, page, order) {
-    const limit = 10
+  async fetchUserReservations(userId, page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const reservations = await prisma.reservation.findMany({
       where: { userId },
-      take: limit,
+      take,
       skip: skipIndex,
       orderBy: { id: order },
     })

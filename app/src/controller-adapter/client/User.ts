@@ -46,9 +46,10 @@ const updateUserPassword = async (req: Request, res: Response, next: NextFunctio
 
 const userReservations = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order } = req.query
+    const { page, order, take } = req.query
     const { user } = req
-    return res.send(await ReservationController.userReservationsList(user, { page: parseToInt(page), order }))
+    return res.send(await ReservationController.userReservationsList(user,
+      { page: parseToInt(page), order, take: parseToInt(take) }))
   } catch (e) { return next(e) }
 }
 

@@ -31,14 +31,13 @@ const reconstructReservation = (reservation: PrismaReservation)
 
 const ReservationRepository: ReservationServiceSocket = {
 
-  async fetchShopReservations(shopId, page, order) {
-    const limit = 10
+  async fetchShopReservations(shopId, page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const reservations = await prisma.reservation.findMany({
       where: { shop: { id: shopId } },
       skip: skipIndex,
       orderBy: { reservationDate: order },
-      take: limit,
+      take,
     })
     return reservations.map(r => reconstructReservation(r))
   },

@@ -9,9 +9,10 @@ import { OrderBy } from '@entities/Common'
 import { convertDateObjectToOutboundDateString, convertDateStringToDateObject } from '@lib/Date'
 
 export type UserServiceInterface = {
-  fetchUsersWithTotalCount(page?: number, order?: OrderBy): Promise<{ users: User[], totalCount: number}>
+  fetchUsersWithTotalCount(page?: number, order?: OrderBy, take?: number): Promise<{ users: User[], totalCount: number}>
   fetchUser(id: number): Promise<User>
-  searchUser(keyword: string, page?: number, order?: OrderBy): Promise<{ users: User[], totalCount: number}>
+  searchUser(keyword: string, page?: number, order?: OrderBy, take?: number)
+    : Promise<{ users: User[], totalCount: number}>
   insertUser(password: string, confirm: string, email: string, roleSlug: RoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, gender: Gender, birthday: Date)
     : Promise<User>
@@ -24,8 +25,8 @@ export type UserServiceInterface = {
 
 const UserController: UserControllerInterface = {
   async index(query) {
-    const { page, order } = await indexSchema.parseAsync(query)
-    const { users, totalCount } = await UserService.fetchUsersWithTotalCount(page, order)
+    const { page, order, take } = await indexSchema.parseAsync(query)
+    const { users, totalCount } = await UserService.fetchUsersWithTotalCount(page, order, take)
     const userReservationCounts = await UserService.fetchUsersReservationCounts(users.map(u => u.id))
     const userList = users.map(u => ({
       id: u.id,
@@ -100,8 +101,10 @@ const UserController: UserControllerInterface = {
   },
 
   async searchUsers(query) {
-    const { keyword, page, order } = await searchSchema.parseAsync(query)
-    const { users, totalCount } = await UserService.searchUser(keyword, page, order)
+    const {
+      keyword, page, order, take,
+    } = await searchSchema.parseAsync(query)
+    const { users, totalCount } = await UserService.searchUser(keyword, page, order, take)
     const userReservationCounts = await UserService.fetchUsersReservationCounts(users.map(u => u.id))
     const userList = users.map(u => ({
       id: u.id,

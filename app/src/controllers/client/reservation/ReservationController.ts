@@ -18,7 +18,7 @@ export type ReservationServiceInterface = {
     : Promise<{ id: number, reservationStartDate: Date, reservationEndDate: Date, stylistId?: number}[]>
   createReservation(user: UserForAuth, shopId: number, reservationDate: Date, menuId: number, stylistId?: number)
     : Promise<Reservation>
-  fetchUserReservationsWithShopAndMenuAndStylist(user: UserForAuth, page?: number, order?: OrderBy)
+  fetchUserReservationsWithShopAndMenuAndStylist(user: UserForAuth, page?: number, order?: OrderBy, take?: number)
     : Promise<(Reservation & { shop: Shop, menu: Menu, stylist?: Stylist })[]>
   fetchUserReservationTotalCount(user: UserForAuth): Promise<number>
 }
@@ -68,8 +68,10 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
       throw new UnauthorizedError()
     }
 
-    const { page, order } = await indexSchema.parseAsync(query)
-    const reservations = await ReservationService.fetchUserReservationsWithShopAndMenuAndStylist(user, page, order)
+    const { page, order, take } = await indexSchema.parseAsync(query)
+    const reservations = await ReservationService.fetchUserReservationsWithShopAndMenuAndStylist(
+      user, page, order, take,
+    )
     const totalCount = await ReservationService.fetchUserReservationTotalCount(user)
 
     return {

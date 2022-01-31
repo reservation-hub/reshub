@@ -10,7 +10,7 @@ import Logger from '@lib/Logger'
 import { convertToUnixTime } from '@lib/ScheduleChecker'
 
 export type ShopRepositoryInterface = {
-  fetchAllShops(page: number, order: OrderBy): Promise<Shop[]>
+  fetchAllShops(page: number, order: OrderBy, take: number): Promise<Shop[]>
   fetchShop(shopId: number): Promise<Shop | null>
   totalCount(): Promise<number>
   insertShop(
@@ -22,10 +22,10 @@ export type ShopRepositoryInterface = {
     phoneNumber: string, days: ScheduleDays[], seats:number,
     startTime: string, endTime: string, details: string) : Promise<Shop>
   deleteShop(id: number): Promise<Shop>
-  searchShops(keyword: string, page: number, order: OrderBy): Promise<Shop[]>
+  searchShops(keyword: string, page: number, order: OrderBy, take: number): Promise<Shop[]>
   searchShopsTotalCount(keyword: string): Promise<number>
   staffShopSearchTotalCount(keyword: string, userId: number): Promise<number>
-  fetchStaffShops(userId: number, page: number, order: OrderBy): Promise<Shop[]>
+  fetchStaffShops(userId: number, page: number, order: OrderBy, take: number): Promise<Shop[]>
   fetchStaffTotalShopsCount(userId: number): Promise<number>
   fetchUserShopIds(userId: number): Promise<number[]>
   assignShopToStaff(userId: number, shopId: number): void
@@ -46,14 +46,14 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 
 export const ShopService: ShopServiceInterface = {
 
-  async fetchShopsWithTotalCount(user, page = 1, order = OrderBy.DESC) {
+  async fetchShopsWithTotalCount(user, page = 1, order = OrderBy.DESC, take = 10) {
     let shops
     let shopsCount
     if (user.role.slug === RoleSlug.SHOP_STAFF) {
-      shops = await ShopRepository.fetchStaffShops(user.id, page, order)
+      shops = await ShopRepository.fetchStaffShops(user.id, page, order, take)
       shopsCount = await ShopRepository.fetchStaffTotalShopsCount(user.id)
     } else {
-      shops = await ShopRepository.fetchAllShops(page, order)
+      shops = await ShopRepository.fetchAllShops(page, order, take)
       shopsCount = await ShopRepository.totalCount()
     }
     return { shops, totalCount: shopsCount }
@@ -149,9 +149,9 @@ export const ShopService: ShopServiceInterface = {
     return ShopRepository.deleteShop(id)
   },
 
-  async searchShops(user, keyword, page = 1, order = OrderBy.DESC) {
+  async searchShops(user, keyword, page = 1, order = OrderBy.DESC, take = 10) {
     let shops: Shop[]
-    shops = await ShopRepository.searchShops(keyword, page, order)
+    shops = await ShopRepository.searchShops(keyword, page, order, take)
     let totalCount: number
     if (user.role.slug === RoleSlug.SHOP_STAFF) {
       const userShopIds = await ShopRepository.fetchUserShopIds(user.id)

@@ -2,14 +2,13 @@ import { MenuRepositoryInterface } from '@menu/services/MenuService'
 import prisma from '@lib/prisma'
 
 const MenuRepository: MenuRepositoryInterface = {
-  async fetchAllShopMenus(shopId, page, order) {
-    const limit = 10
+  async fetchAllShopMenus(shopId, page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const menus = await prisma.menu.findMany({
       where: { shopId },
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
     })
     return menus
   },

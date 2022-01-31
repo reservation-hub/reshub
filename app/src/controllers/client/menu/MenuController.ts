@@ -8,7 +8,8 @@ import { indexSchema } from './schemas'
 
 export type MenuServiceInterface = {
   popularMenus(user: UserForAuth | undefined): Promise<Menu[]>
-  fetchShopMenusWithTotalCount(user: UserForAuth | undefined, shopId: number, page?: number, order?: OrderBy)
+  fetchShopMenusWithTotalCount(user: UserForAuth | undefined, shopId: number, page?: number,
+    order?: OrderBy, take?: number)
     :Promise<{ menus: Menu[], totalCount: number}>
 }
 
@@ -19,8 +20,8 @@ const MenuController: MenuSocket & ShopSocket = {
 
   async list(user, query) {
     const { shopId } = query
-    const { page, order } = await indexSchema.parseAsync(query)
-    const { menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(user, shopId, page, order)
+    const { page, order, take } = await indexSchema.parseAsync(query)
+    const { menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(user, shopId, page, order, take)
     const values = menus.map(m => ({
       id: m.id,
       shopId: m.shopId,

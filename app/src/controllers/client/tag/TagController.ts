@@ -4,13 +4,16 @@ import { OrderBy } from '@request-response-types/Common'
 import TagService from '@client/tag/services/TagService'
 
 export type TagServiceInterface = {
-  searchTag(keyword: string, page?: number, order?: OrderBy): Promise<{ tags: Tag[], totalCount: number }>
+  searchTag(keyword: string, page?: number, order?: OrderBy, take?: number)
+    : Promise<{ tags: Tag[], totalCount: number }>
 }
 
 const TagController: TagControllerInterface = {
   async search(query) {
-    const { keyword, page, order } = query
-    const { tags: values, totalCount } = await TagService.searchTag(keyword, page, order)
+    const {
+      keyword, page, order, take,
+    } = query
+    const { tags: values, totalCount } = await TagService.searchTag(keyword, page, order, take)
     return { values, totalCount }
   },
 }

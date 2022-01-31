@@ -9,7 +9,7 @@ import Logger from '@lib/Logger'
 import { OrderBy } from '@entities/Common'
 
 export type UserRepositoryInterface = {
-  fetchAllUsers(page: number, order: OrderBy): Promise<User[]>
+  fetchAllUsers(page: number, order: OrderBy, take: number): Promise<User[]>
   fetchUser(userId: number): Promise<User | null>
   totalCount(): Promise<number>
   insertUser(email: string, password: string, roleSlug: RoleSlug, lastNameKanji: string,
@@ -20,7 +20,7 @@ export type UserRepositoryInterface = {
     : Promise<User>
   updateUserPassword(id: number, password: string): Promise<User>
   deleteUser(id: number): Promise<User>
-  searchUser(keyword: string, page: number, order: OrderBy): Promise<User[]>
+  searchUser(keyword: string, page: number, order: OrderBy, take: number): Promise<User[]>
   searchUserTotalCount(keyword: string): Promise<number>
   fetchUserByEmail(email: string): Promise<User | null>
 }
@@ -31,14 +31,14 @@ export type ReservationRepositoryInterface = {
 
 const UserService: UserServiceInterface = {
 
-  async fetchUsersWithTotalCount(page = 1, order = OrderBy.DESC) {
-    const users = await UserRepository.fetchAllUsers(page, order)
+  async fetchUsersWithTotalCount(page = 1, order = OrderBy.DESC, take = 10) {
+    const users = await UserRepository.fetchAllUsers(page, order, take)
     const totalCount = await UserRepository.totalCount()
     return { users, totalCount }
   },
 
-  async searchUser(keyword, page = 1, order = OrderBy.DESC) {
-    const users = await UserRepository.searchUser(keyword, page, order)
+  async searchUser(keyword, page = 1, order = OrderBy.DESC, take = 10) {
+    const users = await UserRepository.searchUser(keyword, page, order, take)
     const totalCount = await UserRepository.searchUserTotalCount(keyword)
     return { users, totalCount }
   },

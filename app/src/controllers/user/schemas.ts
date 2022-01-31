@@ -7,6 +7,7 @@ import { birthdayDatePattern, passwordPattern } from '@lib/RegexPatterns'
 export const indexSchema = z.object({
   page: z.number().optional(),
   order: z.nativeEnum(OrderBy).optional(),
+  take: z.number().optional(),
 })
 
 export const userInsertSchema = z.object({
@@ -49,4 +50,5 @@ export const searchSchema = z.object({
   keyword: z.string(),
   page: z.number().positive().int().optional(),
   order: z.nativeEnum(OrderBy).optional(),
+  take: z.number().optional(),
 })

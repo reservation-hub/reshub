@@ -20,7 +20,7 @@ import isWithinSchedule from '@lib/ScheduleChecker'
 import today from '@lib/Today'
 
 export type ReservationRepositoryInterface = {
-  fetchShopReservations(shopId: number, page: number, order: OrderBy): Promise<Reservation[]>
+  fetchShopReservations(shopId: number, page: number, order: OrderBy, take: number): Promise<Reservation[]>
   fetchShopReservationsForCalendar(shopId: number, year: number, month: number): Promise<Reservation[]>
   fetchShopTotalReservationCount(shopId: number): Promise<number>
   fetchShopReservation(shopId: number, reservationId: number): Promise<Reservation | null>
@@ -106,13 +106,13 @@ const recreateReservationList = async (reservations: Reservation[]) => {
 }
 
 const ReservationService: ReservationServiceInterface = {
-  async fetchReservationsWithClientAndStylistAndMenu(user, shopId, page = 1, order = OrderBy.ASC) {
+  async fetchReservationsWithClientAndStylistAndMenu(user, shopId, page = 1, order = OrderBy.ASC, take = 10) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
       Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
-    const reservations = await ReservationRepository.fetchShopReservations(shopId, page, order)
+    const reservations = await ReservationRepository.fetchShopReservations(shopId, page, order, take)
     return recreateReservationList(reservations)
   },
 

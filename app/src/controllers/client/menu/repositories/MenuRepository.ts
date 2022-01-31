@@ -16,14 +16,13 @@ const MenuRepository: MenuRepositoryInterface = {
 
   setPopularMenus,
 
-  async fetchMenus(shopId, page, order) {
-    const limit = 10
+  async fetchMenus(shopId, page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const menus = await prisma.menu.findMany({
       where: { shopId },
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
     })
     return menus
   },

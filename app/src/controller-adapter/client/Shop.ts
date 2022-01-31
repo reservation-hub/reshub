@@ -42,9 +42,9 @@ export type ReservationControllerInterface = {
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order } = req.query
+    const { page, order, take } = req.query
     const { user } = req
-    return res.send(await ShopController.index(user, { page: parseToInt(page), order }))
+    return res.send(await ShopController.index(user, { page: parseToInt(page), order, take: parseToInt(take) }))
   } catch (e) { return next(e) }
 }
 
@@ -60,7 +60,7 @@ const shopSearchByArea = async (req: Request, res: Response, next: NextFunction)
   try {
     const { user } = req
     const {
-      page, order, areaId, prefectureId, cityId,
+      page, order, areaId, prefectureId, cityId, take,
     } = req.query
     return res.send(await ShopController.searchByArea(user, {
       page: parseToInt(page),
@@ -68,6 +68,7 @@ const shopSearchByArea = async (req: Request, res: Response, next: NextFunction)
       areaId: parseInt(areaId, 10),
       prefectureId: parseToInt(prefectureId),
       cityId: parseToInt(cityId),
+      take: parseToInt(take),
     }))
   } catch (e) { return next(e) }
 }
@@ -75,16 +76,24 @@ const shopSearchByArea = async (req: Request, res: Response, next: NextFunction)
 const shopSearchByTags = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
     const { user } = req
-    const { page, order, tags } = req.query
-    return res.send(await ShopController.searchByTags(user, { tags, page: parseToInt(page), order }))
+    const {
+      page, order, tags, take,
+    } = req.query
+    return res.send(await ShopController.searchByTags(user, {
+      tags, page: parseToInt(page), order, take: parseToInt(take),
+    }))
   } catch (e) { return next(e) }
 }
 
 const shopSearchByName = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
     const { user } = req
-    const { name, page, order } = req.body
-    return res.send(await ShopController.searchByName(user, { name, page: parseToInt(page), order }))
+    const {
+      name, page, order, take,
+    } = req.body
+    return res.send(await ShopController.searchByName(user, {
+      name, page: parseToInt(page), order, take: parseToInt(take),
+    }))
   } catch (e) { return next(e) }
 }
 
@@ -92,8 +101,10 @@ const shopMenus = async (req: Request, res: Response, next: NextFunction) : Prom
   try {
     const { user } = req
     const { shopId } = res.locals
-    const { page, order } = req.query
-    return res.send(await MenuController.list(user, { shopId, page: parseToInt(page), order }))
+    const { page, order, take } = req.query
+    return res.send(await MenuController.list(user, {
+      shopId, page: parseToInt(page), order, take: parseToInt(take),
+    }))
   } catch (e) { return next(e) }
 }
 
@@ -101,8 +112,10 @@ const shopStylists = async (req: Request, res: Response, next: NextFunction) : P
   try {
     const { user } = req
     const { shopId } = res.locals
-    const { page, order } = req.query
-    return res.send(await StylistController.list(user, { shopId, page: parseToInt(page), order }))
+    const { page, order, take } = req.query
+    return res.send(await StylistController.list(user, {
+      shopId, page: parseToInt(page), order, take: parseToInt(take),
+    }))
   } catch (e) { return next(e) }
 }
 

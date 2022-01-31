@@ -55,9 +55,9 @@ export type ReservationControllerInterface = {
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order } = req.query
+    const { page, order, take } = req.query
     const { user } = req
-    return res.send(await ShopController.index(user, { page: parseToInt(page), order }))
+    return res.send(await ShopController.index(user, { page: parseToInt(page), order, take: parseToInt(take) }))
   } catch (e) { return next(e) }
 }
 
@@ -96,10 +96,12 @@ const deleteShop = async (req: Request, res: Response, next: NextFunction) : Pro
 
 const showStylists = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order } = req.query
+    const { page, order, take } = req.query
     const { shopId } = res.locals
     const { user } = req
-    return res.send(await StylistController.index(user, { shopId, page: parseToInt(page), order }))
+    return res.send(await StylistController.index(user, {
+      shopId, page: parseToInt(page), order, take: parseToInt(take),
+    }))
   } catch (e) { return next(e) }
 }
 
@@ -139,18 +141,24 @@ const deleteStylist = async (req: Request, res: Response, next: NextFunction) : 
 
 const searchShops = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { keyword, page, order } = req.query
+    const {
+      keyword, page, order, take,
+    } = req.query
     const { user } = req
-    return res.send(await ShopController.searchShops(user, { keyword, page: parseToInt(page), order }))
+    return res.send(await ShopController.searchShops(user, {
+      keyword, page: parseToInt(page), order, take: parseToInt(take),
+    }))
   } catch (e) { return next(e) }
 }
 
 const showMenus = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order } = req.query
+    const { page, order, take } = req.query
     const { shopId } = res.locals
     const { user } = req
-    return res.send(await MenuController.index(user, { shopId, page: parseToInt(page), order }))
+    return res.send(await MenuController.index(user, {
+      shopId, page: parseToInt(page), order, take: parseToInt(take),
+    }))
   } catch (e) { return next(e) }
 }
 
@@ -190,10 +198,12 @@ const deleteMenu = async (req: Request, res: Response, next: NextFunction) : Pro
 
 const showReservations = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
-    const { page, order } = req.query
+    const { page, order, take } = req.query
     const { shopId } = res.locals
     const { user } = req
-    return res.send(await ReservationController.index(user, { shopId, page: parseToInt(page), order }))
+    return res.send(await ReservationController.index(user, {
+      shopId, page: parseToInt(page), order, take: parseToInt(take),
+    }))
   } catch (e) { return next(e) }
 }
 
