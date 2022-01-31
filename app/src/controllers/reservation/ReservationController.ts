@@ -13,8 +13,9 @@ import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './sch
 import ShopService from './services/ShopService'
 
 export type ReservationServiceInterface = {
-  fetchReservationsWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
-    : Promise<(Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
+  fetchReservationsWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, page?: number,
+    order?: OrderBy, take?: number): Promise<(
+      Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
   fetchReservationsWithClientAndStylistAndMenuForCalendar(user: UserForAuth, shopId: number,
     year: number, month: number): Promise<(Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
   fetchShopReservationTotalCount(user: UserForAuth, shopId: number): Promise<number>
@@ -38,10 +39,10 @@ const ReservationController: ReservationControllerInterface = {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const { page, order } = await indexSchema.parseAsync(query)
+    const { page, order, take } = await indexSchema.parseAsync(query)
     const { shopId } = query
     const reservations = await ReservationService.fetchReservationsWithClientAndStylistAndMenu(
-      user, shopId, page, order,
+      user, shopId, page, order, take,
     )
     const totalCount = await ReservationService.fetchShopReservationTotalCount(user, shopId)
 

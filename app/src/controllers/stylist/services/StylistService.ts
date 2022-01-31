@@ -9,7 +9,7 @@ import Logger from '@lib/Logger'
 import isWithinSchedule, { convertToDate } from '@lib/ScheduleChecker'
 
 export type StylistRepositoryInterface = {
-  fetchShopStylists(shopId: number, page: number, order: OrderBy): Promise<Stylist[]>
+  fetchShopStylists(shopId: number, page: number, order: OrderBy, take: number): Promise<Stylist[]>
   fetchShopTotalStylistsCount(shopId: number): Promise<number>
   fetchShopStylist(shopId: number, stylistId: number): Promise<Stylist | null>
   insertStylist(name: string, price: number, shopId: number, days:ScheduleDays[],
@@ -32,13 +32,13 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 }
 
 const StylistService: StylistServiceInterface = {
-  async fetchShopStylistsWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC) {
+  async fetchShopStylistsWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC, take = 10) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
       Logger.debug('Shop is not owned by user')
       throw new AuthorizationError()
     }
 
-    const stylists = await StylistRepository.fetchShopStylists(shopId, page, order)
+    const stylists = await StylistRepository.fetchShopStylists(shopId, page, order, take)
     const totalCount = await StylistRepository.fetchShopTotalStylistsCount(shopId)
     return { stylists, totalCount }
   },

@@ -83,13 +83,12 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
 
 const ShopRepository: ShopServiceSocket & MenuServiceSocket &
 StylistServiceSocket = {
-  async fetchAllShops(page, order) {
-    const limit = 10
+  async fetchAllShops(page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const shops = await prisma.shop.findMany({
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
       },
@@ -177,14 +176,13 @@ StylistServiceSocket = {
     return cleanShop
   },
 
-  async searchShops(keyword, page, order) {
-    const limit = 10
+  async searchShops(keyword, page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const shops = await prisma.shop.findMany({
       where: { shopDetail: { name: { contains: keyword } } },
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
       },

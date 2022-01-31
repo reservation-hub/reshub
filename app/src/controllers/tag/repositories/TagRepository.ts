@@ -6,13 +6,12 @@ import { TagRepositoryInterface } from '@tag/services/TagService'
 const convertToEntityTag = (tag: PrismaTag): Tag => ({ id: tag.id, slug: tag.slug })
 
 const TagRepository: TagRepositoryInterface = {
-  async fetchAllTags(page, order) {
-    const limit = 10
+  async fetchAllTags(page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const tags = await prisma.tag.findMany({
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
     })
     return tags.map(convertToEntityTag)
   },
@@ -57,14 +56,13 @@ const TagRepository: TagRepositoryInterface = {
     return convertToEntityTag(tag)
   },
 
-  async searchTag(keyword, page, order) {
-    const limit = 10
+  async searchTag(keyword, page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const tags = await prisma.tag.findMany({
       where: { slug: { contains: keyword } },
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
     })
     return tags.map(convertToEntityTag)
   },

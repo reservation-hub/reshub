@@ -8,7 +8,7 @@ import { UnauthorizedError } from '@errors/ControllerErrors'
 import { menuUpsertSchema, indexSchema } from './schemas'
 
 export type MenuServiceInterface = {
-  fetchShopMenusWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
+  fetchShopMenusWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy, take?: number)
     : Promise<{ menus: Menu[], totalCount: number}>
   fetchShopMenu(user: UserForAuth, shopId: number, menuId: number): Promise<Menu>
   insertMenu(user: UserForAuth, shopId: number, name: string, description: string, price: number
@@ -25,9 +25,9 @@ const MenuController: MenuControllerInterface = {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const { page, order } = await indexSchema.parseAsync(query)
+    const { page, order, take } = await indexSchema.parseAsync(query)
     const { shopId } = query
-    const { menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(user, shopId, page, order)
+    const { menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(user, shopId, page, order, take)
     return {
       values: menus.map(m => ({
         id: m.id,

@@ -11,7 +11,7 @@ import { UnauthorizedError } from '@errors/ControllerErrors'
 import Logger from '@lib/Logger'
 
 export type StylistServiceInterface = {
-  fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy)
+  fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy, take?: number)
     : Promise<{ stylists: Stylist[], totalCount: number }>
   fetchStylist(user: UserForAuth, shopId: number, stylistId: number): Promise<Stylist>
   insertStylist(user: UserForAuth, shopId: number, name: string, price: number,
@@ -73,9 +73,11 @@ const StylistController: StylistControllerInterface = {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const { page, order } = await indexSchema.parseAsync(query)
+    const { page, order, take } = await indexSchema.parseAsync(query)
     const { shopId } = query
-    const { stylists, totalCount } = await StylistService.fetchShopStylistsWithTotalCount(user, shopId, page, order)
+    const { stylists, totalCount } = await StylistService.fetchShopStylistsWithTotalCount(
+      user, shopId, page, order, take,
+    )
     const stylistReservationCounts = await StylistService.fetchStylistsReservationCounts(stylists.map(s => s.id))
     const stylistList = stylists.map(s => ({
       id: s.id,

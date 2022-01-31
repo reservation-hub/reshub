@@ -13,7 +13,7 @@ export type ShopRepositoryInterface = {
 }
 
 export type MenuRepositoryInterface = {
-  fetchAllShopMenus(shopId: number, page: number, order: OrderBy): Promise<Menu[]>
+  fetchAllShopMenus(shopId: number, page: number, order: OrderBy, take: number): Promise<Menu[]>
   totalShopMenuCount(shopId: number): Promise<number>
   fetchMenu(shopId: number, menuId: number): Promise<Menu | null>
   insertShopMenu(shopId: number, name: string, description: string, price: number, duration: number): Promise<Menu>
@@ -34,7 +34,7 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 }
 
 const MenuService: MenuServiceInterface = {
-  async fetchShopMenusWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC) {
+  async fetchShopMenusWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC, take = 10) {
     if (!await ShopRepository.shopExists(shopId)) {
       Logger.debug('Shop does not exist')
       throw new NotFoundError()
@@ -45,7 +45,7 @@ const MenuService: MenuServiceInterface = {
       throw new AuthorizationError()
     }
 
-    const menus = await MenuRepository.fetchAllShopMenus(shopId, page, order)
+    const menus = await MenuRepository.fetchAllShopMenus(shopId, page, order, take)
     const totalCount = await MenuRepository.totalShopMenuCount(shopId)
     return { menus, totalCount }
   },

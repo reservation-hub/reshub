@@ -53,14 +53,13 @@ const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
 })
 
 export const StylistRepository: StylistRepositoryInterface = {
-  async fetchShopStylists(shopId, page, order) {
-    const limit = 10
+  async fetchShopStylists(shopId, page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const stylists = await prisma.stylist.findMany({
       where: { shopId },
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
       include: { shop: { include: { shopDetail: true } } },
     })
     return stylists.map(reconstructStylist)

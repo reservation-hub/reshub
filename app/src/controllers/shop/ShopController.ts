@@ -20,7 +20,7 @@ import TagService from '@shop/services/TagService'
 import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
-  fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: OrderBy)
+  fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: OrderBy, take?: number)
     : Promise<{ shops: Shop[], totalCount: number }>
   fetchShop(user: UserForAuth, id: number): Promise<Shop>
   insertShop(user: UserForAuth, name: string, areaId: number, prefectureId: number,
@@ -30,7 +30,7 @@ export type ShopServiceInterface = {
     cityId: number, address: string, phoneNumber: string, days: EntityScheduleDays[],
     seats:number, startTime: string, endTime: string, details: string): Promise<Shop>
   deleteShop(user: UserForAuth, id: number): Promise<Shop>
-  searchShops(user: UserForAuth, keyword: string, page?: number, order?: OrderBy)
+  searchShops(user: UserForAuth, keyword: string, page?: number, order?: OrderBy, take?: number)
     : Promise<{ shops: Shop[], totalCount: number }>
 }
 
@@ -105,8 +105,8 @@ const ShopController: ShopControllerInterface = {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const { page, order } = await indexSchema.parseAsync(query)
-    const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order)
+    const { page, order, take } = await indexSchema.parseAsync(query)
+    const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order, take)
 
     const shopIds = shops.map(shop => shop.id)
 
@@ -248,8 +248,10 @@ const ShopController: ShopControllerInterface = {
       Logger.debug('User not found in request')
       throw new UnauthorizedError()
     }
-    const { keyword, page, order } = await searchSchema.parseAsync(query)
-    const { shops, totalCount } = await ShopService.searchShops(user, keyword, page, order)
+    const {
+      keyword, page, order, take,
+    } = await searchSchema.parseAsync(query)
+    const { shops, totalCount } = await ShopService.searchShops(user, keyword, page, order, take)
     const shopIds = shops.map(s => s.id)
     const totalReservationsCount = await ReservationService.fetchReservationsCountByShopIds(shopIds)
     const totalStylistsCount = await StylistService.fetchStylistsCountByShopIds(shopIds)
