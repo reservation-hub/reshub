@@ -116,6 +116,21 @@ const UserRepository: UserRepositoryInterface = {
     return reconstructUser(user)
   },
 
+  async updateUserPassword(id, password) {
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        password,
+      },
+      include: {
+        oAuthIds: true,
+        profile: true,
+        role: true,
+      },
+    })
+    return reconstructUser(user)
+  },
+
   async emailAndUsernameAreAvailable(email, username) {
     const emailCount = await prisma.user.count(
       {

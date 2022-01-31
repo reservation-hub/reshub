@@ -17,3 +17,9 @@ export const updateUserSchema = z.object({
   gender: z.nativeEnum(Gender),
   birthday: z.string().regex(birthdayDatePattern),
 })
+
+export const userPasswordUpdateSchema = z.object({
+  oldPassword: z.string().regex(passwordPattern),
+  newPassword: z.string().regex(passwordPattern),
+  confirmNewPassword: z.string().regex(passwordPattern),
+})
