@@ -67,7 +67,7 @@ const UserService: UserServiceInterface = {
 
     const hash = bcrypt.hashSync(password, 10 /* hash rounds */)
 
-    await UserRepository.insertUser(
+    return UserRepository.insertUser(
       email, hash, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, birthday, gender,
     )
@@ -81,7 +81,7 @@ const UserService: UserServiceInterface = {
       throw new NotFoundError()
     }
 
-    await UserRepository.updateUser(
+    return UserRepository.updateUser(
       id, email, roleSlug, lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, birthday, gender,
     )
@@ -107,7 +107,7 @@ const UserService: UserServiceInterface = {
 
     const hash = bcrypt.hashSync(newPassword, 10 /* hash rounds */)
 
-    await UserRepository.updateUserPassword(id, hash)
+    return UserRepository.updateUserPassword(id, hash)
   },
 
   async deleteUser(id) {
@@ -116,7 +116,7 @@ const UserService: UserServiceInterface = {
       Logger.debug('User does not exist')
       throw new NotFoundError()
     }
-    await UserRepository.deleteUser(id)
+    return UserRepository.deleteUser(id)
   },
 
   async fetchUsersReservationCounts(userIds) {
