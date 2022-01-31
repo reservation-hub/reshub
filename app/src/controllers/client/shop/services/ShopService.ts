@@ -16,6 +16,8 @@ export type ShopRepositoryInterface = {
   fetchShopsTotalCountByArea(areaId: number, prefectureId?: number, cityId?: number): Promise<number>
   fetchShopsByTags(tagIds: number[], page: number, order: OrderBy): Promise<Shop[]>
   fetchShopsTotalCountByTags(tagIds: number[]): Promise<number>
+  fetchShopsByName(name: string, page: number, order: OrderBy): Promise<Shop[]>
+  fetchShopsTotalCountByName(name: string): Promise<number>
 }
 
 export type LocationRepositoryInterface = {
@@ -59,6 +61,12 @@ const ShopService: ShopServiceInterface = {
     const existingTagIds = (await TagRepository.fetchValidTagsBySlugs(tags)).map(vt => vt.id)
     const shops = await ShopRepository.fetchShopsByTags(existingTagIds, page, order)
     const totalCount = await ShopRepository.fetchShopsTotalCountByTags(existingTagIds)
+    return { shops, totalCount }
+  },
+
+  async fetchShopsByNameWithTotalCount(user, name, page = 1, order = OrderBy.DESC) {
+    const shops = await ShopRepository.fetchShopsByName(name, page, order)
+    const totalCount = await ShopRepository.fetchShopsTotalCountByName(name)
     return { shops, totalCount }
   },
 

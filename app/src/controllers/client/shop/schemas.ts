@@ -20,3 +20,9 @@ export const searchByTagsSchema = z.object({
   order: z.nativeEnum(OrderBy).optional(),
   tags: z.array(z.string().regex(noWhiteSpaceInBetweenPattern)),
 })
+
+export const searchByNameSchema = z.object({
+  name: z.string(),
+  page: z.number().optional(),
+  order: z.nativeEnum(OrderBy).optional(),
+})

@@ -157,6 +157,24 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
     })).length
   },
 
+  async fetchShopsByName(name, page, order) {
+    const limit = 10
+    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const shops = await prisma.shop.findMany({
+      where: { shopDetail: { name: { contains: name } } },
+      skip: skipIndex,
+      orderBy: { id: order },
+      take: limit,
+      include: {
+        shopDetail: true, area: true, prefecture: true, city: true,
+      },
+    })
+    return shops.map(reconstructShop)
+  },
+
+  async fetchShopsTotalCountByName(name) {
+    return prisma.shop.count({ where: { shopDetail: { name: { contains: name } } } })
+  },
 }
 
 export default ShopRepository
