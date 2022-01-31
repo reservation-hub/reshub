@@ -63,13 +63,12 @@ const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAndCity): 
 })
 
 const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSocket = {
-  async fetchShops(page, order) {
-    const limit = 5
+  async fetchShops(page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 5 : 0
     const shops = await prisma.shop.findMany({
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
       },
@@ -96,8 +95,7 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
     return (await prisma.shop.count({ where: { id: shopId } })) > 0
   },
 
-  async fetchShopsByArea(page, order, areaId, prefectureId, cityId) {
-    const limit = 10
+  async fetchShopsByArea(page, order, take, areaId, prefectureId, cityId) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const shops = await prisma.shop.findMany({
       where: {
@@ -109,7 +107,7 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
       },
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
       },
@@ -130,15 +128,14 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
     })
   },
 
-  async fetchShopsByTags(tagIds, page, order) {
-    const limit = 10
+  async fetchShopsByTags(tagIds, page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const shops = (await prisma.shopTags.findMany({
       where: { tagId: { in: tagIds } },
       distinct: ['shopId'],
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
       select: {
         shop: {
           include: {
@@ -157,14 +154,13 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
     })).length
   },
 
-  async fetchShopsByName(name, page, order) {
-    const limit = 10
+  async fetchShopsByName(name, page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * 10 : 0
     const shops = await prisma.shop.findMany({
       where: { shopDetail: { name: { contains: name } } },
       skip: skipIndex,
       orderBy: { id: order },
-      take: limit,
+      take,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
       },

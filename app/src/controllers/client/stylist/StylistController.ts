@@ -7,8 +7,8 @@ import { ScheduleDays } from '@request-response-types/models/Common'
 import { indexSchema } from './schemas'
 
 export type StylistServiceInterface = {
-  fetchShopStylistsWithTotalCount(user: UserForAuth | undefined, shopId: number, page?: number, order?: OrderBy)
-    :Promise<{ stylists: Stylist[], totalCount: number }>
+  fetchShopStylistsWithTotalCount(user: UserForAuth | undefined, shopId: number,
+    page?: number, order?: OrderBy, take?: number): Promise<{ stylists: Stylist[], totalCount: number }>
 }
 
 const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
@@ -33,8 +33,10 @@ const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays 
 const StylistController: StylistControllerInterface = {
   async list(user, query) {
     const { shopId } = query
-    const { page, order } = await indexSchema.parseAsync(query)
-    const { stylists, totalCount } = await StylistService.fetchShopStylistsWithTotalCount(user, shopId, page, order)
+    const { page, order, take } = await indexSchema.parseAsync(query)
+    const { stylists, totalCount } = await StylistService.fetchShopStylistsWithTotalCount(
+      user, shopId, page, order, take,
+    )
     const values = stylists.map(s => ({
       id: s.id,
       shopId: s.shopId,

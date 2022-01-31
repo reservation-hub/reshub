@@ -18,7 +18,7 @@ export type ReservationRepositoryInterface = {
     rangeInDays: number) :Promise<(Reservation & { duration: number })[]>
   createReservation(clientId: number, shopId: number, reservationDate: Date, menuId: number, stylistId?: number)
     : Promise<Reservation>
-  fetchUserReservations(userId: number, page: number, order: OrderBy): Promise<Reservation[]>
+  fetchUserReservations(userId: number, page: number, order: OrderBy, take: number): Promise<Reservation[]>
   fetchUserReservationTotalCount(id: number): Promise<number>
 }
 
@@ -136,8 +136,8 @@ const ReservationService: ReservationServiceInterface = {
       menuId, stylistId)
   },
 
-  async fetchUserReservationsWithShopAndMenuAndStylist(user, page = 1, order = OrderBy.DESC) {
-    const reservations = await ReservationRepository.fetchUserReservations(user.id, page, order)
+  async fetchUserReservationsWithShopAndMenuAndStylist(user, page = 1, order = OrderBy.DESC, take = 10) {
+    const reservations = await ReservationRepository.fetchUserReservations(user.id, page, order, take)
     const menuIds: number[] = []
     const shopIds: number[] = []
     const stylistIds: number[] = []

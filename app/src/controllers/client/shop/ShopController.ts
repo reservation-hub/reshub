@@ -12,15 +12,15 @@ import {
 } from './schemas'
 
 export type ShopServiceInterface = {
-  fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: OrderBy)
+  fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: OrderBy, take?: number)
     : Promise<{ shops: Shop[], totalCount: number }>
   fetchShop(user: UserForAuth | undefined, shopId: number): Promise<Shop>
   fetchShopsByAreaWithTotalCount(user: UserForAuth | undefined, areaId: number, page?: number, order?: OrderBy,
-    prefectureId?: number, cityId?: number): Promise<{ shops: Shop[], totalCount:number }>
+    take?: number, prefectureId?: number, cityId?: number): Promise<{ shops: Shop[], totalCount:number }>
   fetchShopsByTagsWithTotalCount(user: UserForAuth | undefined, tags: string[], page?: number,
-    order?: OrderBy,): Promise<{ shops: Shop[], totalCount:number }>
+    order?: OrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
   fetchShopsByNameWithTotalCount(user: UserForAuth | undefined, name: string, page?: number,
-    order?: OrderBy,): Promise<{ shops: Shop[], totalCount:number }>
+    order?: OrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
 }
 
 export type MenuServiceInterface = {
@@ -34,8 +34,8 @@ export type StylistServiceInterface = {
 
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
-    const { page, order } = await indexSchema.parseAsync(query)
-    const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order)
+    const { page, order, take } = await indexSchema.parseAsync(query)
+    const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order, take)
     const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
     const values = shops.map(s => ({
       id: s.id,
@@ -84,11 +84,11 @@ const ShopController: ShopControllerInterface = {
 
   async searchByArea(user, query) {
     const {
-      page, order, areaId, prefectureId, cityId,
+      page, order, areaId, prefectureId, cityId, take,
     } = await searchByAreaSchema.parseAsync(query)
 
     const { shops, totalCount } = await ShopService.fetchShopsByAreaWithTotalCount(
-      user, areaId, page, order, prefectureId, cityId,
+      user, areaId, page, order, prefectureId, cityId, take,
     )
     const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
 
@@ -108,11 +108,11 @@ const ShopController: ShopControllerInterface = {
 
   async searchByTags(user, query) {
     const {
-      tags, page, order,
+      tags, page, order, take,
     } = await searchByTagsSchema.parseAsync(query)
 
     const { shops, totalCount } = await ShopService.fetchShopsByTagsWithTotalCount(
-      user, tags, page, order,
+      user, tags, page, order, take,
     )
     const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
 
@@ -132,10 +132,10 @@ const ShopController: ShopControllerInterface = {
 
   async searchByName(user, query) {
     const {
-      name, page, order,
+      name, page, order, take,
     } = await searchByNameSchema.parseAsync(query)
     const { shops, totalCount } = await ShopService.fetchShopsByNameWithTotalCount(
-      user, name, page, order,
+      user, name, page, order, take,
     )
     const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
 
