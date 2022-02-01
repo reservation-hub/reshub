@@ -57,7 +57,7 @@ export type ReservationControllerInterface = {
 
 export type ReviewControllerInterface = {
   index(user: UserForAuth | undefined, query: ReviewListQuery): Promise<ReviewListResponse>
-  // show(user: UserForAuth | undefined, query: ReviewQuery): Promise<ReviewResponse>
+  show(user: UserForAuth | undefined, query: ReviewQuery): Promise<ReviewResponse>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -278,7 +278,7 @@ const showReview = async (req: Request, res: Response, next: NextFunction) : Pro
   try {
     const { shopId, reviewId } = res.locals
     const { user } = req
-    return res.send('Not yet implemented')
+    return res.send(await ReviewController.show(user, { shopId, reviewId }))
   } catch (e) { return next(e) }
 }
 

@@ -12,6 +12,7 @@ import UserRepository from '@review/repositories/UserRepository'
 export type ReviewRepositoryInterface = {
   fetchShopReviews(shopId: number, page: number, order: OrderBy, take: number): Promise<Review[]>
   fetchShopReviewsTotalCount(shopId: number): Promise<number>
+  fetchShopReview(shopId: number, reviewId: number): Promise<Review | null>
 }
 
 export type ShopRepositoryInterface = {
@@ -21,6 +22,7 @@ export type ShopRepositoryInterface = {
 
 export type UserRepositoryInterface = {
   fetchUsers(userIds: number[]): Promise<User[]>
+  fetchUser(userId: number): Promise<User | null>
 }
 
 const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean> => {
@@ -55,6 +57,37 @@ const ReviewService: ReviewServiceInterface = {
         }
       }),
       totalCount,
+    }
+  },
+
+  async fetchReviewWithShopNameAndClientName(user, shopId, reviewId) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
+      Logger.debug('Shop is not owned by user')
+      throw new AuthorizationError()
+    }
+
+    const shopName = await ShopRepository.fetchShopName(shopId)
+    if (!shopName) {
+      Logger.debug('Shop does not exist')
+      throw new NotFoundError()
+    }
+
+    const review = await ReviewRepository.fetchShopReview(shopId, reviewId)
+    if (!review) {
+      Logger.debug('Review does not exist')
+      throw new NotFoundError()
+    }
+
+    const client = await UserRepository.fetchUser(review.clientId)
+    if (!client) {
+      Logger.debug('Client does not exist')
+      throw new NotFoundError()
+    }
+
+    return {
+      ...review,
+      shopName,
+      clientName: `${client.lastNameKanji} ${client.firstNameKanji}`,
     }
   },
 }
