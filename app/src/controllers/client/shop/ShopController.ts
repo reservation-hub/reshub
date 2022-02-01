@@ -1,7 +1,8 @@
 import ShopService from '@client/shop/services/ShopService'
 import { Shop } from '@entities/Shop'
 import { UserForAuth } from '@entities/User'
-import { OrderBy } from '@entities/Common'
+import { OrderBy, ScheduleDays as EntityScheduleDays } from '@entities/Common'
+import { ScheduleDays } from '@request-response-types/models/Common'
 import { Menu } from '@entities/Menu'
 import { Stylist } from '@entities/Stylist'
 import MenuService from '@client/shop/services/MenuService'
@@ -30,6 +31,25 @@ export type MenuServiceInterface = {
 
 export type StylistServiceInterface = {
   fetchShopStylists(shopId: number): Promise<Stylist[]>
+}
+
+const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
+  switch (day) {
+    case EntityScheduleDays.SUNDAY:
+      return ScheduleDays.SUNDAY
+    case EntityScheduleDays.MONDAY:
+      return ScheduleDays.MONDAY
+    case EntityScheduleDays.TUESDAY:
+      return ScheduleDays.TUESDAY
+    case EntityScheduleDays.WEDNESDAY:
+      return ScheduleDays.WEDNESDAY
+    case EntityScheduleDays.THURSDAY:
+      return ScheduleDays.THURSDAY
+    case EntityScheduleDays.FRIDAY:
+      return ScheduleDays.FRIDAY
+    default:
+      return ScheduleDays.SATURDAY
+  }
 }
 
 const ShopController: ShopControllerInterface = {
@@ -65,6 +85,9 @@ const ShopController: ShopControllerInterface = {
       cityName: shop.city.name,
       startTime: shop.startTime,
       endTime: shop.endTime,
+      seats: shop.seats,
+      details: shop.details,
+      days: shop.days.map(convertEntityDaysToOutboundDays),
       menus: menus.map(m => ({
         id: m.id,
         shopId: m.shopId,
