@@ -27,7 +27,17 @@ const ReviewController: ReviewControllerInterface = {
       user, shopId, page, order, take,
     )
 
-    return { values: reviews, totalCount }
+    return {
+      values: reviews.map(r => ({
+        id: r.id,
+        score: r.score,
+        clientId: r.clientId,
+        clientName: r.clientName,
+        shopId: r.shopId,
+        shopName: r.shopName,
+      })),
+      totalCount,
+    }
   },
 
   async show(user, query) {

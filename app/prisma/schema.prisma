@@ -239,7 +239,7 @@ model Review {
   id     Int         @id @default(autoincrement())
   shopId Int         @map("shop_id")
   userId Int         @map("user_id")
-  text   String      @db.VarChar(255)
+  text   String      @db.Text
   score  ReviewScore
   user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   shop   Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
