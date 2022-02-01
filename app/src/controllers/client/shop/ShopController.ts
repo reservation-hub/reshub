@@ -4,12 +4,15 @@ import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
 import { Tag } from '@entities/Tag'
 import { UserForAuth } from '@entities/User'
+import { Review } from '@entities/Review'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { ShopControllerInterface } from '@controller-adapter/client/Shop'
 import MenuService from '@client/shop/services/MenuService'
 import ShopService from '@client/shop/services/ShopService'
 import StylistService from '@client/shop/services/StylistService'
 import TagService from '@client/shop/services/TagService'
+import ReviewService from '@client/shop/services/ReviewService'
+
 import {
   indexSchema, searchByAreaSchema, searchByTagsSchema, searchByNameSchema,
 } from '@client/shop/schemas'
@@ -39,6 +42,11 @@ export type TagServiceInterface = {
   fetchShopsTags(shopIds: number[]): Promise<{ shopId: number, tags: Tag[]}[]>
 }
 
+export type ReviewServiceInterface = {
+  fetchShopReviewsWithClientName(shopId: number): Promise<(Review & { clientName: string })[]>
+  fetchShopsReviewsCount(shopIds: number[]): Promise<{ shopId: number, reviewCount: number }[]>
+}
+
 const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
   switch (day) {
     case EntityScheduleDays.SUNDAY:
@@ -58,34 +66,42 @@ const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays 
   }
 }
 
+const reconstructShops = async (shops: Shop[]) => {
+  const shopIds = shops.map(s => s.id)
+  const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shopIds)
+  const shopTags = await TagService.fetchShopsTags(shopIds)
+  const reviewCounts = await ReviewService.fetchShopsReviewsCount(shopIds)
+  return shops.map(s => ({
+    id: s.id,
+    name: s.name,
+    phoneNumber: s.phoneNumber,
+    address: s.address,
+    prefectureName: s.prefecture.name,
+    cityName: s.city.name,
+    startTime: s.startTime,
+    endTime: s.endTime,
+    averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
+    tags: shopTags.find(st => st.shopId === s.id)?.tags.map(t => ({ slug: t.slug })),
+    reviewsCount: reviewCounts.find(rc => rc.shopId === s.id)!.reviewCount,
+  }))
+}
+
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
     const { page, order, take } = await indexSchema.parseAsync(query)
     const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order, take)
-    const shopIds = shops.map(s => s.id)
-    const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shopIds)
-    const shopTags = await TagService.fetchShopsTags(shopIds)
-    const values = shops.map(s => ({
-      id: s.id,
-      name: s.name,
-      phoneNumber: s.phoneNumber,
-      address: s.address,
-      prefectureName: s.prefecture.name,
-      cityName: s.city.name,
-      startTime: s.startTime,
-      endTime: s.endTime,
-      averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
-      tags: shopTags.find(st => st.shopId === s.id)?.tags.map(t => ({ slug: t.slug })),
-    }))
+    const values = await reconstructShops(shops)
     return { values, totalCount }
   },
 
   async detail(user, query) {
     const { shopId } = query
     const shop = await ShopService.fetchShop(user, shopId)
-    const menus = await MenuService.fetchShopMenus(shopId)
-    const stylists = await StylistService.fetchShopStylists(shopId)
+    const menus = await MenuService.fetchShopMenus(shop.id)
+    const stylists = await StylistService.fetchShopStylists(shop.id)
     const shopTags = await TagService.fetchShopsTags([shop.id])
+    const reviews = await ReviewService.fetchShopReviewsWithClientName(shop.id)
+    const reviewCounts = await ReviewService.fetchShopsReviewsCount([shop.id])
     return {
       id: shop.id,
       name: shop.name,
@@ -113,6 +129,11 @@ const ShopController: ShopControllerInterface = {
 
       })),
       tags: shopTags.find(st => st.shopId === shop.id)?.tags.map(t => ({ slug: t.slug })),
+      reviews: reviews.map(r => ({
+        ...r,
+        shopName: shop.name,
+      })),
+      reviewsCount: reviewCounts.find(rc => rc.shopId === shop.id)!.reviewCount,
     }
   },
 
@@ -124,19 +145,7 @@ const ShopController: ShopControllerInterface = {
     const { shops, totalCount } = await ShopService.fetchShopsByAreaWithTotalCount(
       user, areaId, page, order, prefectureId, cityId, take,
     )
-    const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
-
-    const values = shops.map(s => ({
-      id: s.id,
-      name: s.name,
-      phoneNumber: s.phoneNumber,
-      address: s.address,
-      prefectureName: s.prefecture.name,
-      cityName: s.city.name,
-      startTime: s.startTime,
-      endTime: s.endTime,
-      averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
-    }))
+    const values = await reconstructShops(shops)
     return { values, totalCount }
   },
 
@@ -148,19 +157,7 @@ const ShopController: ShopControllerInterface = {
     const { shops, totalCount } = await ShopService.fetchShopsByTagsWithTotalCount(
       user, tags, page, order, take,
     )
-    const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
-
-    const values = shops.map(s => ({
-      id: s.id,
-      name: s.name,
-      phoneNumber: s.phoneNumber,
-      address: s.address,
-      prefectureName: s.prefecture.name,
-      cityName: s.city.name,
-      startTime: s.startTime,
-      endTime: s.endTime,
-      averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
-    }))
+    const values = await reconstructShops(shops)
     return { values, totalCount }
   },
 
@@ -171,19 +168,7 @@ const ShopController: ShopControllerInterface = {
     const { shops, totalCount } = await ShopService.fetchShopsByNameWithTotalCount(
       user, name, page, order, take,
     )
-    const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
-
-    const values = shops.map(s => ({
-      id: s.id,
-      name: s.name,
-      phoneNumber: s.phoneNumber,
-      address: s.address,
-      prefectureName: s.prefecture.name,
-      cityName: s.city.name,
-      startTime: s.startTime,
-      endTime: s.endTime,
-      averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
-    }))
+    const values = await reconstructShops(shops)
     return { values, totalCount }
   },
 }
