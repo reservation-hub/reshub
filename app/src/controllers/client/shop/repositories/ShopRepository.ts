@@ -96,7 +96,7 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
   },
 
   async fetchShopsByArea(page, order, take, areaId, prefectureId, cityId) {
-    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const skipIndex = page > 1 ? (page - 1) * take : 0
     const shops = await prisma.shop.findMany({
       where: {
         areaId,
@@ -129,7 +129,7 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
   },
 
   async fetchShopsByTags(tagIds, page, order, take) {
-    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const skipIndex = page > 1 ? (page - 1) * take : 0
     const shops = (await prisma.shopTags.findMany({
       where: { tagId: { in: tagIds } },
       distinct: ['shopId'],
@@ -155,7 +155,7 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
   },
 
   async fetchShopsByName(name, page, order, take) {
-    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const skipIndex = page > 1 ? (page - 1) * take : 0
     const shops = await prisma.shop.findMany({
       where: { shopDetail: { name: { contains: name } } },
       skip: skipIndex,

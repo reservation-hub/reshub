@@ -76,7 +76,7 @@ const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
 
 const UserRepository: UserRepositoryInterface = {
   async fetchAllUsers(page, order, take) {
-    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const skipIndex = page > 1 ? (page - 1) * take : 0
     const users = await prisma.user.findMany({
       skip: skipIndex,
       orderBy: { id: order },
@@ -199,7 +199,7 @@ const UserRepository: UserRepositoryInterface = {
   },
 
   async searchUser(keyword, page, order, take) {
-    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const skipIndex = page > 1 ? (page - 1) * take : 0
     const usersResult = await prisma.user.findMany({
       where: { OR: [{ email: { contains: keyword } }, { username: { contains: keyword } }] },
       skip: skipIndex,

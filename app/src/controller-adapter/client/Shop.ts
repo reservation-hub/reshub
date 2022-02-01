@@ -5,7 +5,7 @@ import {
   SalonListQuery, SalonListResponse, SalonQuery, SalonResponse,
   SalonMenuListQuery, SalonMenuListResponse, SalonStylistListQuery, SalonStylistListResponse,
   SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
-  SalonListByAreaQuery, SalonListByTagsQuery, SalonListByNameQuery,
+  SalonListByAreaQuery, SalonListByTagsQuery, SalonListByNameQuery, SalonReviewListQuery, SalonReviewListResponse,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -13,6 +13,7 @@ import ShopController from '@client/shop/ShopController'
 import MenuController from '@client/menu/MenuController'
 import StylistController from '@client/stylist/StylistController'
 import ReservationController from '@client/reservation/ReservationController'
+import ReviewController from '@client/review/ReviewController'
 import { ResponseMessage } from '@request-response-types/client/Common'
 import parseToInt from '@lib/ParseInt'
 
@@ -22,7 +23,6 @@ export type ShopControllerInterface = {
   searchByArea(user: UserForAuth | undefined, query: SalonListByAreaQuery): Promise<SalonListResponse>
   searchByTags(user: UserForAuth | undefined, query: SalonListByTagsQuery): Promise<SalonListResponse>
   searchByName(user: UserForAuth | undefined, query: SalonListByNameQuery): Promise<SalonListResponse>
-
 }
 
 export type MenuControllerInterface = {
@@ -38,6 +38,10 @@ export type StylistControllerInterface = {
 export type ReservationControllerInterface = {
   list(user: UserForAuth | undefined, query: SalonAvailabilityQuery): Promise<SalonAvailabilityResponse>
   create(user: UserForAuth | undefined, query: SalonSetReservationQuery): Promise<ResponseMessage>
+}
+
+export type ReviewControllerInterface = {
+  list(user: UserForAuth | undefined, query: SalonReviewListQuery): Promise<SalonReviewListResponse>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -147,6 +151,17 @@ const createReservation = async (req: Request, res: Response, next: NextFunction
   } catch (e) { return next(e) }
 }
 
+const shopReviews = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user } = req
+    const { shopId } = res.locals
+    const { page, order, take } = req.query
+    return res.send(await ReviewController.list(user, {
+      shopId, page: parseToInt(page), order, take: parseToInt(take),
+    }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.get('/', index)
@@ -173,10 +188,16 @@ routes.get('/:shopId/stylists', parseIntIdMiddleware, shopStylists)
 routes.get('/:shopId/stylists/reservation', parseIntIdMiddleware, shopStylistsForReservation)
 
 /**
- * stylist routes
+ * Reservation routes
  */
 
 routes.get('/:shopId/reservations', parseIntIdMiddleware, shopReservations)
 routes.post('/:shopId/reservations', parseIntIdMiddleware, protectClientRoute, createReservation)
+
+/**
+ * Review routes
+ */
+
+routes.get('/:shopId/reviews', parseIntIdMiddleware, shopReviews)
 
 export default routes
