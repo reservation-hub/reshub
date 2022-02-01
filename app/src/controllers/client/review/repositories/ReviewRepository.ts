@@ -49,6 +49,19 @@ const ReviewRepository: ReviewRepositoryInterface = {
     })
     return review ? reconstructReview(review) : null
   },
+  
+  async makeReviewForShop(userId, shopId, review, reviewScore) {
+    const userReview = await prisma.review.create({
+      data: {
+        shopId,
+        userId,
+        score:reviewScore,
+        text: review
+      }
+    })
+    return reconstructReview(userReview)
+  }
+  
 }
 
 export default ReviewRepository

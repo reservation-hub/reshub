@@ -27,10 +27,6 @@ const ReviewController: ReviewControllerInterface = {
   },
   
   async add(user, query) {
-    if(!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
-    }
     const { shopId, review, reviewScore } = await reviewInsertSchema.parseAsync(query)
     const shop = await ReviewService.makeReview(user, shopId, review, reviewScore)
     if(!shop) {

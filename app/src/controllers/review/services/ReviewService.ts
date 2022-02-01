@@ -8,11 +8,13 @@ import { AuthorizationError, NotFoundError } from '@errors/ServiceErrors'
 import ReviewRepository from '@review/repositories/ReviewRepository'
 import ShopRepository from '@review/repositories/ShopRepository'
 import UserRepository from '@review/repositories/UserRepository'
+import { ReviewScore } from '@prisma/client'
 
 export type ReviewRepositoryInterface = {
   fetchShopReviews(shopId: number, page: number, order: OrderBy, take: number): Promise<Review[]>
   fetchShopReviewsTotalCount(shopId: number): Promise<number>
   fetchShopReview(shopId: number, reviewId: number): Promise<Review | null>
+  makeReviewForShop(userId:number, shopId:number, review: string, reviewScore: ReviewScore): Promise<Review>
 }
 
 export type ShopRepositoryInterface = {

@@ -7,6 +7,7 @@ import { NotFoundError } from '@errors/ServiceErrors'
 import ReviewRepository from '@client/review/repositories/ReviewRepository'
 import ShopRepository from '@client/review/repositories/ShopRepository'
 import UserRepository from '@client/review/repositories/UserRepository'
+import { UnauthorizedError } from '@errors/RouteErrors'
 
 export type ReviewRepositoryInterface = {
   fetchShopReviews(shopId: number, page: number, order: OrderBy, take: number): Promise<Review[]>
@@ -47,16 +48,13 @@ const ReviewService: ReviewServiceInterface = {
     }
   },
 
-  async makeReview(user, shopId, review, revieScore) {
-    if(user.role)
-    const shopName = await ShopRepository.fetchShopName(shopId)
-    if (!shopName) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError
+  async makeReview(user, shopId, review, reviewScore) {
+    if(!user){
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
     }
-    const review = await ReviewRepository.makeReview(
-
-    )
+    const userReview = await ReviewRepository.makeReviewForShop(user.id, shopId, review, reviewScore)
+    return userReview
   }
 
 }
