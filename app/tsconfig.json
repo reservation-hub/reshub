@@ -55,6 +55,9 @@
       ],
       "@tag/*": [
         "src/controllers/tag/*"
+      ],
+      "@review/*": [
+        "src/controllers/review/*"
       ]
     },
     /* Basic Options */

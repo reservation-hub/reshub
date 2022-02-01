@@ -35,6 +35,14 @@ enum Days {
   SUNDAY
 }
 
+enum ReviewScore {
+  ONE
+  TWO
+  THREE
+  FOUR
+  FIVE
+}
+
 model User {
   id           Int           @id @default(autoincrement())
   email        String        @unique @db.VarChar(255)
@@ -49,6 +57,7 @@ model User {
   role         Role          @relation(fields: [roleId], references: [id])
   roleId       Int
   shopUser     ShopUser[]
+  reivews      Review[]
 }
 
 model UserProfile {
@@ -123,20 +132,21 @@ model Shop {
   shopDetailId Int           @unique @map("shop_detail_id")
   stylists     Stylist[]
   shopUser     ShopUser?
-  ShopTags     ShopTags[]
+  shopTags     ShopTags[]
+  reviews      Review[]
 }
 
 model Menu {
-  id          Int           @id @default(autoincrement())
-  name        String        @db.VarChar(255)
-  description String        @db.VarChar(255)
-  price       Int
-  duration    Int
-  imageId     Int?          @unique @map("image_id")
-  shopId      Int           @map("shop_id")
-  image       ModelImage?   @relation(fields: [imageId], references: [id])
-  shop        Shop          @relation(fields: [shopId], references: [id])
-  Reservation Reservation[]
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar(255)
+  description  String        @db.VarChar(255)
+  price        Int
+  duration     Int
+  imageId      Int?          @unique @map("image_id")
+  shopId       Int           @map("shop_id")
+  image        ModelImage?   @relation(fields: [imageId], references: [id])
+  shop         Shop          @relation(fields: [shopId], references: [id])
+  reservations Reservation[]
 }
 
 model ShopUser {
@@ -223,4 +233,14 @@ model ShopTags {
   tagId  Int  @map("tag_id")
   tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
   shop   Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id     Int         @id @default(autoincrement())
+  shopId Int         @map("shop_id")
+  userId Int         @map("user_id")
+  text   String      @db.VarChar(255)
+  score  ReviewScore
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shop   Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
 }

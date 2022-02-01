@@ -4,7 +4,7 @@ import { Gender, User } from '@entities/User'
 import { UserRepositoryInterface } from '@user/services/UserService'
 import prisma from '@lib/prisma'
 
-export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
+const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
   switch (slug) {
     case PrismaRoleSlug.SHOP_STAFF:
       return RoleSlug.SHOP_STAFF
@@ -15,7 +15,7 @@ export const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
   }
 }
 
-export const convertEntityRoleSlugToPrismaRoleSlug = (slug: RoleSlug): PrismaRoleSlug => {
+const convertEntityRoleSlugToPrismaRoleSlug = (slug: RoleSlug): PrismaRoleSlug => {
   switch (slug) {
     case RoleSlug.SHOP_STAFF:
       return PrismaRoleSlug.SHOP_STAFF
@@ -32,7 +32,7 @@ const userWithProfileAndOAuthIdsAndRoles = Prisma.validator<Prisma.UserArgs>()(
 
 type userWithProfileAndOAuthIdsAndRoles = Prisma.UserGetPayload<typeof userWithProfileAndOAuthIdsAndRoles>
 
-export const convertEntityGenderToDBGender = (gender: Gender): PrismaGender => {
+const convertEntityGenderToDBGender = (gender: Gender): PrismaGender => {
   switch (gender) {
     case Gender.FEMALE:
       return PrismaGender.FEMALE
@@ -50,7 +50,7 @@ const convertDBGenderToEntityGender = (gender: PrismaGender): Gender => {
   }
 }
 
-export const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
+const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
   id: user.id,
   email: user.email,
   username: user.username ?? undefined,
