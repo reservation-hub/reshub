@@ -6,7 +6,7 @@ import prefectures, { PrefectureObject } from './prefec-db'
 import words from './words'
 import cities, { CityObject } from './cities-db'
 import {
-  RoleSlug, Days, Role, User, Area, Prefecture, City, Shop, Menu, ShopDetail, Stylist,
+  RoleSlug, Days, Role, User, Area, Prefecture, City, Shop, Menu, ShopDetail, Stylist, ReviewScore
 } from '@prisma/client'
 import {
   UserObject, admins, staffs, clients,
@@ -327,6 +327,27 @@ const shopTagLinker = async (shopIds: number[], tagIds: number[]) => {
   }
 }
 
+const reviewSeeder = async (shopIds: number[], clientIds: number[]) => {
+  const maxShopId = Math.max(...shopIds)
+  const minShopId = Math.min(...shopIds)
+  try {
+    await Promise.all(clientIds.map(async clientId => {
+      const randomShopId = Math.floor(Math.random() * maxShopId) + minShopId
+      return prisma.review.create({
+        data: {
+          score: ReviewScore.FIVE,
+          text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+          shopId: randomShopId,
+          userId: clientId,
+        }
+      })
+    }))
+  } catch (e) {
+    Logger.info(`Review Seed Error ${e}`)
+    process.exit(1)
+  }
+}
+
 const main = async () => {
   Logger.info('running seeder')
 
@@ -444,6 +465,7 @@ const main = async () => {
 
   Logger.info('running tag seeder')
   await tagSeeder()
+  Logger.info('tag seeder done')
 
   const tagIds = (await prisma.tag.findMany({
     select: { id: true }
@@ -457,6 +479,9 @@ const main = async () => {
   await shopTagLinker(shopIdsForTagLink, tagIds)
   Logger.info('linking tags to shops done')
   
+  Logger.info('running review seeder')
+  await reviewSeeder(shopIdsForTagLink, clientsForReservation.map(cfr => cfr.id))
+  Logger.info('review seeder done')
 
   Logger.info('seed done')
   process.exit(0)
