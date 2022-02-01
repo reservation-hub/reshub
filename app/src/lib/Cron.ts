@@ -5,6 +5,7 @@ import CronController from 'src/controllers/cron/CronController'
 export type CronControllerInterface = {
   setPopularMenus(): Promise<void>
   setReservationStatuses(): Promise<void>
+  cleanUpTags(): Promise<void>
 }
 
 /**
@@ -23,9 +24,16 @@ const setReservationStatuses = Cron.schedule('0 0,30 * * * *', async () => {
   Logger.info('Reservation statuses set')
 })
 
+const cleanUpTags = Cron.schedule('0 * 0 * * *', async () => {
+  Logger.info('Cleaning up tags')
+  await CronController.cleanUpTags()
+  Logger.info('Tags clean up done')
+})
+
 const jobs = [
   setPopularMenus,
   setReservationStatuses,
+  cleanUpTags,
 ]
 
 export default jobs
