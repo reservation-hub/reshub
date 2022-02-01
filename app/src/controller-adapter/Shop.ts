@@ -8,7 +8,8 @@ import {
   InsertMenuQuery, UpdateMenuQuery, DeleteMenuQuery, ReservationListQuery, ReservationListResponse,
   InsertShopReservationQuery, UpdateShopReservationQuery, DeleteShopReservationQuery, StylistListQuery,
   StylistListResponse, StylistQuery, StylistResponse, MenuListQuery, MenuListResponse, MenuQuery,
-  MenuResponse, ReservationResponse, ReservationQuery, ReservationListForCalendarQuery,
+  MenuResponse, ReservationResponse, ReservationQuery, ReservationListForCalendarQuery, ReviewListQuery,
+  ReviewListResponse, ReviewQuery, ReviewResponse,
 } from '@request-response-types/Shop'
 import { UserForAuth } from '@entities/User'
 import { ResponseMessage } from '@request-response-types/Common'
@@ -16,6 +17,7 @@ import ShopController from '@shop/ShopController'
 import MenuController from '@menu/MenuController'
 import StylistController from '@stylist/StylistController'
 import ReservationController from '@reservation/ReservationController'
+import ReviewController from '@review/ReviewController'
 import parseToInt from '@lib/ParseInt'
 
 export type ShopControllerInterface = {
@@ -51,6 +53,11 @@ export type ReservationControllerInterface = {
   insert(user: UserForAuth | undefined, query: InsertShopReservationQuery): Promise<ResponseMessage>
   update(user: UserForAuth | undefined, query: UpdateShopReservationQuery): Promise<ResponseMessage>
   delete(user: UserForAuth | undefined, query: DeleteShopReservationQuery): Promise<ResponseMessage>
+}
+
+export type ReviewControllerInterface = {
+  index(user: UserForAuth | undefined, query: ReviewListQuery): Promise<ReviewListResponse>
+  // show(user: UserForAuth | undefined, query: ReviewQuery): Promise<ReviewResponse>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -252,6 +259,29 @@ const deleteReservation = async (req: Request, res: Response, next: NextFunction
   } catch (e) { return next(e) }
 }
 
+const showReviews = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { shopId } = res.locals
+    const { page, order, take } = req.query
+    const { user } = req
+    return res.send(await ReviewController.index(user,
+      {
+        shopId,
+        page: parseToInt(page),
+        order,
+        take: parseToInt(take),
+      }))
+  } catch (e) { return next(e) }
+}
+
+const showReview = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { shopId, reviewId } = res.locals
+    const { user } = req
+    return res.send('Not yet implemented')
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 // shop routes
@@ -283,5 +313,9 @@ routes.get('/:shopId/reservation/:reservationId', parseIntIdMiddleware, showRese
 routes.post('/:shopId/reservation', parseIntIdMiddleware, insertReservation)
 routes.patch('/:shopId/reservation/:reservationId', parseIntIdMiddleware, updateReservation)
 routes.delete('/:shopId/reservation/:reservationId', parseIntIdMiddleware, deleteReservation)
+
+// review routes
+routes.get('/:shopId/reviews', parseIntIdMiddleware, showReviews)
+routes.get('/:shopId/reviews/:reviewId', parseIntIdMiddleware, showReview)
 
 export default routes

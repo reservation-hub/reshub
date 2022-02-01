@@ -22,6 +22,7 @@ const idSchema = z.object({
   stylistId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()).optional(),
   menuId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()).optional(),
   reservationId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()).optional(),
+  reviewId: z.preprocess(id => parseInt(id as string, 10), z.number().positive().int()).optional(),
 })
 
 export const parseIntIdMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -39,6 +40,9 @@ export const parseIntIdMiddleware = async (req: Request, res: Response, next: Ne
     }
     if (ids.reservationId) {
       res.locals.reservationId = ids.reservationId
+    }
+    if (ids.reviewId) {
+      res.locals.reviewId = ids.reviewId
     }
     return next()
   } catch (e) { return next(e) }
