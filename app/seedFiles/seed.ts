@@ -337,8 +337,6 @@ const reviewSeeder = async (shopIds: number[], clientIds: number[]) => {
         const randomClientIdIndices = Array(reviewCount).fill(0).map(rci => Math.floor(Math.random() * clientIds.length))
         while (randomClientIdIndices.length) {
           await Promise.all(randomClientIdIndices.splice(0, concurrencyRate).map(rcii => {
-            Logger.info(`Will create a review with userId:${clientIds[rcii]}`)
-            Logger.info(`Will create a review with shopId:${shopId}`)
             return prisma.review.create({
               data: {
                 score: ReviewScore.FIVE,
