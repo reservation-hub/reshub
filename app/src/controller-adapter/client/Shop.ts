@@ -5,7 +5,7 @@ import {
   SalonListQuery, SalonListResponse, SalonQuery, SalonResponse,
   SalonMenuListQuery, SalonMenuListResponse, SalonStylistListQuery, SalonStylistListResponse,
   SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
-  SalonListByAreaQuery, SalonListByTagsQuery, SalonListByNameQuery, SalonReviewListQuery, SalonReviewListResponse,
+  SalonListByAreaQuery, SalonListByTagsQuery, SalonListByNameQuery, SalonReviewListQuery, SalonReviewListResponse, ReviewParameters,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -42,6 +42,7 @@ export type ReservationControllerInterface = {
 
 export type ReviewControllerInterface = {
   list(user: UserForAuth | undefined, query: SalonReviewListQuery): Promise<SalonReviewListResponse>
+  add(user: UserForAuth | undefined, query: ReviewParameters): Promise<ResponseMessage>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -162,6 +163,18 @@ const shopReviews = async (req: Request, res: Response, next: NextFunction) : Pr
   } catch (e) { return next(e) }
 }
 
+const makeShopReview =  async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user } = req
+    const { shopId } = res.locals
+    const { review, reviewScore }  = req.body
+    return res.send(await ReviewController.add(user, {
+      shopId, review,  reviewScore
+    }))
+  } catch (e) { return next(e) }
+}
+
+
 const routes = Router()
 
 routes.get('/', index)
@@ -199,5 +212,5 @@ routes.post('/:shopId/reservations', parseIntIdMiddleware, protectClientRoute, c
  */
 
 routes.get('/:shopId/reviews', parseIntIdMiddleware, shopReviews)
-
+routes.post('/:shopId/reviews', parseIntIdMiddleware, makeShopReview)
 export default routes

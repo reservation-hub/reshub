@@ -47,6 +47,18 @@ const ReviewService: ReviewServiceInterface = {
     }
   },
 
+  async makeReview(user, shopId, review, revieScore) {
+    if(user.role)
+    const shopName = await ShopRepository.fetchShopName(shopId)
+    if (!shopName) {
+      Logger.debug('Shop does not exist')
+      throw new NotFoundError
+    }
+    const review = await ReviewRepository.makeReview(
+
+    )
+  }
+
 }
 
 export default ReviewService
