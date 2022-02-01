@@ -16,7 +16,9 @@ import { ScheduleDays } from '@request-response-types/models/Common'
 import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { Tag } from '@entities/Tag'
+import { Review } from '@entities/Review'
 import TagService from '@shop/services/TagService'
+import ReviewService from '@shop/services/ReviewService'
 import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
@@ -59,6 +61,10 @@ export type UserServiceInterface = {
 export type TagServiceInterface = {
   setShopTags(shopId: number, slugs: string[]): Promise<void>
   fetchShopTags(shopId: number): Promise<Tag[]>
+}
+
+export type ReviewsServiceInterface = {
+  fetchReviewsForShop(shopId: number, limit?: number): Promise<Review[]>
 }
 
 const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
@@ -136,15 +142,17 @@ const ShopController: ShopControllerInterface = {
     const stylistLimit = 5
     const reservationLimit = 5
     const menuLimit = 5
+    const reviewLimit = 5
     const { id } = query
     const shop = await ShopService.fetchShop(user, id)
     const stylists = await StylistService.fetchShopStylistsWithReservationCount(user, shop.id, stylistLimit)
     const reservations = await ReservationService.fetchShopReservations(user, shop.id, reservationLimit)
     const menus = await MenuService.fetchShopMenus(user, shop.id, menuLimit)
+    const reviews = await ReviewService.fetchReviewsForShop(id, reviewLimit)
     const users = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
+    const usersForReview = await UserService.fetchUsersByIds(reviews.map(r => r.clientId))
     const totalSalesForCurrentMonth = await ReservationService.getTotalSalesForShopForCurrentMonth(shop.id)
     const shopTags = await TagService.fetchShopTags(shop.id)
-
     const stylistList = stylists.map(s => ({
       id: s.id,
       shopId: s.shopId,
@@ -153,6 +161,18 @@ const ShopController: ShopControllerInterface = {
       reservationCount: s.reservationCount,
     }))
 
+    const reviewList = reviews.map(rev => {
+      const user = usersForReview.find(u => u.id === rev.clientId)!
+      return {
+        id: rev.id,
+        text: rev.text,
+        score: rev.score,
+        clientId: rev.clientId,
+        clientName: `${user.lastNameKana} ${user.firstNameKana}`,
+        shopId: rev.shopId,
+        shopName: shop.name,
+      }
+    })
     const reservationList = reservations.map(r => {
       const user = users.find(u => u.id === r.clientId)!
       const stylist = stylists.find(s => s.id === r.stylistId)
@@ -190,6 +210,7 @@ const ShopController: ShopControllerInterface = {
       reservationCount: reservations.length,
       totalSalesForCurrentMonth,
       tags: shopTags.map(st => ({ slug: st.slug })),
+      reviews: reviewList,
     }
   },
 
