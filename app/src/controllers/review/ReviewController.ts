@@ -11,6 +11,8 @@ export type ReviewServiceInterface = {
   fetchReviewsWithTotalCountAndShopNameAndClientName(user: UserForAuth, shopId: number, page?: number,
     order?: OrderBy, take?: number): Promise<{ reviews:
       (Review & { shopName: string, clientName: string })[], totalCount: number }>
+  fetchReviewWithShopNameAndClientName(user: UserForAuth, shopId: number, reviewId: number)
+    : Promise<(Review & { shopName: string, clientName: string })>
 }
 
 const ReviewController: ReviewControllerInterface = {
@@ -28,12 +30,15 @@ const ReviewController: ReviewControllerInterface = {
     return { values: reviews, totalCount }
   },
 
-  // async show(user, query) {
-  //   if (!user) {
-  //     Logger.debug('User not found in request')
-  //     throw new UnauthorizedError()
-  //   }
-  // },
+  async show(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
+
+    const { shopId, reviewId } = query
+    return ReviewService.fetchReviewWithShopNameAndClientName(user, shopId, reviewId)
+  },
 
 }
 
