@@ -54,7 +54,7 @@ const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
 
 export const StylistRepository: StylistRepositoryInterface = {
   async fetchShopStylists(shopId, page, order, take) {
-    const skipIndex = page > 1 ? (page - 1) * 10 : 0
+    const skipIndex = page > 1 ? (page - 1) * take : 0
     const stylists = await prisma.stylist.findMany({
       where: { shopId },
       skip: skipIndex,
