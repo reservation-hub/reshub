@@ -75,7 +75,7 @@ const ShopController: ShopControllerInterface = {
       startTime: s.startTime,
       endTime: s.endTime,
       averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
-      tags: shopTags.find(st => st.shopId === s.id)?.tags,
+      tags: shopTags.find(st => st.shopId === s.id)?.tags.map(t => ({ slug: t.slug })),
     }))
     return { values, totalCount }
   },
@@ -112,7 +112,7 @@ const ShopController: ShopControllerInterface = {
         price: s.price,
 
       })),
-      tags: shopTags.find(st => st.shopId === shop.id)?.tags,
+      tags: shopTags.find(st => st.shopId === shop.id)?.tags.map(t => ({ slug: t.slug })),
     }
   },
 

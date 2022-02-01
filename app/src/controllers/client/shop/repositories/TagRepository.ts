@@ -22,7 +22,7 @@ const TagRepository: ShopServiceSocket & TagServiceSocket = {
 
     return shopIds.map(shopId => ({
       shopId,
-      tags: tags.filter(t => (t.shopId === shopId)).map(t => t.tag),
+      tags: tags.filter(t => (t.shopId === shopId)).map(t => convertToEntityTag(t.tag)),
     }))
   },
 }
