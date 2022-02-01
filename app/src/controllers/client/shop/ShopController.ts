@@ -1,16 +1,18 @@
-import ShopService from '@client/shop/services/ShopService'
-import { Shop } from '@entities/Shop'
-import { UserForAuth } from '@entities/User'
 import { OrderBy, ScheduleDays as EntityScheduleDays } from '@entities/Common'
-import { ScheduleDays } from '@request-response-types/models/Common'
 import { Menu } from '@entities/Menu'
+import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
-import MenuService from '@client/shop/services/MenuService'
-import StylistService from '@client/shop/services/StylistService'
+import { Tag } from '@entities/Tag'
+import { UserForAuth } from '@entities/User'
+import { ScheduleDays } from '@request-response-types/models/Common'
 import { ShopControllerInterface } from '@controller-adapter/client/Shop'
+import MenuService from '@client/shop/services/MenuService'
+import ShopService from '@client/shop/services/ShopService'
+import StylistService from '@client/shop/services/StylistService'
+import TagService from '@client/shop/services/TagService'
 import {
   indexSchema, searchByAreaSchema, searchByTagsSchema, searchByNameSchema,
-} from './schemas'
+} from '@client/shop/schemas'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: OrderBy, take?: number)
@@ -31,6 +33,10 @@ export type MenuServiceInterface = {
 
 export type StylistServiceInterface = {
   fetchShopStylists(shopId: number): Promise<Stylist[]>
+}
+
+export type TagServiceInterface = {
+  fetchShopsTags(shopIds: number[]): Promise<{ shopId: number, tags: Tag[]}[]>
 }
 
 const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
@@ -56,7 +62,9 @@ const ShopController: ShopControllerInterface = {
   async index(user, query) {
     const { page, order, take } = await indexSchema.parseAsync(query)
     const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order, take)
-    const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shops.map(s => s.id))
+    const shopIds = shops.map(s => s.id)
+    const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shopIds)
+    const shopTags = await TagService.fetchShopsTags(shopIds)
     const values = shops.map(s => ({
       id: s.id,
       name: s.name,
@@ -67,6 +75,7 @@ const ShopController: ShopControllerInterface = {
       startTime: s.startTime,
       endTime: s.endTime,
       averageMenuPrice: shopMenuAveragePrices.find(smap => smap.shopId === s.id)!.price,
+      tags: shopTags.find(st => st.shopId === s.id)?.tags.map(t => ({ slug: t.slug })),
     }))
     return { values, totalCount }
   },
@@ -76,6 +85,7 @@ const ShopController: ShopControllerInterface = {
     const shop = await ShopService.fetchShop(user, shopId)
     const menus = await MenuService.fetchShopMenus(shopId)
     const stylists = await StylistService.fetchShopStylists(shopId)
+    const shopTags = await TagService.fetchShopsTags([shop.id])
     return {
       id: shop.id,
       name: shop.name,
@@ -102,6 +112,7 @@ const ShopController: ShopControllerInterface = {
         price: s.price,
 
       })),
+      tags: shopTags.find(st => st.shopId === shop.id)?.tags.map(t => ({ slug: t.slug })),
     }
   },
 
