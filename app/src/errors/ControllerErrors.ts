@@ -13,6 +13,6 @@ export class ControllerError extends Error {
 
 export class UnauthorizedError extends ControllerError {
   constructor(message?: string) {
-    super(message ?? 'User is unauthorized', ErrorCode.Authorization)
+    super(`Unauthorized Error: ${message}`, ErrorCode.Authorization)
   }
 }

@@ -13,7 +13,6 @@ import StylistService from '@shop/services/StylistService'
 import MenuService from '@shop/services/MenuService'
 import { OrderBy } from '@request-response-types/Common'
 import { ScheduleDays } from '@request-response-types/models/Common'
-import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { Tag } from '@entities/Tag'
 import { Review } from '@entities/Review'
@@ -108,8 +107,7 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const { page, order, take } = await indexSchema.parseAsync(query)
     const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order, take)
@@ -136,8 +134,7 @@ const ShopController: ShopControllerInterface = {
 
   async show(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const stylistLimit = 5
     const reservationLimit = 5
@@ -216,8 +213,7 @@ const ShopController: ShopControllerInterface = {
 
   async insert(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const {
       name, areaId, prefectureId, cityId, address,
@@ -237,8 +233,7 @@ const ShopController: ShopControllerInterface = {
 
   async update(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const {
       name, areaId, prefectureId, cityId, address, phoneNumber,
@@ -256,8 +251,7 @@ const ShopController: ShopControllerInterface = {
 
   async delete(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const { id } = query
     await ShopService.deleteShop(user, id)
@@ -266,8 +260,7 @@ const ShopController: ShopControllerInterface = {
 
   async searchShops(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const {
       keyword, page, order, take,

@@ -1,5 +1,4 @@
 import { ShopServiceInterface } from '@client/reservation/ReservationController'
-import Logger from '@lib/Logger'
 import { NotFoundError } from '@errors/ServiceErrors'
 import ShopRepository from '@client/reservation/repositories/ShopRepository'
 
@@ -12,8 +11,7 @@ const ShopService: ShopServiceInterface = {
   async fetchShopSeatCount(user, shopId) {
     const seatCount = await ShopRepository.fetchShopSeatCount(shopId)
     if (!seatCount) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
     return seatCount
   },

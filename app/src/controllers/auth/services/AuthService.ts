@@ -11,7 +11,6 @@ import UserRepository from '@auth/repositories/UserRepository'
 import {
   AuthenticationError, AuthorizationError, InvalidParamsError, InvalidTokenError, NotFoundError, UserIsLoggedInError,
 } from '@errors/ServiceErrors'
-import Logger from '@lib/Logger'
 
 export type UserRepositoryInterface = {
   fetch(id: number): Promise<User | null>
@@ -33,23 +32,19 @@ const AuthService: AuthControllerSocket & PassportSocket = {
 
   async verifyIfUserInTokenIsLoggedIn(authToken, headerToken?) {
     if (headerToken && headerToken !== authToken) {
-      Logger.debug('Header token does not match')
-      throw new AuthenticationError()
+      throw new AuthenticationError('Header token does not match')
     }
     const token = jwt.verify(authToken, config.JWT_TOKEN_SECRET) as JwtPayload
     const user = await UserRepository.fetch(token.user.id)
     if (!user) {
-      Logger.debug('User in token does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('User in token does not exist')
     }
-    Logger.debug('User is already logged in')
-    throw new UserIsLoggedInError()
+    throw new UserIsLoggedInError('User is already logged in')
   },
 
   async silentRefreshTokenChecks(authToken, refreshToken, headerToken?) {
     if (!(!authToken && !headerToken && refreshToken)) {
-      Logger.debug('Necessary tokens are not complete')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Necessary tokens are not complete')
     }
   },
 
@@ -62,19 +57,16 @@ const AuthService: AuthControllerSocket & PassportSocket = {
 
     const { email, sub } = ticket.getPayload() as TokenPayload
     if (!email) {
-      Logger.debug('Token does not have email')
-      throw new InvalidTokenError()
+      throw new InvalidTokenError('Token does not have email')
     }
 
     const user = await UserRepository.fetchByEmail(email)
     if (!user) {
-      Logger.debug('User in token does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('User in token does not exist')
     }
 
     if (!(user.role.slug === RoleSlug.ADMIN || user.role.slug === RoleSlug.SHOP_STAFF)) {
-      Logger.debug('User is neither an admin nor a staff')
-      throw new AuthorizationError()
+      throw new AuthorizationError('User is neither an admin nor a staff')
     }
 
     if (!user.oAuthIds || !user.oAuthIds.googleId) {
@@ -86,24 +78,20 @@ const AuthService: AuthControllerSocket & PassportSocket = {
 
   async authenticateByEmailAndPassword(email, password) {
     if (!email || !password) {
-      Logger.debug('email or password is required')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('email or password is required')
     }
 
     const user = await UserRepository.fetchByEmail(email)
     if (!user) {
-      Logger.debug('User does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError(`User with email ${email} does not exist`)
     }
 
     if (!(user.role.slug === RoleSlug.ADMIN || user.role.slug === RoleSlug.SHOP_STAFF)) {
-      Logger.debug('User is neither an admin nor a staff')
-      throw new AuthorizationError()
+      throw new AuthorizationError('User is neither an admin nor a staff')
     }
 
     if (user.password && !bcrypt.compareSync(password, user.password)) {
-      Logger.debug('password does not match')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('password does not match')
     }
 
     return user
@@ -119,8 +107,7 @@ const AuthService: AuthControllerSocket & PassportSocket = {
       user = await UserRepository.fetchByEmail('eugene.sinamban@gmail.com')
     }
     if (!user) {
-      Logger.debug('User for hack not found')
-      throw new NotFoundError()
+      throw new NotFoundError('User for hack not found')
     }
     return user
   },

@@ -3,7 +3,6 @@ import { Gender, User } from '@entities/User'
 import UserRepository from '@client/user/repositories/UserRepository'
 import { DuplicateModelError, InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import { UserServiceInterface } from '@client/user/UserController'
-import Logger from '@lib/Logger'
 
 export type UserRepositoryInterface = {
   fetchUser(id: number): Promise<User | null>
@@ -17,14 +16,12 @@ export type UserRepositoryInterface = {
 const UserService: UserServiceInterface = {
   async signUpUser(email, username, password, confirm) {
     if (password !== confirm) {
-      Logger.debug('passwords did not match')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('passwords did not match')
     }
 
     const emailAndUsernameAreAvailable = await UserRepository.emailAndUsernameAreAvailable(email, username)
     if (!emailAndUsernameAreAvailable) {
-      Logger.debug('Email / Username is not available')
-      throw new DuplicateModelError()
+      throw new DuplicateModelError('Email / Username is not available')
     }
     const hash = bcrypt.hashSync(password, 10 /* hash rounds */)
     return UserRepository.insertUser(email, username, hash)
@@ -34,8 +31,7 @@ const UserService: UserServiceInterface = {
     gender, birthday) {
     const user = await UserRepository.fetchUser(id)
     if (!user) {
-      Logger.debug('User does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError(`User ${id} does not exist`)
     }
 
     return UserRepository.updateUser(
@@ -47,19 +43,16 @@ const UserService: UserServiceInterface = {
   async updateUserPassword(id, oldPassword, newPassword, confirmNewPassword) {
     const user = await UserRepository.fetchUser(id)
     if (!user) {
-      Logger.debug('User does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError(`User ${id} does not exist`)
     }
 
     const passwordMatches = await bcrypt.compare(oldPassword, user.password)
     if (!passwordMatches) {
-      Logger.debug('Old password do not match')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('Old password do not match')
     }
 
     if (newPassword !== confirmNewPassword) {
-      Logger.debug('Passwords do not match')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('Passwords do not match')
     }
 
     const hash = bcrypt.hashSync(newPassword, 10 /* hash rounds */)

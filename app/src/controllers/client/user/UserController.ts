@@ -3,7 +3,6 @@ import UserService from '@client/user/services/UserService'
 import { Gender, User } from '@entities/User'
 import { signUpSchema, updateUserSchema, userPasswordUpdateSchema } from '@client/user/schemas'
 import MailService from '@client/user/services/MailService'
-import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { convertDateStringToDateObject } from '@lib/Date'
 
@@ -30,8 +29,7 @@ const UserController: UserControllerInterface = {
 
   async update(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
 
     const {
@@ -46,8 +44,7 @@ const UserController: UserControllerInterface = {
 
   async updatePassword(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
 
     const {

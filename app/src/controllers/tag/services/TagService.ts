@@ -2,7 +2,6 @@ import { OrderBy } from '@entities/Common'
 import { Tag } from '@entities/Tag'
 import { TagServiceInterface } from '@tag/TagController'
 import TagRepository from '@tag/repositories/TagRepository'
-import Logger from '@lib/Logger'
 import { DuplicateModelError, NotFoundError } from '@errors/ServiceErrors'
 
 export type TagRepositoryInterface = {
@@ -27,8 +26,7 @@ const TagService: TagServiceInterface = {
   async fetchTag(id) {
     const tag = await TagRepository.fetchTag(id)
     if (!tag) {
-      Logger.debug('No tag found')
-      throw new NotFoundError()
+      throw new NotFoundError('No tag found')
     }
     return tag
   },
@@ -36,8 +34,7 @@ const TagService: TagServiceInterface = {
   async insertTag(slug) {
     const duplicateSlug = await TagRepository.fetchTagBySlug(slug)
     if (duplicateSlug) {
-      Logger.debug('Duplicate slug found')
-      throw new DuplicateModelError()
+      throw new DuplicateModelError('Duplicate slug found')
     }
     return TagRepository.insertTag(slug)
   },
@@ -45,14 +42,12 @@ const TagService: TagServiceInterface = {
   async updateTag(id, slug) {
     const tag = await TagRepository.fetchTag(id)
     if (!tag) {
-      Logger.debug('No tag found')
-      throw new NotFoundError()
+      throw new NotFoundError('No tag found')
     }
 
     const duplicateSlug = await TagRepository.fetchTagBySlug(slug)
     if (duplicateSlug && duplicateSlug.id !== tag.id) {
-      Logger.debug('Duplicate slug found')
-      throw new DuplicateModelError()
+      throw new DuplicateModelError('Duplicate slug found')
     }
 
     return TagRepository.updateTag(id, slug)
@@ -61,8 +56,7 @@ const TagService: TagServiceInterface = {
   async deleteTag(id) {
     const tag = await TagRepository.fetchTag(id)
     if (!tag) {
-      Logger.debug('No tag found')
-      throw new NotFoundError()
+      throw new NotFoundError('No tag found')
     }
     return TagRepository.deleteTag(id)
   },

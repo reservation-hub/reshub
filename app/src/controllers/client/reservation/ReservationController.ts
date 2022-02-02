@@ -6,7 +6,6 @@ import { ReservationControllerInterface as UserEndpointSocket } from '@controlle
 import { indexSchema, reservationQuerySchema, reservationUpsertSchema } from '@client/reservation/schemas'
 import ReservationService from '@client/reservation/services/ReservationService'
 import ShopService from '@client/reservation/services/ShopService'
-import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { OrderBy } from '@entities/Common'
 import { Menu } from '@entities/Menu'
@@ -51,8 +50,7 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
 
   async create(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
 
     const { shopId } = query
@@ -67,8 +65,7 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
 
   async userReservationsList(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
 
     const { page, order, take } = await indexSchema.parseAsync(query)
@@ -93,8 +90,7 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
 
   async userReservation(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
 
     const { id } = query
@@ -114,8 +110,7 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
 
   async cancelUserReservation(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
 
     const { id } = query

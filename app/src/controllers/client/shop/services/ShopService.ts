@@ -2,7 +2,6 @@ import { OrderBy } from '@entities/Common'
 import { Shop } from '@entities/Shop'
 import { Tag } from '@entities/Tag'
 import ShopRepository from '@client/shop/repositories/ShopRepository'
-import Logger from '@lib/Logger'
 import { InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import { ShopServiceInterface } from '@client/shop/ShopController'
 import LocationRepository from '@client/shop/repositories/LocationRepository'
@@ -39,8 +38,7 @@ const ShopService: ShopServiceInterface = {
   async fetchShop(user, shopId) {
     const shop = await ShopRepository.fetchShop(shopId)
     if (!shop) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
     return shop
   },
@@ -49,8 +47,7 @@ const ShopService: ShopServiceInterface = {
     cityId) {
     const isValidLocation = await LocationRepository.isValidLocation(areaId, prefectureId, cityId)
     if (!isValidLocation) {
-      Logger.debug('Location provided is incorrect')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('Location provided is incorrect')
     }
 
     const shops = await ShopRepository.fetchShopsByArea(page, order, take, areaId, prefectureId, cityId)

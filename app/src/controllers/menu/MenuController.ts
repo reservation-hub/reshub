@@ -3,7 +3,6 @@ import { Menu } from '@entities/Menu'
 import { OrderBy } from '@request-response-types/Common'
 import MenuService from '@menu/services/MenuService'
 import { MenuControllerInterface } from '@controller-adapter/Shop'
-import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { menuUpsertSchema, indexSchema } from './schemas'
 
@@ -22,8 +21,7 @@ export type MenuServiceInterface = {
 const MenuController: MenuControllerInterface = {
   async index(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const { page, order, take } = await indexSchema.parseAsync(query)
     const { shopId } = query
@@ -42,8 +40,7 @@ const MenuController: MenuControllerInterface = {
 
   async show(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const { shopId, menuId } = query
     return MenuService.fetchShopMenu(user, shopId, menuId)
@@ -51,8 +48,7 @@ const MenuController: MenuControllerInterface = {
 
   async insert(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const {
       name, description, price, duration,
@@ -64,8 +60,7 @@ const MenuController: MenuControllerInterface = {
 
   async update(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const {
       name, description, price, duration,
@@ -77,8 +72,7 @@ const MenuController: MenuControllerInterface = {
 
   async delete(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const { shopId, menuId } = query
     await MenuService.deleteMenu(user, shopId, menuId)

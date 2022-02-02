@@ -11,7 +11,6 @@ import { Menu } from '@entities/Menu'
 import ReservationService from '@dashboard/services/ReservationService'
 import StylistService from '@dashboard/services/StylistService'
 import MenuService from '@dashboard/services/MenuService'
-import Logger from '@lib/Logger'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { convertDateTimeObjectToDateTimeString } from '@lib/Date'
 
@@ -115,8 +114,7 @@ const salonIndexForShopStaff = async (user: UserForAuth): Promise<salonIndexShop
 const DashboardController : DashboardControllerInterface = {
   async salon(user) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     if (user.role.slug === RoleSlug.SHOP_STAFF) {
       return salonIndexForShopStaff(user)

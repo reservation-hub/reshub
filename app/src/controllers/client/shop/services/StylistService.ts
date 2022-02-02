@@ -1,6 +1,5 @@
 import { Stylist } from '@entities/Stylist'
 import ShopRepository from '@client/shop/repositories/ShopRepository'
-import Logger from '@lib/Logger'
 import { NotFoundError } from '@errors/ServiceErrors'
 import StylistRepository from '@client/shop/repositories/StylistRepository'
 import { StylistServiceInterface } from '@client/shop/ShopController'
@@ -18,8 +17,7 @@ const StylistService: StylistServiceInterface = {
     const limit = 5
     const shopExists = await ShopRepository.shopExists(shopId)
     if (!shopExists) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
     return StylistRepository.fetchShopStylists(shopId, limit)
   },
