@@ -21,6 +21,8 @@ export type ReservationServiceInterface = {
   fetchUserReservationsWithShopAndMenuAndStylist(user: UserForAuth, page?: number, order?: OrderBy, take?: number)
     : Promise<(Reservation & { shop: Shop, menu: Menu, stylist?: Stylist })[]>
   fetchUserReservationTotalCount(user: UserForAuth): Promise<number>
+  fetchUserReservationWithShopAndMenuAndStylist(user: UserForAuth, id: number)
+    : Promise<(Reservation & { shop: Shop, menu: Menu, stylist?: Stylist })>
 }
 
 export type ShopServiceInterface = {
@@ -85,6 +87,27 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
         stylistName: r.stylist?.name,
       })),
       totalCount,
+    }
+  },
+
+  async userReservation(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
+
+    const { id } = query
+    const reservation = await ReservationService.fetchUserReservationWithShopAndMenuAndStylist(user, id)
+    return {
+      id: reservation.id,
+      shopId: reservation.shopId,
+      shopName: reservation.shop.name,
+      menuName: reservation.menu.name,
+      menuId: reservation.menuId,
+      status: reservation.status,
+      reservationDate: convertDateTimeObjectToDateTimeString(reservation.reservationDate),
+      stylistName: reservation.stylist?.name,
+      stylistId: reservation.stylistId,
     }
   },
 }
