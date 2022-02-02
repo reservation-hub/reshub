@@ -1,4 +1,4 @@
-const todayString = new Date().toLocaleString('en-us', { timeZone: 'Asia/Tokyo', hour12: false })
+const todayString = new Date().toLocaleString('en-us', { timeZone: 'Asia/Tokyo' })
 const today = new Date(todayString)
 
 export default today
