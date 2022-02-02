@@ -1,6 +1,6 @@
 import { OrderBy, ScheduleDays } from '@entities/Common'
 import { Menu } from '@entities/Menu'
-import { Reservation } from '@entities/Reservation'
+import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationServiceInterface } from '@client/reservation/ReservationController'
 import { InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import ReservationRepository from '@client/reservation/repositories/ReservationRepository'
@@ -21,6 +21,7 @@ export type ReservationRepositoryInterface = {
   fetchUserReservations(userId: number, page: number, order: OrderBy, take: number): Promise<Reservation[]>
   fetchUserReservation(userId: number, reservationId: number): Promise<Reservation | null>
   fetchUserReservationTotalCount(id: number): Promise<number>
+  cancelUserReservation(reservationId: number): Promise<Reservation>
 }
 
 export type MenuRepositoryInterface = {
@@ -183,6 +184,21 @@ const ReservationService: ReservationServiceInterface = {
       shop,
       stylist,
     }
+  },
+
+  async cancelUserReservation(user, id) {
+    const reservation = await ReservationRepository.fetchUserReservation(user.id, id)
+    if (!reservation) {
+      Logger.debug('Reservation does not exist')
+      throw new NotFoundError()
+    }
+
+    if (reservation.status === ReservationStatus.CANCELLED) {
+      Logger.debug('Reservation is already cancelled')
+      throw new InvalidParamsError()
+    }
+
+    return ReservationRepository.cancelUserReservation(reservation.id)
   },
 }
 

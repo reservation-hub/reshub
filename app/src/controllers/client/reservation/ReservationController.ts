@@ -23,6 +23,7 @@ export type ReservationServiceInterface = {
   fetchUserReservationTotalCount(user: UserForAuth): Promise<number>
   fetchUserReservationWithShopAndMenuAndStylist(user: UserForAuth, id: number)
     : Promise<(Reservation & { shop: Shop, menu: Menu, stylist?: Stylist })>
+  cancelUserReservation(user: UserForAuth, id: number): Promise<Reservation>
 }
 
 export type ShopServiceInterface = {
@@ -109,6 +110,18 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
       stylistName: reservation.stylist?.name,
       stylistId: reservation.stylistId,
     }
+  },
+
+  async cancelUserReservation(user, query) {
+    if (!user) {
+      Logger.debug('User not found in request')
+      throw new UnauthorizedError()
+    }
+
+    const { id } = query
+    await ReservationService.cancelUserReservation(user, id)
+
+    return 'Reservation cancelled'
   },
 }
 

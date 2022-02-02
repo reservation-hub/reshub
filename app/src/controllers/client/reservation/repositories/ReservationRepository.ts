@@ -98,6 +98,14 @@ const ReservationRepository: ReservationRepositoryInterface = {
 
     return reservation ? reconstructReservation(reservation) : null
   },
+
+  async cancelUserReservation(id) {
+    const reservation = await prisma.reservation.update({
+      where: { id },
+      data: { status: PrismaReservationStatus.CANCELLED },
+    })
+    return reconstructReservation(reservation)
+  },
 }
 
 export default ReservationRepository
