@@ -19,6 +19,7 @@ export type ReservationRepositoryInterface = {
   createReservation(clientId: number, shopId: number, reservationDate: Date, menuId: number, stylistId?: number)
     : Promise<Reservation>
   fetchUserReservations(userId: number, page: number, order: OrderBy, take: number): Promise<Reservation[]>
+  fetchUserReservation(userId: number, reservationId: number): Promise<Reservation | null>
   fetchUserReservationTotalCount(id: number): Promise<number>
 }
 
@@ -162,6 +163,26 @@ const ReservationService: ReservationServiceInterface = {
 
   async fetchUserReservationTotalCount(user) {
     return ReservationRepository.fetchUserReservationTotalCount(user.id)
+  },
+
+  async fetchUserReservationWithShopAndMenuAndStylist(user, id) {
+    const reservation = await ReservationRepository.fetchUserReservation(user.id, id)
+    if (!reservation) {
+      Logger.debug('Reservation does not exist')
+      throw new NotFoundError()
+    }
+    const menu = (await MenuRepository.fetchMenusByIds([reservation.menuId]))[0]
+    const shop = (await ShopRepository.fetchShopsByIds([reservation.shopId]))[0]
+    let stylist: Stylist | undefined
+    if (reservation.stylistId) {
+      stylist = (await StylistRepository.fetchStylistsByIds([reservation.stylistId])).pop()
+    }
+    return {
+      ...reservation,
+      menu,
+      shop,
+      stylist,
+    }
   },
 }
 

@@ -90,6 +90,14 @@ const ReservationRepository: ReservationRepositoryInterface = {
   async fetchUserReservationTotalCount(id) {
     return prisma.reservation.count({ where: { userId: id } })
   },
+
+  async fetchUserReservation(userId, reservationId) {
+    const reservation = await prisma.reservation.findFirst({
+      where: { id: reservationId, AND: { userId } },
+    })
+
+    return reservation ? reconstructReservation(reservation) : null
+  },
 }
 
 export default ReservationRepository

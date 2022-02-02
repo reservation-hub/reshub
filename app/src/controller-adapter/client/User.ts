@@ -3,7 +3,8 @@ import {
 } from 'express'
 import { ResponseMessage } from '@request-response-types/Common'
 import {
-  InsertUserQuery, UpdateUserQuery, UpdateUserPasswordQuery, UserReservationListQuery, UserReservationListResponse,
+  InsertUserQuery, UpdateUserQuery, UpdateUserPasswordQuery, UserReservationListQuery,
+  UserReservationListResponse, UserReservationQuery, ReservationResponse,
 } from '@request-response-types/client/User'
 import UserController from '@client/user/UserController'
 import ReservationController from '@client/reservation/ReservationController'
@@ -21,6 +22,7 @@ export type UserControllerInterface = {
 export type ReservationControllerInterface = {
   userReservationsList(user: UserForAuth | undefined, query: UserReservationListQuery)
     : Promise<UserReservationListResponse>
+  userReservation(user: UserForAuth | undefined, query: UserReservationQuery): Promise<ReservationResponse>
 }
 
 const signUp = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -53,6 +55,14 @@ const userReservations = async (req: Request, res: Response, next: NextFunction)
   } catch (e) { return next(e) }
 }
 
+const userReservation = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user } = req
+    const { id } = res.locals
+    return res.send(await ReservationController.userReservation(user, { id }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.post('/create', verifyIfNotLoggedInYet, signUp)
@@ -61,5 +71,6 @@ routes.patch('/password', protectClientRoute, updateUserPassword)
 
 // reservation routes
 routes.get('/reservations', protectClientRoute, userReservations)
+routes.get('/reservations/:id', protectClientRoute, userReservation)
 
 export default routes
