@@ -206,7 +206,7 @@ const ShopController: ShopControllerInterface = {
       menu: menus,
       reservationCount: reservations.length,
       totalSalesForCurrentMonth,
-      tags: shopTags.map(st => ({ slug: st.slug })),
+      tags: shopTags,
       reviews: reviewList,
     }
   },
