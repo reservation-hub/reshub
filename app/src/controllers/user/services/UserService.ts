@@ -5,7 +5,6 @@ import { UserServiceInterface } from '@user/UserController'
 import UserRepository from '@user/repositories/UserRepository'
 import ReservationRepository from '@user/repositories/ReservationRepository'
 import { InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
-import Logger from '@lib/Logger'
 import { OrderBy } from '@entities/Common'
 
 export type UserRepositoryInterface = {
@@ -46,8 +45,7 @@ const UserService: UserServiceInterface = {
   async fetchUser(id) {
     const user = await UserRepository.fetchUser(id)
     if (!user) {
-      Logger.debug('User does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError(`User ${id} does not exist`)
     }
     return user
   },
@@ -55,14 +53,12 @@ const UserService: UserServiceInterface = {
   async insertUser(password, confirm, email, roleSlug, lastNameKanji,
     firstNameKanji, lastNameKana, firstNameKana, gender, birthday) {
     if (password !== confirm) {
-      Logger.debug('Passwords do not match')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('Passwords do not match')
     }
 
     const duplicate = await UserRepository.fetchUserByEmail(email)
     if (duplicate) {
-      Logger.debug('Email is not available')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('Email is not available')
     }
 
     const hash = bcrypt.hashSync(password, 10 /* hash rounds */)
@@ -77,8 +73,7 @@ const UserService: UserServiceInterface = {
     lastNameKana, firstNameKana, gender, birthday) {
     const user = await UserRepository.fetchUser(id)
     if (!user) {
-      Logger.debug('User does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError(`User ${id} does not exist`)
     }
 
     return UserRepository.updateUser(
@@ -90,19 +85,16 @@ const UserService: UserServiceInterface = {
   async updateUserPassword(id, oldPassword, newPassword, confirmNewPassword) {
     const user = await UserRepository.fetchUser(id)
     if (!user) {
-      Logger.debug('User does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError(`User ${id} does not exist`)
     }
 
     const passwordMatches = await bcrypt.compare(oldPassword, user.password)
     if (!passwordMatches) {
-      Logger.debug('Old password do not match')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('Old password do not match')
     }
 
     if (newPassword !== confirmNewPassword) {
-      Logger.debug('Passwords do not match')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('Passwords do not match')
     }
 
     const hash = bcrypt.hashSync(newPassword, 10 /* hash rounds */)
@@ -113,8 +105,7 @@ const UserService: UserServiceInterface = {
   async deleteUser(id) {
     const user = await UserRepository.fetchUser(id)
     if (!user) {
-      Logger.debug('User does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError(`User ${id} does not exist`)
     }
     return UserRepository.deleteUser(id)
   },

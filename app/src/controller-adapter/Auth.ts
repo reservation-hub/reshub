@@ -7,7 +7,6 @@ import { UserForAuth } from '@entities/User'
 import { UnauthorizedError } from '@errors/RouteErrors'
 import passport from '@auth/middlewares/passport'
 import config from '@config'
-import Logger from '@lib/Logger'
 
 export type AuthControllerInterface = {
   hack(role?: RoleSlug, userId?: number): Promise<UserForAuth>
@@ -30,8 +29,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) : P
   try {
     const { user } = req
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
 
     // トークン生成
@@ -49,8 +47,7 @@ export const refreshLogin = async (req: Request, res: Response, next: NextFuncti
   try {
     const { user } = req
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const token = AuthController.createOneDayToken(user)
     res.cookie('authToken', token, cookieOptions)

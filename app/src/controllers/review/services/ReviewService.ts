@@ -2,7 +2,6 @@ import { OrderBy } from '@entities/Common'
 import { Review } from '@entities/Review'
 import { RoleSlug } from '@entities/Role'
 import { User } from '@entities/User'
-import Logger from '@lib/Logger'
 import { ReviewServiceInterface } from '@review/ReviewController'
 import { AuthorizationError, NotFoundError } from '@errors/ServiceErrors'
 import ReviewRepository from '@review/repositories/ReviewRepository'
@@ -33,13 +32,11 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 const ReviewService: ReviewServiceInterface = {
   async fetchReviewsWithTotalCountAndShopNameAndClientName(user, shopId, page = 1, order = OrderBy.DESC, take = 10) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Shop is not owned by user')
     }
     const shopName = await ShopRepository.fetchShopName(shopId)
     if (!shopName) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
 
     const reviews = await ReviewRepository.fetchShopReviews(shopId, page, order, take)
@@ -62,26 +59,22 @@ const ReviewService: ReviewServiceInterface = {
 
   async fetchReviewWithShopNameAndClientName(user, shopId, reviewId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Shop is not owned by user')
     }
 
     const shopName = await ShopRepository.fetchShopName(shopId)
     if (!shopName) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
 
     const review = await ReviewRepository.fetchShopReview(shopId, reviewId)
     if (!review) {
-      Logger.debug('Review does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Review does not exist')
     }
 
     const client = await UserRepository.fetchUser(review.clientId)
     if (!client) {
-      Logger.debug('Client does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Client does not exist')
     }
 
     return {

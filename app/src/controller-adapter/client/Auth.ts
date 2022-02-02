@@ -6,7 +6,6 @@ import { UserForAuth } from '@entities/User'
 import { UnknownServerError } from '@errors/RouteErrors'
 import passport from '@client/auth/middlewares/passport'
 import AuthController from '@client/auth/AuthController'
-import Logger from '@lib/Logger'
 
 export type AuthControllerInterface = {
   hack(): Promise<UserForAuth>
@@ -29,8 +28,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) : P
   try {
     const { user } = req
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnknownServerError()
+      throw new UnknownServerError('User not found in request')
     }
 
     // トークン生成
@@ -48,8 +46,7 @@ export const refreshLogin = async (req: Request, res: Response, next: NextFuncti
   try {
     const { user } = req
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnknownServerError()
+      throw new UnknownServerError('User not found in request')
     }
     const token = AuthController.createOneDayToken(user)
     res.cookie('authToken', token, cookieOptions)

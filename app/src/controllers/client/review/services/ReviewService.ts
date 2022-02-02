@@ -1,7 +1,6 @@
 import { OrderBy } from '@entities/Common'
 import { Review } from '@entities/Review'
 import { User } from '@entities/User'
-import Logger from '@lib/Logger'
 import { ReviewServiceInterface } from '@client/review/ReviewController'
 import { NotFoundError } from '@errors/ServiceErrors'
 import ReviewRepository from '@client/review/repositories/ReviewRepository'
@@ -25,8 +24,7 @@ const ReviewService: ReviewServiceInterface = {
   async fetchReviewsWithTotalCountAndShopNameAndClientName(user, shopId, page = 1, order = OrderBy.DESC, take = 10) {
     const shopName = await ShopRepository.fetchShopName(shopId)
     if (!shopName) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
 
     const reviews = await ReviewRepository.fetchShopReviews(shopId, page, order, take)

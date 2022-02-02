@@ -4,7 +4,6 @@ import { AuthorizationError } from '@errors/ServiceErrors'
 import { RoleSlug } from '@entities/Role'
 import ShopRepository from '@shop/repositories/ShopRepository'
 import { Reservation } from '@entities/Reservation'
-import Logger from '@lib/Logger'
 
 export type ShopRepositoryInterface = {
   fetchUserShopIds(userId: number): Promise<number[]>
@@ -33,8 +32,7 @@ const ReservationService: ReservationServiceInterface = {
 
   async fetchShopReservations(user, shopId, limit = 10) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Shop is not owned by user')
     }
 
     return ReservationRepository.fetchShopReservations(shopId, limit)

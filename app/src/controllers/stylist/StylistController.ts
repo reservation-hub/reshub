@@ -8,7 +8,6 @@ import { StylistControllerInterface } from '@controller-adapter/Shop'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { ScheduleDays as EntityScheduleDays } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
-import Logger from '@lib/Logger'
 
 export type StylistServiceInterface = {
   fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy, take?: number)
@@ -70,8 +69,7 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
 const StylistController: StylistControllerInterface = {
   async index(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const { page, order, take } = await indexSchema.parseAsync(query)
     const { shopId } = query
@@ -91,8 +89,7 @@ const StylistController: StylistControllerInterface = {
 
   async show(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const { shopId, stylistId } = query
     const stylist = await StylistService.fetchStylist(user, shopId, stylistId)
@@ -111,8 +108,7 @@ const StylistController: StylistControllerInterface = {
 
   async insert(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const {
       name, price, days, startTime, endTime,
@@ -125,8 +121,7 @@ const StylistController: StylistControllerInterface = {
 
   async update(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const {
       name, price, days, startTime, endTime,
@@ -139,8 +134,7 @@ const StylistController: StylistControllerInterface = {
 
   async delete(user, query) {
     if (!user) {
-      Logger.debug('User not found in request')
-      throw new UnauthorizedError()
+      throw new UnauthorizedError('User not found in request')
     }
     const { shopId, stylistId } = query
     await StylistService.deleteStylist(user, shopId, stylistId)

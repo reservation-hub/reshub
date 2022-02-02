@@ -5,7 +5,6 @@ import { Stylist } from '@entities/Stylist'
 import ShopRepository from '@shop/repositories/ShopRepository'
 import StylistRepository from '@shop/repositories/StylistRepository'
 import { AuthorizationError } from '@errors/ServiceErrors'
-import Logger from '@lib/Logger'
 
 export type StylistRepositoryInterface = {
   fetchShopStylistsWithReservationCounts(shopId: number, limit: number)
@@ -25,8 +24,7 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 const StylistService: StylistServiceInterface = {
   async fetchShopStylistsWithReservationCount(user, shopId, limit = 5) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Shop is not owned by user')
     }
 
     return StylistRepository.fetchShopStylistsWithReservationCounts(shopId, limit)

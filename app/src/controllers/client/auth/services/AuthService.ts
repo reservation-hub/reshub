@@ -9,7 +9,6 @@ import { AuthServiceInterface as PassportSocket } from '@client/auth/middlewares
 import {
   InvalidParamsError, NotFoundError, AuthenticationError, UserIsLoggedInError, AuthorizationError, InvalidTokenError,
 } from '@errors/ServiceErrors'
-import Logger from '@lib/Logger'
 
 export type UserRepositoryInterface = {
   fetch(id: number): Promise<User | null>
@@ -41,14 +40,12 @@ const AuthService: PassportSocket & AuthControllerSocket = {
 
     const { email, sub } = ticket.getPayload() as TokenPayload
     if (!email) {
-      Logger.debug('Token does not have email')
-      throw new InvalidTokenError()
+      throw new InvalidTokenError('Token does not have email')
     }
 
     const user = await UserRepository.fetchByEmail(email)
     if (!user) {
-      Logger.debug('User in token does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('User in token does not exist')
     }
 
     if (!user.oAuthIds || !user.oAuthIds.googleId) {
@@ -60,18 +57,15 @@ const AuthService: PassportSocket & AuthControllerSocket = {
 
   async authenticateByUsernameAndPassword(username, password) {
     if (!username || !password) {
-      Logger.debug('username or password is not filled')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('username or password is not filled')
     }
 
     const user = await UserRepository.fetchByUsername(username)
     if (!user) {
-      Logger.debug('User provided not found')
-      throw new NotFoundError()
+      throw new NotFoundError('User provided not found')
     }
     if (user.password && !bcrypt.compareSync(password, user.password)) {
-      Logger.debug('passwords did not match')
-      throw new InvalidParamsError()
+      throw new InvalidParamsError('passwords did not match')
     }
 
     return user
@@ -79,31 +73,26 @@ const AuthService: PassportSocket & AuthControllerSocket = {
 
   async silentRefreshTokenChecks(authToken, refreshToken, headerToken?) {
     if (!(!authToken && !headerToken && refreshToken)) {
-      Logger.debug('Necessary tokens are not complete')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Necessary tokens are not complete')
     }
   },
 
   async verifyIfUserInTokenIsLoggedIn(authToken, headerToken?) {
     if (headerToken && headerToken !== authToken) {
-      Logger.debug('header token does not match auth token')
-      throw new AuthenticationError()
+      throw new AuthenticationError('header token does not match auth token')
     }
     const token = jwt.verify(authToken, config.JWT_TOKEN_SECRET) as JwtPayload
     const user = await UserRepository.fetch(token.user.id)
     if (!user) {
-      Logger.debug('User provided not found')
-      throw new NotFoundError()
+      throw new NotFoundError('User provided not found')
     }
-    Logger.debug('User is already logged in')
-    throw new UserIsLoggedInError()
+    throw new UserIsLoggedInError('User is already logged in')
   },
 
   async hack() {
     const user = await UserRepository.fetchByUsername('eugene.sinamban@gmail.com')
     if (!user) {
-      Logger.debug('User for hack not found')
-      throw new NotFoundError()
+      throw new NotFoundError('User for hack not found')
     }
     return user
   },

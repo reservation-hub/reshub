@@ -41,7 +41,6 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
         break
       case EntityErrorCode.NotFound:
       case EntityErrorCode.Unavailable:
-      case EntityErrorCode.OutOfSchedule:
         code = ErrorCode.NotFound
         break
       default:
@@ -69,11 +68,8 @@ export const errorHandler: ErrorRequestHandler = (error: ResHubError | Middlewar
   }
 
   if (error instanceof ZodError) {
-    Logger.debug('Zod Error')
     const keys = error.issues.map(e => e.path.toString())
-    Logger.debug('Error on keys:')
-    Logger.debug(keys)
-    return res.status(ErrorCode.BadRequest).send({ keys, message: 'Invalid values error' })
+    return res.status(ErrorCode.BadRequest).send({ keys, message: 'Request parameter type error' })
   }
 
   if (error instanceof JsonWebTokenError) {

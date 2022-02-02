@@ -1,7 +1,6 @@
 import { Menu } from '@entities/Menu'
 import MenuRepository from '@client/shop/repositories/MenuRepository'
 import ShopRepository from '@client/shop/repositories/ShopRepository'
-import Logger from '@lib/Logger'
 import { NotFoundError } from '@errors/ServiceErrors'
 import { MenuServiceInterface } from '@client/shop/ShopController'
 
@@ -19,8 +18,7 @@ const MenuService: MenuServiceInterface = {
     const limit = 5
     const shopExists = await ShopRepository.shopExists(shopId)
     if (!shopExists) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
     return MenuRepository.fetchShopMenus(shopId, limit)
   },

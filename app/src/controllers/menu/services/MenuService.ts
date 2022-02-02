@@ -5,7 +5,6 @@ import MenuRepository from '@menu/repositories/MenuRepository'
 import { RoleSlug } from '@entities/Role'
 import { Menu } from '@entities/Menu'
 import { OrderBy } from '@entities/Common'
-import Logger from '@lib/Logger'
 
 export type ShopRepositoryInterface = {
   shopExists(shopId: number): Promise<boolean>
@@ -36,13 +35,11 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 const MenuService: MenuServiceInterface = {
   async fetchShopMenusWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC, take = 10) {
     if (!await ShopRepository.shopExists(shopId)) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
 
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Shop is not owned by user')
     }
 
     const menus = await MenuRepository.fetchAllShopMenus(shopId, page, order, take)
@@ -52,19 +49,16 @@ const MenuService: MenuServiceInterface = {
 
   async fetchShopMenu(user, shopId, menuId) {
     if (!await ShopRepository.shopExists(shopId)) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
 
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Shop is not owned by user')
     }
 
     const menu = await MenuRepository.fetchMenu(shopId, menuId)
     if (!menu) {
-      Logger.debug('Menu does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Menu does not exist')
     }
 
     return menu
@@ -72,13 +66,11 @@ const MenuService: MenuServiceInterface = {
 
   async insertMenu(user, shopId, name, description, price, duration) {
     if (!await ShopRepository.shopExists(shopId)) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
 
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Shop is not owned by user')
     }
 
     const menu = await MenuRepository.insertShopMenu(shopId, name,
@@ -88,17 +80,14 @@ const MenuService: MenuServiceInterface = {
 
   async updateMenu(user, shopId, menuId, name, description, price, duration) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Shop is not owned by user')
     }
 
     if (!await ShopRepository.shopExists(shopId)) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
     if (!await isValidMenuId(shopId, menuId)) {
-      Logger.debug('Menu is not of the shop')
-      throw new NotFoundError()
+      throw new NotFoundError('Menu is not of the shop')
     }
 
     return MenuRepository.updateShopMenu(menuId, name,
@@ -107,17 +96,14 @@ const MenuService: MenuServiceInterface = {
 
   async deleteMenu(user, shopId, menuId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Shop is not owned by user')
     }
 
     if (!await ShopRepository.shopExists(shopId)) {
-      Logger.debug('shop not found')
-      throw new NotFoundError()
+      throw new NotFoundError('shop not found')
     }
     if (!await isValidMenuId(shopId, menuId)) {
-      Logger.debug('Menu not found')
-      throw new NotFoundError()
+      throw new NotFoundError('Menu not found')
     }
 
     return MenuRepository.deleteShopMenu(menuId)

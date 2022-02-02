@@ -1,7 +1,6 @@
 import { ShopServiceInterface } from '@reservation/ReservationController'
 import { RoleSlug } from '@entities/Role'
 import ShopRepository from '@reservation/repositories/ShopRepository'
-import Logger from '@lib/Logger'
 import { AuthorizationError, NotFoundError } from '@errors/ServiceErrors'
 
 export type ShopRepositoryInterface = {
@@ -17,14 +16,12 @@ const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean>
 const ShopService: ShopServiceInterface = {
   async fetchShopSeatCount(user, shopId) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
-      Logger.debug('Shop is not owned by user')
-      throw new AuthorizationError()
+      throw new AuthorizationError('Shop is not owned by user')
     }
 
     const seatCount = await ShopRepository.fetchShopSeatCount(shopId)
     if (!seatCount) {
-      Logger.debug('Shop does not exist')
-      throw new NotFoundError()
+      throw new NotFoundError('Shop does not exist')
     }
     return seatCount
   },
