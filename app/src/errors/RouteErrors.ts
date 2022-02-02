@@ -15,25 +15,25 @@ export class MiddlewareError extends Error {
 }
 
 export class UnknownServerError extends MiddlewareError {
-  constructor() {
-    super('Unknown Server Error', MiddlewareErrorCode.ServerError)
+  constructor(message?: string) {
+    super(message ?? 'Unknown Server Error', MiddlewareErrorCode.ServerError)
   }
 }
 export class InvalidParamsError extends MiddlewareError {
-  constructor() {
-    super('Invalid parameters', MiddlewareErrorCode.InvalidParams)
+  constructor(message?: string) {
+    super(message ?? 'Invalid parameters', MiddlewareErrorCode.InvalidParams)
   }
 }
 
 export class UnauthorizedError extends MiddlewareError {
-  constructor() {
-    super('User is unauthorized', MiddlewareErrorCode.Unauthorized)
+  constructor(message?: string) {
+    super(message ?? 'User is unauthorized', MiddlewareErrorCode.Unauthorized)
   }
 }
 
 export class InvalidRouteError extends Error {
-  constructor() {
-    super('Route not found')
+  constructor(message?: string) {
+    super(message ?? 'Route not found')
     this.code = 404
     this.name = 'InvalidRouteError'
     Object.setPrototypeOf(this, InvalidRouteError.prototype)

@@ -12,61 +12,62 @@ export class ServiceError extends Error {
 }
 
 export class NotFoundError extends ServiceError {
-  constructor() {
-    super('Resource not found', ErrorCode.NotFound)
+  constructor(message?: string) {
+    super(message ?? 'Resource not found', ErrorCode.NotFound)
   }
 }
 
 export class InvalidTokenError extends ServiceError {
-  constructor() {
-    super('Invalid token', ErrorCode.InvalidToken)
+  constructor(message?: string) {
+    super(message ?? 'Invalid token', ErrorCode.InvalidToken)
   }
 }
 
 export class InvalidParamsError extends ServiceError {
-  constructor() {
-    super('Invalid query params', ErrorCode.InvalidParams)
+  constructor(message?: string) {
+    super(message ?? 'Invalid query params', ErrorCode.InvalidParams)
   }
 }
 
 export class DuplicateModelError extends ServiceError {
-  constructor() {
-    super('Duplicate resource found', ErrorCode.DuplicateModel)
+  constructor(message?: string) {
+    super(message ?? 'Duplicate resource found', ErrorCode.DuplicateModel)
   }
 }
 
 export class UserIsLoggedInError extends ServiceError {
-  constructor() {
-    super('User is logged in', ErrorCode.LoggedIn)
+  constructor(message?: string) {
+    super(message ?? 'User is logged in', ErrorCode.LoggedIn)
   }
 }
 
 export class AuthenticationError extends ServiceError {
-  constructor() {
-    super('User authentication failed', ErrorCode.Authentication)
+  constructor(message?: string) {
+    super(message ?? 'User authentication failed', ErrorCode.Authentication)
   }
 }
 
 export class AuthorizationError extends ServiceError {
-  constructor() {
-    super('User not Authorized', ErrorCode.Authorization)
+  constructor(message?: string) {
+    super(message ?? 'User not Authorized', ErrorCode.Authorization)
   }
 }
 
 export class UnavailableError extends ServiceError {
-  constructor() {
-    super('Reservation is already taken', ErrorCode.Unavailable)
+  constructor(message?: string) {
+    super(message ?? 'Reservation is already taken', ErrorCode.Unavailable)
   }
 }
 
 export class OutOfScheduleError extends ServiceError {
-  constructor() {
-    super('Reservation is not within Shop Schedule', ErrorCode.OutOfSchedule)
+  constructor(message?: string) {
+    super(message ?? 'Reservation is not within Shop Schedule', ErrorCode.OutOfSchedule)
   }
 }
 
 export class NoSeatsAvailableError extends ServiceError {
-  constructor() {
-    super('There are no seats available at the moment try diffrent date or time', ErrorCode.NoSeatsUnavailable)
+  constructor(message?: string) {
+    super(message ?? 'There are no seats available at the moment try diffrent date or time',
+      ErrorCode.NoSeatsUnavailable)
   }
 }

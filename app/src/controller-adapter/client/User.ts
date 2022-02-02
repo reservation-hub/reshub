@@ -4,7 +4,7 @@ import {
 import { ResponseMessage } from '@request-response-types/Common'
 import {
   InsertUserQuery, UpdateUserQuery, UpdateUserPasswordQuery, UserReservationListQuery,
-  UserReservationListResponse, UserReservationQuery, ReservationResponse,
+  UserReservationListResponse, UserReservationQuery, ReservationResponse, CancelUserReservationQuery,
 } from '@request-response-types/client/User'
 import UserController from '@client/user/UserController'
 import ReservationController from '@client/reservation/ReservationController'
@@ -23,6 +23,7 @@ export type ReservationControllerInterface = {
   userReservationsList(user: UserForAuth | undefined, query: UserReservationListQuery)
     : Promise<UserReservationListResponse>
   userReservation(user: UserForAuth | undefined, query: UserReservationQuery): Promise<ReservationResponse>
+  cancelUserReservation(user: UserForAuth | undefined, query: CancelUserReservationQuery): Promise<ResponseMessage>
 }
 
 const signUp = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -63,6 +64,14 @@ const userReservation = async (req: Request, res: Response, next: NextFunction) 
   } catch (e) { return next(e) }
 }
 
+const cancelUserReservation = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user } = req
+    const { id } = res.locals
+    return res.send(await ReservationController.cancelUserReservation(user, { id }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.post('/create', verifyIfNotLoggedInYet, signUp)
@@ -72,5 +81,6 @@ routes.patch('/password', protectClientRoute, updateUserPassword)
 // reservation routes
 routes.get('/reservations', protectClientRoute, userReservations)
 routes.get('/reservations/:id', protectClientRoute, userReservation)
+routes.delete('/reservations/:id', protectClientRoute, cancelUserReservation)
 
 export default routes
