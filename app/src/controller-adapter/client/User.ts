@@ -4,7 +4,7 @@ import {
 import { ResponseMessage } from '@request-response-types/Common'
 import {
   InsertUserQuery, UpdateUserQuery, UpdateUserPasswordQuery, UserReservationListQuery,
-  UserReservationListResponse, UserReservationQuery, ReservationResponse, CancelUserReservationQuery,
+  UserReservationListResponse, UserReservationQuery, ReservationResponse, CancelUserReservationQuery, UserResponse,
 } from '@request-response-types/client/User'
 import UserController from '@client/user/UserController'
 import ReservationController from '@client/reservation/ReservationController'
@@ -14,6 +14,7 @@ import parseToInt from '@lib/ParseInt'
 import { verifyIfNotLoggedInYet } from './Auth'
 
 export type UserControllerInterface = {
+  detail(user: UserForAuth | undefined): Promise<UserResponse>
   signUp(query: InsertUserQuery): Promise<ResponseMessage>
   update(user: UserForAuth | undefined, query: UpdateUserQuery): Promise<ResponseMessage>
   updatePassword(user: UserForAuth | undefined, query: UpdateUserPasswordQuery): Promise<ResponseMessage>
@@ -24,6 +25,13 @@ export type ReservationControllerInterface = {
     : Promise<UserReservationListResponse>
   userReservation(user: UserForAuth | undefined, query: UserReservationQuery): Promise<ReservationResponse>
   cancelUserReservation(user: UserForAuth | undefined, query: CancelUserReservationQuery): Promise<ResponseMessage>
+}
+
+const showUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user } = req
+    return res.send(await UserController.detail(user))
+  } catch (e) { return next(e) }
 }
 
 const signUp = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -74,6 +82,7 @@ const cancelUserReservation = async (req: Request, res: Response, next: NextFunc
 
 const routes = Router()
 
+routes.get('/', protectClientRoute, showUser)
 routes.post('/create', verifyIfNotLoggedInYet, signUp)
 routes.patch('/', protectClientRoute, update)
 routes.patch('/password', protectClientRoute, updateUserPassword)

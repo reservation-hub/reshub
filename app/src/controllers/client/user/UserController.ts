@@ -4,9 +4,11 @@ import { Gender, User } from '@entities/User'
 import { signUpSchema, updateUserSchema, userPasswordUpdateSchema } from '@client/user/schemas'
 import MailService from '@client/user/services/MailService'
 import { UnauthorizedError } from '@errors/ControllerErrors'
-import { convertDateStringToDateObject } from '@lib/Date'
+import { convertDateObjectToOutboundDateString, convertDateStringToDateObject } from '@lib/Date'
 
 export type UserServiceInterface = {
+  fetchUserWithReservationCountAndReviewCount(id: number)
+    : Promise<(User & { reservationCount: number, reviewCount: number })>
   signUpUser(email: string, username: string, password: string, confirm: string): Promise<User>
   updateUser(id: number, lastNameKanji: string, firstNameKanji: string, lastNameKana: string,
     firstNameKana: string, gender: Gender, birthday: Date): Promise<User>
@@ -18,6 +20,24 @@ export type MailServiceInterface = {
 }
 
 const UserController: UserControllerInterface = {
+  async detail(user) {
+    if (!user) {
+      throw new UnauthorizedError('User not found in request')
+    }
+    const u = await UserService.fetchUserWithReservationCountAndReviewCount(user.id)
+    return {
+      id: u.id,
+      username: u.username!,
+      email: u.email,
+      lastNameKana: u.lastNameKana,
+      firstNameKana: u.firstNameKana,
+      birthday: u.birthday ? convertDateObjectToOutboundDateString(u.birthday) : undefined,
+      gender: u.gender,
+      reservationCount: u.reservationCount,
+      reviewCount: u.reviewCount,
+    }
+  },
+
   async signUp(query) {
     const {
       email, username, password, confirm,

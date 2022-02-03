@@ -8,12 +8,7 @@ export const convertDateStringToDateObject = (dateString: string)
   : Date => new Date(dateString)
 
 export const convertDateObjectToOutboundDateString = (date: Date)
-  : string => {
-  const dateParts = date.toISOString().split('T')
-  const dateString = dateParts[0]
-  const time = dateParts[1].split('.')[0]
-  return `${dateString} ${time}`
-}
+  : string => date.toISOString().split('T')[0]
 
 export const convertDateTimeObjectToDateTimeString = (dateTime: Date) => dateTime.toISOString().replace('T', ' ')
   .substring(0, 19)
