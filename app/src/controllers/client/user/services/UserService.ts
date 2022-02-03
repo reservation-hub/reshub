@@ -1,8 +1,10 @@
 import bcrypt from 'bcrypt'
 import { Gender, User } from '@entities/User'
-import UserRepository from '@client/user/repositories/UserRepository'
 import { DuplicateModelError, InvalidParamsError, NotFoundError } from '@errors/ServiceErrors'
 import { UserServiceInterface } from '@client/user/UserController'
+import UserRepository from '@client/user/repositories/UserRepository'
+import ReservationRepository from '@client/user/repositories/ReservationRepository'
+import ReviewRepository from '@client/user/repositories/ReviewRepository'
 
 export type UserRepositoryInterface = {
   fetchUser(id: number): Promise<User | null>
@@ -13,7 +15,26 @@ export type UserRepositoryInterface = {
     updateUserPassword(id: number, password: string): Promise<User>
 }
 
+export type ReservationRepositoryInterface = {
+  fetchUserReservationCount(id: number): Promise<number>
+}
+
+export type ReviewRepositoryInterface = {
+  fetchUserReviewCount(id: number): Promise<number>
+}
+
 const UserService: UserServiceInterface = {
+  async fetchUserWithReservationCountAndReviewCount(id) {
+    const user = await UserRepository.fetchUser(id)
+    if (!user) {
+      throw new NotFoundError(`User ${id} not found`)
+    }
+
+    const reservationCount = await ReservationRepository.fetchUserReservationCount(id)
+    const reviewCount = await ReviewRepository.fetchUserReviewCount(id)
+
+    return { ...user, reservationCount, reviewCount }
+  },
   async signUpUser(email, username, password, confirm) {
     if (password !== confirm) {
       throw new InvalidParamsError('passwords did not match')
