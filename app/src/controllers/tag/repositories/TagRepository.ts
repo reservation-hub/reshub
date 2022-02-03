@@ -20,6 +20,22 @@ const TagRepository: TagRepositoryInterface = {
     return prisma.tag.count()
   },
 
+  async fetchAllShopTags(shopId, page, order, take) {
+    const skipIndex = page > 1 ? (page - 1) * take : 0
+    const shopTags = await prisma.shopTags.findMany({
+      where: { shopId },
+      skip: skipIndex,
+      orderBy: { id: order },
+      take,
+      include: { tag: true },
+    })
+    return shopTags.map(st => convertToEntityTag(st.tag))
+  },
+
+  async fetchShopTagsTotalCount(shopId) {
+    return prisma.shopTags.count({ where: { shopId } })
+  },
+
   async fetchTag(id) {
     const tag = await prisma.tag.findUnique({
       where: { id },

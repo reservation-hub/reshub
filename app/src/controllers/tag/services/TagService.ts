@@ -1,12 +1,16 @@
 import { OrderBy } from '@entities/Common'
 import { Tag } from '@entities/Tag'
 import { TagServiceInterface } from '@tag/TagController'
+import { AuthorizationError, DuplicateModelError, NotFoundError } from '@errors/ServiceErrors'
 import TagRepository from '@tag/repositories/TagRepository'
-import { DuplicateModelError, NotFoundError } from '@errors/ServiceErrors'
+import ShopRepository from '@tag/repositories/ShopRepository'
+import { RoleSlug } from '@entities/Role'
 
 export type TagRepositoryInterface = {
   fetchAllTags(page: number, order: OrderBy, take: number): Promise<Tag[]>
   fetchTagsTotalCount(): Promise<number>
+  fetchAllShopTags(shopId: number, page: number, order: OrderBy, take: number): Promise<Tag[]>
+  fetchShopTagsTotalCount(shopId: number): Promise<number>
   fetchTag(id: number): Promise<Tag | null>
   fetchTagBySlug(slug: string): Promise<Tag | null>
   insertTag(slug: string): Promise<Tag>
@@ -16,10 +20,28 @@ export type TagRepositoryInterface = {
   searchTagTotalCount(keyword: string): Promise<number>
 }
 
+export type ShopRepositoryInterface = {
+  fetchUserShopIds(userId: number): Promise<number[]>
+}
+
+const isUserOwnedShop = async (userId: number, shopId: number): Promise<boolean> => {
+  const userShopIds = await ShopRepository.fetchUserShopIds(userId)
+  return userShopIds.some(id => id === shopId)
+}
+
 const TagService: TagServiceInterface = {
   async fetchTagsWithTotalCount(page = 1, order = OrderBy.DESC, take = 10) {
     const tags = await TagRepository.fetchAllTags(page, order, take)
     const totalCount = await TagRepository.fetchTagsTotalCount()
+    return { tags, totalCount }
+  },
+
+  async fetchShopTagsWithTotalCount(user, shopId, page = 1, order = OrderBy.DESC, take = 10) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
+      throw new AuthorizationError('Shop is not owned by user')
+    }
+    const tags = await TagRepository.fetchAllShopTags(shopId, page, order, take)
+    const totalCount = await TagRepository.fetchShopTagsTotalCount(shopId)
     return { tags, totalCount }
   },
 
