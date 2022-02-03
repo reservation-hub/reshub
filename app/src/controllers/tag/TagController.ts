@@ -1,11 +1,16 @@
-import { TagControllerInterface } from '@controller-adapter/Tag'
+import { TagControllerInterface as TagEndpointSocket } from '@controller-adapter/Tag'
+import { TagControllerInterface as ShopEndpointSocket } from '@controller-adapter/Shop'
 import { Tag } from '@entities/Tag'
 import { OrderBy } from '@request-response-types/Common'
 import TagService from '@tag/services/TagService'
 import { indexSchema, tagUpsertSchema } from '@tag/schemas'
+import { UnauthorizedError } from '@errors/ControllerErrors'
+import { UserForAuth } from '@entities/User'
 
 export type TagServiceInterface = {
   fetchTagsWithTotalCount(page?: number, order?: OrderBy, take?: number)
+    : Promise<{ tags: Tag[], totalCount: number }>
+  fetchShopTagsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy, take?: number)
     : Promise<{ tags: Tag[], totalCount: number }>
   fetchTag(id: number): Promise<Tag>
   insertTag(slug: string): Promise<Tag>
@@ -15,7 +20,7 @@ export type TagServiceInterface = {
     : Promise<{ tags: Tag[], totalCount: number }>
 }
 
-const TagController: TagControllerInterface = {
+const TagController: TagEndpointSocket & ShopEndpointSocket = {
   async index(query) {
     const { page, order, take } = await indexSchema.parseAsync(query)
     const { tags, totalCount } = await TagService.fetchTagsWithTotalCount(page, order, take)
@@ -52,6 +57,18 @@ const TagController: TagControllerInterface = {
     } = query
     const { tags: values, totalCount } = await TagService.searchTag(keyword, page, order, take)
     return { values, totalCount }
+  },
+
+  async getShopTags(user, query) {
+    if (!user) {
+      throw new UnauthorizedError('User not found in request')
+    }
+    const { shopId } = query
+    const { page, order, take } = await indexSchema.parseAsync(query)
+    const { tags, totalCount } = await TagService.fetchShopTagsWithTotalCount(
+      user, shopId, page, order, take,
+    )
+    return { values: tags, totalCount }
   },
 }
 

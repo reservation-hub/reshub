@@ -9,7 +9,7 @@ import {
   InsertShopReservationQuery, UpdateShopReservationQuery, DeleteShopReservationQuery, StylistListQuery,
   StylistListResponse, StylistQuery, StylistResponse, MenuListQuery, MenuListResponse, MenuQuery,
   MenuResponse, ReservationResponse, ReservationQuery, ReservationListForCalendarQuery, ReviewListQuery,
-  ReviewListResponse, ReviewQuery, ReviewResponse,
+  ReviewListResponse, ReviewQuery, ReviewResponse, TagListQuery, TagListResponse,
 } from '@request-response-types/Shop'
 import { UserForAuth } from '@entities/User'
 import { ResponseMessage } from '@request-response-types/Common'
@@ -18,6 +18,7 @@ import MenuController from '@menu/MenuController'
 import StylistController from '@stylist/StylistController'
 import ReservationController from '@reservation/ReservationController'
 import ReviewController from '@review/ReviewController'
+import TagController from '@tag/TagController'
 import parseToInt from '@lib/ParseInt'
 
 export type ShopControllerInterface = {
@@ -58,6 +59,10 @@ export type ReservationControllerInterface = {
 export type ReviewControllerInterface = {
   index(user: UserForAuth | undefined, query: ReviewListQuery): Promise<ReviewListResponse>
   show(user: UserForAuth | undefined, query: ReviewQuery): Promise<ReviewResponse>
+}
+
+export type TagControllerInterface = {
+  getShopTags(user: UserForAuth | undefined, query: TagListQuery): Promise<TagListResponse>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -282,6 +287,20 @@ const showReview = async (req: Request, res: Response, next: NextFunction) : Pro
   } catch (e) { return next(e) }
 }
 
+const showTags = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { shopId } = res.locals
+    const { page, order, take } = req.query
+    const { user } = req
+    return res.send(await TagController.getShopTags(user, {
+      shopId,
+      page: parseToInt(page),
+      order,
+      take: parseToInt(take),
+    }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 // shop routes
@@ -317,5 +336,8 @@ routes.delete('/:shopId/reservation/:reservationId', parseIntIdMiddleware, delet
 // review routes
 routes.get('/:shopId/reviews', parseIntIdMiddleware, showReviews)
 routes.get('/:shopId/reviews/:reviewId', parseIntIdMiddleware, showReview)
+
+// tag routes
+routes.get('/:shopId/tags', parseIntIdMiddleware, showTags)
 
 export default routes
