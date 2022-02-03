@@ -10,6 +10,7 @@ import UserRepository from '@client/review/repositories/UserRepository'
 export type ReviewRepositoryInterface = {
   fetchShopReviews(shopId: number, page: number, order: OrderBy, take: number): Promise<Review[]>
   fetchShopReviewsTotalCount(shopId: number): Promise<number>
+  fetchShopReview(reviewId: number): Promise<Review>
 }
 
 export type ShopRepositoryInterface = {
@@ -18,6 +19,7 @@ export type ShopRepositoryInterface = {
 
 export type UserRepositoryInterface = {
   fetchUsers(userIds: number[]): Promise<User[]>
+  fetchUserById(userId: number): Promise<User | null>
 }
 
 const ReviewService: ReviewServiceInterface = {
@@ -42,6 +44,30 @@ const ReviewService: ReviewServiceInterface = {
         }
       }),
       totalCount,
+    }
+  },
+
+  async fetchReviewWithShopNameAndClientName(user, shopId, reviewId) {
+    const shopName = await ShopRepository.fetchShopName(shopId)
+    if (!shopName) {
+      throw new NotFoundError('Shop does not exist')
+    }
+    const review = await ReviewRepository.fetchShopReview(shopId, reviewId)
+    if (!review) {
+      throw new NotFoundError('Review does not exist')
+    }
+    const client = await UserRepository.fetchUserById(review.clientId)
+    if (!client) {
+      throw new NotFoundError('Client does not exist')
+    }
+    return {
+      id: review.id,
+      text: review.text,
+      score: review.score,
+      clientId: review.clientId,
+      clientName: `${client.lastNameKana} ${client.firstNameKana}`,
+      shopId: review.shopId,
+      shopName,
     }
   },
 

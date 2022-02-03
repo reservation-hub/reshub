@@ -3,6 +3,7 @@ import { RoleSlug } from '@entities/Role'
 import { Gender, User } from '@entities/User'
 import { UserRepositoryInterface } from '@client/review/services/ReviewService'
 import prisma from '@lib/prisma'
+import UserService from '@auth/services/UserService'
 
 const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
   switch (slug) {
@@ -66,6 +67,19 @@ const UserRepository: UserRepositoryInterface = {
     })
 
     return users.map(reconstructUser)
+  },
+
+  async fetchUserById(userId) {
+    const user = await prisma.user.findFirst({
+      where: { id: userId },
+      include: {
+        profile: true,
+        oAuthIds: true,
+        role: true,
+      },
+    })
+
+    return user ? reconstructUser(user) : null
   },
 
 }

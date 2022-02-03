@@ -6,6 +6,7 @@ import {
   SalonMenuListQuery, SalonMenuListResponse, SalonStylistListQuery, SalonStylistListResponse,
   SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
   SalonListByAreaQuery, SalonListByTagsQuery, SalonListByNameQuery, SalonReviewListQuery, SalonReviewListResponse,
+  SalonReviewShowQuery,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -16,6 +17,7 @@ import ReservationController from '@client/reservation/ReservationController'
 import ReviewController from '@client/review/ReviewController'
 import { ResponseMessage } from '@request-response-types/client/Common'
 import parseToInt from '@lib/ParseInt'
+import { Review } from '@entities/Review'
 
 export type ShopControllerInterface = {
   index(user: UserForAuth | undefined, query: SalonListQuery): Promise<SalonListResponse>
@@ -42,6 +44,7 @@ export type ReservationControllerInterface = {
 
 export type ReviewControllerInterface = {
   list(user: UserForAuth | undefined, query: SalonReviewListQuery): Promise<SalonReviewListResponse>
+  show(user: UserForAuth | undefined, query: SalonReviewShowQuery): Promise<Review>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -162,6 +165,14 @@ const shopReviews = async (req: Request, res: Response, next: NextFunction) : Pr
   } catch (e) { return next(e) }
 }
 
+const showReview = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user } = req
+    const { shopId, reviewId } = res.locals
+    return res.send(await ReviewController.show(user, { shopId, reviewId }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.get('/', index)
@@ -199,5 +210,6 @@ routes.post('/:shopId/reservations', parseIntIdMiddleware, protectClientRoute, c
  */
 
 routes.get('/:shopId/reviews', parseIntIdMiddleware, shopReviews)
+routes.get('/:shopId/reviews/:reviewId', parseIntIdMiddleware, showReview)
 
 export default routes
