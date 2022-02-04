@@ -4,17 +4,17 @@ import { AuthControllerInterface } from '@controller-adapter/Auth'
 import { RoleSlug } from '@entities/Role'
 import { googleSchema } from '@auth/schemas'
 
+enum CookieDuration {
+  ONE_DAY = '1d',
+  THIRTY_DAYS = '30d'
+}
+
 export type AuthServiceInterface = {
-  createToken(user: UserForAuth, expiresIn: string): string,
+  createToken(user: UserForAuth, expiresIn: CookieDuration): string,
   verifyIfUserInTokenIsLoggedIn(authToken: string, headerToken?: string): Promise<void>
   silentRefreshTokenChecks(authToken: string, refreshToken: string, headerToken?: string): Promise<void>
   googleAuthenticate(token: string): Promise<UserForAuth>
   hack(role?: RoleSlug, userId?: number): Promise<UserForAuth>
-}
-
-enum CookieDuration {
-  ONE_DAY = '1d',
-  THIRTY_DAYS = '30d'
 }
 
 const AuthController : AuthControllerInterface = {

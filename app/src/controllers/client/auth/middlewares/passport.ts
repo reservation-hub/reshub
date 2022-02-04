@@ -73,7 +73,7 @@ const jwtStrategyLogic = async (jwtPayload: any, done: any) => {
 }
 
 passport.use('client-jwt', new JWTStrategy(jwtOptionsClient, jwtStrategyLogic))
-passport.use('refresh-jwt', new JWTStrategy(jwtOptionsRefresh, jwtStrategyLogic))
+passport.use('client-refresh', new JWTStrategy(jwtOptionsRefresh, jwtStrategyLogic))
 // local
 
 passport.use('client-local', new LocalStrategy(async (username, password, done) => {
