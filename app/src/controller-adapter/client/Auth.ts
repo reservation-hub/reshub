@@ -103,7 +103,7 @@ const routes = Router()
 
 routes.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
 routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('client-local', { session: false }), login)
-routes.post('/silent_refresh', passport.authenticate('client-jwt', { session: false }), login)
+routes.post('/silent_refresh', passport.authenticate('client-refresh', { session: false }), login)
 routes.get('/logout', passport.authenticate('client-jwt', { session: false }), logout)
 
 export default routes
