@@ -58,7 +58,6 @@ export type UserServiceInterface = {
 }
 
 export type TagServiceInterface = {
-  setShopTags(shopId: number, slugs: string[]): Promise<void>
   fetchShopTags(shopId: number): Promise<Tag[]>
 }
 
@@ -217,17 +216,14 @@ const ShopController: ShopControllerInterface = {
     }
     const {
       name, areaId, prefectureId, cityId, address,
-      phoneNumber, days, seats, startTime, endTime, details, tags,
+      phoneNumber, days, seats, startTime, endTime, details,
     } = await shopUpsertSchema.parseAsync(query)
 
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    const shop = await ShopService.insertShop(user,
+    await ShopService.insertShop(user,
       name, areaId, prefectureId, cityId, address,
       phoneNumber, entityDays, seats, startTime, endTime, details)
 
-    if (tags) {
-      await TagService.setShopTags(shop.id, tags)
-    }
     return 'Shop created'
   },
 
@@ -237,15 +233,12 @@ const ShopController: ShopControllerInterface = {
     }
     const {
       name, areaId, prefectureId, cityId, address, phoneNumber,
-      seats, days, startTime, endTime, details, tags,
+      seats, days, startTime, endTime, details,
     } = await shopUpsertSchema.parseAsync(query.params)
     const { id } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
     await ShopService.updateShop(user, id, name, areaId, prefectureId, cityId,
       address, phoneNumber, entityDays, seats, startTime, endTime, details)
-    if (tags) {
-      await TagService.setShopTags(id, tags)
-    }
     return 'Shop updated'
   },
 

@@ -3,7 +3,9 @@ import { TagControllerInterface as ShopEndpointSocket } from '@controller-adapte
 import { Tag } from '@entities/Tag'
 import { OrderBy } from '@request-response-types/Common'
 import TagService from '@tag/services/TagService'
-import { indexSchema, tagUpsertSchema } from '@tag/schemas'
+import {
+  indexSchema, searchSchema, tagLinkSchema, tagUpsertSchema,
+} from '@tag/schemas'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { UserForAuth } from '@entities/User'
 
@@ -18,6 +20,7 @@ export type TagServiceInterface = {
   deleteTag(id: number): Promise<Tag>
   searchTag(keyword: string, page?: number, order?: OrderBy, take?: number)
     : Promise<{ tags: Tag[], totalCount: number }>
+  setShopTags(user: UserForAuth, shopId: number, tagIds: number[]): Promise<void>
 }
 
 const TagController: TagEndpointSocket & ShopEndpointSocket = {
@@ -54,7 +57,7 @@ const TagController: TagEndpointSocket & ShopEndpointSocket = {
   async search(query) {
     const {
       keyword, page, order, take,
-    } = query
+    } = await searchSchema.parseAsync(query)
     const { tags: values, totalCount } = await TagService.searchTag(keyword, page, order, take)
     return { values, totalCount }
   },
@@ -70,6 +73,18 @@ const TagController: TagEndpointSocket & ShopEndpointSocket = {
     )
     return { values: tags, totalCount }
   },
+
+  async linkTagsToShop(user, query) {
+    if (!user) {
+      throw new UnauthorizedError('User not found in request')
+    }
+    const { shopId } = query
+    const { tagIds } = await tagLinkSchema.parseAsync(query.params)
+    await TagService.setShopTags(user, shopId, tagIds)
+
+    return 'Tags linked to shop'
+  },
+
 }
 
 export default TagController
