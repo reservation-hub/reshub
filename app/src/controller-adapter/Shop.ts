@@ -9,7 +9,7 @@ import {
   InsertShopReservationQuery, UpdateShopReservationQuery, DeleteShopReservationQuery, StylistListQuery,
   StylistListResponse, StylistQuery, StylistResponse, MenuListQuery, MenuListResponse, MenuQuery,
   MenuResponse, ReservationResponse, ReservationQuery, ReservationListForCalendarQuery, ReviewListQuery,
-  ReviewListResponse, ReviewQuery, ReviewResponse, TagListQuery, TagListResponse,
+  ReviewListResponse, ReviewQuery, ReviewResponse, TagListQuery, TagListResponse, TagLinkQuery,
 } from '@request-response-types/Shop'
 import { UserForAuth } from '@entities/User'
 import { ResponseMessage } from '@request-response-types/Common'
@@ -63,6 +63,7 @@ export type ReviewControllerInterface = {
 
 export type TagControllerInterface = {
   getShopTags(user: UserForAuth | undefined, query: TagListQuery): Promise<TagListResponse>
+  linkTagsToShop(user: UserForAuth | undefined, query: TagLinkQuery): Promise<ResponseMessage>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -301,6 +302,14 @@ const showTags = async (req: Request, res: Response, next: NextFunction) : Promi
   } catch (e) { return next(e) }
 }
 
+const linkTags = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { shopId } = res.locals
+    const { user, body: params } = req
+    return res.send(await TagController.linkTagsToShop(user, { shopId, params }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 // shop routes
@@ -339,5 +348,6 @@ routes.get('/:shopId/reviews/:reviewId', parseIntIdMiddleware, showReview)
 
 // tag routes
 routes.get('/:shopId/tags', parseIntIdMiddleware, showTags)
+routes.post('/:shopId/tags', parseIntIdMiddleware, linkTags)
 
 export default routes

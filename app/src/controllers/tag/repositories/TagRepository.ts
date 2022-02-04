@@ -88,6 +88,20 @@ const TagRepository: TagRepositoryInterface = {
       where: { slug: { contains: keyword } },
     })
   },
+
+  async setShopTags(shopId, ids) {
+    await prisma.shopTags.createMany({
+      data: ids.map(id => ({ shopId, tagId: id })),
+    })
+  },
+
+  async fetchTagIdsNotLinkedYet(shopId, tagIds) {
+    const shopTags = await prisma.shopTags.findMany({
+      where: { tagId: { in: tagIds }, AND: { shopId } },
+    })
+    return tagIds.filter(ti => !shopTags.some(st => st.tagId === ti))
+  },
+
 }
 
 export default TagRepository

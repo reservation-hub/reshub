@@ -12,7 +12,7 @@ export const indexSchema = z.object({
 export const shopStylistUpsertSchema = z.object({
   name: z.string(),
   price: z.number().min(0),
-  days: z.nativeEnum(ScheduleDays).array().min(1),
+  days: z.nativeEnum(ScheduleDays).array().nonempty(),
   startTime: z.string()
     .regex(hoursPattern),
   endTime: z.string()

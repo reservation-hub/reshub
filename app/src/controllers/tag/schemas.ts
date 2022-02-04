@@ -18,3 +18,7 @@ export const searchSchema = z.object({
   order: z.nativeEnum(OrderBy).optional(),
   take: z.number().optional(),
 })
+
+export const tagLinkSchema = z.object({
+  tagIds: z.array(z.number()).nonempty(),
+})

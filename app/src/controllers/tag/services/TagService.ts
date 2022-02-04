@@ -18,6 +18,8 @@ export type TagRepositoryInterface = {
   deleteTag(id: number): Promise<Tag>
   searchTag(keyword: string, page: number, order: OrderBy, take: number): Promise<Tag[]>
   searchTagTotalCount(keyword: string): Promise<number>
+  setShopTags(shopId: number, tagIds: number[]): Promise<void>
+  fetchTagIdsNotLinkedYet(shopId: number, tagIds: number[]): Promise<number[]>
 }
 
 export type ShopRepositoryInterface = {
@@ -87,6 +89,15 @@ const TagService: TagServiceInterface = {
     const tags = await TagRepository.searchTag(keyword, page, order, take)
     const totalCount = await TagRepository.searchTagTotalCount(keyword)
     return { tags, totalCount }
+  },
+
+  async setShopTags(user, shopId, tagIds) {
+    if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
+      throw new AuthorizationError('Shop is not owned by user')
+    }
+    const uniqueTagIds: number[] = tagIds.filter((n, i) => tagIds.indexOf(n) === i)
+    const tagIdsToLink = await TagRepository.fetchTagIdsNotLinkedYet(shopId, uniqueTagIds)
+    await TagRepository.setShopTags(shopId, tagIdsToLink)
   },
 }
 
