@@ -14,7 +14,7 @@ import ShopService from './services/ShopService'
 
 export type ReservationServiceInterface = {
   fetchReservationsWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, page?: number,
-    order?: OrderBy, take?: number): Promise<(
+    order?: EntityOrderBy, take?: number): Promise<(
       Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
   fetchReservationsWithClientAndStylistAndMenuForCalendar(user: UserForAuth, shopId: number,
     year: number, month: number): Promise<(Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
