@@ -5,7 +5,7 @@ import { ShopControllerInterface } from '@controller-adapter/Shop'
 import { User, UserForAuth } from '@entities/User'
 import { Menu } from '@entities/Menu'
 import { Reservation } from '@entities/Reservation'
-import { ScheduleDays as EntityScheduleDays } from '@entities/Common'
+import { ScheduleDays as EntityScheduleDays, OrderBy as EntityOrderBy } from '@entities/Common'
 import ShopService from '@shop/services/ShopService'
 import UserService from '@shop/services/UserService'
 import ReservationService from '@shop/services/ReservationService'
@@ -21,7 +21,7 @@ import ReviewService from '@shop/services/ReviewService'
 import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
-  fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: OrderBy, take?: number)
+  fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: EntityOrderBy, take?: number)
     : Promise<{ shops: Shop[], totalCount: number }>
   fetchShop(user: UserForAuth, id: number): Promise<Shop>
   insertShop(user: UserForAuth, name: string, areaId: number, prefectureId: number,
@@ -31,7 +31,7 @@ export type ShopServiceInterface = {
     cityId: number, address: string, phoneNumber: string, days: EntityScheduleDays[],
     seats:number, startTime: string, endTime: string, details: string): Promise<Shop>
   deleteShop(user: UserForAuth, id: number): Promise<Shop>
-  searchShops(user: UserForAuth, keyword: string, page?: number, order?: OrderBy, take?: number)
+  searchShops(user: UserForAuth, keyword: string, page?: number, order?: EntityOrderBy, take?: number)
     : Promise<{ shops: Shop[], totalCount: number }>
 }
 
@@ -103,13 +103,25 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
   }
 }
 
+const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
+  switch (order) {
+    case OrderBy.ASC:
+      return EntityOrderBy.ASC
+    default:
+      return EntityOrderBy.DESC
+  }
+}
+
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
     if (!user) {
       throw new UnauthorizedError('User not found in request')
     }
     const { page, order, take } = await indexSchema.parseAsync(query)
-    const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order, take)
+    const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user,
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take)
 
     const shopIds = shops.map(shop => shop.id)
 
@@ -258,7 +270,13 @@ const ShopController: ShopControllerInterface = {
     const {
       keyword, page, order, take,
     } = await searchSchema.parseAsync(query)
-    const { shops, totalCount } = await ShopService.searchShops(user, keyword, page, order, take)
+    const { shops, totalCount } = await ShopService.searchShops(
+      user,
+      keyword,
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
+    )
     const shopIds = shops.map(s => s.id)
     const totalReservationsCount = await ReservationService.fetchReservationsCountByShopIds(shopIds)
     const totalStylistsCount = await StylistService.fetchStylistsCountByShopIds(shopIds)

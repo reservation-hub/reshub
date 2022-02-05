@@ -1,7 +1,7 @@
 export enum ReservationStatus {
-  RESERVED = 'RESERVED',
-  CANCELLED = 'CANCELLED',
-  COMPLETED = 'COMPLETED',
+  RESERVED,
+  CANCELLED,
+  COMPLETED,
 }
 
 export type Reservation = {

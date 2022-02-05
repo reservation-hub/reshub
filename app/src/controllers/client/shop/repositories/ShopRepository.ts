@@ -1,6 +1,6 @@
 import { Prisma, Days } from '@prisma/client'
+import { OrderBy, ScheduleDays } from '@entities/Common'
 import { Shop } from '@entities/Shop'
-import { ScheduleDays } from '@entities/Common'
 import prisma from '@lib/prisma'
 import { ShopRepositoryInterface as ShopServiceSocket } from '@client/shop/services/ShopService'
 import { ShopRepositoryInterface as MenuServiceSocket } from '@client/shop/services/MenuService'
@@ -32,6 +32,15 @@ const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
       return ScheduleDays.SATURDAY
     default:
       return ScheduleDays.SUNDAY
+  }
+}
+
+const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
+  switch (order) {
+    case OrderBy.ASC:
+      return Prisma.SortOrder.asc
+    default:
+      return Prisma.SortOrder.desc
   }
 }
 
@@ -67,7 +76,7 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
     const skipIndex = page > 1 ? (page - 1) * 5 : 0
     const shops = await prisma.shop.findMany({
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
@@ -106,7 +115,7 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
         },
       },
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
@@ -134,7 +143,7 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
       where: { tagId: { in: tagIds } },
       distinct: ['shopId'],
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
       select: {
         shop: {
@@ -159,7 +168,7 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
     const shops = await prisma.shop.findMany({
       where: { shopDetail: { name: { contains: name } } },
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,

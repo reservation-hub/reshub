@@ -9,6 +9,6 @@ export enum ScheduleDays {
 }
 
 export enum OrderBy {
-  ASC = 'asc',
-  DESC = 'desc',
+  ASC,
+  DESC,
 }

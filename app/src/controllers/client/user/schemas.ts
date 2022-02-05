@@ -1,4 +1,4 @@
-import { birthdayDatePattern, passwordPattern } from '@lib/RegexPatterns'
+import { datePattern, passwordPattern } from '@lib/RegexPatterns'
 import { Gender } from '@request-response-types/client/models/User'
 import { z } from 'zod'
 
@@ -15,7 +15,7 @@ export const updateUserSchema = z.object({
   lastNameKana: z.string(),
   firstNameKana: z.string(),
   gender: z.nativeEnum(Gender),
-  birthday: z.string().regex(birthdayDatePattern),
+  birthday: z.string().regex(datePattern),
 })
 
 export const userPasswordUpdateSchema = z.object({

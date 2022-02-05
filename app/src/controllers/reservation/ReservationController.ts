@@ -7,13 +7,14 @@ import { User, UserForAuth } from '@entities/User'
 import ReservationService from '@reservation/services/ReservationService'
 import { ReservationControllerInterface } from '@controller-adapter/Shop'
 import { OrderBy } from '@request-response-types/Common'
+import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './schemas'
 import ShopService from './services/ShopService'
 
 export type ReservationServiceInterface = {
   fetchReservationsWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, page?: number,
-    order?: OrderBy, take?: number): Promise<(
+    order?: EntityOrderBy, take?: number): Promise<(
       Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
   fetchReservationsWithClientAndStylistAndMenuForCalendar(user: UserForAuth, shopId: number,
     year: number, month: number): Promise<(Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
@@ -32,6 +33,15 @@ export type ShopServiceInterface = {
   fetchShopSeatCount(user: UserForAuth, shopId: number): Promise<number>
 }
 
+const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
+  switch (order) {
+    case OrderBy.ASC:
+      return EntityOrderBy.ASC
+    default:
+      return EntityOrderBy.DESC
+  }
+}
+
 const ReservationController: ReservationControllerInterface = {
   async index(user, query) {
     if (!user) {
@@ -40,7 +50,11 @@ const ReservationController: ReservationControllerInterface = {
     const { page, order, take } = await indexSchema.parseAsync(query)
     const { shopId } = query
     const reservations = await ReservationService.fetchReservationsWithClientAndStylistAndMenu(
-      user, shopId, page, order, take,
+      user,
+      shopId,
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
     )
     const totalCount = await ReservationService.fetchShopReservationTotalCount(user, shopId)
 

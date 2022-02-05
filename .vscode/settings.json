@@ -1,2 +1,6 @@
 {
+    "eslint.options": {
+        "ignorePath": "app/.eslintignore"
+    },
+    "eslint.run": "onSave",
 }

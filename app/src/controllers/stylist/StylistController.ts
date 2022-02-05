@@ -6,12 +6,12 @@ import StylistService from '@stylist/services/StylistService'
 import ShopService from '@stylist/services/ShopService'
 import { StylistControllerInterface } from '@controller-adapter/Shop'
 import { ScheduleDays } from '@request-response-types/models/Common'
-import { ScheduleDays as EntityScheduleDays } from '@entities/Common'
+import { ScheduleDays as EntityScheduleDays, OrderBy as EntityOrderBy } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 
 export type StylistServiceInterface = {
-  fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy, take?: number)
-    : Promise<{ stylists: Stylist[], totalCount: number }>
+  fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: EntityOrderBy,
+    take?: number): Promise<{ stylists: Stylist[], totalCount: number }>
   fetchStylist(user: UserForAuth, shopId: number, stylistId: number): Promise<Stylist>
   insertStylist(user: UserForAuth, shopId: number, name: string, price: number,
     days:EntityScheduleDays[], startTime:string, endTime:string)
@@ -66,6 +66,15 @@ const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays =
   }
 }
 
+const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
+  switch (order) {
+    case OrderBy.ASC:
+      return EntityOrderBy.ASC
+    default:
+      return EntityOrderBy.DESC
+  }
+}
+
 const StylistController: StylistControllerInterface = {
   async index(user, query) {
     if (!user) {
@@ -74,7 +83,11 @@ const StylistController: StylistControllerInterface = {
     const { page, order, take } = await indexSchema.parseAsync(query)
     const { shopId } = query
     const { stylists, totalCount } = await StylistService.fetchShopStylistsWithTotalCount(
-      user, shopId, page, order, take,
+      user,
+      shopId,
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
     )
     const stylistReservationCounts = await StylistService.fetchStylistsReservationCounts(stylists.map(s => s.id))
     const stylistList = stylists.map(s => ({

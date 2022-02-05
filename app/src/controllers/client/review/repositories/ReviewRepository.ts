@@ -1,4 +1,5 @@
-import { ReviewScore, Review } from '@prisma/client'
+import { Prisma, ReviewScore, Review } from '@prisma/client'
+import { OrderBy } from '@entities/Common'
 import { ReviewScore as EntityReviewScore, Review as EntityReview } from '@entities/Review'
 import { ReviewRepositoryInterface } from '@client/review/services/ReviewService'
 import prisma from '@lib/prisma'
@@ -33,6 +34,15 @@ const convertEntityToReviewScore = (score: EntityReviewScore): ReviewScore => {
   }
 }
 
+const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
+  switch (order) {
+    case OrderBy.ASC:
+      return Prisma.SortOrder.asc
+    default:
+      return Prisma.SortOrder.desc
+  }
+}
+
 const reconstructReview = (review: Review): EntityReview => ({
   id: review.id,
   text: review.text,
@@ -47,7 +57,7 @@ const ReviewRepository: ReviewRepositoryInterface = {
     const reviews = await prisma.review.findMany({
       where: { shopId },
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
     })
 

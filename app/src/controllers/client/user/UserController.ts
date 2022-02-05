@@ -1,6 +1,7 @@
 import { UserControllerInterface } from '@controller-adapter/client/User'
 import UserService from '@client/user/services/UserService'
-import { Gender, User } from '@entities/User'
+import { Gender } from '@request-response-types/client/models/User'
+import { Gender as EntityGender, User } from '@entities/User'
 import { signUpSchema, updateUserSchema, userPasswordUpdateSchema } from '@client/user/schemas'
 import MailService from '@client/user/services/MailService'
 import { UnauthorizedError } from '@errors/ControllerErrors'
@@ -19,6 +20,24 @@ export type MailServiceInterface = {
   sendSignUpEmail(email: string): Promise<void>
 }
 
+const convertGenderToEntity = (gender: Gender): EntityGender => {
+  switch (gender) {
+    case Gender.FEMALE:
+      return EntityGender.FEMALE
+    default:
+      return EntityGender.MALE
+  }
+}
+
+const convertEntityGenderToDTOGender = (gender: EntityGender): Gender => {
+  switch (gender) {
+    case EntityGender.FEMALE:
+      return Gender.FEMALE
+    default:
+      return Gender.MALE
+  }
+}
+
 const UserController: UserControllerInterface = {
   async detail(user) {
     if (!user) {
@@ -32,7 +51,7 @@ const UserController: UserControllerInterface = {
       lastNameKana: u.lastNameKana,
       firstNameKana: u.firstNameKana,
       birthday: u.birthday ? convertDateObjectToOutboundDateString(u.birthday) : undefined,
-      gender: u.gender,
+      gender: u.gender ? convertEntityGenderToDTOGender(u.gender) : undefined,
       reservationCount: u.reservationCount,
       reviewCount: u.reviewCount,
     }
@@ -57,7 +76,7 @@ const UserController: UserControllerInterface = {
     } = await updateUserSchema.parseAsync(query)
     const dateObject = convertDateStringToDateObject(birthday)
     await UserService.updateUser(user.id, lastNameKanji, firstNameKanji, lastNameKana, firstNameKana,
-      gender, dateObject)
+      convertGenderToEntity(gender), dateObject)
 
     return 'User updated'
   },

@@ -1,4 +1,5 @@
-import { OrderBy, ScheduleDays as EntityScheduleDays } from '@entities/Common'
+import { OrderBy } from '@request-response-types/client/Common'
+import { OrderBy as EntityOrderBy, ScheduleDays as EntityScheduleDays } from '@entities/Common'
 import { Menu } from '@entities/Menu'
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
@@ -18,15 +19,15 @@ import {
 } from '@client/shop/schemas'
 
 export type ShopServiceInterface = {
-  fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: OrderBy, take?: number)
+  fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: EntityOrderBy, take?: number)
     : Promise<{ shops: Shop[], totalCount: number }>
   fetchShop(user: UserForAuth | undefined, shopId: number): Promise<Shop>
-  fetchShopsByAreaWithTotalCount(user: UserForAuth | undefined, areaId: number, page?: number, order?: OrderBy,
+  fetchShopsByAreaWithTotalCount(user: UserForAuth | undefined, areaId: number, page?: number, order?: EntityOrderBy,
     take?: number, prefectureId?: number, cityId?: number): Promise<{ shops: Shop[], totalCount:number }>
   fetchShopsByTagsWithTotalCount(user: UserForAuth | undefined, tags: string[], page?: number,
-    order?: OrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
+    order?: EntityOrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
   fetchShopsByNameWithTotalCount(user: UserForAuth | undefined, name: string, page?: number,
-    order?: OrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
+    order?: EntityOrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
 }
 
 export type MenuServiceInterface = {
@@ -66,6 +67,15 @@ const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays 
   }
 }
 
+const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
+  switch (order) {
+    case OrderBy.ASC:
+      return EntityOrderBy.ASC
+    default:
+      return EntityOrderBy.DESC
+  }
+}
+
 const reconstructShops = async (shops: Shop[]) => {
   const shopIds = shops.map(s => s.id)
   const shopMenuAveragePrices = await MenuService.fetchShopAverageMenuPriceByShopIds(shopIds)
@@ -89,7 +99,12 @@ const reconstructShops = async (shops: Shop[]) => {
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
     const { page, order, take } = await indexSchema.parseAsync(query)
-    const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(user, page, order, take)
+    const { shops, totalCount } = await ShopService.fetchShopsWithTotalCount(
+      user,
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
+    )
     const values = await reconstructShops(shops)
     return { values, totalCount }
   },
@@ -143,7 +158,13 @@ const ShopController: ShopControllerInterface = {
     } = await searchByAreaSchema.parseAsync(query)
 
     const { shops, totalCount } = await ShopService.fetchShopsByAreaWithTotalCount(
-      user, areaId, page, order, prefectureId, cityId, take,
+      user,
+      areaId,
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      prefectureId,
+      cityId,
+      take,
     )
     const values = await reconstructShops(shops)
     return { values, totalCount }
@@ -155,7 +176,11 @@ const ShopController: ShopControllerInterface = {
     } = await searchByTagsSchema.parseAsync(query)
 
     const { shops, totalCount } = await ShopService.fetchShopsByTagsWithTotalCount(
-      user, tags, page, order, take,
+      user,
+      tags,
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
     )
     const values = await reconstructShops(shops)
     return { values, totalCount }
@@ -166,7 +191,11 @@ const ShopController: ShopControllerInterface = {
       name, page, order, take,
     } = await searchByNameSchema.parseAsync(query)
     const { shops, totalCount } = await ShopService.fetchShopsByNameWithTotalCount(
-      user, name, page, order, take,
+      user,
+      name,
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
     )
     const values = await reconstructShops(shops)
     return { values, totalCount }

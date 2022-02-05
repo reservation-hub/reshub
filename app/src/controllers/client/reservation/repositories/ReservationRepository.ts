@@ -1,7 +1,9 @@
 import {
+  Prisma,
   ReservationStatus as PrismaReservationStatus,
   Reservation as PrismaReservation,
 } from '@prisma/client'
+import { OrderBy } from '@entities/Common'
 import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface } from '@client/reservation/services/ReservationService'
 import prisma from '@lib/prisma'
@@ -14,6 +16,15 @@ const convertReservationStatus = (status: PrismaReservationStatus): ReservationS
       return ReservationStatus.COMPLETED
     default:
       return ReservationStatus.RESERVED
+  }
+}
+
+const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
+  switch (order) {
+    case OrderBy.ASC:
+      return Prisma.SortOrder.asc
+    default:
+      return Prisma.SortOrder.desc
   }
 }
 
@@ -81,7 +92,7 @@ const ReservationRepository: ReservationRepositoryInterface = {
       where: { userId },
       take,
       skip: skipIndex,
-      orderBy: { reservationDate: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
     })
 
     return reservations.map(reconstructReservation)

@@ -1,7 +1,7 @@
 export enum RoleSlug {
-    ADMIN = 'admin',
-    SHOP_STAFF = 'shop_staff',
-    CLIENT = 'client'
+    ADMIN = 'ADMIN',
+    SHOP_STAFF = 'SHOP_STAFF',
+    CLIENT = 'CLIENT'
 }
 
 export type Role = {
