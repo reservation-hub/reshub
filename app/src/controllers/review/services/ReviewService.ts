@@ -1,5 +1,5 @@
 import { OrderBy } from '@entities/Common'
-import { Review } from '@entities/Review'
+import { Review, ReviewScore } from '@entities/Review'
 import { RoleSlug } from '@entities/Role'
 import { User } from '@entities/User'
 import { ReviewServiceInterface } from '@review/ReviewController'
@@ -12,6 +12,7 @@ export type ReviewRepositoryInterface = {
   fetchShopReviews(shopId: number, page: number, order: OrderBy, take: number): Promise<Review[]>
   fetchShopReviewsTotalCount(shopId: number): Promise<number>
   fetchShopReview(shopId: number, reviewId: number): Promise<Review | null>
+  updateReview(userId:number, shopId: number, reviewId: number, text: string, score: ReviewScore): Promise<Review>
 }
 
 export type ShopRepositoryInterface = {
