@@ -1,2 +1,15 @@
 {
+    "[javascript]": {
+        "editor.tabSize": 2,
+        "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+    },
+    "eslint.options": {
+        "ignorePath": "${workspaceRoot}/app/.eslintignore"
+    },
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "eslint.lintTask.enable": true,
+    "eslint.format.enable": true,
+    "eslint.run": "onSave",
 }

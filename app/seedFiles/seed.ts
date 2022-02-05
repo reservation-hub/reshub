@@ -1,5 +1,3 @@
-/* eslint-disable  */
-import bcrypt from 'bcrypt'
 import { PrismaClient } from '@prisma/client'
 import areas, { AreaObject } from './areas-db'
 import prefectures, { PrefectureObject } from './prefec-db'
@@ -12,36 +10,13 @@ import {
   UserObject, admins, staffs, clients,
 } from './users'
 import roles, { RoleObject } from './roles'
-import { Gender, randomNameGenerator } from './utils'
+import { Gender, randomNameGenerator, randomReviewScoreGenerator, getRandomDate, userDataObject } from './utils'
 import Logger from './Logger'
 
 const concurrencyRate = 1000
 
 const prisma = new PrismaClient({
   errorFormat: 'minimal'
-})
-
-const getRandomDate = (from: Date, to: Date) => {
-  const fromTime = from.getTime()
-  const toTime = to.getTime()
-  return new Date(fromTime + Math.random() * (toTime - fromTime))
-}
-
-const userDataObject = (r: Role, u: UserObject) => ({
-  email: u.email,
-  username: u.email,
-  password: bcrypt.hashSync(u.password, 10),
-  profile: {
-    create: {
-      firstNameKana: u.firstNameKana,
-      lastNameKana: u.lastNameKana,
-      firstNameKanji: u.firstNameKanji,
-      lastNameKanji: u.lastNameKanji,
-    },
-  },
-  role: {
-    connect: { id: r.id },
-  },
 })
 
 const roleSeeder = async (rs: RoleObject[]): Promise<void> => {
@@ -337,9 +312,10 @@ const reviewSeeder = async (shopIds: number[], clientIds: number[]) => {
         const randomClientIdIndices = Array(reviewCount).fill(0).map(rci => Math.floor(Math.random() * clientIds.length))
         while (randomClientIdIndices.length) {
           await Promise.all(randomClientIdIndices.splice(0, concurrencyRate).map(rcii => {
+            const randomScore = randomReviewScoreGenerator()
             return prisma.review.create({
               data: {
-                score: ReviewScore.FIVE,
+                score: randomScore,
                 text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
                 shopId,
                 userId: clientIds[rcii],
@@ -502,4 +478,3 @@ const main = async () => {
 (async () => {
   main()
 })()
-/* eslint-enable  */
