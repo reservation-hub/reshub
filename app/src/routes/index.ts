@@ -19,7 +19,9 @@ export default router
 
 // client api
 router.use('/client/', apiRoutes)
-router.use('/client/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404
+router.use('/client/*', (req: Request, res: Response, next: NextFunction) => next(
+  new InvalidRouteError(`Route ${req.baseUrl} does not exist`),
+)) // 404
 
 router.use('/auth', authController)
 router.use('/dashboard', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), dashboardController)
@@ -27,6 +29,7 @@ router.use('/shops', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP
 router.use('/users', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), userController)
 router.use('/tags', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), TagController)
 router.use('/', protectAdminRoute, roleCheck([RoleSlug.ADMIN, RoleSlug.SHOP_STAFF]), LocationController)
-router.use('/', (req: Request, res: Response) => res.send('Reshub'))
 
-router.use('/*', (req: Request, res: Response, next: NextFunction) => next(new InvalidRouteError())) // 404
+router.use('/*', (req: Request, res: Response, next: NextFunction) => next(
+  new InvalidRouteError(`Route ${req.baseUrl} does not exist`),
+)) // 404
