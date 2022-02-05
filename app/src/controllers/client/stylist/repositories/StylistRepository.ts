@@ -1,6 +1,6 @@
-import { Stylist as PrismaStylist, Days } from '@prisma/client'
+import { Prisma, Stylist as PrismaStylist, Days } from '@prisma/client'
+import { OrderBy, ScheduleDays } from '@entities/Common'
 import { StylistRepositoryInterface } from '@client/stylist/services/StylistService'
-import { ScheduleDays } from '@entities/Common'
 import { Stylist } from '@entities/Stylist'
 import prisma from '@lib/prisma'
 
@@ -23,6 +23,15 @@ const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
   }
 }
 
+const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
+  switch (order) {
+    case OrderBy.ASC:
+      return Prisma.SortOrder.asc
+    default:
+      return Prisma.SortOrder.desc
+  }
+}
+
 const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
   id: stylist.id,
   shopId: stylist.shopId,
@@ -39,7 +48,7 @@ const StylistRepository: StylistRepositoryInterface = {
     const stylists = await prisma.stylist.findMany({
       where: { shopId },
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
       include: { shop: { include: { shopDetail: true } } },
     })

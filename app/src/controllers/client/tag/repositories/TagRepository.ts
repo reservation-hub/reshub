@@ -1,9 +1,19 @@
-import { Tag as PrismaTag } from '@prisma/client'
+import { Prisma, Tag as PrismaTag } from '@prisma/client'
+import { OrderBy } from '@entities/Common'
 import { Tag } from '@entities/Tag'
 import prisma from '@lib/prisma'
 import { TagRepositoryInterface } from '@client/tag/services/TagService'
 
 const convertToEntityTag = (tag: PrismaTag): Tag => ({ id: tag.id, slug: tag.slug })
+
+const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
+  switch (order) {
+    case OrderBy.ASC:
+      return Prisma.SortOrder.asc
+    default:
+      return Prisma.SortOrder.desc
+  }
+}
 
 const TagRepository: TagRepositoryInterface = {
   async searchTag(keyword, page, order, take) {
@@ -11,7 +21,7 @@ const TagRepository: TagRepositoryInterface = {
     const tags = await prisma.tag.findMany({
       where: { slug: { contains: keyword } },
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
     })
     return tags.map(convertToEntityTag)
