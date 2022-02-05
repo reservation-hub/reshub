@@ -105,6 +105,12 @@ const shopSearchByName = async (req: Request, res: Response, next: NextFunction)
   } catch (e) { return next(e) }
 }
 
+const popularShops = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+  try {
+    return res.send('Not yet implemented')
+  } catch (e) { return next(e) }
+}
+
 const shopMenus = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
   try {
     const { user } = req
@@ -201,6 +207,7 @@ const deleteReview = async (req: Request, res: Response, next: NextFunction) : P
 const routes = Router()
 
 routes.get('/', index)
+routes.get('/popular', popularShops)
 routes.get('/:shopId', parseIntIdMiddleware, detail)
 
 /**
@@ -210,6 +217,7 @@ routes.get('/:shopId', parseIntIdMiddleware, detail)
 routes.get('/search/area', shopSearchByArea)
 routes.get('/search/tags', shopSearchByTags)
 routes.get('/search/name', shopSearchByName)
+
 /**
  * Menu routes
  */
@@ -238,4 +246,5 @@ routes.get('/:shopId/reviews', parseIntIdMiddleware, shopReviews)
 routes.patch('/:shopId/reviews/:reviewId', parseIntIdMiddleware, updateReviews)
 routes.post('/:shopId/reviews', parseIntIdMiddleware, protectClientRoute, createReview)
 routes.delete('/:shopId/reviews/:reviewId', parseIntIdMiddleware, protectClientRoute, deleteReview)
+
 export default routes
