@@ -5,13 +5,15 @@ import UserService from '@user/services/UserService'
 import {
   userInsertSchema, userUpdateSchema, indexSchema, searchSchema, userPasswordUpdateSchema,
 } from '@user/schemas'
-import { OrderBy } from '@entities/Common'
+import { OrderBy } from '@request-response-types/Common'
+import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { convertDateObjectToOutboundDateString, convertDateStringToDateObject } from '@lib/Date'
 
 export type UserServiceInterface = {
-  fetchUsersWithTotalCount(page?: number, order?: OrderBy, take?: number): Promise<{ users: User[], totalCount: number}>
+  fetchUsersWithTotalCount(page?: number, order?: EntityOrderBy, take?: number)
+    : Promise<{ users: User[], totalCount: number}>
   fetchUser(id: number): Promise<User>
-  searchUser(keyword: string, page?: number, order?: OrderBy, take?: number)
+  searchUser(keyword: string, page?: number, order?: EntityOrderBy, take?: number)
     : Promise<{ users: User[], totalCount: number}>
   insertUser(password: string, confirm: string, email: string, roleSlug: RoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, gender: Gender, birthday: Date)
@@ -23,10 +25,23 @@ export type UserServiceInterface = {
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 
+const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
+  switch (order) {
+    case OrderBy.ASC:
+      return EntityOrderBy.ASC
+    default:
+      return EntityOrderBy.DESC
+  }
+}
+
 const UserController: UserControllerInterface = {
   async index(query) {
     const { page, order, take } = await indexSchema.parseAsync(query)
-    const { users, totalCount } = await UserService.fetchUsersWithTotalCount(page, order, take)
+    const { users, totalCount } = await UserService.fetchUsersWithTotalCount(
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
+    )
     const userReservationCounts = await UserService.fetchUsersReservationCounts(users.map(u => u.id))
     const userList = users.map(u => ({
       id: u.id,
@@ -104,7 +119,12 @@ const UserController: UserControllerInterface = {
     const {
       keyword, page, order, take,
     } = await searchSchema.parseAsync(query)
-    const { users, totalCount } = await UserService.searchUser(keyword, page, order, take)
+    const { users, totalCount } = await UserService.searchUser(
+      keyword,
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
+    )
     const userReservationCounts = await UserService.fetchUsersReservationCounts(users.map(u => u.id))
     const userList = users.map(u => ({
       id: u.id,

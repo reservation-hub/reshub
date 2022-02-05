@@ -2,6 +2,7 @@ import { TagControllerInterface as TagEndpointSocket } from '@controller-adapter
 import { TagControllerInterface as ShopEndpointSocket } from '@controller-adapter/Shop'
 import { Tag } from '@entities/Tag'
 import { OrderBy } from '@request-response-types/Common'
+import { OrderBy as EntityOrderBy } from '@entities/Common'
 import TagService from '@tag/services/TagService'
 import {
   indexSchema, searchSchema, tagLinkSchema, tagUpsertSchema,
@@ -23,10 +24,23 @@ export type TagServiceInterface = {
   setShopTags(user: UserForAuth, shopId: number, tagIds: number[]): Promise<void>
 }
 
+const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
+  switch (order) {
+    case OrderBy.ASC:
+      return EntityOrderBy.ASC
+    default:
+      return EntityOrderBy.DESC
+  }
+}
+
 const TagController: TagEndpointSocket & ShopEndpointSocket = {
   async index(query) {
     const { page, order, take } = await indexSchema.parseAsync(query)
-    const { tags, totalCount } = await TagService.fetchTagsWithTotalCount(page, order, take)
+    const { tags, totalCount } = await TagService.fetchTagsWithTotalCount(
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
+    )
     return { values: tags, totalCount }
   },
 

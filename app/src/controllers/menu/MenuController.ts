@@ -1,3 +1,4 @@
+import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { UserForAuth } from '@entities/User'
 import { Menu } from '@entities/Menu'
 import { OrderBy } from '@request-response-types/Common'
@@ -7,7 +8,7 @@ import { UnauthorizedError } from '@errors/ControllerErrors'
 import { menuUpsertSchema, indexSchema } from './schemas'
 
 export type MenuServiceInterface = {
-  fetchShopMenusWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: OrderBy, take?: number)
+  fetchShopMenusWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: EntityOrderBy, take?: number)
     : Promise<{ menus: Menu[], totalCount: number}>
   fetchShopMenu(user: UserForAuth, shopId: number, menuId: number): Promise<Menu>
   insertMenu(user: UserForAuth, shopId: number, name: string, description: string, price: number
@@ -18,6 +19,15 @@ export type MenuServiceInterface = {
   deleteMenu(user: UserForAuth, shopId: number, menuId: number): Promise<Menu>
 }
 
+const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
+  switch (order) {
+    case OrderBy.ASC:
+      return EntityOrderBy.ASC
+    default:
+      return EntityOrderBy.DESC
+  }
+}
+
 const MenuController: MenuControllerInterface = {
   async index(user, query) {
     if (!user) {
@@ -25,7 +35,13 @@ const MenuController: MenuControllerInterface = {
     }
     const { page, order, take } = await indexSchema.parseAsync(query)
     const { shopId } = query
-    const { menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(user, shopId, page, order, take)
+    const { menus, totalCount } = await MenuService.fetchShopMenusWithTotalCount(
+      user,
+      shopId,
+      page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
+    )
     return {
       values: menus.map(m => ({
         id: m.id,
