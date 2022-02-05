@@ -14,6 +14,7 @@ export type ReviewRepositoryInterface = {
   fetchShopReview(shopId: number, reviewId: number): Promise<Review | null>
   updateReview(userId: number, shopId: number, reviewId: number, text: string, score: ReviewScore):
   Promise<Review>
+  insertReview(userId: number, shopId: number, text: string, score: ReviewScore): Promise<Review>
 }
 
 export type ShopRepositoryInterface = {
@@ -58,6 +59,14 @@ const ReviewService: ReviewServiceInterface = {
       throw new UnauthorizedError('This Review is not owned by the current user')
     }
     return ReviewRepository.updateReview(user.id, shopId, reviewId, text, score)
+  },
+
+  async insertReview(user, shopId, text, score) {
+    const shopName = await ShopRepository.fetchShopName(shopId)
+    if (!shopName) {
+      throw new NotFoundError('The shop you want to make review for does not exist')
+    }
+    return ReviewRepository.insertReview(user.id, shopId, text, score)
   },
 
 }
