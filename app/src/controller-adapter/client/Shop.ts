@@ -6,7 +6,7 @@ import {
   SalonMenuListQuery, SalonMenuListResponse, SalonStylistListQuery, SalonStylistListResponse,
   SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
   SalonListByAreaQuery, SalonListByTagsQuery, SalonListByNameQuery, SalonReviewListQuery, SalonReviewListResponse,
-  SalonReviewUpdateQuery,
+  SalonReviewUpdateQuery, SalonReviewInsertQuery,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -44,6 +44,7 @@ export type ReservationControllerInterface = {
 export type ReviewControllerInterface = {
   list(user: UserForAuth | undefined, query: SalonReviewListQuery): Promise<SalonReviewListResponse>
   update(user: UserForAuth | undefined, query: SalonReviewUpdateQuery): Promise<ResponseMessage>
+  create(user: UserForAuth | undefined, query: SalonReviewInsertQuery): Promise<ResponseMessage>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -175,6 +176,17 @@ const updateReviews = async (req: Request, res: Response, next: NextFunction) : 
   } catch (e) { return next(e) }
 }
 
+const createReview = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user } = req
+    const { shopId } = res.locals
+    const { body: params } = req
+    return res.send(await ReviewController.create(user, {
+      shopId, params,
+    }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.get('/', index)
@@ -213,5 +225,6 @@ routes.post('/:shopId/reservations', parseIntIdMiddleware, protectClientRoute, c
 
 routes.get('/:shopId/reviews', parseIntIdMiddleware, shopReviews)
 routes.patch('/:shopId/reviews/:reviewId', parseIntIdMiddleware, updateReviews)
+routes.post('/:shopId/reviews', parseIntIdMiddleware, protectClientRoute, createReview)
 
 export default routes

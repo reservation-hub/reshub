@@ -77,6 +77,18 @@ const ReviewRepository: ReviewRepositoryInterface = {
     })
     return reconstructReview(updatedReview)
   },
+
+  async insertReview(userId, shopId, text, score) {
+    const review = await prisma.review.create({
+      data: {
+        shopId,
+        text,
+        userId,
+        score: convertEntityToReviewScore(score),
+      },
+    })
+    return reconstructReview(review)
+  },
 }
 
 export default ReviewRepository

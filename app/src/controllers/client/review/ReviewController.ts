@@ -1,5 +1,5 @@
 import { ReviewControllerInterface } from '@controller-adapter/client/Shop'
-import { indexSchema, updateSchema } from '@client/review/schemas'
+import { indexSchema, upsertSchema } from '@client/review/schemas'
 import { OrderBy } from '@entities/Common'
 import { Review, ReviewScore } from '@entities/Review'
 import { UserForAuth } from '@entities/User'
@@ -11,7 +11,9 @@ export type ReviewServiceInterface = {
     order?: OrderBy, take?: number): Promise<{ reviews:
       (Review & { shopName: string, clientName: string })[], totalCount: number }>
   updateReview(user: UserForAuth, shopId: number, reviewId: number, text: string, score: ReviewScore)
-  :Promise<Review>
+    :Promise<Review>
+  insertReview(user: UserForAuth, shopId: number, text: string, score: ReviewScore)
+    :Promise<Review>
 }
 
 const ReviewController: ReviewControllerInterface = {
@@ -29,9 +31,18 @@ const ReviewController: ReviewControllerInterface = {
       throw new UnauthorizedError('User not found')
     }
     const { shopId, reviewId } = query
-    const { text, score } = await updateSchema.parseAsync(query.params)
+    const { text, score } = await upsertSchema.parseAsync(query.params)
     await ReviewService.updateReview(user, shopId, reviewId, text, score)
     return 'review updated'
+  },
+  async create(user, query) {
+    if (!user) {
+      throw new UnauthorizedError('User not found in Request')
+    }
+    const { shopId } = query
+    const { text, score } = await upsertSchema.parseAsync(query.params)
+    await ReviewService.insertReview(user, shopId, text, score)
+    return 'Review created'
   },
 }
 

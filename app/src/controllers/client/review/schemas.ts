@@ -8,7 +8,7 @@ export const indexSchema = z.object({
   take: z.number().optional(),
 })
 
-export const updateSchema = z.object({
+export const upsertSchema = z.object({
   text: z.string(),
   score: z.nativeEnum(ReviewScore),
 })

@@ -13,6 +13,7 @@ export type ReviewRepositoryInterface = {
   fetchShopReviewsTotalCount(shopId: number): Promise<number>
   fetchShopReview(shopId: number, reviewId: number): Promise<Review | null>
   updateReview(userId:number, shopId: number, reviewId: number, text: string, score: ReviewScore): Promise<Review>
+  insertReview(userId:number, shopId: number, text: string, score: ReviewScore): Promise<Review>
 }
 
 export type ShopRepositoryInterface = {
