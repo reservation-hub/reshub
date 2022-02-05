@@ -2,8 +2,8 @@ import { Role } from '@entities/Role'
 import { OAuthIds } from '@entities/OAuthIds'
 
 export enum Gender {
-  MALE = 'male',
-  FEMALE = 'female',
+  MALE,
+  FEMALE,
 }
 
 export type User = {

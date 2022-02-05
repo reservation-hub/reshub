@@ -3,11 +3,12 @@ import { Request, Response, NextFunction } from 'express'
 import adminPassport from '@auth/middlewares/passport'
 import clientPassport from '@client/auth/middlewares/passport'
 import { UnauthorizedError } from '@errors/RouteErrors'
+import { RoleSlug } from '@entities/Role'
 
 export const protectAdminRoute = adminPassport.authenticate('admin-jwt', { session: false })
 export const protectClientRoute = clientPassport.authenticate('client-jwt', { session: false })
 
-export const roleCheck = (roles: string[]) => (req: Request, res: Response, next: NextFunction): void => {
+export const roleCheck = (roles: RoleSlug[]) => (req: Request, res: Response, next: NextFunction): void => {
   const { user } = req
   if (!user) return next(new UnauthorizedError('User is not found in request'))
   const authorized: boolean = roles.includes(user.role.slug)

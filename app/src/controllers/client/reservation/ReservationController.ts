@@ -7,7 +7,8 @@ import { indexSchema, reservationQuerySchema, reservationUpsertSchema } from '@c
 import ReservationService from '@client/reservation/services/ReservationService'
 import ShopService from '@client/reservation/services/ShopService'
 import { UnauthorizedError } from '@errors/ControllerErrors'
-import { OrderBy } from '@entities/Common'
+import { OrderBy } from '@request-response-types/client/Common'
+import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { Menu } from '@entities/Menu'
 import { Stylist } from '@entities/Stylist'
 import { Shop } from '@entities/Shop'
@@ -17,7 +18,7 @@ export type ReservationServiceInterface = {
     : Promise<{ id: number, reservationStartDate: Date, reservationEndDate: Date, stylistId?: number}[]>
   createReservation(user: UserForAuth, shopId: number, reservationDate: Date, menuId: number, stylistId?: number)
     : Promise<Reservation>
-  fetchUserReservationsWithShopAndMenuAndStylist(user: UserForAuth, page?: number, order?: OrderBy, take?: number)
+  fetchUserReservationsWithShopAndMenuAndStylist(user: UserForAuth, page?: number, order?: EntityOrderBy, take?: number)
     : Promise<(Reservation & { shop: Shop, menu: Menu, stylist?: Stylist })[]>
   fetchUserReservationTotalCount(user: UserForAuth): Promise<number>
   fetchUserReservationWithShopAndMenuAndStylist(user: UserForAuth, id: number)
@@ -27,6 +28,15 @@ export type ReservationServiceInterface = {
 
 export type ShopServiceInterface = {
   fetchShopSeatCount(user: UserForAuth | undefined, shopId: number): Promise<number>
+}
+
+const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
+  switch (order) {
+    case OrderBy.ASC:
+      return EntityOrderBy.ASC
+    default:
+      return EntityOrderBy.DESC
+  }
 }
 
 const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
@@ -70,7 +80,9 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
 
     const { page, order, take } = await indexSchema.parseAsync(query)
     const reservations = await ReservationService.fetchUserReservationsWithShopAndMenuAndStylist(
-      user, page, order, take,
+      user, page,
+      order ? convertOrderByToEntity(order) : order,
+      take,
     )
     const totalCount = await ReservationService.fetchUserReservationTotalCount(user)
 
