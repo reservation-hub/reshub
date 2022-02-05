@@ -88,6 +88,13 @@ const ReviewRepository: ReviewRepositoryInterface = {
     })
     return reconstructReview(review)
   },
+
+  async deleteReview(reviewId) {
+    const review = await prisma.review.delete({
+      where: { id: reviewId },
+    })
+    return reconstructReview(review)
+  },
 }
 
 export default ReviewRepository

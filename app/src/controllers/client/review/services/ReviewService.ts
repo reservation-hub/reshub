@@ -13,8 +13,9 @@ export type ReviewRepositoryInterface = {
   fetchShopReviewsTotalCount(shopId: number): Promise<number>
   fetchShopReview(shopId: number, reviewId: number): Promise<Review | null>
   updateReview(userId: number, shopId: number, reviewId: number, text: string, score: ReviewScore):
-  Promise<Review>
+    Promise<Review>
   insertReview(userId: number, shopId: number, text: string, score: ReviewScore): Promise<Review>
+  deleteReview(reviewId: number): Promise<Review>
 }
 
 export type ShopRepositoryInterface = {
@@ -69,6 +70,15 @@ const ReviewService: ReviewServiceInterface = {
     return ReviewRepository.insertReview(user.id, shopId, text, score)
   },
 
+  async deleteReview(user, shopId, reviewId) {
+    const review = await ReviewRepository.fetchShopReview(shopId, reviewId)
+    if (!review) {
+      throw new NotFoundError('The review does not exist')
+    }
+    if (review.clientId !== user.id) {
+      throw new UnauthorizedError('Cannot delete Review does not belong to the user')
+    }
+    return ReviewRepository.deleteReview(reviewId)
+  },
 }
-
 export default ReviewService
