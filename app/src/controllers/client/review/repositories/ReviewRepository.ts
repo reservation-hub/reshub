@@ -1,6 +1,6 @@
 import { ReviewScore, Review } from '@prisma/client'
 import { ReviewScore as EntityReviewScore, Review as EntityReview } from '@entities/Review'
-import { ReviewRepositoryInterface } from '@review/services/ReviewService'
+import { ReviewRepositoryInterface } from '@client/review/services/ReviewService'
 import prisma from '@lib/prisma'
 
 const convertReviewScoreToEntity = (score: ReviewScore): EntityReviewScore => {
@@ -43,12 +43,6 @@ const ReviewRepository: ReviewRepositoryInterface = {
     return prisma.review.count({ where: { shopId } })
   },
 
-  async fetchShopReview(shopId, reviewId) {
-    const review = await prisma.review.findFirst({
-      where: { id: reviewId, AND: { shopId } },
-    })
-    return review ? reconstructReview(review) : null
-  },
 }
 
 export default ReviewRepository
