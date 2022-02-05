@@ -18,6 +18,21 @@ const convertReviewScoreToEntity = (score: ReviewScore): EntityReviewScore => {
   }
 }
 
+const convertEntityToReviewScore = (score: EntityReviewScore): ReviewScore => {
+  switch (score) {
+    case EntityReviewScore.one:
+      return ReviewScore.ONE
+    case EntityReviewScore.two:
+      return ReviewScore.TWO
+    case EntityReviewScore.three:
+      return ReviewScore.THREE
+    case EntityReviewScore.four:
+      return ReviewScore.FOUR
+    default:
+      return ReviewScore.FIVE
+  }
+}
+
 const reconstructReview = (review: Review): EntityReview => ({
   id: review.id,
   text: review.text,
@@ -48,6 +63,19 @@ const ReviewRepository: ReviewRepositoryInterface = {
       where: { id: reviewId, AND: { shopId } },
     })
     return review ? reconstructReview(review) : null
+  },
+
+  async updateReview(userId, shopId, reviewId, text, score) {
+    const updatedReview = await prisma.review.update({
+      where: { id: reviewId },
+      data: {
+        userId,
+        shopId,
+        text,
+        score: convertEntityToReviewScore(score),
+      },
+    })
+    return reconstructReview(updatedReview)
   },
 }
 
