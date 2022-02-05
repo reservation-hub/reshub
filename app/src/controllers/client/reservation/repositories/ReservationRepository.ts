@@ -81,7 +81,7 @@ const ReservationRepository: ReservationRepositoryInterface = {
       where: { userId },
       take,
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { reservationDate: order },
     })
 
     return reservations.map(reconstructReservation)
