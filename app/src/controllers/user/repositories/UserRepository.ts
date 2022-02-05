@@ -3,6 +3,7 @@ import { RoleSlug } from '@entities/Role'
 import { Gender, User } from '@entities/User'
 import { UserRepositoryInterface } from '@user/services/UserService'
 import prisma from '@lib/prisma'
+import { OrderBy } from '@entities/Common'
 
 const convertRoleSlug = (slug: PrismaRoleSlug): RoleSlug => {
   switch (slug) {
@@ -50,6 +51,15 @@ const convertDBGenderToEntityGender = (gender: PrismaGender): Gender => {
   }
 }
 
+const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
+  switch (order) {
+    case OrderBy.ASC:
+      return Prisma.SortOrder.asc
+    default:
+      return Prisma.SortOrder.desc
+  }
+}
+
 const reconstructUser = (user: userWithProfileAndOAuthIdsAndRoles): User => ({
   id: user.id,
   email: user.email,
@@ -79,7 +89,7 @@ const UserRepository: UserRepositoryInterface = {
     const skipIndex = page > 1 ? (page - 1) * take : 0
     const users = await prisma.user.findMany({
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
       include: {
         profile: true,
@@ -203,7 +213,7 @@ const UserRepository: UserRepositoryInterface = {
     const usersResult = await prisma.user.findMany({
       where: { OR: [{ email: { contains: keyword } }, { username: { contains: keyword } }] },
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
       include: {
         oAuthIds: true,

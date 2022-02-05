@@ -1,6 +1,6 @@
 import { Prisma, Days } from '@prisma/client'
 import { Shop } from '@entities/Shop'
-import { ScheduleDays } from '@entities/Common'
+import { ScheduleDays, OrderBy } from '@entities/Common'
 import { ShopRepositoryInterface as ShopServiceSocket } from '@shop/services/ShopService'
 import { ShopRepositoryInterface as MenuServiceSocket } from '@shop/services/MenuService'
 import { ShopRepositoryInterface as StylistServiceSocket } from '@shop/services/StylistService'
@@ -54,6 +54,15 @@ const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
   }
 }
 
+const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
+  switch (order) {
+    case OrderBy.ASC:
+      return Prisma.SortOrder.asc
+    default:
+      return Prisma.SortOrder.desc
+  }
+}
+
 export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAndCity): Shop => ({
   id: shop.id,
   area: {
@@ -87,7 +96,7 @@ StylistServiceSocket = {
     const skipIndex = page > 1 ? (page - 1) * take : 0
     const shops = await prisma.shop.findMany({
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
@@ -181,7 +190,7 @@ StylistServiceSocket = {
     const shops = await prisma.shop.findMany({
       where: { shopDetail: { name: { contains: keyword } } },
       skip: skipIndex,
-      orderBy: { id: order },
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
       take,
       include: {
         shopDetail: true, area: true, prefecture: true, city: true,
