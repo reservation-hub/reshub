@@ -14,6 +14,8 @@ export type ReviewServiceInterface = {
     :Promise<Review>
   insertReview(user: UserForAuth, shopId: number, text: string, score: ReviewScore)
     :Promise<Review>
+  deleteReview(user: UserForAuth, shopId: number, reviewId: number)
+    :Promise<Review>
 }
 
 const ReviewController: ReviewControllerInterface = {
@@ -43,6 +45,14 @@ const ReviewController: ReviewControllerInterface = {
     const { text, score } = await upsertSchema.parseAsync(query.params)
     await ReviewService.insertReview(user, shopId, text, score)
     return 'Review created'
+  },
+  async delete(user, query) {
+    if (!user) {
+      throw new UnauthorizedError('User not found')
+    }
+    const { shopId, reviewId } = query
+    await ReviewService.deleteReview(user, shopId, reviewId)
+    return 'Review deleted'
   },
 }
 

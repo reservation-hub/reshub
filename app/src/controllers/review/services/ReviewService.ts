@@ -14,6 +14,7 @@ export type ReviewRepositoryInterface = {
   fetchShopReview(shopId: number, reviewId: number): Promise<Review | null>
   updateReview(userId:number, shopId: number, reviewId: number, text: string, score: ReviewScore): Promise<Review>
   insertReview(userId:number, shopId: number, text: string, score: ReviewScore): Promise<Review>
+  deleteReview(reviewId: number): Promise<Review>
 }
 
 export type ShopRepositoryInterface = {

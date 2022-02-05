@@ -6,7 +6,7 @@ import {
   SalonMenuListQuery, SalonMenuListResponse, SalonStylistListQuery, SalonStylistListResponse,
   SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
   SalonListByAreaQuery, SalonListByTagsQuery, SalonListByNameQuery, SalonReviewListQuery, SalonReviewListResponse,
-  SalonReviewUpdateQuery, SalonReviewInsertQuery,
+  SalonReviewUpdateQuery, SalonReviewInsertQuery, SalonReviewDeleteQuery,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -45,6 +45,7 @@ export type ReviewControllerInterface = {
   list(user: UserForAuth | undefined, query: SalonReviewListQuery): Promise<SalonReviewListResponse>
   update(user: UserForAuth | undefined, query: SalonReviewUpdateQuery): Promise<ResponseMessage>
   create(user: UserForAuth | undefined, query: SalonReviewInsertQuery): Promise<ResponseMessage>
+  delete(user: UserForAuth | undefined, query: SalonReviewDeleteQuery): Promise<ResponseMessage>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
@@ -187,6 +188,16 @@ const createReview = async (req: Request, res: Response, next: NextFunction) : P
   } catch (e) { return next(e) }
 }
 
+const deleteReview = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user } = req
+    const { shopId, reviewId } = res.locals
+    return res.send(await ReviewController.delete(user, {
+      shopId, reviewId,
+    }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.get('/', index)
@@ -226,5 +237,5 @@ routes.post('/:shopId/reservations', parseIntIdMiddleware, protectClientRoute, c
 routes.get('/:shopId/reviews', parseIntIdMiddleware, shopReviews)
 routes.patch('/:shopId/reviews/:reviewId', parseIntIdMiddleware, updateReviews)
 routes.post('/:shopId/reviews', parseIntIdMiddleware, protectClientRoute, createReview)
-
+routes.delete('/:shopId/reviews/:reviewId', parseIntIdMiddleware, protectClientRoute, deleteReview)
 export default routes
