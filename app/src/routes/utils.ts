@@ -9,10 +9,13 @@ export const protectClientRoute = clientPassport.authenticate('client-jwt', { se
 
 export const roleCheck = (roles: string[]) => (req: Request, res: Response, next: NextFunction): void => {
   const { user } = req
-  if (!user) return next(new UnauthorizedError())
-  if (!user.role) return next(new UnauthorizedError())
+  if (!user) return next(new UnauthorizedError('User is not found in request'))
   const authorized: boolean = roles.includes(user.role.slug)
-  if (!authorized) return next(new UnauthorizedError())
+  if (!authorized) {
+    return next(new UnauthorizedError(
+      `user role ${user.role.name} is not authorized to access this resource`,
+    ))
+  }
   return next()
 }
 
