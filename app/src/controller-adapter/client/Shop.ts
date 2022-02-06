@@ -6,7 +6,8 @@ import {
   SalonMenuListQuery, SalonMenuListResponse, SalonStylistListQuery, SalonStylistListResponse,
   SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
   SalonListByAreaQuery, SalonListByTagsQuery, SalonListByNameQuery, SalonReviewListQuery, SalonReviewListResponse,
-  SalonReviewUpdateQuery, SalonReviewInsertQuery, SalonReviewDeleteQuery, PopularSalonListResponse,
+  SalonReviewUpdateQuery, SalonReviewInsertQuery, SalonReviewDeleteQuery, PopularSalonListResponse, ReviewResponse,
+  ReservationResponse,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -15,7 +16,6 @@ import MenuController from '@client/menu/MenuController'
 import StylistController from '@client/stylist/StylistController'
 import ReservationController from '@client/reservation/ReservationController'
 import ReviewController from '@client/review/ReviewController'
-import { ResponseMessage } from '@request-response-types/client/Common'
 import parseToInt from '@lib/ParseInt'
 
 export type ShopControllerInterface = {
@@ -39,14 +39,14 @@ export type StylistControllerInterface = {
 
 export type ReservationControllerInterface = {
   list(user: UserForAuth | undefined, query: SalonAvailabilityQuery): Promise<SalonAvailabilityResponse>
-  create(user: UserForAuth | undefined, query: SalonSetReservationQuery): Promise<ResponseMessage>
+  create(user: UserForAuth | undefined, query: SalonSetReservationQuery): Promise<ReservationResponse>
 }
 
 export type ReviewControllerInterface = {
   list(user: UserForAuth | undefined, query: SalonReviewListQuery): Promise<SalonReviewListResponse>
-  update(user: UserForAuth | undefined, query: SalonReviewUpdateQuery): Promise<ResponseMessage>
-  create(user: UserForAuth | undefined, query: SalonReviewInsertQuery): Promise<ResponseMessage>
-  delete(user: UserForAuth | undefined, query: SalonReviewDeleteQuery): Promise<ResponseMessage>
+  update(user: UserForAuth | undefined, query: SalonReviewUpdateQuery): Promise<ReviewResponse>
+  create(user: UserForAuth | undefined, query: SalonReviewInsertQuery): Promise<ReviewResponse>
+  delete(user: UserForAuth | undefined, query: SalonReviewDeleteQuery): Promise<ReviewResponse>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {

@@ -1,29 +1,30 @@
 import { UserControllerInterface } from '@controller-adapter/User'
-import { Gender as EntityGender, User } from '@entities/User'
+import { Gender as EntityGender, User as EntityUser } from '@entities/User'
+import { User, Gender } from '@request-response-types/models/User'
 import { RoleSlug as EntityRoleSlug } from '@entities/Role'
 import { RoleSlug } from '@request-response-types/models/Role'
 import UserService from '@user/services/UserService'
 import {
   userInsertSchema, userUpdateSchema, indexSchema, searchSchema, userPasswordUpdateSchema,
 } from '@user/schemas'
-import { Gender } from '@request-response-types/models/User'
 import { OrderBy } from '@request-response-types/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { convertDateObjectToOutboundDateString, convertDateStringToDateObject } from '@lib/Date'
 
 export type UserServiceInterface = {
   fetchUsersWithTotalCount(page?: number, order?: EntityOrderBy, take?: number)
-    : Promise<{ users: User[], totalCount: number}>
-  fetchUser(id: number): Promise<User>
+    : Promise<{ users: EntityUser[], totalCount: number}>
+  fetchUser(id: number): Promise<EntityUser>
   searchUser(keyword: string, page?: number, order?: EntityOrderBy, take?: number)
-    : Promise<{ users: User[], totalCount: number}>
+    : Promise<{ users: EntityUser[], totalCount: number}>
   insertUser(password: string, confirm: string, email: string, roleSlug: EntityRoleSlug, lastNameKanji: string,
     firstNameKanji: string, lastNameKana: string, firstNameKana: string, gender: EntityGender, birthday: Date)
-    : Promise<User>
+    : Promise<EntityUser>
   updateUser(id: number, email: string, roleSlug: EntityRoleSlug, lastNameKanji: string, firstNameKanji: string,
-    lastNameKana: string, firstNameKana: string, gender: EntityGender, birthday: Date) : Promise<User>
-  updateUserPassword(id: number, oldPassword: string, newPassword: string, confirmNewPassword: string): Promise<User>
-  deleteUser(id: number): Promise<User>
+    lastNameKana: string, firstNameKana: string, gender: EntityGender, birthday: Date) : Promise<EntityUser>
+  updateUserPassword(id: number, oldPassword: string, newPassword: string, confirmNewPassword: string)
+    : Promise<EntityUser>
+  deleteUser(id: number): Promise<EntityUser>
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 
@@ -76,6 +77,24 @@ const convertRoleSlugToEntity = (slug: RoleSlug): EntityRoleSlug => {
   }
 }
 
+const recreateUser = async (u: EntityUser): Promise<User> => {
+  const userReservationCount = await UserService.fetchUsersReservationCounts([u.id])
+  return {
+    id: u.id,
+    username: u.username,
+    email: u.email,
+    role: {
+      slug: convertEntityRoleSlugToDTO(u.role.slug),
+      name: u.role.name,
+    },
+    lastNameKana: u.lastNameKana,
+    firstNameKana: u.firstNameKana,
+    birthday: u.birthday ? convertDateObjectToOutboundDateString(u.birthday) : undefined,
+    gender: u.gender ? convertEntityGenderToDTO(u.gender) : undefined,
+    reservationCount: userReservationCount[0].reservationCount,
+  }
+}
+
 const UserController: UserControllerInterface = {
   async index(query) {
     const { page, order, take } = await indexSchema.parseAsync(query)
@@ -102,22 +121,8 @@ const UserController: UserControllerInterface = {
 
   async show(query) {
     const { id } = query
-    const u = await UserService.fetchUser(id)
-    const userReservationCount = await UserService.fetchUsersReservationCounts([u.id])
-    return {
-      id: u.id,
-      username: u.username,
-      email: u.email,
-      role: {
-        slug: convertEntityRoleSlugToDTO(u.role.slug),
-        name: u.role.name,
-      },
-      lastNameKana: u.lastNameKana,
-      firstNameKana: u.firstNameKana,
-      birthday: u.birthday ? convertDateObjectToOutboundDateString(u.birthday) : undefined,
-      gender: u.gender ? convertEntityGenderToDTO(u.gender) : undefined,
-      reservationCount: userReservationCount[0].reservationCount,
-    }
+    const user = await UserService.fetchUser(id)
+    return recreateUser(user)
   },
 
   async insert(query) {
@@ -126,9 +131,9 @@ const UserController: UserControllerInterface = {
       firstNameKanji, lastNameKana, firstNameKana, gender, birthday,
     } = await userInsertSchema.parseAsync(query)
     const dateObject = convertDateStringToDateObject(birthday)
-    await UserService.insertUser(password, confirm, email, convertRoleSlugToEntity(roleSlug), lastNameKanji,
-      firstNameKanji, lastNameKana, firstNameKana, convertGenderToEntity(gender), dateObject)
-    return 'User created'
+    const user = await UserService.insertUser(password, confirm, email, convertRoleSlugToEntity(roleSlug),
+      lastNameKanji, firstNameKanji, lastNameKana, firstNameKana, convertGenderToEntity(gender), dateObject)
+    return recreateUser(user)
   },
 
   async update(query) {
@@ -137,9 +142,10 @@ const UserController: UserControllerInterface = {
       lastNameKana, firstNameKana, gender, birthday,
     } = await userUpdateSchema.parseAsync(query.params)
     const dateObject = convertDateStringToDateObject(birthday)
-    await UserService.updateUser(query.id, email, convertRoleSlugToEntity(roleSlug), lastNameKanji, firstNameKanji,
+    const user = await UserService.updateUser(query.id, email, convertRoleSlugToEntity(roleSlug),
+      lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, convertGenderToEntity(gender), dateObject)
-    return 'User updated'
+    return recreateUser(user)
   },
 
   async updatePassword(query) {
@@ -153,8 +159,8 @@ const UserController: UserControllerInterface = {
 
   async delete(query) {
     const { id } = query
-    await UserService.deleteUser(id)
-    return 'User deleted'
+    const user = await UserService.deleteUser(id)
+    return recreateUser(user)
   },
 
   async searchUsers(query) {

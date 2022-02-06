@@ -18,7 +18,7 @@ export type TagRepositoryInterface = {
   deleteTag(id: number): Promise<Tag>
   searchTag(keyword: string, page: number, order: OrderBy, take: number): Promise<Tag[]>
   searchTagTotalCount(keyword: string): Promise<number>
-  setShopTags(shopId: number, tagIds: number[]): Promise<void>
+  setShopTags(shopId: number, tagIds: number[]): Promise<Tag[]>
   fetchTagIdsNotLinkedYet(shopId: number, tagIds: number[]): Promise<number[]>
 }
 
@@ -97,7 +97,7 @@ const TagService: TagServiceInterface = {
     }
     const uniqueTagIds: number[] = tagIds.filter((n, i) => tagIds.indexOf(n) === i)
     const tagIdsToLink = await TagRepository.fetchTagIdsNotLinkedYet(shopId, uniqueTagIds)
-    await TagRepository.setShopTags(shopId, tagIdsToLink)
+    return TagRepository.setShopTags(shopId, tagIdsToLink)
   },
 }
 

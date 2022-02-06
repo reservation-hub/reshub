@@ -3,8 +3,8 @@ import { ReviewControllerInterface as UserEndpointSocket } from '@controller-ada
 import { indexSchema, upsertSchema } from '@client/review/schemas'
 import { OrderBy } from '@request-response-types/client/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
-import { Review, ReviewScore as EntityReviewScore } from '@entities/Review'
-import { ReviewScore } from '@request-response-types/client/models/Review'
+import { Review as EntityReview, ReviewScore as EntityReviewScore } from '@entities/Review'
+import { Review, ReviewScore } from '@request-response-types/client/models/Review'
 import { UserForAuth } from '@entities/User'
 import ReviewService from '@client/review/services/ReviewService'
 import { UnauthorizedError } from '@errors/ControllerErrors'
@@ -12,16 +12,16 @@ import { UnauthorizedError } from '@errors/ControllerErrors'
 export type ReviewServiceInterface = {
   fetchReviewsWithTotalCountAndShopNameAndClientName(user: UserForAuth | undefined, shopId: number, page?: number,
     order?: EntityOrderBy, take?: number): Promise<{ reviews:
-      (Review & { shopName: string, clientName: string })[], totalCount: number }>
+      (EntityReview & { shopName: string, clientName: string })[], totalCount: number }>
   fetchUserReviewsWithTotalCountAndShopNameAndClientName(user: UserForAuth, page?: number,
     order?: EntityOrderBy, take?: number): Promise<{ reviews:
-      (Review & { shopName: string, clientName: string })[], totalCount: number }>
-  updateReview(user: UserForAuth, shopId: number, reviewId: number, text: string, score: EntityReviewScore)
-    :Promise<Review>
+      (EntityReview & { shopName: string, clientName: string })[], totalCount: number }>
   insertReview(user: UserForAuth, shopId: number, text: string, score: EntityReviewScore)
-    :Promise<Review>
+    :Promise<EntityReview & { shopName: string, clientName: string }>
+  updateReview(user: UserForAuth, shopId: number, reviewId: number, text: string, score: EntityReviewScore)
+    :Promise<EntityReview & { shopName: string, clientName: string }>
   deleteReview(user: UserForAuth, shopId: number, reviewId: number)
-    :Promise<Review>
+    :Promise<EntityReview & { shopName: string, clientName: string }>
 }
 
 const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
@@ -63,6 +63,10 @@ const convertEntityReviewScoreToDTO = (reviewScore: EntityReviewScore): ReviewSc
   }
 }
 
+const reconstructReview = (review: EntityReview & { shopName: string, clientName: string }): Review => ({
+  ...review, score: convertEntityReviewScoreToDTO(review.score),
+})
+
 const ReviewController: ShopEndpointSocket & UserEndpointSocket = {
   async list(user, query) {
     const { shopId } = query
@@ -74,7 +78,7 @@ const ReviewController: ShopEndpointSocket & UserEndpointSocket = {
       order ? convertOrderByToEntity(order) : order,
       take,
     )
-    return { values: reviews.map(r => ({ ...r, reviewScore: convertEntityReviewScoreToDTO(r.score) })), totalCount }
+    return { values: reviews.map(reconstructReview), totalCount }
   },
 
   async userReviewList(user, query) {
@@ -88,7 +92,7 @@ const ReviewController: ShopEndpointSocket & UserEndpointSocket = {
       order ? convertOrderByToEntity(order) : order,
       take,
     )
-    return { values: reviews.map(r => ({ ...r, reviewScore: convertEntityReviewScoreToDTO(r.score) })), totalCount }
+    return { values: reviews.map(reconstructReview), totalCount }
   },
 
   async create(user, query) {
@@ -97,8 +101,8 @@ const ReviewController: ShopEndpointSocket & UserEndpointSocket = {
     }
     const { shopId } = query
     const { text, score } = await upsertSchema.parseAsync(query.params)
-    await ReviewService.insertReview(user, shopId, text, convertReviewScoreToEntity(score))
-    return 'Review created'
+    const review = await ReviewService.insertReview(user, shopId, text, convertReviewScoreToEntity(score))
+    return reconstructReview(review)
   },
 
   async update(user, query) {
@@ -107,8 +111,8 @@ const ReviewController: ShopEndpointSocket & UserEndpointSocket = {
     }
     const { shopId, reviewId } = query
     const { text, score } = await upsertSchema.parseAsync(query.params)
-    await ReviewService.updateReview(user, shopId, reviewId, text, convertReviewScoreToEntity(score))
-    return 'Review updated'
+    const review = await ReviewService.updateReview(user, shopId, reviewId, text, convertReviewScoreToEntity(score))
+    return reconstructReview(review)
   },
 
   async delete(user, query) {
@@ -116,8 +120,8 @@ const ReviewController: ShopEndpointSocket & UserEndpointSocket = {
       throw new UnauthorizedError('User not found in request')
     }
     const { shopId, reviewId } = query
-    await ReviewService.deleteReview(user, shopId, reviewId)
-    return 'Review deleted'
+    const review = await ReviewService.deleteReview(user, shopId, reviewId)
+    return reconstructReview(review)
   },
 
 }

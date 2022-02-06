@@ -1,5 +1,6 @@
 import { convertDateTimeObjectToDateTimeString, convertDateStringToDateObject } from '@lib/Date'
-import { Reservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
+import { Reservation as EntityReservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
+import { Reservation, ReservationStatus } from '@request-response-types/client/models/Reservation'
 import { UserForAuth } from '@entities/User'
 import { ReservationControllerInterface as ShopEndpointSocket } from '@controller-adapter/client/Shop'
 import { ReservationControllerInterface as UserEndpointSocket } from '@controller-adapter/client/User'
@@ -12,19 +13,19 @@ import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { Menu } from '@entities/Menu'
 import { Stylist } from '@entities/Stylist'
 import { Shop } from '@entities/Shop'
-import { ReservationStatus } from '@request-response-types/client/models/Reservation'
 
 export type ReservationServiceInterface = {
   fetchShopReservationsForAvailability(user: UserForAuth | undefined, shopId: number, reservationDate: Date)
     : Promise<{ id: number, reservationStartDate: Date, reservationEndDate: Date, stylistId?: number}[]>
   createReservation(user: UserForAuth, shopId: number, reservationDate: Date, menuId: number, stylistId?: number)
-    : Promise<Reservation>
+    : Promise<EntityReservation & { shop: Shop, menu: Menu, stylist?: Stylist }>
   fetchUserReservationsWithShopAndMenuAndStylist(user: UserForAuth, page?: number, order?: EntityOrderBy, take?: number)
-    : Promise<(Reservation & { shop: Shop, menu: Menu, stylist?: Stylist })[]>
+    : Promise<(EntityReservation & { shop: Shop, menu: Menu, stylist?: Stylist })[]>
   fetchUserReservationTotalCount(user: UserForAuth): Promise<number>
   fetchUserReservationWithShopAndMenuAndStylist(user: UserForAuth, id: number)
-    : Promise<(Reservation & { shop: Shop, menu: Menu, stylist?: Stylist })>
-  cancelUserReservation(user: UserForAuth, id: number): Promise<Reservation>
+    : Promise<EntityReservation & { shop: Shop, menu: Menu, stylist?: Stylist }>
+  cancelUserReservation(user: UserForAuth, id: number)
+    : Promise<EntityReservation & { shop: Shop, menu: Menu, stylist?: Stylist }>
 }
 
 export type ShopServiceInterface = {
@@ -50,6 +51,19 @@ const convertStatusToPDO = (status: EntityReservationStatus): ReservationStatus 
       return ReservationStatus.RESERVED
   }
 }
+
+const reconstructReservation = (reservation: EntityReservation & { shop: Shop, menu: Menu, stylist?: Stylist })
+  : Reservation => ({
+  id: reservation.id,
+  shopId: reservation.shopId,
+  shopName: reservation.shop.name,
+  menuName: reservation.menu.name,
+  menuId: reservation.menuId,
+  status: convertStatusToPDO(reservation.status),
+  reservationDate: convertDateTimeObjectToDateTimeString(reservation.reservationDate),
+  stylistName: reservation.stylist?.name,
+  stylistId: reservation.stylistId,
+})
 
 const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
   async list(user, query) {
@@ -80,9 +94,9 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
       reservationDate, menuId, stylistId,
     } = await reservationUpsertSchema.parseAsync(query.params)
     const reservationDateObject = convertDateStringToDateObject(reservationDate)
-    await ReservationService.createReservation(user, shopId, reservationDateObject, menuId, stylistId)
-
-    return 'Reservation created successfully'
+    const reservation = await ReservationService
+      .createReservation(user, shopId, reservationDateObject, menuId, stylistId)
+    return reconstructReservation(reservation)
   },
 
   async userReservationsList(user, query) {
@@ -138,9 +152,9 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
     }
 
     const { id } = query
-    await ReservationService.cancelUserReservation(user, id)
+    const reservation = await ReservationService.cancelUserReservation(user, id)
 
-    return 'Reservation cancelled'
+    return reconstructReservation(reservation)
   },
 }
 

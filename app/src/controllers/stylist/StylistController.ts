@@ -1,5 +1,6 @@
 import { UserForAuth } from '@entities/User'
-import { Stylist } from '@entities/Stylist'
+import { Stylist as EntityStylist } from '@entities/Stylist'
+import { Stylist } from '@request-response-types/models/Stylist'
 import { OrderBy } from '@request-response-types/Common'
 import { indexSchema, shopStylistUpsertSchema } from '@stylist/schemas'
 import StylistService from '@stylist/services/StylistService'
@@ -11,16 +12,16 @@ import { UnauthorizedError } from '@errors/ControllerErrors'
 
 export type StylistServiceInterface = {
   fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: EntityOrderBy,
-    take?: number): Promise<{ stylists: Stylist[], totalCount: number }>
-  fetchStylist(user: UserForAuth, shopId: number, stylistId: number): Promise<Stylist>
+    take?: number): Promise<{ stylists: EntityStylist[], totalCount: number }>
+  fetchStylist(user: UserForAuth, shopId: number, stylistId: number): Promise<EntityStylist>
   insertStylist(user: UserForAuth, shopId: number, name: string, price: number,
     days:EntityScheduleDays[], startTime:string, endTime:string)
-    : Promise<Stylist>
+    : Promise<EntityStylist>
   updateStylist(user: UserForAuth, shopId: number, stylistId: number, name: string, price: number,
     days: EntityScheduleDays[], startTime: string, endTime: string)
-    : Promise<Stylist>
+    : Promise<EntityStylist>
   deleteStylist(user: UserForAuth, shopId: number, stylistId: number)
-    : Promise<Stylist>
+    : Promise<EntityStylist>
   fetchStylistsReservationCounts(stylistIds: number[]): Promise<{ stylistId: number, reservationCount: number }[]>
 }
 
@@ -75,6 +76,20 @@ const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
   }
 }
 
+const recreateStylist = async (s: EntityStylist, user: UserForAuth, shopId: number): Promise<Stylist> => {
+  const shopName = await ShopService.fetchShopName(user, shopId)
+  const stylistReservationCount = (
+    await StylistService.fetchStylistsReservationCounts([s.id]))[0].reservationCount
+  return {
+    ...s,
+    startTime: s.startTime,
+    endTime: s.endTime,
+    days: s.days.map(convertEntityDaysToOutboundDays),
+    shopName,
+    reservationCount: stylistReservationCount,
+  }
+}
+
 const StylistController: StylistControllerInterface = {
   async index(user, query) {
     if (!user) {
@@ -106,17 +121,7 @@ const StylistController: StylistControllerInterface = {
     }
     const { shopId, stylistId } = query
     const stylist = await StylistService.fetchStylist(user, shopId, stylistId)
-    const shopName = await ShopService.fetchShopName(user, shopId)
-    const stylistReservationCount = (
-      await StylistService.fetchStylistsReservationCounts([stylist.id]))[0].reservationCount
-    return {
-      ...stylist,
-      startTime: stylist.startTime,
-      endTime: stylist.endTime,
-      days: stylist.days.map(convertEntityDaysToOutboundDays),
-      shopName,
-      reservationCount: stylistReservationCount,
-    }
+    return recreateStylist(stylist, user, shopId)
   },
 
   async insert(user, query) {
@@ -128,8 +133,8 @@ const StylistController: StylistControllerInterface = {
     } = await shopStylistUpsertSchema.parseAsync(query.params)
     const { shopId } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    await StylistService.insertStylist(user, shopId, name, price, entityDays, startTime, endTime)
-    return 'Stylist created'
+    const stylist = await StylistService.insertStylist(user, shopId, name, price, entityDays, startTime, endTime)
+    return recreateStylist(stylist, user, shopId)
   },
 
   async update(user, query) {
@@ -141,8 +146,9 @@ const StylistController: StylistControllerInterface = {
     } = await shopStylistUpsertSchema.parseAsync(query.params)
     const { shopId, stylistId } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    await StylistService.updateStylist(user, shopId, stylistId, name, price, entityDays, startTime, endTime)
-    return 'Stylist updated'
+    const stylist = await StylistService.updateStylist(user, shopId, stylistId, name, price, entityDays,
+      startTime, endTime)
+    return recreateStylist(stylist, user, shopId)
   },
 
   async delete(user, query) {
@@ -150,8 +156,8 @@ const StylistController: StylistControllerInterface = {
       throw new UnauthorizedError('User not found in request')
     }
     const { shopId, stylistId } = query
-    await StylistService.deleteStylist(user, shopId, stylistId)
-    return 'Stylist deleted'
+    const stylist = await StylistService.deleteStylist(user, shopId, stylistId)
+    return recreateStylist(stylist, user, shopId)
   },
 }
 

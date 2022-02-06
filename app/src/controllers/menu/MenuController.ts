@@ -70,8 +70,7 @@ const MenuController: MenuControllerInterface = {
       name, description, price, duration,
     } = await menuUpsertSchema.parseAsync(query.params)
     const { shopId } = query
-    await MenuService.insertMenu(user, shopId, name, description, price, duration)
-    return 'Menu created'
+    return MenuService.insertMenu(user, shopId, name, description, price, duration)
   },
 
   async update(user, query) {
@@ -82,8 +81,7 @@ const MenuController: MenuControllerInterface = {
       name, description, price, duration,
     } = await menuUpsertSchema.parseAsync(query.params)
     const { shopId, menuId } = query
-    await MenuService.updateMenu(user, shopId, menuId, name, description, price, duration)
-    return 'Menu updated'
+    return MenuService.updateMenu(user, shopId, menuId, name, description, price, duration)
   },
 
   async delete(user, query) {
@@ -91,8 +89,7 @@ const MenuController: MenuControllerInterface = {
       throw new UnauthorizedError('User not found in request')
     }
     const { shopId, menuId } = query
-    await MenuService.deleteMenu(user, shopId, menuId)
-    return 'Menu deleted'
+    return MenuService.deleteMenu(user, shopId, menuId)
   },
 }
 

@@ -103,6 +103,27 @@ const recreateReservationList = async (reservations: Reservation[]) => {
   }))
 }
 
+const reconstructReservation = async (reservation: Reservation) => {
+  const menu = (await MenuRepository.fetchMenusByIds([reservation.menuId]))[0]
+  const client = (await UserRepository.fetchUsersByIds([reservation.clientId]))[0]
+  const shop = (await ShopRepository.fetchShopsByIds([reservation.shopId]))[0]
+  let stylist: Stylist | undefined
+  if (reservation.stylistId) {
+    stylist = (await StylistRepository.fetchStylistsByIds([reservation.stylistId])).pop()
+  }
+
+  const reservationEndDate = new Date(reservation.reservationDate.getTime() + menu.duration * 1000 * 60)
+
+  return {
+    ...reservation,
+    reservationEndDate,
+    shop,
+    stylist,
+    menu,
+    client,
+  }
+}
+
 const ReservationService: ReservationServiceInterface = {
   async fetchReservationsWithClientAndStylistAndMenu(user, shopId, page = 1, order = OrderBy.ASC, take = 10) {
     if (user.role.slug === RoleSlug.SHOP_STAFF && !await isUserOwnedShop(user.id, shopId)) {
@@ -139,25 +160,7 @@ const ReservationService: ReservationServiceInterface = {
     if (!reservation) {
       throw new NotFoundError('Reservation does not exist')
     }
-
-    const menu = (await MenuRepository.fetchMenusByIds([reservation.menuId]))[0]
-    const client = (await UserRepository.fetchUsersByIds([reservation.clientId]))[0]
-    const shop = (await ShopRepository.fetchShopsByIds([reservation.shopId]))[0]
-    let stylist: Stylist | undefined
-    if (reservation.stylistId) {
-      stylist = (await StylistRepository.fetchStylistsByIds([reservation.stylistId])).pop()
-    }
-
-    const reservationEndDate = new Date(reservation.reservationDate.getTime() + menu.duration * 1000 * 60)
-
-    return {
-      ...reservation,
-      reservationEndDate,
-      shop,
-      stylist,
-      menu,
-      client,
-    }
+    return reconstructReservation(reservation)
   },
 
   async insertReservation(user, shopId, reservationDate, clientId, menuId, stylistId?) {
@@ -228,7 +231,9 @@ const ReservationService: ReservationServiceInterface = {
       }
     }
 
-    return ReservationRepository.insertReservation(reservationDate, clientId, shopId, menuId, stylistId)
+    const reservation = await ReservationRepository.insertReservation(reservationDate, clientId, shopId,
+      menuId, stylistId)
+    return reconstructReservation(reservation)
   },
 
   async updateReservation(user, shopId, reservationId, reservationDate, clientId, menuId, stylistId) {
@@ -322,8 +327,9 @@ const ReservationService: ReservationServiceInterface = {
       }
     }
 
-    return ReservationRepository.updateReservation(reservationId, reservationDate,
+    const reservation = await ReservationRepository.updateReservation(reservationId, reservationDate,
       clientId, shopId, menuId, stylistId)
+    return reconstructReservation(reservation)
   },
 
   async cancelReservation(user, shopId, reservationId) {
@@ -336,7 +342,8 @@ const ReservationService: ReservationServiceInterface = {
       throw new NotFoundError('Reservation does not exist')
     }
 
-    return ReservationRepository.cancelReservation(reservationId)
+    const reservation = await ReservationRepository.cancelReservation(reservationId)
+    return reconstructReservation(reservation)
   },
 
 }

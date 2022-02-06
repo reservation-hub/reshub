@@ -1,7 +1,7 @@
 import { UserControllerInterface } from '@controller-adapter/client/User'
 import UserService from '@client/user/services/UserService'
-import { Gender } from '@request-response-types/client/models/User'
-import { Gender as EntityGender, User } from '@entities/User'
+import { Gender, User } from '@request-response-types/client/models/User'
+import { Gender as EntityGender, User as EntityUser } from '@entities/User'
 import { signUpSchema, updateUserSchema, userPasswordUpdateSchema } from '@client/user/schemas'
 import MailService from '@client/user/services/MailService'
 import { UnauthorizedError } from '@errors/ControllerErrors'
@@ -9,11 +9,12 @@ import { convertDateObjectToOutboundDateString, convertDateStringToDateObject } 
 
 export type UserServiceInterface = {
   fetchUserWithReservationCountAndReviewCount(id: number)
-    : Promise<(User & { reservationCount: number, reviewCount: number })>
-  signUpUser(email: string, username: string, password: string, confirm: string): Promise<User>
+    : Promise<(EntityUser & { reservationCount: number, reviewCount: number })>
+  signUpUser(email: string, username: string, password: string, confirm: string): Promise<EntityUser>
   updateUser(id: number, lastNameKanji: string, firstNameKanji: string, lastNameKana: string,
-    firstNameKana: string, gender: Gender, birthday: Date): Promise<User>
-  updateUserPassword(id: number, oldPassword: string, newPassword: string, confirmNewPassword: string): Promise<User>
+    firstNameKana: string, gender: Gender, birthday: Date): Promise<EntityUser>
+  updateUserPassword(id: number, oldPassword: string, newPassword: string, confirmNewPassword: string)
+    : Promise<EntityUser>
 }
 
 export type MailServiceInterface = {
@@ -38,32 +39,36 @@ const convertEntityGenderToDTOGender = (gender: EntityGender): Gender => {
   }
 }
 
+const reconstructUser = async (userId: number): Promise<User> => {
+  const u = await UserService.fetchUserWithReservationCountAndReviewCount(userId)
+  return {
+    id: u.id,
+    username: u.username!,
+    email: u.email,
+    lastNameKana: u.lastNameKana,
+    firstNameKana: u.firstNameKana,
+    birthday: u.birthday ? convertDateObjectToOutboundDateString(u.birthday) : undefined,
+    gender: u.gender ? convertEntityGenderToDTOGender(u.gender) : undefined,
+    reservationCount: u.reservationCount,
+    reviewCount: u.reviewCount,
+  }
+}
+
 const UserController: UserControllerInterface = {
   async detail(user) {
     if (!user) {
       throw new UnauthorizedError('User not found in request')
     }
-    const u = await UserService.fetchUserWithReservationCountAndReviewCount(user.id)
-    return {
-      id: u.id,
-      username: u.username!,
-      email: u.email,
-      lastNameKana: u.lastNameKana,
-      firstNameKana: u.firstNameKana,
-      birthday: u.birthday ? convertDateObjectToOutboundDateString(u.birthday) : undefined,
-      gender: u.gender ? convertEntityGenderToDTOGender(u.gender) : undefined,
-      reservationCount: u.reservationCount,
-      reviewCount: u.reviewCount,
-    }
+    return reconstructUser(user.id)
   },
 
   async signUp(query) {
     const {
       email, username, password, confirm,
     } = await signUpSchema.parseAsync(query)
-    await UserService.signUpUser(email, username, password, confirm)
+    const user = await UserService.signUpUser(email, username, password, confirm)
     await MailService.sendSignUpEmail(email)
-    return 'User created'
+    return reconstructUser(user.id)
   },
 
   async update(user, query) {
@@ -78,7 +83,7 @@ const UserController: UserControllerInterface = {
     await UserService.updateUser(user.id, lastNameKanji, firstNameKanji, lastNameKana, firstNameKana,
       convertGenderToEntity(gender), dateObject)
 
-    return 'User updated'
+    return reconstructUser(user.id)
   },
 
   async updatePassword(user, query) {

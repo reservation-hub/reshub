@@ -14,10 +14,10 @@ import parseToInt from '@lib/ParseInt'
 export type UserControllerInterface = {
   index(query: UserListQuery): Promise<UserListResponse>
   show(query: UserQuery): Promise<UserResponse>
-  insert(query: InsertUserQuery): Promise<ResponseMessage>
-  update(query: UpdateUserQuery): Promise<ResponseMessage>
+  insert(query: InsertUserQuery): Promise<UserResponse>
+  update(query: UpdateUserQuery): Promise<UserResponse>
   updatePassword(query: UpdateUserPasswordQuery): Promise<ResponseMessage>
-  delete(query: deleteUserQuery): Promise<ResponseMessage>
+  delete(query: deleteUserQuery): Promise<UserResponse>
   searchUsers(query: userSearchQuery): Promise<UserListResponse>
 }
 
