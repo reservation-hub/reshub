@@ -216,7 +216,7 @@ const ShopController: ShopControllerInterface = {
       reservations: reservationList,
       menu: menus,
       reservationCount: reservations.length,
-      totalSales: totalSalesForCurrentMonth,
+      totalSalesForCurrentMonth,
       tags: shopTags,
       reviews: reviewList,
     }
