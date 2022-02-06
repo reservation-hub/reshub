@@ -7,7 +7,6 @@ import ReviewRepository from '@client/review/repositories/ReviewRepository'
 import ShopRepository from '@client/review/repositories/ShopRepository'
 import UserRepository from '@client/review/repositories/UserRepository'
 import { UnauthorizedError } from '@errors/RouteErrors'
-import Logger from '@lib/Logger'
 
 export type ReviewRepositoryInterface = {
   fetchShopReviews(shopId: number, page: number, order: OrderBy, take: number): Promise<Review[]>
@@ -29,6 +28,19 @@ export type ShopRepositoryInterface = {
 export type UserRepositoryInterface = {
   fetchUser(userId: number): Promise<User | null>
   fetchUsers(userIds: number[]): Promise<User[]>
+}
+
+const reconstructReview = async (review: Review, userId: number, shopName: string)
+  : Promise<Review & { shopName: string, clientName: string }> => {
+  const user = await UserRepository.fetchUser(userId)
+  if (!user) {
+    throw new NotFoundError('User not found')
+  }
+  return {
+    ...review,
+    shopName,
+    clientName: `${user.lastNameKanji} ${user.firstNameKanji}`,
+  }
 }
 
 const ReviewService: ReviewServiceInterface = {
@@ -81,7 +93,8 @@ const ReviewService: ReviewServiceInterface = {
     if (!shopName) {
       throw new NotFoundError('The shop you want to make review for does not exist')
     }
-    return ReviewRepository.insertReview(user.id, shopId, text, score)
+    const review = await ReviewRepository.insertReview(user.id, shopId, text, score)
+    return reconstructReview(review, user.id, shopName)
   },
 
   async updateReview(user, shopId, reviewId, text, score) {
@@ -95,7 +108,12 @@ const ReviewService: ReviewServiceInterface = {
     if (review.shopId !== shopId) {
       throw new UnauthorizedError('This Review is not of the shop')
     }
-    return ReviewRepository.updateReview(user.id, shopId, reviewId, text, score)
+    const shopName = await ShopRepository.fetchShopName(shopId)
+    if (!shopName) {
+      throw new NotFoundError('The shop you want to make review for does not exist')
+    }
+    await ReviewRepository.updateReview(user.id, shopId, reviewId, text, score)
+    return reconstructReview(review, user.id, shopName)
   },
 
   async deleteReview(user, shopId, reviewId) {
@@ -109,7 +127,12 @@ const ReviewService: ReviewServiceInterface = {
     if (review.shopId !== shopId) {
       throw new UnauthorizedError('This Review is not of the shop')
     }
-    return ReviewRepository.deleteReview(reviewId)
+    const shopName = await ShopRepository.fetchShopName(shopId)
+    if (!shopName) {
+      throw new NotFoundError('The shop you want to make review for does not exist')
+    }
+    await ReviewRepository.deleteReview(reviewId)
+    return reconstructReview(review, user.id, shopName)
   },
 }
 export default ReviewService

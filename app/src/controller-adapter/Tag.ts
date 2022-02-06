@@ -6,16 +6,15 @@ import {
   TagListQuery, TagListResponse, TagQuery, TagResponse,
   InsertTagQuery, UpdateTagQuery, DeleteTagQuery, TagSearchQuery,
 } from '@request-response-types/Tag'
-import { ResponseMessage } from '@request-response-types/Common'
 import TagController from '@tag/TagController'
 import parseToInt from '@lib/ParseInt'
 
 export type TagControllerInterface = {
   index(query: TagListQuery): Promise<TagListResponse>
   show(query: TagQuery): Promise<TagResponse>
-  insert(query: InsertTagQuery): Promise<ResponseMessage>
-  update(query: UpdateTagQuery): Promise<ResponseMessage>
-  delete(query: DeleteTagQuery): Promise<ResponseMessage>
+  insert(query: InsertTagQuery): Promise<TagResponse>
+  update(query: UpdateTagQuery): Promise<TagResponse>
+  delete(query: DeleteTagQuery): Promise<TagResponse>
   search(query: TagSearchQuery): Promise<TagListResponse>
 }
 

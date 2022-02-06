@@ -21,7 +21,7 @@ export type TagServiceInterface = {
   deleteTag(id: number): Promise<Tag>
   searchTag(keyword: string, page?: number, order?: EntityOrderBy, take?: number)
     : Promise<{ tags: Tag[], totalCount: number }>
-  setShopTags(user: UserForAuth, shopId: number, tagIds: number[]): Promise<void>
+  setShopTags(user: UserForAuth, shopId: number, tagIds: number[]): Promise<Tag[]>
 }
 
 const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
@@ -51,21 +51,18 @@ const TagController: TagEndpointSocket & ShopEndpointSocket = {
 
   async insert(query) {
     const { slug } = await tagUpsertSchema.parseAsync(query)
-    await TagService.insertTag(slug)
-    return 'Tag created'
+    return TagService.insertTag(slug)
   },
 
   async update(query) {
     const { id, params } = query
     const { slug } = await tagUpsertSchema.parseAsync(params)
-    await TagService.updateTag(id, slug)
-    return 'Tag updated'
+    return TagService.updateTag(id, slug)
   },
 
   async delete(query) {
     const { id } = query
-    await TagService.deleteTag(id)
-    return 'Tag deleted'
+    return TagService.deleteTag(id)
   },
 
   async search(query) {
@@ -103,9 +100,7 @@ const TagController: TagEndpointSocket & ShopEndpointSocket = {
     }
     const { shopId } = query
     const { tagIds } = await tagLinkSchema.parseAsync(query.params)
-    await TagService.setShopTags(user, shopId, tagIds)
-
-    return 'Tags linked to shop'
+    return TagService.setShopTags(user, shopId, tagIds)
   },
 
 }

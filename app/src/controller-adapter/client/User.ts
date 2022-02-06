@@ -6,6 +6,7 @@ import {
   InsertUserQuery, UpdateUserQuery, UpdateUserPasswordQuery, UserReservationListQuery,
   UserReservationListResponse, UserReservationQuery, ReservationResponse, CancelUserReservationQuery,
   UserResponse, UserReviewListQuery, UserReviewListResponse, UserReviewUpdateQuery, UserReviewDeleteQuery,
+  ReviewResponse,
 } from '@request-response-types/client/User'
 import UserController from '@client/user/UserController'
 import ReservationController from '@client/reservation/ReservationController'
@@ -13,13 +14,12 @@ import ReviewController from '@client/review/ReviewController'
 import { UserForAuth } from '@entities/User'
 import { protectClientRoute, parseIntIdMiddleware } from '@routes/utils'
 import parseToInt from '@lib/ParseInt'
-import Logger from '@lib/Logger'
 import { verifyIfNotLoggedInYet } from './Auth'
 
 export type UserControllerInterface = {
   detail(user: UserForAuth | undefined): Promise<UserResponse>
-  signUp(query: InsertUserQuery): Promise<ResponseMessage>
-  update(user: UserForAuth | undefined, query: UpdateUserQuery): Promise<ResponseMessage>
+  signUp(query: InsertUserQuery): Promise<UserResponse>
+  update(user: UserForAuth | undefined, query: UpdateUserQuery): Promise<UserResponse>
   updatePassword(user: UserForAuth | undefined, query: UpdateUserPasswordQuery): Promise<ResponseMessage>
 }
 
@@ -27,13 +27,13 @@ export type ReservationControllerInterface = {
   userReservationsList(user: UserForAuth | undefined, query: UserReservationListQuery)
     : Promise<UserReservationListResponse>
   userReservation(user: UserForAuth | undefined, query: UserReservationQuery): Promise<ReservationResponse>
-  cancelUserReservation(user: UserForAuth | undefined, query: CancelUserReservationQuery): Promise<ResponseMessage>
+  cancelUserReservation(user: UserForAuth | undefined, query: CancelUserReservationQuery): Promise<ReservationResponse>
 }
 
 export type ReviewControllerInterface = {
   userReviewList(user: UserForAuth | undefined, query: UserReviewListQuery): Promise<UserReviewListResponse>
-  update(user: UserForAuth | undefined, query: UserReviewUpdateQuery): Promise<ResponseMessage>
-  delete(user: UserForAuth | undefined, query: UserReviewDeleteQuery): Promise<ResponseMessage>
+  update(user: UserForAuth | undefined, query: UserReviewUpdateQuery): Promise<ReviewResponse>
+  delete(user: UserForAuth | undefined, query: UserReviewDeleteQuery): Promise<ReviewResponse>
 }
 
 const showUser = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {

@@ -9,10 +9,9 @@ import {
   InsertShopReservationQuery, UpdateShopReservationQuery, DeleteShopReservationQuery, StylistListQuery,
   StylistListResponse, StylistQuery, StylistResponse, MenuListQuery, MenuListResponse, MenuQuery,
   MenuResponse, ReservationResponse, ReservationQuery, ReservationListForCalendarQuery, ReviewListQuery,
-  ReviewListResponse, ReviewQuery, ReviewResponse, TagListQuery, TagListResponse, TagLinkQuery,
+  ReviewListResponse, ReviewQuery, ReviewResponse, TagListQuery, TagListResponse, TagLinkQuery, TagLinkResponse,
 } from '@request-response-types/Shop'
 import { UserForAuth } from '@entities/User'
-import { ResponseMessage } from '@request-response-types/Common'
 import ShopController from '@shop/ShopController'
 import MenuController from '@menu/MenuController'
 import StylistController from '@stylist/StylistController'
@@ -24,26 +23,26 @@ import parseToInt from '@lib/ParseInt'
 export type ShopControllerInterface = {
   index(user: UserForAuth | undefined, query: ShopListQuery): Promise<ShopListResponse>
   show(user: UserForAuth | undefined, query: ShopQuery): Promise<ShopResponse>
-  insert(user: UserForAuth | undefined, query: InsertShopQuery): Promise<ResponseMessage>
-  update(user: UserForAuth | undefined, query: UpdateShopQuery): Promise<ResponseMessage>
-  delete(user: UserForAuth | undefined, query: DeleteShopQuery): Promise<ResponseMessage>
+  insert(user: UserForAuth | undefined, query: InsertShopQuery): Promise<ShopResponse>
+  update(user: UserForAuth | undefined, query: UpdateShopQuery): Promise<ShopResponse>
+  delete(user: UserForAuth | undefined, query: DeleteShopQuery): Promise<ShopResponse>
   searchShops(user: UserForAuth | undefined, query: ShopSearchQuery): Promise<ShopListResponse>
 }
 
 export type MenuControllerInterface = {
   index(user: UserForAuth | undefined, query: MenuListQuery): Promise<MenuListResponse>
   show(user: UserForAuth | undefined, query: MenuQuery): Promise<MenuResponse>
-  insert(user: UserForAuth | undefined, query: InsertMenuQuery): Promise<ResponseMessage>
-  update(user: UserForAuth | undefined, query: UpdateMenuQuery): Promise<ResponseMessage>
-  delete(user: UserForAuth | undefined, query: DeleteMenuQuery): Promise<ResponseMessage>
+  insert(user: UserForAuth | undefined, query: InsertMenuQuery): Promise<MenuResponse>
+  update(user: UserForAuth | undefined, query: UpdateMenuQuery): Promise<MenuResponse>
+  delete(user: UserForAuth | undefined, query: DeleteMenuQuery): Promise<MenuResponse>
 }
 
 export type StylistControllerInterface = {
   index(user: UserForAuth | undefined, query: StylistListQuery): Promise<StylistListResponse>
   show(user: UserForAuth | undefined, query: StylistQuery): Promise<StylistResponse>
-  insert(user: UserForAuth | undefined, query: InsertStylistQuery): Promise<ResponseMessage>
-  update(user: UserForAuth | undefined, query: UpdateStylistQuery): Promise<ResponseMessage>
-  delete(user: UserForAuth | undefined, query: DeleteStylistQuery): Promise<ResponseMessage>
+  insert(user: UserForAuth | undefined, query: InsertStylistQuery): Promise<StylistResponse>
+  update(user: UserForAuth | undefined, query: UpdateStylistQuery): Promise<StylistResponse>
+  delete(user: UserForAuth | undefined, query: DeleteStylistQuery): Promise<StylistResponse>
 }
 
 export type ReservationControllerInterface = {
@@ -51,9 +50,9 @@ export type ReservationControllerInterface = {
   indexForCalendar(user: UserForAuth | undefined, query: ReservationListForCalendarQuery)
     : Promise<ReservationListResponse>
   show(user: UserForAuth | undefined, query: ReservationQuery): Promise<ReservationResponse>
-  insert(user: UserForAuth | undefined, query: InsertShopReservationQuery): Promise<ResponseMessage>
-  update(user: UserForAuth | undefined, query: UpdateShopReservationQuery): Promise<ResponseMessage>
-  delete(user: UserForAuth | undefined, query: DeleteShopReservationQuery): Promise<ResponseMessage>
+  insert(user: UserForAuth | undefined, query: InsertShopReservationQuery): Promise<ReservationResponse>
+  update(user: UserForAuth | undefined, query: UpdateShopReservationQuery): Promise<ReservationResponse>
+  delete(user: UserForAuth | undefined, query: DeleteShopReservationQuery): Promise<ReservationResponse>
 }
 
 export type ReviewControllerInterface = {
@@ -63,7 +62,7 @@ export type ReviewControllerInterface = {
 
 export type TagControllerInterface = {
   getShopTags(user: UserForAuth | undefined, query: TagListQuery): Promise<TagListResponse>
-  linkTagsToShop(user: UserForAuth | undefined, query: TagLinkQuery): Promise<ResponseMessage>
+  linkTagsToShop(user: UserForAuth | undefined, query: TagLinkQuery): Promise<TagLinkResponse>
 }
 
 const index = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {

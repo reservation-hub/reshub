@@ -1,5 +1,6 @@
 import { convertDateTimeObjectToDateTimeString } from '@lib/Date'
-import { Shop } from '@entities/Shop'
+import { Shop as EntityShop } from '@entities/Shop'
+import { Shop } from '@request-response-types/models/Shop'
 import { Stylist } from '@entities/Stylist'
 import { ShopControllerInterface } from '@controller-adapter/Shop'
 import { User, UserForAuth } from '@entities/User'
@@ -23,17 +24,17 @@ import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth, page?: number, order?: EntityOrderBy, take?: number)
-    : Promise<{ shops: Shop[], totalCount: number }>
-  fetchShop(user: UserForAuth, id: number): Promise<Shop>
+    : Promise<{ shops: EntityShop[], totalCount: number }>
+  fetchShop(user: UserForAuth, id: number): Promise<EntityShop>
   insertShop(user: UserForAuth, name: string, areaId: number, prefectureId: number,
     cityId: number, address: string, phoneNumber: string, days: EntityScheduleDays[],
-    seats: number, startTime: string, endTime: string, details: string): Promise<Shop>
+    seats: number, startTime: string, endTime: string, details: string): Promise<EntityShop>
   updateShop(user: UserForAuth, id: number, name: string, areaId: number, prefectureId: number,
     cityId: number, address: string, phoneNumber: string, days: EntityScheduleDays[],
-    seats:number, startTime: string, endTime: string, details: string): Promise<Shop>
-  deleteShop(user: UserForAuth, id: number): Promise<Shop>
+    seats:number, startTime: string, endTime: string, details: string): Promise<EntityShop>
+  deleteShop(user: UserForAuth, id: number): Promise<EntityShop>
   searchShops(user: UserForAuth, keyword: string, page?: number, order?: EntityOrderBy, take?: number)
-    : Promise<{ shops: Shop[], totalCount: number }>
+    : Promise<{ shops: EntityShop[], totalCount: number }>
 }
 
 export type StylistServiceInterface = {
@@ -124,6 +125,81 @@ const convertStatusToPDO = (status: EntityReservationStatus): ReservationStatus 
   }
 }
 
+const reconstructShop = async (shop: EntityShop, user: UserForAuth, limits: {
+  stylistLimit?: number
+  reservationLimit?: number
+  menuLimit?: number
+  reviewLimit?: number
+}): Promise<Shop> => {
+  const stylists = await StylistService.fetchShopStylistsWithReservationCount(user, shop.id, limits.stylistLimit)
+  const reservations = await ReservationService.fetchShopReservations(user, shop.id, limits.reservationLimit)
+  const menus = await MenuService.fetchShopMenus(user, shop.id, limits.menuLimit)
+  const reviews = await ReviewService.fetchReviewsForShop(shop.id, limits.reviewLimit)
+  const users = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
+  const usersForReview = await UserService.fetchUsersByIds(reviews.map(r => r.clientId))
+  const totalSalesForCurrentMonth = await ReservationService.getTotalSalesForShopForCurrentMonth(shop.id)
+  const shopTags = await TagService.fetchShopTags(shop.id)
+  const stylistList = stylists.map(s => ({
+    id: s.id,
+    shopId: s.shopId,
+    name: s.name,
+    price: s.price,
+    reservationCount: s.reservationCount,
+  }))
+
+  const reviewList = reviews.map(rev => {
+    const user = usersForReview.find(u => u.id === rev.clientId)!
+    return {
+      id: rev.id,
+      text: rev.text,
+      score: rev.score,
+      clientId: rev.clientId,
+      clientName: `${user.lastNameKana} ${user.firstNameKana}`,
+      shopId: rev.shopId,
+      shopName: shop.name,
+    }
+  })
+  const reservationList = reservations.map(r => {
+    const user = users.find(u => u.id === r.clientId)!
+    const stylist = stylists.find(s => s.id === r.stylistId)
+    const menu = menus.find(m => m.id === r.menuId)!
+    return {
+      id: r.id,
+      shopId: r.shopId,
+      shopName: shop.name,
+      clientName: `${user.lastNameKana} ${user.firstNameKana}`,
+      stylistName: stylist?.name,
+      menuName: menu.name,
+      status: convertStatusToPDO(r.status),
+      reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
+    }
+  })
+
+  return {
+    id: shop.id,
+    areaId: shop.area.id,
+    prefectureId: shop.prefecture.id,
+    prefectureName: shop.prefecture.name,
+    cityId: shop.city.id,
+    cityName: shop.city.name,
+    days: shop.days.map(convertEntityDaysToOutboundDays),
+    seats: shop.seats,
+    startTime: shop.startTime,
+    endTime: shop.endTime,
+    name: shop.name,
+    address: shop.address,
+    details: shop.details,
+    phoneNumber: shop.phoneNumber,
+    stylists: stylistList,
+    reservations: reservationList,
+    menu: menus,
+    reservationCount: reservations.length,
+    totalSalesForCurrentMonth,
+    tags: shopTags,
+    reviews: reviewList,
+  }
+}
+
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
     if (!user) {
@@ -165,73 +241,9 @@ const ShopController: ShopControllerInterface = {
     const reviewLimit = 5
     const { id } = query
     const shop = await ShopService.fetchShop(user, id)
-    const stylists = await StylistService.fetchShopStylistsWithReservationCount(user, shop.id, stylistLimit)
-    const reservations = await ReservationService.fetchShopReservations(user, shop.id, reservationLimit)
-    const menus = await MenuService.fetchShopMenus(user, shop.id, menuLimit)
-    const reviews = await ReviewService.fetchReviewsForShop(id, reviewLimit)
-    const users = await UserService.fetchUsersByIds(reservations.map(r => r.clientId))
-    const usersForReview = await UserService.fetchUsersByIds(reviews.map(r => r.clientId))
-    const totalSalesForCurrentMonth = await ReservationService.getTotalSalesForShopForCurrentMonth(shop.id)
-    const shopTags = await TagService.fetchShopTags(shop.id)
-    const stylistList = stylists.map(s => ({
-      id: s.id,
-      shopId: s.shopId,
-      name: s.name,
-      price: s.price,
-      reservationCount: s.reservationCount,
-    }))
-
-    const reviewList = reviews.map(rev => {
-      const user = usersForReview.find(u => u.id === rev.clientId)!
-      return {
-        id: rev.id,
-        text: rev.text,
-        score: rev.score,
-        clientId: rev.clientId,
-        clientName: `${user.lastNameKana} ${user.firstNameKana}`,
-        shopId: rev.shopId,
-        shopName: shop.name,
-      }
+    return reconstructShop(shop, user, {
+      stylistLimit, reservationLimit, menuLimit, reviewLimit,
     })
-    const reservationList = reservations.map(r => {
-      const user = users.find(u => u.id === r.clientId)!
-      const stylist = stylists.find(s => s.id === r.stylistId)
-      const menu = menus.find(m => m.id === r.menuId)!
-      return {
-        id: r.id,
-        shopId: r.shopId,
-        shopName: shop.name,
-        clientName: `${user.lastNameKana} ${user.firstNameKana}`,
-        stylistName: stylist?.name,
-        menuName: menu.name,
-        status: convertStatusToPDO(r.status),
-        reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
-      }
-    })
-
-    return {
-      id: shop.id,
-      areaId: shop.area.id,
-      prefectureId: shop.prefecture.id,
-      prefectureName: shop.prefecture.name,
-      cityId: shop.city.id,
-      cityName: shop.city.name,
-      days: shop.days.map(convertEntityDaysToOutboundDays),
-      seats: shop.seats,
-      startTime: shop.startTime,
-      endTime: shop.endTime,
-      name: shop.name,
-      address: shop.address,
-      details: shop.details,
-      phoneNumber: shop.phoneNumber,
-      stylists: stylistList,
-      reservations: reservationList,
-      menu: menus,
-      reservationCount: reservations.length,
-      totalSalesForCurrentMonth,
-      tags: shopTags,
-      reviews: reviewList,
-    }
   },
 
   async insert(user, query) {
@@ -244,11 +256,11 @@ const ShopController: ShopControllerInterface = {
     } = await shopUpsertSchema.parseAsync(query)
 
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    await ShopService.insertShop(user,
+    const shop = await ShopService.insertShop(user,
       name, areaId, prefectureId, cityId, address,
       phoneNumber, entityDays, seats, startTime, endTime, details)
 
-    return 'Shop created'
+    return reconstructShop(shop, user, {})
   },
 
   async update(user, query) {
@@ -261,9 +273,9 @@ const ShopController: ShopControllerInterface = {
     } = await shopUpsertSchema.parseAsync(query.params)
     const { id } = query
     const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
-    await ShopService.updateShop(user, id, name, areaId, prefectureId, cityId,
+    const shop = await ShopService.updateShop(user, id, name, areaId, prefectureId, cityId,
       address, phoneNumber, entityDays, seats, startTime, endTime, details)
-    return 'Shop updated'
+    return reconstructShop(shop, user, {})
   },
 
   async delete(user, query) {
@@ -271,8 +283,8 @@ const ShopController: ShopControllerInterface = {
       throw new UnauthorizedError('User not found in request')
     }
     const { id } = query
-    await ShopService.deleteShop(user, id)
-    return 'Shop deleted'
+    const shop = await ShopService.deleteShop(user, id)
+    return reconstructShop(shop, user, {})
   },
 
   async searchShops(user, query) {

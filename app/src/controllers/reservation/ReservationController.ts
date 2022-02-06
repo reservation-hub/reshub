@@ -1,6 +1,7 @@
 import { convertDateTimeObjectToDateTimeString, convertDateStringToDateObject } from '@lib/Date'
 import { Menu } from '@entities/Menu'
-import { Reservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
+import { Reservation as EntityReservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
+import { Reservation, ReservationStatus } from '@request-response-types/models/Reservation'
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
 import { User, UserForAuth } from '@entities/User'
@@ -9,25 +10,26 @@ import { ReservationControllerInterface } from '@controller-adapter/Shop'
 import { OrderBy } from '@request-response-types/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
-import { ReservationStatus } from '@request-response-types/models/Reservation'
 import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './schemas'
 import ShopService from './services/ShopService'
 
 export type ReservationServiceInterface = {
   fetchReservationsWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, page?: number,
     order?: EntityOrderBy, take?: number): Promise<(
-      Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
-  fetchReservationsWithClientAndStylistAndMenuForCalendar(user: UserForAuth, shopId: number,
-    year: number, month: number): Promise<(Reservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
+      EntityReservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
+  fetchReservationsWithClientAndStylistAndMenuForCalendar(user: UserForAuth, shopId: number, year: number,
+    month: number): Promise<(EntityReservation & { client: User, menu: Menu, shop: Shop, stylist?: Stylist })[]>
   fetchShopReservationTotalCount(user: UserForAuth, shopId: number): Promise<number>
   fetchReservationWithClientAndStylistAndMenu(user: UserForAuth, shopId: number, reservationId: number)
-    : Promise<Reservation & { reservationEndDate: Date, client: User, menu: Menu, shop: Shop, stylist?: Stylist }>
+    : Promise<EntityReservation & { reservationEndDate: Date, client: User, menu: Menu, shop: Shop, stylist?: Stylist }>
   insertReservation(user: UserForAuth, shopId: number, reservationDate: Date,
-    clientId: number, menuId: number, stylistId?: number): Promise<Reservation>
+    clientId: number, menuId: number, stylistId?: number): Promise<EntityReservation &
+    { reservationEndDate: Date, client: User, menu: Menu, shop: Shop, stylist?: Stylist }>
   updateReservation(user: UserForAuth, shopId: number, reservationId: number,
     reservationDate: Date, clientId: number, menuId: number, stylistId?: number)
-    : Promise<Reservation>
-  cancelReservation(user: UserForAuth, shopId: number, reservationId: number): Promise<Reservation>
+    : Promise<EntityReservation & { reservationEndDate: Date, client: User, menu: Menu, shop: Shop, stylist?: Stylist }>
+  cancelReservation(user: UserForAuth, shopId: number, reservationId: number): Promise<EntityReservation
+    & { reservationEndDate: Date, client: User, menu: Menu, shop: Shop, stylist?: Stylist }>
 }
 
 export type ShopServiceInterface = {
@@ -53,6 +55,22 @@ const convertStatusToPDO = (status: EntityReservationStatus): ReservationStatus 
       return ReservationStatus.RESERVED
   }
 }
+
+const reconstructReservation = (r: EntityReservation & { reservationEndDate: Date, client: User,
+  menu: Menu, shop: Shop, stylist?: Stylist }): Reservation => ({
+  id: r.id,
+  shopId: r.shopId,
+  shopName: r.shop.name,
+  clientName: `${r.client.lastNameKana!} ${r.client.firstNameKana!}`,
+  menuName: r.menu.name,
+  stylistName: r.stylist?.name,
+  status: convertStatusToPDO(r.status),
+  reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
+  reservationEndDate: convertDateTimeObjectToDateTimeString(r.reservationEndDate),
+  clientId: r.clientId,
+  stylistId: r.stylistId,
+  menuId: r.menuId,
+})
 
 const ReservationController: ReservationControllerInterface = {
   async index(user, query) {
@@ -122,20 +140,7 @@ const ReservationController: ReservationControllerInterface = {
     }
     const { shopId, reservationId } = query
     const r = await ReservationService.fetchReservationWithClientAndStylistAndMenu(user, shopId, reservationId)
-    return {
-      id: r.id,
-      shopId: r.shopId,
-      shopName: r.shop.name,
-      clientName: `${r.client.lastNameKana!} ${r.client.firstNameKana!}`,
-      menuName: r.menu.name,
-      stylistName: r.stylist?.name,
-      status: convertStatusToPDO(r.status),
-      reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
-      reservationEndDate: convertDateTimeObjectToDateTimeString(r.reservationEndDate),
-      clientId: r.clientId,
-      stylistId: r.stylistId,
-      menuId: r.menuId,
-    }
+    return reconstructReservation(r)
   },
 
   async insert(user, query) {
@@ -147,8 +152,8 @@ const ReservationController: ReservationControllerInterface = {
     } = await reservationUpsertSchema.parseAsync(query.params)
     const reservationDateObject = convertDateStringToDateObject(reservationDate)
     const { shopId } = query
-    await ReservationService.insertReservation(user, shopId, reservationDateObject, userId, menuId, stylistId)
-    return 'Reservation created'
+    const r = await ReservationService.insertReservation(user, shopId, reservationDateObject, userId, menuId, stylistId)
+    return reconstructReservation(r)
   },
 
   async update(user, query) {
@@ -160,9 +165,9 @@ const ReservationController: ReservationControllerInterface = {
     } = await reservationUpsertSchema.parseAsync(query.params)
     const reservationDateObject = convertDateStringToDateObject(reservationDate)
     const { shopId, reservationId } = query
-    await ReservationService.updateReservation(user, shopId, reservationId, reservationDateObject,
+    const r = await ReservationService.updateReservation(user, shopId, reservationId, reservationDateObject,
       userId, menuId, stylistId)
-    return 'Reservation updated'
+    return reconstructReservation(r)
   },
 
   async delete(user, query) {
@@ -170,8 +175,8 @@ const ReservationController: ReservationControllerInterface = {
       throw new UnauthorizedError('User not found in request')
     }
     const { shopId, reservationId } = query
-    await ReservationService.cancelReservation(user, shopId, reservationId)
-    return 'Reservation deleted'
+    const r = await ReservationService.cancelReservation(user, shopId, reservationId)
+    return reconstructReservation(r)
   },
 
 }

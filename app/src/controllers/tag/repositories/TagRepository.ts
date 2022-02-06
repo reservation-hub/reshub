@@ -102,6 +102,10 @@ const TagRepository: TagRepositoryInterface = {
     await prisma.shopTags.createMany({
       data: ids.map(id => ({ shopId, tagId: id })),
     })
+    const tags = await prisma.tag.findMany({
+      where: { id: { in: ids } },
+    })
+    return tags.map(convertToEntityTag)
   },
 
   async fetchTagIdsNotLinkedYet(shopId, tagIds) {

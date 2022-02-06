@@ -51,6 +51,21 @@ const getConflictingReservations = (reservationDate: Date, menuDuration: number,
   })
 }
 
+const reconstructReservation = async (reservation: Reservation) => {
+  const menu = (await MenuRepository.fetchMenusByIds([reservation.menuId]))[0]
+  const shop = (await ShopRepository.fetchShopsByIds([reservation.shopId]))[0]
+  let stylist: Stylist | undefined
+  if (reservation.stylistId) {
+    stylist = (await StylistRepository.fetchStylistsByIds([reservation.stylistId])).pop()
+  }
+  return {
+    ...reservation,
+    menu,
+    shop,
+    stylist,
+  }
+}
+
 const ReservationService: ReservationServiceInterface = {
   async fetchShopReservationsForAvailability(user, shopId, reservationDate) {
     const numberOfDays = 7
@@ -131,8 +146,9 @@ const ReservationService: ReservationServiceInterface = {
       }
     }
 
-    return ReservationRepository.createReservation(user.id, shopId, reservationDate,
+    const reservation = await ReservationRepository.createReservation(user.id, shopId, reservationDate,
       menuId, stylistId)
+    return reconstructReservation(reservation)
   },
 
   async fetchUserReservationsWithShopAndMenuAndStylist(user, page = 1, order = OrderBy.DESC, take = 10) {
@@ -192,7 +208,8 @@ const ReservationService: ReservationServiceInterface = {
       throw new InvalidParamsError('Reservation is already cancelled')
     }
 
-    return ReservationRepository.cancelUserReservation(reservation.id)
+    await ReservationRepository.cancelUserReservation(reservation.id)
+    return reconstructReservation(reservation)
   },
 }
 
