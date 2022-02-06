@@ -68,6 +68,19 @@ const UserRepository: UserRepositoryInterface = {
     return users.map(reconstructUser)
   },
 
+  async fetchUser(userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        profile: true,
+        oAuthIds: true,
+        role: true,
+      },
+    })
+
+    return user ? reconstructUser(user) : null
+  },
+
 }
 
 export default UserRepository
