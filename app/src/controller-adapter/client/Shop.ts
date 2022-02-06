@@ -98,7 +98,7 @@ const shopSearchByName = async (req: Request, res: Response, next: NextFunction)
     const { user } = req
     const {
       name, page, order, take,
-    } = req.body
+    } = req.query
     return res.send(await ShopController.searchByName(user, {
       name, page: parseToInt(page), order, take: parseToInt(take),
     }))
