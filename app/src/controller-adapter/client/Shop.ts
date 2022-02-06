@@ -6,7 +6,7 @@ import {
   SalonMenuListQuery, SalonMenuListResponse, SalonStylistListQuery, SalonStylistListResponse,
   SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
   SalonListByAreaQuery, SalonListByTagsQuery, SalonListByNameQuery, SalonReviewListQuery, SalonReviewListResponse,
-  SalonReviewUpdateQuery, SalonReviewInsertQuery, SalonReviewDeleteQuery,
+  SalonReviewUpdateQuery, SalonReviewInsertQuery, SalonReviewDeleteQuery, PopularSalonListResponse,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -24,6 +24,7 @@ export type ShopControllerInterface = {
   searchByArea(user: UserForAuth | undefined, query: SalonListByAreaQuery): Promise<SalonListResponse>
   searchByTags(user: UserForAuth | undefined, query: SalonListByTagsQuery): Promise<SalonListResponse>
   searchByName(user: UserForAuth | undefined, query: SalonListByNameQuery): Promise<SalonListResponse>
+  fetchPopularShops(user: UserForAuth | undefined): Promise<PopularSalonListResponse>
 }
 
 export type MenuControllerInterface = {
@@ -107,7 +108,8 @@ const shopSearchByName = async (req: Request, res: Response, next: NextFunction)
 
 const popularShops = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
   try {
-    return res.send('Not yet implemented')
+    const { user } = req
+    return res.send(await ShopController.fetchPopularShops(user))
   } catch (e) { return next(e) }
 }
 

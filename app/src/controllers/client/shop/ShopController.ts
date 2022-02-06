@@ -13,7 +13,6 @@ import ShopService from '@client/shop/services/ShopService'
 import StylistService from '@client/shop/services/StylistService'
 import TagService from '@client/shop/services/TagService'
 import ReviewService from '@client/shop/services/ReviewService'
-
 import {
   indexSchema, searchByAreaSchema, searchByTagsSchema, searchByNameSchema,
 } from '@client/shop/schemas'
@@ -28,6 +27,7 @@ export type ShopServiceInterface = {
     order?: EntityOrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
   fetchShopsByNameWithTotalCount(user: UserForAuth | undefined, name: string, page?: number,
     order?: EntityOrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
+  fetchPopularShops(user: UserForAuth | undefined): Promise<(Shop & { ranking: number })[]>
 }
 
 export type MenuServiceInterface = {
@@ -141,7 +141,6 @@ const ShopController: ShopControllerInterface = {
         shopId: s.shopId,
         name: s.name,
         price: s.price,
-
       })),
       tags: shopTags.find(st => st.shopId === shop.id)?.tags.map(t => ({ slug: t.slug })),
       reviews: reviews.map(r => ({
@@ -199,6 +198,15 @@ const ShopController: ShopControllerInterface = {
     )
     const values = await reconstructShops(shops)
     return { values, totalCount }
+  },
+
+  async fetchPopularShops(user) {
+    const shopsWithRanking = await ShopService.fetchPopularShops(user)
+    const cleanShops = await reconstructShops(shopsWithRanking)
+    return cleanShops.map(cs => ({
+      ...cs,
+      ranking: shopsWithRanking.find(swr => cs.id === swr.id)!.ranking,
+    }))
   },
 }
 
