@@ -68,9 +68,25 @@ const ReviewRepository: ReviewRepositoryInterface = {
     return prisma.review.count({ where: { shopId } })
   },
 
-  async fetchShopReview(shopId, reviewId) {
+  async fetchUserReviews(userId, page, order, take) {
+    const skipIndex = page > 1 ? (page - 1) * take : 0
+    const reviews = await prisma.review.findMany({
+      where: { userId },
+      skip: skipIndex,
+      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
+      take,
+    })
+
+    return reviews.map(reconstructReview)
+  },
+
+  async fetchUserReviewsTotalCount(userId) {
+    return prisma.review.count({ where: { userId } })
+  },
+
+  async fetchReview(reviewId) {
     const review = await prisma.review.findFirst({
-      where: { id: reviewId, AND: { shopId } },
+      where: { id: reviewId },
     })
     return review ? reconstructReview(review) : null
   },

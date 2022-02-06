@@ -92,7 +92,7 @@ const ReservationRepository: ReservationRepositoryInterface = {
       where: { userId },
       take,
       skip: skipIndex,
-      orderBy: { id: convertEntityOrderToRepositoryOrder(order) },
+      orderBy: { reservationDate: convertEntityOrderToRepositoryOrder(order) },
     })
 
     return reservations.map(reconstructReservation)
