@@ -18,6 +18,8 @@ export type ShopRepositoryInterface = {
   fetchShopsTotalCountByTags(tagIds: number[]): Promise<number>
   fetchShopsByName(name: string, page: number, order: OrderBy, take: number): Promise<Shop[]>
   fetchShopsTotalCountByName(name: string): Promise<number>
+  fetchPopularShops(): Promise<(Shop & { ranking: number })[]>
+  setPopularShops(): Promise<void>
 }
 
 export type LocationRepositoryInterface = {
@@ -66,6 +68,16 @@ const ShopService: ShopServiceInterface = {
     const shops = await ShopRepository.fetchShopsByName(name, page, order, take)
     const totalCount = await ShopRepository.fetchShopsTotalCountByName(name)
     return { shops, totalCount }
+  },
+
+  async fetchPopularShops(user) {
+    let popularShops: (Shop & { ranking: number })[] = []
+    popularShops = await ShopRepository.fetchPopularShops()
+    if (popularShops.length === 0) {
+      await ShopRepository.setPopularShops()
+      popularShops = await ShopRepository.fetchPopularShops()
+    }
+    return popularShops
   },
 
 }

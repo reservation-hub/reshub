@@ -6,6 +6,7 @@ export type CronControllerInterface = {
   setPopularMenus(): Promise<void>
   setReservationStatuses(): Promise<void>
   cleanUpTags(): Promise<void>
+  setPopularShops(): Promise<void>
 }
 
 /**
@@ -30,10 +31,17 @@ const cleanUpTags = Cron.schedule('0 0 0 * * *', async () => {
   Logger.info('Tags clean up done')
 })
 
+const setPopularShops = Cron.schedule('0 15,45 * * * *', async () => {
+  Logger.info('Setting popular shops')
+  await CronController.setPopularShops()
+  Logger.info('Popular shops set')
+})
+
 const jobs = [
   setPopularMenus,
   setReservationStatuses,
   cleanUpTags,
+  setPopularShops,
 ]
 
 export default jobs
