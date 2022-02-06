@@ -1,36 +1,36 @@
-import { ReviewScore, Review, Prisma } from '@prisma/client'
-import { ReviewScore as EntityReviewScore, Review as EntityReview } from '@entities/Review'
+import { Review, Prisma } from '@prisma/client'
+import { ReviewScore, Review as EntityReview } from '@entities/Review'
 import { ReviewRepositoryInterface } from '@review/services/ReviewService'
 import { OrderBy } from '@entities/Common'
 import prisma from '@lib/prisma'
 
-const convertReviewScoreToEntity = (score: ReviewScore): EntityReviewScore => {
+const convertReviewScoreToEntity = (score: number): ReviewScore => {
   switch (score) {
-    case ReviewScore.ONE:
-      return EntityReviewScore.one
-    case ReviewScore.TWO:
-      return EntityReviewScore.two
-    case ReviewScore.THREE:
-      return EntityReviewScore.three
-    case ReviewScore.FOUR:
-      return EntityReviewScore.four
+    case 1:
+      return ReviewScore.one
+    case 2:
+      return ReviewScore.two
+    case 3:
+      return ReviewScore.three
+    case 4:
+      return ReviewScore.four
     default:
-      return EntityReviewScore.five
+      return ReviewScore.five
   }
 }
 
-const convertEntityToReviewScore = (score: EntityReviewScore): ReviewScore => {
+const convertEntityToReviewScore = (score: ReviewScore): number => {
   switch (score) {
-    case EntityReviewScore.one:
-      return ReviewScore.ONE
-    case EntityReviewScore.two:
-      return ReviewScore.TWO
-    case EntityReviewScore.three:
-      return ReviewScore.THREE
-    case EntityReviewScore.four:
-      return ReviewScore.FOUR
+    case ReviewScore.one:
+      return 1
+    case ReviewScore.two:
+      return 2
+    case ReviewScore.three:
+      return 3
+    case ReviewScore.four:
+      return 4
     default:
-      return ReviewScore.FIVE
+      return 5
   }
 }
 

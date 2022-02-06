@@ -1,7 +1,7 @@
 import lastNames from './lastNames'
 import maleNames from './maleNames'
 import femaleNames from './femaleNames'
-import { ReviewScore, Role } from '@prisma/client'
+import { Role } from '@prisma/client'
 import {  UserObject } from './users'
 import bcrypt from 'bcrypt'
 
@@ -25,16 +25,7 @@ export const randomNameGenerator = (gender: Gender): { firstName: string, lastNa
   return { firstName, lastName }
 }
 
-export const randomReviewScoreGenerator = (): ReviewScore => {
-  const reviewScores = [
-    ReviewScore.ONE,
-    ReviewScore.TWO,
-    ReviewScore.THREE,
-    ReviewScore.FOUR,
-    ReviewScore.FIVE,
-  ]
-  return reviewScores[Math.floor(Math.random() * 5)]
-}
+export const randomReviewScoreGenerator = (): number => Math.floor(Math.random() * 5) + 1
 
 export const getRandomDate = (from: Date, to: Date) => {
   const fromTime = from.getTime()

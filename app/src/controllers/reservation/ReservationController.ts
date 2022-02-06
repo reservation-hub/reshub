@@ -1,6 +1,6 @@
 import { convertDateTimeObjectToDateTimeString, convertDateStringToDateObject } from '@lib/Date'
 import { Menu } from '@entities/Menu'
-import { Reservation } from '@entities/Reservation'
+import { Reservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
 import { User, UserForAuth } from '@entities/User'
@@ -9,6 +9,7 @@ import { ReservationControllerInterface } from '@controller-adapter/Shop'
 import { OrderBy } from '@request-response-types/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
+import { ReservationStatus } from '@request-response-types/models/Reservation'
 import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './schemas'
 import ShopService from './services/ShopService'
 
@@ -42,6 +43,17 @@ const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
   }
 }
 
+const convertStatusToPDO = (status: EntityReservationStatus): ReservationStatus => {
+  switch (status) {
+    case EntityReservationStatus.CANCELLED:
+      return ReservationStatus.CANCELLED
+    case EntityReservationStatus.COMPLETED:
+      return ReservationStatus.COMPLETED
+    default:
+      return ReservationStatus.RESERVED
+  }
+}
+
 const ReservationController: ReservationControllerInterface = {
   async index(user, query) {
     if (!user) {
@@ -65,7 +77,7 @@ const ReservationController: ReservationControllerInterface = {
       clientName: `${r.client.lastNameKana!} ${r.client.firstNameKana!}`,
       menuName: r.menu.name,
       stylistName: r.stylist?.name,
-      status: r.status,
+      status: convertStatusToPDO(r.status),
       reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
       clientId: r.clientId,
       menuId: r.menuId,
@@ -95,7 +107,7 @@ const ReservationController: ReservationControllerInterface = {
       clientName: `${r.client.lastNameKana!} ${r.client.firstNameKana!}`,
       menuName: r.menu.name,
       stylistName: r.stylist?.name,
-      status: r.status,
+      status: convertStatusToPDO(r.status),
       reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
     }))
 
@@ -117,7 +129,7 @@ const ReservationController: ReservationControllerInterface = {
       clientName: `${r.client.lastNameKana!} ${r.client.firstNameKana!}`,
       menuName: r.menu.name,
       stylistName: r.stylist?.name,
-      status: r.status,
+      status: convertStatusToPDO(r.status),
       reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
       reservationEndDate: convertDateTimeObjectToDateTimeString(r.reservationEndDate),
       clientId: r.clientId,

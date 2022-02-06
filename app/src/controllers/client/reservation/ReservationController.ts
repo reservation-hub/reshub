@@ -1,5 +1,5 @@
 import { convertDateTimeObjectToDateTimeString, convertDateStringToDateObject } from '@lib/Date'
-import { Reservation } from '@entities/Reservation'
+import { Reservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
 import { UserForAuth } from '@entities/User'
 import { ReservationControllerInterface as ShopEndpointSocket } from '@controller-adapter/client/Shop'
 import { ReservationControllerInterface as UserEndpointSocket } from '@controller-adapter/client/User'
@@ -12,6 +12,7 @@ import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { Menu } from '@entities/Menu'
 import { Stylist } from '@entities/Stylist'
 import { Shop } from '@entities/Shop'
+import { ReservationStatus } from '@request-response-types/client/models/Reservation'
 
 export type ReservationServiceInterface = {
   fetchShopReservationsForAvailability(user: UserForAuth | undefined, shopId: number, reservationDate: Date)
@@ -36,6 +37,17 @@ const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
       return EntityOrderBy.ASC
     default:
       return EntityOrderBy.DESC
+  }
+}
+
+const convertStatusToPDO = (status: EntityReservationStatus): ReservationStatus => {
+  switch (status) {
+    case EntityReservationStatus.CANCELLED:
+      return ReservationStatus.CANCELLED
+    case EntityReservationStatus.COMPLETED:
+      return ReservationStatus.COMPLETED
+    default:
+      return ReservationStatus.RESERVED
   }
 }
 
@@ -92,7 +104,7 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
         shopId: r.shopId,
         shopName: r.shop.name,
         menuName: r.menu.name,
-        status: r.status,
+        status: convertStatusToPDO(r.status),
         reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
         stylistName: r.stylist?.name,
       })),
@@ -113,7 +125,7 @@ const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
       shopName: reservation.shop.name,
       menuName: reservation.menu.name,
       menuId: reservation.menuId,
-      status: reservation.status,
+      status: convertStatusToPDO(reservation.status),
       reservationDate: convertDateTimeObjectToDateTimeString(reservation.reservationDate),
       stylistName: reservation.stylist?.name,
       stylistId: reservation.stylistId,

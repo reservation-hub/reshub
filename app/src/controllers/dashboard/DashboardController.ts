@@ -1,4 +1,4 @@
-import { Reservation } from '@entities/Reservation'
+import { Reservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
 import { Shop } from '@entities/Shop'
 import { User, UserForAuth } from '@entities/User'
 import { Stylist } from '@entities/Stylist'
@@ -13,6 +13,7 @@ import StylistService from '@dashboard/services/StylistService'
 import MenuService from '@dashboard/services/MenuService'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { convertDateTimeObjectToDateTimeString } from '@lib/Date'
+import { ReservationStatus } from '@request-response-types/models/Reservation'
 
 export type UserServiceInterface = {
   fetchUsersWithReservationCounts(): Promise<{ users: (User & { reservationCount: number })[], totalCount: number }>
@@ -35,6 +36,17 @@ export type StylistServiceInterface = {
 
 export type MenuServiceInterface = {
   fetchPopularMenus(user: UserForAuth): Promise<Menu[]>
+}
+
+const convertStatusToPDO = (status: EntityReservationStatus): ReservationStatus => {
+  switch (status) {
+    case EntityReservationStatus.CANCELLED:
+      return ReservationStatus.CANCELLED
+    case EntityReservationStatus.COMPLETED:
+      return ReservationStatus.COMPLETED
+    default:
+      return ReservationStatus.RESERVED
+  }
 }
 
 const salonIndexForAdmin = async (): Promise<salonIndexAdminResponse> => {
@@ -89,7 +101,7 @@ const salonIndexForShopStaff = async (user: UserForAuth): Promise<salonIndexShop
     clientName: `${r.client.lastNameKana!} ${r.client.firstNameKana!}`,
     menuName: r.menu.name,
     stylistName: r.stylist?.name,
-    status: r.status,
+    status: convertStatusToPDO(r.status),
     reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
   }))
 

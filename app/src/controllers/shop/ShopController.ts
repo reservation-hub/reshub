@@ -4,7 +4,7 @@ import { Stylist } from '@entities/Stylist'
 import { ShopControllerInterface } from '@controller-adapter/Shop'
 import { User, UserForAuth } from '@entities/User'
 import { Menu } from '@entities/Menu'
-import { Reservation } from '@entities/Reservation'
+import { Reservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
 import { ScheduleDays as EntityScheduleDays, OrderBy as EntityOrderBy } from '@entities/Common'
 import ShopService from '@shop/services/ShopService'
 import UserService from '@shop/services/UserService'
@@ -12,6 +12,7 @@ import ReservationService from '@shop/services/ReservationService'
 import StylistService from '@shop/services/StylistService'
 import MenuService from '@shop/services/MenuService'
 import { OrderBy } from '@request-response-types/Common'
+import { ReservationStatus } from '@request-response-types/models/Reservation'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { Tag } from '@entities/Tag'
@@ -112,6 +113,17 @@ const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
   }
 }
 
+const convertStatusToPDO = (status: EntityReservationStatus): ReservationStatus => {
+  switch (status) {
+    case EntityReservationStatus.CANCELLED:
+      return ReservationStatus.CANCELLED
+    case EntityReservationStatus.COMPLETED:
+      return ReservationStatus.COMPLETED
+    default:
+      return ReservationStatus.RESERVED
+  }
+}
+
 const ShopController: ShopControllerInterface = {
   async index(user, query) {
     if (!user) {
@@ -192,7 +204,7 @@ const ShopController: ShopControllerInterface = {
         clientName: `${user.lastNameKana} ${user.firstNameKana}`,
         stylistName: stylist?.name,
         menuName: menu.name,
-        status: r.status,
+        status: convertStatusToPDO(r.status),
         reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
       }
     })

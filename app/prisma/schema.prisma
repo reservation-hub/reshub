@@ -201,15 +201,15 @@ model ShopTags {
 }
 
 model Review {
-  id        Int         @id @default(autoincrement())
-  shopId    Int         @map("shop_id")
-  userId    Int         @map("user_id")
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
-  score     ReviewScore
-  text      String      @db.Text
-  shop      Shop        @relation(fields: [shopId], references: [id], onDelete: Cascade)
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int      @id @default(autoincrement())
+  shopId    Int      @map("shop_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  score     Int      @default(1)
+  text      String   @db.Text
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Gender {
@@ -237,12 +237,4 @@ enum Days {
   FRIDAY
   SATURDAY
   SUNDAY
-}
-
-enum ReviewScore {
-  ONE
-  TWO
-  THREE
-  FOUR
-  FIVE
 }

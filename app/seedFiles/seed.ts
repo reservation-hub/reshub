@@ -4,7 +4,7 @@ import prefectures, { PrefectureObject } from './prefec-db'
 import words from './words'
 import cities, { CityObject } from './cities-db'
 import {
-  RoleSlug, Days, Role, User, Area, Prefecture, City, Shop, Menu, ShopDetail, Stylist, ReviewScore
+  RoleSlug, Days, Role, User, Area, Prefecture, City, Shop, Menu, ShopDetail, Stylist
 } from '@prisma/client'
 import {
   UserObject, admins, staffs, clients,
@@ -236,7 +236,7 @@ const reservationSeeder = async (shopsForReservationSeed: (Shop & {
   try {
     while (shopsForReservationSeed.length) {
       await Promise.all(shopsForReservationSeed.splice(0, 1).map(async sfs => {
-        const dates = Array(datesLength).fill(new Date()).map(d => {
+        const dates = Array(datesLength).fill(new Date('2021-01-01')).map(d => {
           const start = d
           const end = new Date('2022-12-31')
           const shopOpeningHours = sfs.shopDetail.startTime.split(':').map(soh => parseInt(soh, 10))
