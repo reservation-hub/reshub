@@ -180,6 +180,7 @@ const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSock
   async fetchShopsTotalCountByName(name) {
     return prisma.shop.count({ where: { shopDetail: { name: { contains: name } } } })
   },
+
 }
 
 export default ShopRepository
