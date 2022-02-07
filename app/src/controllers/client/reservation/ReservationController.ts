@@ -68,7 +68,7 @@ const reconstructReservation = (reservation: EntityReservation & { shop: Shop, m
 const ReservationController: ShopEndpointSocket & UserEndpointSocket = {
   async list(user, query) {
     const { shopId } = query
-    const { reservationDate } = await reservationQuerySchema.parseAsync(query.params)
+    const { reservationDate } = await reservationQuerySchema.parseAsync(query)
     const reservationDateObject = convertDateStringToDateObject(reservationDate)
     const reservations = await ReservationService.fetchShopReservationsForAvailability(
       user, shopId, reservationDateObject,

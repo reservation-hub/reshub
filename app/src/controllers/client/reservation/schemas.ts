@@ -1,4 +1,4 @@
-import { dateTimePattern } from '@lib/RegexPatterns'
+import { datePattern, dateTimePattern } from '@lib/RegexPatterns'
 import { OrderBy } from '@request-response-types/client/Common'
 import { z } from 'zod'
 
@@ -17,5 +17,5 @@ export const reservationUpsertSchema = z.object({
 
 export const reservationQuerySchema = z.object({
   reservationDate:
-    z.string().regex(dateTimePattern),
+    z.string().regex(datePattern),
 })

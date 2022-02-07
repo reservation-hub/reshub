@@ -149,8 +149,8 @@ const shopReservations = async (req: Request, res: Response, next: NextFunction)
   try {
     const { user } = req
     const { shopId } = res.locals
-    const { body: params } = req
-    return res.send(await ReservationController.list(user, { shopId, params }))
+    const { reservationDate } = req.query
+    return res.send(await ReservationController.list(user, { shopId, reservationDate }))
   } catch (e) { return next(e) }
 }
 
