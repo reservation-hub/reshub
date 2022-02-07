@@ -6,7 +6,7 @@ import {
   InsertUserQuery, UpdateUserQuery, UpdateUserPasswordQuery, UserReservationListQuery,
   UserReservationListResponse, UserReservationQuery, ReservationResponse, CancelUserReservationQuery,
   UserResponse, UserReviewListQuery, UserReviewListResponse, UserReviewUpdateQuery, UserReviewDeleteQuery,
-  ReviewResponse,
+  ReviewResponse, UserResponsesWithReservationDetails,
 } from '@request-response-types/client/User'
 import UserController from '@client/user/UserController'
 import ReservationController from '@client/reservation/ReservationController'
@@ -17,7 +17,7 @@ import parseToInt from '@lib/ParseInt'
 import { verifyIfNotLoggedInYet } from './Auth'
 
 export type UserControllerInterface = {
-  detail(user: UserForAuth | undefined): Promise<UserResponse>
+  detail(user: UserForAuth | undefined): Promise<UserResponsesWithReservationDetails>
   signUp(query: InsertUserQuery): Promise<UserResponse>
   update(user: UserForAuth | undefined, query: UpdateUserQuery): Promise<UserResponse>
   updatePassword(user: UserForAuth | undefined, query: UpdateUserPasswordQuery): Promise<ResponseMessage>

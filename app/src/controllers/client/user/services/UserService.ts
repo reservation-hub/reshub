@@ -5,6 +5,10 @@ import { UserServiceInterface } from '@client/user/UserController'
 import UserRepository from '@client/user/repositories/UserRepository'
 import ReservationRepository from '@client/user/repositories/ReservationRepository'
 import ReviewRepository from '@client/user/repositories/ReviewRepository'
+import MenuRepository from '@client/user/repositories/MenuRepository'
+import ShopRepository from '@client/user/repositories/ShopRepository'
+import StylistRepository from '@client/user/repositories/StylistRepository'
+import { Reservation } from '@entities/Reservation'
 
 export type UserRepositoryInterface = {
   fetchUser(id: number): Promise<User | null>
@@ -15,8 +19,21 @@ export type UserRepositoryInterface = {
     updateUserPassword(id: number, password: string): Promise<User>
 }
 
+export type MenuRepositoryInterface = {
+  fetchMenuNamesByIds(ids: number[]): Promise<{menuId: number, menuName: string}[]>
+}
+
+export type ShopRepositoryInterface = {
+  fetchShopNamesByIds(ids: number[]): Promise<{shopId: number, shopName: string}[]>
+}
+
+export type StylistRepositoryInterface = {
+  fetchStylistNamesByIds(ids: number[]): Promise<{stylistId: number, stylistName: string}[]>
+}
+
 export type ReservationRepositoryInterface = {
   fetchUserReservationCount(id: number): Promise<number>
+  fetchUserReservations(id: number): Promise<Reservation[]>
 }
 
 export type ReviewRepositoryInterface = {
@@ -79,6 +96,33 @@ const UserService: UserServiceInterface = {
     const hash = bcrypt.hashSync(newPassword, 10 /* hash rounds */)
 
     return UserRepository.updateUserPassword(id, hash)
+  },
+
+  async fetchUserReservationsWithShopMenuAndStylistNames(userId) {
+    const reservations = await ReservationRepository.fetchUserReservations(userId)
+    if (!reservations) {
+      throw new NotFoundError('No reservations found for this user')
+    }
+    const menuIds: number[] = []
+    const shopIds: number[] = []
+    const stylistIds: number[] = []
+    reservations.forEach(r => {
+      menuIds.push(r.menuId)
+      shopIds.push(r.shopId)
+      if (r.stylistId) {
+        stylistIds.push(r.stylistId)
+      }
+    })
+    const reservationMenus = await MenuRepository.fetchMenuNamesByIds(menuIds)
+    const reservationShops = await ShopRepository.fetchShopNamesByIds(shopIds)
+    const reservationStylists = await StylistRepository.fetchStylistNamesByIds(stylistIds)
+
+    return reservations.map(r => ({
+      ...r,
+      shopName: reservationShops.find(s => s.shopId === r.shopId)!.shopName,
+      StylistName: reservationStylists.find(s => s.stylistId === r.stylistId)!.stylistName,
+      menuName: reservationMenus.find(m => m.menuId === r.menuId)!.menuName,
+    }))
   },
 }
 
