@@ -9,18 +9,17 @@ export type ShopRepositoryInterface = {
 }
 
 export type MenuRepositoryInterface = {
-  fetchShopMenus(shopId: number, limit: number): Promise<Menu[]>
+  fetchShopPopularMenus(shopId: number): Promise<Menu[]>
   fetchShopsMenus(shopIds: number[]): Promise<{ shopId: number, menus: Menu[] }[]>
 }
 
 const MenuService: MenuServiceInterface = {
-  async fetchShopMenus(shopId) {
-    const limit = 5
+  async fetchShopPopularMenus(shopId) {
     const shopExists = await ShopRepository.shopExists(shopId)
     if (!shopExists) {
       throw new NotFoundError('Shop does not exist')
     }
-    return MenuRepository.fetchShopMenus(shopId, limit)
+    return MenuRepository.fetchShopPopularMenus(shopId)
   },
 
   async fetchShopAverageMenuPriceByShopIds(shopIds) {

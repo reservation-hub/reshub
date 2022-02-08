@@ -31,7 +31,7 @@ export type ShopServiceInterface = {
 }
 
 export type MenuServiceInterface = {
-  fetchShopMenus(shopId: number): Promise<Menu[]>
+  fetchShopPopularMenus(shopId: number): Promise<Menu[]>
   fetchShopAverageMenuPriceByShopIds(shopIds: number[]): Promise<{ shopId: number, price: number }[]>
 }
 
@@ -112,7 +112,7 @@ const ShopController: ShopControllerInterface = {
   async detail(user, query) {
     const { shopId } = query
     const shop = await ShopService.fetchShop(user, shopId)
-    const menus = await MenuService.fetchShopMenus(shop.id)
+    const menus = await MenuService.fetchShopPopularMenus(shop.id)
     const stylists = await StylistService.fetchShopStylists(shop.id)
     const shopTags = await TagService.fetchShopsTags([shop.id])
     const reviews = await ReviewService.fetchShopReviewsWithClientName(shop.id)
@@ -129,7 +129,7 @@ const ShopController: ShopControllerInterface = {
       seats: shop.seats,
       details: shop.details,
       days: shop.days.map(convertEntityDaysToOutboundDays),
-      menus: menus.map(m => ({
+      popularMenus: menus.map(m => ({
         id: m.id,
         shopId: m.shopId,
         name: m.name,
