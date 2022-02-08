@@ -23,13 +23,17 @@ const cookieExtractor = (req: Request) => {
   if (req.get('authorization')) {
     headerToken = req.get('authorization')?.split(' ')[1]
   }
-  if (!headerToken) return null
+  if (!headerToken) {
+    return null
+  }
 
   let authToken
   if (req.signedCookies) {
     authToken = req.signedCookies.authToken
   }
-  if (!authToken) return null
+  if (!authToken) {
+    return null
+  }
   if (req && authToken && headerToken && authToken === headerToken) {
     return authToken
   }

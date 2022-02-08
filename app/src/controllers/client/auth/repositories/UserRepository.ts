@@ -85,6 +85,18 @@ const UserRepository: AuthServiceSocket & UserServiceSocket = {
     return user ? reconstructUser(user) : null
   },
 
+  async fetchClient() {
+    const user = await prisma.user.findFirst({
+      where: { role: { slug: PrismaRoleSlug.CLIENT } },
+      include: {
+        oAuthIds: true,
+        profile: true,
+        role: true,
+      },
+    })
+    return user ? reconstructUser(user) : null
+  },
+
   async addOAuthId(id, provider, authId) {
     const updateQuery = {
       where: { id },
