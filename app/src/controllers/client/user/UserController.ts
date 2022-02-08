@@ -22,6 +22,8 @@ export type UserServiceInterface = {
     : Promise<EntityUser>
   fetchUserReservationsWithShopMenuAndStylistNames(userId:number):
    Promise<(Reservation & { shopName: string, StylistName: string, menuName: string})[]>
+   fetchUserVisitedShopsHistory(userId: number):
+    Promise<{id: number, shopName: string, visitedDate: Date}[]>
 }
 
 export type MailServiceInterface = {
@@ -49,6 +51,7 @@ const UserController: UserControllerInterface = {
       throw new UnauthorizedError('User not found in request')
     }
     const reservations = await UserService.fetchUserReservationsWithShopMenuAndStylistNames(user.id)
+    const visitedShops = await UserService.fetchUserVisitedShopsHistory(user.id)
     return {
       user: await reconstructUser(user.id),
       reservations: reservations.map(r => ({
@@ -59,6 +62,11 @@ const UserController: UserControllerInterface = {
         status: r.status,
         reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
         stylistName: r.StylistName,
+      })),
+      visitedShops: visitedShops.map(vs => ({
+        id: vs.id,
+        shopName: vs.shopName,
+        visitedDate: convertDateTimeObjectToDateTimeString(vs.visitedDate),
       })),
     }
   },
