@@ -1,46 +1,10 @@
-import {
-  ReservationStatus as PrismaReservationStatus,
-  Reservation as PrismaReservation,
-  Prisma,
-} from '@prisma/client'
-import { OrderBy } from '@entities/Common'
-import { Reservation, ReservationStatus } from '@entities/Reservation'
-import { ReservationRepositoryInterface as ReservationServiceSocket } from '@reservation/services/ReservationService'
-
+import { ReservationStatus } from '@prisma/client'
+import { ReservationRepositoryInterface } from '@reservation/services/ReservationService'
 import prisma from '@lib/prisma'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
+import { convertReservationStatusToEntity, reconstructReservation } from '@prismaConverters/Reservation'
 
-const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
-  switch (status) {
-    case PrismaReservationStatus.CANCELLED:
-      return ReservationStatus.CANCELLED
-    case PrismaReservationStatus.COMPLETED:
-      return ReservationStatus.COMPLETED
-    default:
-      return ReservationStatus.RESERVED
-  }
-}
-
-const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
-  switch (order) {
-    case OrderBy.ASC:
-      return Prisma.SortOrder.asc
-    default:
-      return Prisma.SortOrder.desc
-  }
-}
-
-const reconstructReservation = (reservation: PrismaReservation)
-: Reservation => ({
-  id: reservation.id,
-  shopId: reservation.shopId,
-  reservationDate: reservation.reservationDate,
-  status: convertReservationStatus(reservation.status),
-  clientId: reservation.userId,
-  menuId: reservation.menuId,
-  stylistId: reservation.stylistId ?? undefined,
-})
-
-const ReservationRepository: ReservationServiceSocket = {
+const ReservationRepository: ReservationRepositoryInterface = {
 
   async fetchShopReservations(shopId, page, order, take) {
     const skipIndex = page > 1 ? (page - 1) * take : 0
@@ -132,7 +96,7 @@ const ReservationRepository: ReservationServiceSocket = {
     const reservation = await prisma.reservation.update({
       where: { id },
       data: {
-        status: PrismaReservationStatus.CANCELLED,
+        status: ReservationStatus.CANCELLED,
       },
     })
     const cleanReservation = reconstructReservation(reservation)
@@ -169,7 +133,7 @@ const ReservationRepository: ReservationServiceSocket = {
       id: r.id,
       shopId: r.shopId,
       reservationDate: r.reservationDate,
-      status: convertReservationStatus(r.status),
+      status: convertReservationStatusToEntity(r.status),
       clientId: r.userId,
       menuId: r.menuId,
       stylistId: r.stylistId ?? undefined,

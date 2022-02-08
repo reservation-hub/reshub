@@ -1,7 +1,6 @@
 import { TagControllerInterface as TagEndpointSocket } from '@controller-adapter/Tag'
 import { TagControllerInterface as ShopEndpointSocket } from '@controller-adapter/Shop'
 import { Tag } from '@entities/Tag'
-import { OrderBy } from '@request-response-types/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import TagService from '@tag/services/TagService'
 import {
@@ -9,6 +8,7 @@ import {
 } from '@tag/schemas'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { UserForAuth } from '@entities/User'
+import { convertOrderByToEntity } from '@dtoConverters/Common'
 
 export type TagServiceInterface = {
   fetchTagsWithTotalCount(page?: number, order?: EntityOrderBy, take?: number)
@@ -22,15 +22,6 @@ export type TagServiceInterface = {
   searchTag(keyword: string, page?: number, order?: EntityOrderBy, take?: number)
     : Promise<{ tags: Tag[], totalCount: number }>
   setShopTags(user: UserForAuth, shopId: number, tagIds: number[]): Promise<Tag[]>
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
 }
 
 const TagController: TagEndpointSocket & ShopEndpointSocket = {

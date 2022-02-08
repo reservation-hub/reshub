@@ -1,10 +1,7 @@
-import { Tag as PrismaTag } from '@prisma/client'
-import { Tag } from '@entities/Tag'
 import prisma from '@lib/prisma'
 import { TagRepositoryInterface as ShopServiceSocket } from '@client/shop/services/ShopService'
 import { TagRepositoryInterface as TagServiceSocket } from '@client/shop/services/TagService'
-
-const convertToEntityTag = (tag: PrismaTag): Tag => ({ id: tag.id, slug: tag.slug })
+import { convertToEntityTag } from '@prismaConverters/Tag'
 
 const TagRepository: ShopServiceSocket & TagServiceSocket = {
   async fetchValidTagsBySlugs(slugs) {

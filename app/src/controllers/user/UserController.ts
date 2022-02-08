@@ -1,15 +1,18 @@
 import { UserControllerInterface } from '@controller-adapter/User'
 import { Gender as EntityGender, User as EntityUser } from '@entities/User'
-import { User, Gender } from '@request-response-types/models/User'
+import { User } from '@request-response-types/models/User'
 import { RoleSlug as EntityRoleSlug } from '@entities/Role'
-import { RoleSlug } from '@request-response-types/models/Role'
 import UserService from '@user/services/UserService'
 import {
   userInsertSchema, userUpdateSchema, indexSchema, searchSchema, userPasswordUpdateSchema,
 } from '@user/schemas'
-import { OrderBy } from '@request-response-types/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { convertDateObjectToOutboundDateString, convertDateStringToDateObject } from '@lib/Date'
+import {
+  convertEntityGenderToDTO, convertEntityRoleSlugToDTO, convertGenderToEntity,
+  convertRoleSlugToEntity,
+} from '@dtoConverters/User'
+import { convertOrderByToEntity } from '@dtoConverters/Common'
 
 export type UserServiceInterface = {
   fetchUsersWithTotalCount(page?: number, order?: EntityOrderBy, take?: number)
@@ -28,56 +31,7 @@ export type UserServiceInterface = {
   fetchUsersReservationCounts(userIds: number[]): Promise<{ userId: number, reservationCount: number }[]>
 }
 
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
-}
-
-const convertEntityGenderToDTO = (gender: EntityGender): Gender => {
-  switch (gender) {
-    case EntityGender.FEMALE:
-      return Gender.FEMALE
-    default:
-      return Gender.MALE
-  }
-}
-
-const convertGenderToEntity = (gender: Gender): EntityGender => {
-  switch (gender) {
-    case Gender.FEMALE:
-      return EntityGender.FEMALE
-    default:
-      return EntityGender.MALE
-  }
-}
-
-const convertEntityRoleSlugToDTO = (slug: EntityRoleSlug): RoleSlug => {
-  switch (slug) {
-    case EntityRoleSlug.ADMIN:
-      return RoleSlug.ADMIN
-    case EntityRoleSlug.SHOP_STAFF:
-      return RoleSlug.SHOP_STAFF
-    default:
-      return RoleSlug.CLIENT
-  }
-}
-
-const convertRoleSlugToEntity = (slug: RoleSlug): EntityRoleSlug => {
-  switch (slug) {
-    case RoleSlug.ADMIN:
-      return EntityRoleSlug.ADMIN
-    case RoleSlug.SHOP_STAFF:
-      return EntityRoleSlug.SHOP_STAFF
-    default:
-      return EntityRoleSlug.CLIENT
-  }
-}
-
-const recreateUser = async (u: EntityUser): Promise<User> => {
+const reconstructUser = async (u: EntityUser): Promise<User> => {
   const userReservationCount = await UserService.fetchUsersReservationCounts([u.id])
   return {
     id: u.id,
@@ -122,7 +76,7 @@ const UserController: UserControllerInterface = {
   async show(query) {
     const { id } = query
     const user = await UserService.fetchUser(id)
-    return recreateUser(user)
+    return reconstructUser(user)
   },
 
   async insert(query) {
@@ -133,7 +87,7 @@ const UserController: UserControllerInterface = {
     const dateObject = convertDateStringToDateObject(birthday)
     const user = await UserService.insertUser(password, confirm, email, convertRoleSlugToEntity(roleSlug),
       lastNameKanji, firstNameKanji, lastNameKana, firstNameKana, convertGenderToEntity(gender), dateObject)
-    return recreateUser(user)
+    return reconstructUser(user)
   },
 
   async update(query) {
@@ -145,7 +99,7 @@ const UserController: UserControllerInterface = {
     const user = await UserService.updateUser(query.id, email, convertRoleSlugToEntity(roleSlug),
       lastNameKanji, firstNameKanji,
       lastNameKana, firstNameKana, convertGenderToEntity(gender), dateObject)
-    return recreateUser(user)
+    return reconstructUser(user)
   },
 
   async updatePassword(query) {
@@ -160,7 +114,7 @@ const UserController: UserControllerInterface = {
   async delete(query) {
     const { id } = query
     const user = await UserService.deleteUser(id)
-    return recreateUser(user)
+    return reconstructUser(user)
   },
 
   async searchUsers(query) {

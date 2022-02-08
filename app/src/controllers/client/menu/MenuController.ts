@@ -1,10 +1,10 @@
-import { OrderBy } from '@request-response-types/client/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { Menu } from '@entities/Menu'
 import { UserForAuth } from '@entities/User'
 import MenuService from '@client/menu/services/MenuService'
 import { MenuControllerInterface as MenuSocket } from '@controller-adapter/client/Menu'
 import { MenuControllerInterface as ShopSocket } from '@controller-adapter/client/Shop'
+import { convertOrderByToEntity } from '@dtoConverters/Common'
 import { indexSchema } from './schemas'
 
 export type MenuServiceInterface = {
@@ -12,15 +12,6 @@ export type MenuServiceInterface = {
   fetchShopMenusWithTotalCount(user: UserForAuth | undefined, shopId: number, page?: number,
     order?: EntityOrderBy, take?: number)
     :Promise<{ menus: Menu[], totalCount: number}>
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
 }
 
 const MenuController: MenuSocket & ShopSocket = {

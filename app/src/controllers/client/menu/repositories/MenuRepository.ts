@@ -1,19 +1,9 @@
-import { Prisma } from '@prisma/client'
-import { OrderBy } from '@entities/Common'
 import { MenuRepositoryInterface } from '@client/menu/services/MenuService'
 import { Menu } from '@entities/Menu'
 import prisma from '@lib/prisma'
 import redis from '@lib/redis'
 import setPopularMenus from '@lib/PopularMenuSetter'
-
-const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
-  switch (order) {
-    case OrderBy.ASC:
-      return Prisma.SortOrder.asc
-    default:
-      return Prisma.SortOrder.desc
-  }
-}
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
 
 const MenuRepository: MenuRepositoryInterface = {
   async fetchPopularMenus() {

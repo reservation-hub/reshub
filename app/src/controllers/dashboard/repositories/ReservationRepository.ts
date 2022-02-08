@@ -1,36 +1,9 @@
-import {
-  ReservationStatus as PrismaReservationStatus,
-  Reservation as PrismaReservation,
-} from '@prisma/client'
-import { Reservation, ReservationStatus } from '@entities/Reservation'
 import { ReservationRepositoryInterface as ReservationServiceSocket } from '@dashboard/services/ReservationService'
 import { ReservationRepositoryInterface as ShopServiceSocket } from '@dashboard/services/ShopService'
 import { ReservationRepositoryInterface as UserServiceSocket } from '@dashboard/services/UserService'
 import { ReservationRepositoryInterface as StylistServiceSocket } from '@dashboard/services/StylistService'
-
 import prisma from '@lib/prisma'
-
-export const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
-  switch (status) {
-    case PrismaReservationStatus.CANCELLED:
-      return ReservationStatus.CANCELLED
-    case PrismaReservationStatus.COMPLETED:
-      return ReservationStatus.COMPLETED
-    default:
-      return ReservationStatus.RESERVED
-  }
-}
-
-export const reconstructReservation = (reservation: PrismaReservation)
-: Reservation => ({
-  id: reservation.id,
-  shopId: reservation.shopId,
-  reservationDate: reservation.reservationDate,
-  status: convertReservationStatus(reservation.status),
-  clientId: reservation.userId,
-  menuId: reservation.menuId,
-  stylistId: reservation.stylistId ?? undefined,
-})
+import { reconstructReservation } from '@prismaConverters/Reservation'
 
 const ReservationRepository: ReservationServiceSocket & ShopServiceSocket & UserServiceSocket
   & StylistServiceSocket = {

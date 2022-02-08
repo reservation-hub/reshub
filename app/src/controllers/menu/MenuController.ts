@@ -1,10 +1,10 @@
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { UserForAuth } from '@entities/User'
 import { Menu } from '@entities/Menu'
-import { OrderBy } from '@request-response-types/Common'
 import MenuService from '@menu/services/MenuService'
 import { MenuControllerInterface } from '@controller-adapter/Shop'
 import { UnauthorizedError } from '@errors/ControllerErrors'
+import { convertOrderByToEntity } from '@dtoConverters/Common'
 import { menuUpsertSchema, indexSchema } from './schemas'
 
 export type MenuServiceInterface = {
@@ -17,15 +17,6 @@ export type MenuServiceInterface = {
   updateMenu(user: UserForAuth, shopId: number, menuId: number, name: string,
     description: string, price: number, duration: number): Promise<Menu>
   deleteMenu(user: UserForAuth, shopId: number, menuId: number): Promise<Menu>
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
 }
 
 const MenuController: MenuControllerInterface = {

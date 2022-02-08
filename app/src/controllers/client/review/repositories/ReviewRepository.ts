@@ -1,55 +1,7 @@
-import { Prisma, Review } from '@prisma/client'
-import { OrderBy } from '@entities/Common'
-import { ReviewScore, Review as EntityReview } from '@entities/Review'
 import { ReviewRepositoryInterface } from '@client/review/services/ReviewService'
 import prisma from '@lib/prisma'
-
-const convertReviewScoreToEntity = (score: number): ReviewScore => {
-  switch (score) {
-    case 1:
-      return ReviewScore.one
-    case 2:
-      return ReviewScore.two
-    case 3:
-      return ReviewScore.three
-    case 4:
-      return ReviewScore.four
-    default:
-      return ReviewScore.five
-  }
-}
-
-const convertEntityToReviewScore = (score: ReviewScore): number => {
-  switch (score) {
-    case ReviewScore.one:
-      return 1
-    case ReviewScore.two:
-      return 2
-    case ReviewScore.three:
-      return 3
-    case ReviewScore.four:
-      return 4
-    default:
-      return 5
-  }
-}
-
-const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
-  switch (order) {
-    case OrderBy.ASC:
-      return Prisma.SortOrder.asc
-    default:
-      return Prisma.SortOrder.desc
-  }
-}
-
-const reconstructReview = (review: Review): EntityReview => ({
-  id: review.id,
-  text: review.text,
-  shopId: review.shopId,
-  score: convertReviewScoreToEntity(review.score),
-  clientId: review.userId,
-})
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
+import { convertEntityToReviewScore, reconstructReview } from '@prismaConverters/Review'
 
 const ReviewRepository: ReviewRepositoryInterface = {
   async fetchShopReviews(shopId, page, order, take) {

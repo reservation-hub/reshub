@@ -1,7 +1,6 @@
 import { UserForAuth } from '@entities/User'
 import { Stylist as EntityStylist } from '@entities/Stylist'
 import { Stylist } from '@request-response-types/models/Stylist'
-import { OrderBy } from '@request-response-types/Common'
 import { indexSchema, shopStylistUpsertSchema } from '@stylist/schemas'
 import StylistService from '@stylist/services/StylistService'
 import ShopService from '@stylist/services/ShopService'
@@ -9,6 +8,7 @@ import { StylistControllerInterface } from '@controller-adapter/Shop'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { ScheduleDays as EntityScheduleDays, OrderBy as EntityOrderBy } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
+import { convertDTODaysToEntity, convertEntityDaysToDTO, convertOrderByToEntity } from '@dtoConverters/Common'
 
 export type StylistServiceInterface = {
   fetchShopStylistsWithTotalCount(user: UserForAuth, shopId: number, page?: number, order?: EntityOrderBy,
@@ -29,53 +29,6 @@ export type ShopServiceInterface = {
   fetchShopName(user: UserForAuth, shopId: number): Promise<string>
 }
 
-const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
-  switch (day) {
-    case EntityScheduleDays.SUNDAY:
-      return ScheduleDays.SUNDAY
-    case EntityScheduleDays.MONDAY:
-      return ScheduleDays.MONDAY
-    case EntityScheduleDays.TUESDAY:
-      return ScheduleDays.TUESDAY
-    case EntityScheduleDays.WEDNESDAY:
-      return ScheduleDays.WEDNESDAY
-    case EntityScheduleDays.THURSDAY:
-      return ScheduleDays.THURSDAY
-    case EntityScheduleDays.FRIDAY:
-      return ScheduleDays.FRIDAY
-    default:
-      return ScheduleDays.SATURDAY
-  }
-}
-
-const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays => {
-  switch (day) {
-    case ScheduleDays.SUNDAY:
-      return EntityScheduleDays.SUNDAY
-    case ScheduleDays.MONDAY:
-      return EntityScheduleDays.MONDAY
-    case ScheduleDays.TUESDAY:
-      return EntityScheduleDays.TUESDAY
-    case ScheduleDays.WEDNESDAY:
-      return EntityScheduleDays.WEDNESDAY
-    case ScheduleDays.THURSDAY:
-      return EntityScheduleDays.THURSDAY
-    case ScheduleDays.FRIDAY:
-      return EntityScheduleDays.FRIDAY
-    default:
-      return EntityScheduleDays.SATURDAY
-  }
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
-}
-
 const recreateStylist = async (s: EntityStylist, user: UserForAuth, shopId: number): Promise<Stylist> => {
   const shopName = await ShopService.fetchShopName(user, shopId)
   const stylistReservationCount = (
@@ -84,7 +37,7 @@ const recreateStylist = async (s: EntityStylist, user: UserForAuth, shopId: numb
     ...s,
     startTime: s.startTime,
     endTime: s.endTime,
-    days: s.days.map(convertEntityDaysToOutboundDays),
+    days: s.days.map(convertEntityDaysToDTO),
     shopName,
     reservationCount: stylistReservationCount,
   }
@@ -132,7 +85,7 @@ const StylistController: StylistControllerInterface = {
       name, price, days, startTime, endTime,
     } = await shopStylistUpsertSchema.parseAsync(query.params)
     const { shopId } = query
-    const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
+    const entityDays = days.map((d: ScheduleDays) => convertDTODaysToEntity(d))
     const stylist = await StylistService.insertStylist(user, shopId, name, price, entityDays, startTime, endTime)
     return recreateStylist(stylist, user, shopId)
   },
@@ -145,7 +98,7 @@ const StylistController: StylistControllerInterface = {
       name, price, days, startTime, endTime,
     } = await shopStylistUpsertSchema.parseAsync(query.params)
     const { shopId, stylistId } = query
-    const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
+    const entityDays = days.map((d: ScheduleDays) => convertDTODaysToEntity(d))
     const stylist = await StylistService.updateStylist(user, shopId, stylistId, name, price, entityDays,
       startTime, endTime)
     return recreateStylist(stylist, user, shopId)

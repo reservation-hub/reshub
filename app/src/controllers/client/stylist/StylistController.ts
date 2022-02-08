@@ -1,43 +1,14 @@
-import { OrderBy } from '@request-response-types/client/Common'
-import { OrderBy as EntityOrderBy, ScheduleDays as EntityScheduleDays } from '@entities/Common'
+import { OrderBy } from '@entities/Common'
 import { Stylist } from '@entities/Stylist'
 import { UserForAuth } from '@entities/User'
 import StylistService from '@client/stylist/services/StylistService'
 import { StylistControllerInterface } from '@controller-adapter/client/Shop'
-import { ScheduleDays } from '@request-response-types/models/Common'
+import { convertEntityDaysToDTO, convertOrderByToEntity } from '@dtoConverters/Common'
 import { indexSchema } from './schemas'
 
 export type StylistServiceInterface = {
   fetchShopStylistsWithTotalCount(user: UserForAuth | undefined, shopId: number,
-    page?: number, order?: EntityOrderBy, take?: number): Promise<{ stylists: Stylist[], totalCount: number }>
-}
-
-const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
-  switch (day) {
-    case EntityScheduleDays.SUNDAY:
-      return ScheduleDays.SUNDAY
-    case EntityScheduleDays.MONDAY:
-      return ScheduleDays.MONDAY
-    case EntityScheduleDays.TUESDAY:
-      return ScheduleDays.TUESDAY
-    case EntityScheduleDays.WEDNESDAY:
-      return ScheduleDays.WEDNESDAY
-    case EntityScheduleDays.THURSDAY:
-      return ScheduleDays.THURSDAY
-    case EntityScheduleDays.FRIDAY:
-      return ScheduleDays.FRIDAY
-    default:
-      return ScheduleDays.SATURDAY
-  }
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
+    page?: number, order?: OrderBy, take?: number): Promise<{ stylists: Stylist[], totalCount: number }>
 }
 
 const StylistController: StylistControllerInterface = {
@@ -76,7 +47,7 @@ const StylistController: StylistControllerInterface = {
       price: s.price,
       startTime: s.startTime,
       endTime: s.endTime,
-      days: s.days.map(convertEntityDaysToOutboundDays),
+      days: s.days.map(convertEntityDaysToDTO),
     }))
     return { values, totalCount }
   },

@@ -1,12 +1,10 @@
-import { OrderBy } from '@request-response-types/client/Common'
-import { OrderBy as EntityOrderBy, ScheduleDays as EntityScheduleDays } from '@entities/Common'
+import { OrderBy } from '@entities/Common'
 import { Menu } from '@entities/Menu'
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
 import { Tag } from '@entities/Tag'
 import { UserForAuth } from '@entities/User'
 import { Review } from '@entities/Review'
-import { ScheduleDays } from '@request-response-types/models/Common'
 import { ShopControllerInterface } from '@controller-adapter/client/Shop'
 import MenuService from '@client/shop/services/MenuService'
 import ShopService from '@client/shop/services/ShopService'
@@ -16,17 +14,18 @@ import ReviewService from '@client/shop/services/ReviewService'
 import {
   indexSchema, searchByAreaSchema, searchByTagsSchema, searchByNameSchema,
 } from '@client/shop/schemas'
+import { convertEntityDaysToDTO, convertOrderByToEntity } from '@dtoConverters/Common'
 
 export type ShopServiceInterface = {
-  fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: EntityOrderBy, take?: number)
+  fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: OrderBy, take?: number)
     : Promise<{ shops: Shop[], totalCount: number }>
   fetchShop(user: UserForAuth | undefined, shopId: number): Promise<Shop>
-  fetchShopsByAreaWithTotalCount(user: UserForAuth | undefined, areaId: number, page?: number, order?: EntityOrderBy,
+  fetchShopsByAreaWithTotalCount(user: UserForAuth | undefined, areaId: number, page?: number, order?: OrderBy,
     take?: number, prefectureId?: number, cityId?: number): Promise<{ shops: Shop[], totalCount:number }>
   fetchShopsByTagsWithTotalCount(user: UserForAuth | undefined, tags: string[], page?: number,
-    order?: EntityOrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
+    order?: OrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
   fetchShopsByNameWithTotalCount(user: UserForAuth | undefined, name: string, page?: number,
-    order?: EntityOrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
+    order?: OrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
   fetchPopularShops(user: UserForAuth | undefined): Promise<(Shop & { ranking: number })[]>
 }
 
@@ -46,34 +45,6 @@ export type TagServiceInterface = {
 export type ReviewServiceInterface = {
   fetchShopReviewsWithClientName(shopId: number): Promise<(Review & { clientName: string })[]>
   fetchShopsReviewsCount(shopIds: number[]): Promise<{ shopId: number, reviewCount: number }[]>
-}
-
-const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
-  switch (day) {
-    case EntityScheduleDays.SUNDAY:
-      return ScheduleDays.SUNDAY
-    case EntityScheduleDays.MONDAY:
-      return ScheduleDays.MONDAY
-    case EntityScheduleDays.TUESDAY:
-      return ScheduleDays.TUESDAY
-    case EntityScheduleDays.WEDNESDAY:
-      return ScheduleDays.WEDNESDAY
-    case EntityScheduleDays.THURSDAY:
-      return ScheduleDays.THURSDAY
-    case EntityScheduleDays.FRIDAY:
-      return ScheduleDays.FRIDAY
-    default:
-      return ScheduleDays.SATURDAY
-  }
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
 }
 
 const reconstructShops = async (shops: Shop[]) => {
@@ -128,7 +99,7 @@ const ShopController: ShopControllerInterface = {
       endTime: shop.endTime,
       seats: shop.seats,
       details: shop.details,
-      days: shop.days.map(convertEntityDaysToOutboundDays),
+      days: shop.days.map(convertEntityDaysToDTO),
       popularMenus: menus.map(m => ({
         id: m.id,
         shopId: m.shopId,

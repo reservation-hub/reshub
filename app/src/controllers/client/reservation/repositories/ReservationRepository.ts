@@ -1,43 +1,8 @@
-import {
-  Prisma,
-  ReservationStatus as PrismaReservationStatus,
-  Reservation as PrismaReservation,
-} from '@prisma/client'
-import { OrderBy } from '@entities/Common'
-import { Reservation, ReservationStatus } from '@entities/Reservation'
+import { ReservationStatus } from '@prisma/client'
 import { ReservationRepositoryInterface } from '@client/reservation/services/ReservationService'
 import prisma from '@lib/prisma'
-
-const convertReservationStatus = (status: PrismaReservationStatus): ReservationStatus => {
-  switch (status) {
-    case PrismaReservationStatus.CANCELLED:
-      return ReservationStatus.CANCELLED
-    case PrismaReservationStatus.COMPLETED:
-      return ReservationStatus.COMPLETED
-    default:
-      return ReservationStatus.RESERVED
-  }
-}
-
-const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
-  switch (order) {
-    case OrderBy.ASC:
-      return Prisma.SortOrder.asc
-    default:
-      return Prisma.SortOrder.desc
-  }
-}
-
-const reconstructReservation = (reservation: PrismaReservation)
-: Reservation => ({
-  id: reservation.id,
-  shopId: reservation.shopId,
-  reservationDate: reservation.reservationDate,
-  status: convertReservationStatus(reservation.status),
-  clientId: reservation.userId,
-  menuId: reservation.menuId,
-  stylistId: reservation.stylistId ?? undefined,
-})
+import { convertReservationStatusToEntity, reconstructReservation } from '@prismaConverters/Reservation'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
 
 const ReservationRepository: ReservationRepositoryInterface = {
   async fetchShopReservationsForAvailabilityWithMenuDuration(shopId, reservationDate, rangeInDays) {
@@ -64,7 +29,7 @@ const ReservationRepository: ReservationRepositoryInterface = {
       id: r.id,
       shopId: r.shopId,
       reservationDate: r.reservationDate,
-      status: convertReservationStatus(r.status),
+      status: convertReservationStatusToEntity(r.status),
       clientId: r.userId,
       menuId: r.menuId,
       stylistId: r.stylistId ?? undefined,
@@ -113,7 +78,7 @@ const ReservationRepository: ReservationRepositoryInterface = {
   async cancelUserReservation(id) {
     const reservation = await prisma.reservation.update({
       where: { id },
-      data: { status: PrismaReservationStatus.CANCELLED },
+      data: { status: ReservationStatus.CANCELLED },
     })
     return reconstructReservation(reservation)
   },

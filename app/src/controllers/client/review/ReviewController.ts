@@ -1,13 +1,14 @@
 import { ReviewControllerInterface as ShopEndpointSocket } from '@controller-adapter/client/Shop'
 import { ReviewControllerInterface as UserEndpointSocket } from '@controller-adapter/client/User'
 import { indexSchema, upsertSchema } from '@client/review/schemas'
-import { OrderBy } from '@request-response-types/client/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { Review as EntityReview, ReviewScore as EntityReviewScore } from '@entities/Review'
-import { Review, ReviewScore } from '@request-response-types/client/models/Review'
+import { Review } from '@request-response-types/client/models/Review'
 import { UserForAuth } from '@entities/User'
 import ReviewService from '@client/review/services/ReviewService'
 import { UnauthorizedError } from '@errors/ControllerErrors'
+import { convertEntityReviewScoreToDTO, convertReviewScoreToEntity } from '@dtoConverters/Review'
+import { convertOrderByToEntity } from '@dtoConverters/Common'
 
 export type ReviewServiceInterface = {
   fetchReviewsWithTotalCountAndShopNameAndClientName(user: UserForAuth | undefined, shopId: number, page?: number,
@@ -22,45 +23,6 @@ export type ReviewServiceInterface = {
     :Promise<EntityReview & { shopName: string, clientName: string }>
   deleteReview(user: UserForAuth, shopId: number, reviewId: number)
     :Promise<EntityReview & { shopName: string, clientName: string }>
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
-}
-
-const convertReviewScoreToEntity = (reviewScore: ReviewScore): EntityReviewScore => {
-  switch (reviewScore) {
-    case ReviewScore.one:
-      return EntityReviewScore.one
-    case ReviewScore.two:
-      return EntityReviewScore.two
-    case ReviewScore.three:
-      return EntityReviewScore.three
-    case ReviewScore.four:
-      return EntityReviewScore.four
-    default:
-      return EntityReviewScore.five
-  }
-}
-
-const convertEntityReviewScoreToDTO = (reviewScore: EntityReviewScore): ReviewScore => {
-  switch (reviewScore) {
-    case EntityReviewScore.one:
-      return ReviewScore.one
-    case EntityReviewScore.two:
-      return ReviewScore.two
-    case EntityReviewScore.three:
-      return ReviewScore.three
-    case EntityReviewScore.four:
-      return ReviewScore.four
-    default:
-      return ReviewScore.five
-  }
 }
 
 const reconstructReview = (review: EntityReview & { shopName: string, clientName: string }): Review => ({

@@ -1,27 +1,7 @@
 import { ShopRepositoryInterface as ShopServiceSocket } from '@stylist/services/ShopService'
 import prisma from '@lib/prisma'
 import { ShopRepositoryInterface as StylistServiceSocket } from '@stylist/services/StylistService'
-import { Days } from '@prisma/client'
-import { ScheduleDays } from '@entities/Common'
-
-const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
-  switch (day) {
-    case Days.MONDAY:
-      return ScheduleDays.MONDAY
-    case Days.TUESDAY:
-      return ScheduleDays.TUESDAY
-    case Days.WEDNESDAY:
-      return ScheduleDays.WEDNESDAY
-    case Days.THURSDAY:
-      return ScheduleDays.THURSDAY
-    case Days.FRIDAY:
-      return ScheduleDays.FRIDAY
-    case Days.SATURDAY:
-      return ScheduleDays.SATURDAY
-    default:
-      return ScheduleDays.SUNDAY
-  }
-}
+import { convertPrismaDayToEntityDay } from '@prismaConverters/Common'
 
 const ShopRepository: ShopServiceSocket & StylistServiceSocket = {
   async fetchUserShopIds(userId) {
