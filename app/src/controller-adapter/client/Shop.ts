@@ -7,7 +7,7 @@ import {
   SalonAvailabilityQuery, SalonAvailabilityResponse, SalonSetReservationQuery, SalonStylistListForReservationResponse,
   SalonListByAreaQuery, SalonListByTagsQuery, SalonListByNameQuery, SalonReviewListQuery, SalonReviewListResponse,
   SalonReviewUpdateQuery, SalonReviewInsertQuery, SalonReviewDeleteQuery, PopularSalonListResponse, ReviewResponse,
-  ReservationResponse,
+  ReservationResponse, SalonScheduleResponse, SalonScheduleQuery,
 } from '@request-response-types/client/Shop'
 import { UserForAuth } from '@entities/User'
 import { parseIntIdMiddleware, protectClientRoute } from '@routes/utils'
@@ -25,6 +25,7 @@ export type ShopControllerInterface = {
   searchByTags(user: UserForAuth | undefined, query: SalonListByTagsQuery): Promise<SalonListResponse>
   searchByName(user: UserForAuth | undefined, query: SalonListByNameQuery): Promise<SalonListResponse>
   fetchPopularShops(user: UserForAuth | undefined): Promise<PopularSalonListResponse>
+  fetchShopSchedule(user: UserForAuth | undefined, query: SalonScheduleQuery): Promise<SalonScheduleResponse>
 }
 
 export type MenuControllerInterface = {
@@ -206,11 +207,20 @@ const deleteReview = async (req: Request, res: Response, next: NextFunction) : P
   } catch (e) { return next(e) }
 }
 
+const shopSchedule = async (req: Request, res: Response, next: NextFunction) : Promise<Response | void> => {
+  try {
+    const { user } = req
+    const { shopId } = res.locals
+    return res.send(await ShopController.fetchShopSchedule(user, { shopId }))
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.get('/', index)
 routes.get('/popular', popularShops)
 routes.get('/:shopId', parseIntIdMiddleware, detail)
+routes.get('/:shopId/schedule', parseIntIdMiddleware, protectClientRoute, shopSchedule)
 
 /**
  * Search routes

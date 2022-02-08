@@ -1,4 +1,4 @@
-import { OrderBy } from '@entities/Common'
+import { OrderBy, ScheduleDays } from '@entities/Common'
 import { Menu } from '@entities/Menu'
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
@@ -15,6 +15,7 @@ import {
   indexSchema, searchByAreaSchema, searchByTagsSchema, searchByNameSchema,
 } from '@client/shop/schemas'
 import { convertEntityDaysToDTO, convertOrderByToEntity } from '@dtoConverters/Common'
+import { UnauthorizedError } from '@errors/ControllerErrors'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: OrderBy, take?: number)
@@ -27,6 +28,7 @@ export type ShopServiceInterface = {
   fetchShopsByNameWithTotalCount(user: UserForAuth | undefined, name: string, page?: number,
     order?: OrderBy, take?: number): Promise<{ shops: Shop[], totalCount:number }>
   fetchPopularShops(user: UserForAuth | undefined): Promise<(Shop & { ranking: number })[]>
+  fetchShopSchedule(shopId: number): Promise<{startTime: string, endTime: string, seats: number, days: ScheduleDays[]}>
 }
 
 export type MenuServiceInterface = {
@@ -178,6 +180,17 @@ const ShopController: ShopControllerInterface = {
       ...cs,
       ranking: shopsWithRanking.find(swr => cs.id === swr.id)!.ranking,
     }))
+  },
+
+  async fetchShopSchedule(user, query) {
+    if (!user) {
+      throw new UnauthorizedError('User cannot be found in the request')
+    }
+    const shopSchedule = await ShopService.fetchShopSchedule(query.shopId)
+    return {
+      ...shopSchedule,
+      days: shopSchedule.days.map(convertEntityDaysToDTO),
+    }
   },
 }
 

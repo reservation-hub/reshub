@@ -80,6 +80,18 @@ const ShopService: ShopServiceInterface = {
     return popularShops
   },
 
+  async fetchShopSchedule(shopId) {
+    const shop = await ShopRepository.fetchShop(shopId)
+    if (!shop) {
+      throw new NotFoundError('The shop does not exist')
+    }
+    return {
+      startTime: shop.startTime,
+      endTime: shop.endTime,
+      seats: shop.seats,
+      days: shop.days,
+    }
+  },
 }
 
 export default ShopService
