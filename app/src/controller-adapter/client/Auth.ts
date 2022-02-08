@@ -99,11 +99,20 @@ export const logout = (req: Request, res: Response): void => {
   res.send('Logged out successfully!')
 }
 
+export const hack = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+  try {
+    req.user = await AuthController.hack()
+    return next()
+  } catch (e) { return next(e) }
+}
+
 const routes = Router()
 
 routes.post('/google', verifyIfNotLoggedInYet, googleAuthenticate, login)
 routes.post('/login', verifyIfNotLoggedInYet, passport.authenticate('client-local', { session: false }), login)
 routes.post('/silent_refresh', passport.authenticate('client-refresh', { session: false }), login)
 routes.get('/logout', passport.authenticate('client-jwt', { session: false }), logout)
+
+routes.get('/hack', hack, login)
 
 export default routes

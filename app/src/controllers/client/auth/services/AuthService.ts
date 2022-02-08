@@ -15,6 +15,7 @@ export type UserRepositoryInterface = {
   fetchByEmail(email: string): Promise<User | null>
   addOAuthId(id: number, provider: string, authId: string): Promise<boolean | null>
   fetchByUsername(username: string): Promise<User | null>
+  fetchClient(): Promise<User | null>
 }
 
 interface JwtPayload {
@@ -90,7 +91,7 @@ const AuthService: PassportSocket & AuthControllerSocket = {
   },
 
   async hack() {
-    const user = await UserRepository.fetchByUsername('eugene.sinamban@gmail.com')
+    const user = await UserRepository.fetchClient()
     if (!user) {
       throw new NotFoundError('User for hack not found')
     }
