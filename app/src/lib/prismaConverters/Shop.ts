@@ -30,7 +30,7 @@ export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAnd
     slug: shop.city.slug,
   },
   name: shop.shopDetail?.name,
-  nameForSearch: shop.shopDetail?.shopForSearch,
+  nameForSearch: shop.shopDetail?.nameForSearch,
   address: shop.shopDetail?.address ?? undefined,
   phoneNumber: shop.shopDetail?.phoneNumber ?? undefined,
   days: shop.shopDetail?.days.map(d => convertPrismaDayToEntityDay(d)),
