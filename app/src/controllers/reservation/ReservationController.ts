@@ -1,15 +1,16 @@
 import { convertDateTimeObjectToDateTimeString, convertDateStringToDateObject } from '@lib/Date'
 import { Menu } from '@entities/Menu'
-import { Reservation as EntityReservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
-import { Reservation, ReservationStatus } from '@request-response-types/models/Reservation'
+import { Reservation as EntityReservation } from '@entities/Reservation'
+import { Reservation } from '@request-response-types/models/Reservation'
 import { Shop } from '@entities/Shop'
 import { Stylist } from '@entities/Stylist'
 import { User, UserForAuth } from '@entities/User'
 import ReservationService from '@reservation/services/ReservationService'
 import { ReservationControllerInterface } from '@controller-adapter/Shop'
-import { OrderBy } from '@request-response-types/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
+import { convertStatusToPDO } from '@dtoConverters/Reservation'
+import { convertOrderByToEntity } from '@dtoConverters/Common'
 import { indexCalendarSchema, indexSchema, reservationUpsertSchema } from './schemas'
 import ShopService from './services/ShopService'
 
@@ -34,26 +35,6 @@ export type ReservationServiceInterface = {
 
 export type ShopServiceInterface = {
   fetchShopSeatCount(user: UserForAuth, shopId: number): Promise<number>
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
-}
-
-const convertStatusToPDO = (status: EntityReservationStatus): ReservationStatus => {
-  switch (status) {
-    case EntityReservationStatus.CANCELLED:
-      return ReservationStatus.CANCELLED
-    case EntityReservationStatus.COMPLETED:
-      return ReservationStatus.COMPLETED
-    default:
-      return ReservationStatus.RESERVED
-  }
 }
 
 const reconstructReservation = (r: EntityReservation & { reservationEndDate: Date, client: User,

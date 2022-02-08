@@ -1,11 +1,11 @@
 import { ReviewControllerInterface } from '@controller-adapter/Shop'
-import { OrderBy } from '@request-response-types/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { Review } from '@entities/Review'
 import { UserForAuth } from '@entities/User'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { indexSchema } from '@review/schemas'
 import ReviewService from '@review/services/ReviewService'
+import { convertOrderByToEntity } from '@dtoConverters/Common'
 
 export type ReviewServiceInterface = {
   fetchReviewsWithTotalCountAndShopNameAndClientName(user: UserForAuth, shopId: number, page?: number,
@@ -13,15 +13,6 @@ export type ReviewServiceInterface = {
       (Review & { shopName: string, clientName: string })[], totalCount: number }>
   fetchReviewWithShopNameAndClientName(user: UserForAuth, shopId: number, reviewId: number)
     : Promise<(Review & { shopName: string, clientName: string })>
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
 }
 
 const ReviewController: ReviewControllerInterface = {

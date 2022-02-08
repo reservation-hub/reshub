@@ -61,6 +61,9 @@
       ],
       "@prismaConverters/*": [
         "src/lib/prismaConverters/*"
+      ],
+      "@dtoConverters/*": [
+        "src/lib/dtoConverters/*"
       ]
     },
     /* Basic Options */

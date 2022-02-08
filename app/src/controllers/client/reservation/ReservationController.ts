@@ -1,6 +1,6 @@
 import { convertDateTimeObjectToDateTimeString, convertDateStringToDateObject } from '@lib/Date'
-import { Reservation as EntityReservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
-import { Reservation, ReservationStatus } from '@request-response-types/client/models/Reservation'
+import { Reservation as EntityReservation } from '@entities/Reservation'
+import { Reservation } from '@request-response-types/client/models/Reservation'
 import { UserForAuth } from '@entities/User'
 import { ReservationControllerInterface as ShopEndpointSocket } from '@controller-adapter/client/Shop'
 import { ReservationControllerInterface as UserEndpointSocket } from '@controller-adapter/client/User'
@@ -8,11 +8,12 @@ import { indexSchema, reservationQuerySchema, reservationUpsertSchema } from '@c
 import ReservationService from '@client/reservation/services/ReservationService'
 import ShopService from '@client/reservation/services/ShopService'
 import { UnauthorizedError } from '@errors/ControllerErrors'
-import { OrderBy } from '@request-response-types/client/Common'
 import { OrderBy as EntityOrderBy } from '@entities/Common'
 import { Menu } from '@entities/Menu'
 import { Stylist } from '@entities/Stylist'
 import { Shop } from '@entities/Shop'
+import { convertStatusToPDO } from '@dtoConverters/Reservation'
+import { convertOrderByToEntity } from '@dtoConverters/Common'
 
 export type ReservationServiceInterface = {
   fetchShopReservationsForAvailability(user: UserForAuth | undefined, shopId: number, reservationDate: Date)
@@ -30,26 +31,6 @@ export type ReservationServiceInterface = {
 
 export type ShopServiceInterface = {
   fetchShopSeatCount(user: UserForAuth | undefined, shopId: number): Promise<number>
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
-}
-
-const convertStatusToPDO = (status: EntityReservationStatus): ReservationStatus => {
-  switch (status) {
-    case EntityReservationStatus.CANCELLED:
-      return ReservationStatus.CANCELLED
-    case EntityReservationStatus.COMPLETED:
-      return ReservationStatus.COMPLETED
-    default:
-      return ReservationStatus.RESERVED
-  }
 }
 
 const reconstructReservation = (reservation: EntityReservation & { shop: Shop, menu: Menu, stylist?: Stylist })

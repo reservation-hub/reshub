@@ -1,11 +1,12 @@
 import { UserControllerInterface } from '@controller-adapter/client/User'
 import UserService from '@client/user/services/UserService'
 import { Gender, User } from '@request-response-types/client/models/User'
-import { Gender as EntityGender, User as EntityUser } from '@entities/User'
+import { User as EntityUser } from '@entities/User'
 import { signUpSchema, updateUserSchema, userPasswordUpdateSchema } from '@client/user/schemas'
 import MailService from '@client/user/services/MailService'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { convertDateObjectToOutboundDateString, convertDateStringToDateObject } from '@lib/Date'
+import { convertEntityGenderToDTO, convertGenderToEntity } from '@dtoConverters/User'
 
 export type UserServiceInterface = {
   fetchUserWithReservationCountAndReviewCount(id: number)
@@ -21,24 +22,6 @@ export type MailServiceInterface = {
   sendSignUpEmail(email: string): Promise<void>
 }
 
-const convertGenderToEntity = (gender: Gender): EntityGender => {
-  switch (gender) {
-    case Gender.FEMALE:
-      return EntityGender.FEMALE
-    default:
-      return EntityGender.MALE
-  }
-}
-
-const convertEntityGenderToDTOGender = (gender: EntityGender): Gender => {
-  switch (gender) {
-    case EntityGender.FEMALE:
-      return Gender.FEMALE
-    default:
-      return Gender.MALE
-  }
-}
-
 const reconstructUser = async (userId: number): Promise<User> => {
   const u = await UserService.fetchUserWithReservationCountAndReviewCount(userId)
   return {
@@ -48,7 +31,7 @@ const reconstructUser = async (userId: number): Promise<User> => {
     lastNameKana: u.lastNameKana,
     firstNameKana: u.firstNameKana,
     birthday: u.birthday ? convertDateObjectToOutboundDateString(u.birthday) : undefined,
-    gender: u.gender ? convertEntityGenderToDTOGender(u.gender) : undefined,
+    gender: u.gender ? convertEntityGenderToDTO(u.gender) : undefined,
     reservationCount: u.reservationCount,
     reviewCount: u.reviewCount,
   }

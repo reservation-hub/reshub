@@ -5,21 +5,21 @@ import { Stylist } from '@entities/Stylist'
 import { ShopControllerInterface } from '@controller-adapter/Shop'
 import { User, UserForAuth } from '@entities/User'
 import { Menu } from '@entities/Menu'
-import { Reservation, ReservationStatus as EntityReservationStatus } from '@entities/Reservation'
+import { Reservation } from '@entities/Reservation'
 import { ScheduleDays as EntityScheduleDays, OrderBy as EntityOrderBy } from '@entities/Common'
 import ShopService from '@shop/services/ShopService'
 import UserService from '@shop/services/UserService'
 import ReservationService from '@shop/services/ReservationService'
 import StylistService from '@shop/services/StylistService'
 import MenuService from '@shop/services/MenuService'
-import { OrderBy } from '@request-response-types/Common'
-import { ReservationStatus } from '@request-response-types/models/Reservation'
 import { ScheduleDays } from '@request-response-types/models/Common'
 import { UnauthorizedError } from '@errors/ControllerErrors'
 import { Tag } from '@entities/Tag'
 import { Review } from '@entities/Review'
 import TagService from '@shop/services/TagService'
 import ReviewService from '@shop/services/ReviewService'
+import { convertStatusToPDO } from '@dtoConverters/Reservation'
+import { convertDTODaysToEntity, convertEntityDaysToDTO, convertOrderByToEntity } from '@dtoConverters/Common'
 import { shopUpsertSchema, indexSchema, searchSchema } from './schemas'
 
 export type ShopServiceInterface = {
@@ -66,65 +66,6 @@ export type TagServiceInterface = {
 export type ReviewsServiceInterface = {
   fetchReviewsForShop(shopId: number, limit?: number): Promise<Review[]>
 }
-
-const convertEntityDaysToOutboundDays = (day: EntityScheduleDays): ScheduleDays => {
-  switch (day) {
-    case EntityScheduleDays.SUNDAY:
-      return ScheduleDays.SUNDAY
-    case EntityScheduleDays.MONDAY:
-      return ScheduleDays.MONDAY
-    case EntityScheduleDays.TUESDAY:
-      return ScheduleDays.TUESDAY
-    case EntityScheduleDays.WEDNESDAY:
-      return ScheduleDays.WEDNESDAY
-    case EntityScheduleDays.THURSDAY:
-      return ScheduleDays.THURSDAY
-    case EntityScheduleDays.FRIDAY:
-      return ScheduleDays.FRIDAY
-    default:
-      return ScheduleDays.SATURDAY
-  }
-}
-
-const convertInboundDaysToEntityDays = (day: ScheduleDays): EntityScheduleDays => {
-  switch (day) {
-    case ScheduleDays.SUNDAY:
-      return EntityScheduleDays.SUNDAY
-    case ScheduleDays.MONDAY:
-      return EntityScheduleDays.MONDAY
-    case ScheduleDays.TUESDAY:
-      return EntityScheduleDays.TUESDAY
-    case ScheduleDays.WEDNESDAY:
-      return EntityScheduleDays.WEDNESDAY
-    case ScheduleDays.THURSDAY:
-      return EntityScheduleDays.THURSDAY
-    case ScheduleDays.FRIDAY:
-      return EntityScheduleDays.FRIDAY
-    default:
-      return EntityScheduleDays.SATURDAY
-  }
-}
-
-const convertOrderByToEntity = (order: OrderBy): EntityOrderBy => {
-  switch (order) {
-    case OrderBy.ASC:
-      return EntityOrderBy.ASC
-    default:
-      return EntityOrderBy.DESC
-  }
-}
-
-const convertStatusToPDO = (status: EntityReservationStatus): ReservationStatus => {
-  switch (status) {
-    case EntityReservationStatus.CANCELLED:
-      return ReservationStatus.CANCELLED
-    case EntityReservationStatus.COMPLETED:
-      return ReservationStatus.COMPLETED
-    default:
-      return ReservationStatus.RESERVED
-  }
-}
-
 const reconstructShop = async (shop: EntityShop, user: UserForAuth, limits: {
   stylistLimit?: number
   reservationLimit?: number
@@ -182,7 +123,7 @@ const reconstructShop = async (shop: EntityShop, user: UserForAuth, limits: {
     prefectureName: shop.prefecture.name,
     cityId: shop.city.id,
     cityName: shop.city.name,
-    days: shop.days.map(convertEntityDaysToOutboundDays),
+    days: shop.days.map(convertEntityDaysToDTO),
     seats: shop.seats,
     startTime: shop.startTime,
     endTime: shop.endTime,
@@ -255,7 +196,7 @@ const ShopController: ShopControllerInterface = {
       phoneNumber, days, seats, startTime, endTime, details,
     } = await shopUpsertSchema.parseAsync(query)
 
-    const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
+    const entityDays = days.map((d: ScheduleDays) => convertDTODaysToEntity(d))
     const shop = await ShopService.insertShop(user,
       name, areaId, prefectureId, cityId, address,
       phoneNumber, entityDays, seats, startTime, endTime, details)
@@ -272,7 +213,7 @@ const ShopController: ShopControllerInterface = {
       seats, days, startTime, endTime, details,
     } = await shopUpsertSchema.parseAsync(query.params)
     const { id } = query
-    const entityDays = days.map((d: ScheduleDays) => convertInboundDaysToEntityDays(d))
+    const entityDays = days.map((d: ScheduleDays) => convertDTODaysToEntity(d))
     const shop = await ShopService.updateShop(user, id, name, areaId, prefectureId, cityId,
       address, phoneNumber, entityDays, seats, startTime, endTime, details)
     return reconstructShop(shop, user, {})
