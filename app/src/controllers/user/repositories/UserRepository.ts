@@ -1,8 +1,8 @@
 import { UserRepositoryInterface } from '@user/services/UserService'
 import prisma from '@lib/prisma'
-import { convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
 import { convertEntityGenderToDBGender, convertEntityRoleSlugToPrismaRoleSlug, reconstructUser }
-  from '@lib/prismaConverters/User'
+  from '@prismaConverters/User'
 
 const UserRepository: UserRepositoryInterface = {
   async fetchAllUsers(page, order, take) {

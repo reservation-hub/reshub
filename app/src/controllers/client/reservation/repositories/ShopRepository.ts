@@ -1,11 +1,8 @@
 import { ShopRepositoryInterface as ShopServiceSocket } from '@client/reservation/services/ShopService'
 import { ShopRepositoryInterface as ReservationServiceSocket } from '@client/reservation/services/ReservationService'
-import { Shop } from '@entities/Shop'
-import { ScheduleDays } from '@entities/Common'
 import prisma from '@lib/prisma'
-import { Prisma, Days } from '@prisma/client'
-import { convertPrismaDayToEntityDay } from '@lib/prismaConverters/Common'
-import { reconstructShop } from '@lib/prismaConverters/Shop'
+import { convertPrismaDayToEntityDay } from '@prismaConverters/Common'
+import { reconstructShop } from '@prismaConverters/Shop'
 
 const ShopRepository: ShopServiceSocket & ReservationServiceSocket = {
   async fetchUserShopIds(userId) {

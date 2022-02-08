@@ -1,8 +1,8 @@
 import { ReservationStatus } from '@prisma/client'
 import { ReservationRepositoryInterface } from '@client/reservation/services/ReservationService'
 import prisma from '@lib/prisma'
-import { convertReservationStatusToEntity, reconstructReservation } from '@lib/prismaConverters/Reservation'
-import { convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
+import { convertReservationStatusToEntity, reconstructReservation } from '@prismaConverters/Reservation'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
 
 const ReservationRepository: ReservationRepositoryInterface = {
   async fetchShopReservationsForAvailabilityWithMenuDuration(shopId, reservationDate, rangeInDays) {

@@ -2,8 +2,8 @@ import { ShopRepositoryInterface as ShopServiceSocket } from '@shop/services/Sho
 import { ShopRepositoryInterface as MenuServiceSocket } from '@shop/services/MenuService'
 import { ShopRepositoryInterface as StylistServiceSocket } from '@shop/services/StylistService'
 import prisma from '@lib/prisma'
-import { convertEntityDayToPrismaDay, convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
-import { reconstructShop } from '@lib/prismaConverters/Shop'
+import { convertEntityDayToPrismaDay, convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
+import { reconstructShop } from '@prismaConverters/Shop'
 
 const ShopRepository: ShopServiceSocket & MenuServiceSocket &
 StylistServiceSocket = {

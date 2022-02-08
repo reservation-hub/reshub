@@ -1,7 +1,7 @@
 import prisma from '@lib/prisma'
 import { TagRepositoryInterface } from '@client/tag/services/TagService'
-import { convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
-import { convertToEntityTag } from '@lib/prismaConverters/Tag'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
+import { convertToEntityTag } from '@prismaConverters/Tag'
 
 const TagRepository: TagRepositoryInterface = {
   async searchTag(keyword, page, order, take) {

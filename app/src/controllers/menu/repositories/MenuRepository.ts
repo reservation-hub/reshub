@@ -1,6 +1,6 @@
 import { MenuRepositoryInterface } from '@menu/services/MenuService'
 import prisma from '@lib/prisma'
-import { convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
 
 const MenuRepository: MenuRepositoryInterface = {
   async fetchAllShopMenus(shopId, page, order, take) {

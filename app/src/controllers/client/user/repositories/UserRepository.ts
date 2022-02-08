@@ -1,7 +1,7 @@
 import { RoleSlug } from '@prisma/client'
 import { UserRepositoryInterface } from '@client/user/services/UserService'
 import prisma from '@lib/prisma'
-import { convertEntityGenderToDBGender, reconstructUser } from '@lib/prismaConverters/User'
+import { convertEntityGenderToDBGender, reconstructUser } from '@prismaConverters/User'
 
 const UserRepository: UserRepositoryInterface = {
   async fetchUser(id) {

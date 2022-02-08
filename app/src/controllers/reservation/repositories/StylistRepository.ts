@@ -1,6 +1,6 @@
 import { StylistRepositoryInterface } from '@reservation/services/ReservationService'
 import prisma from '@lib/prisma'
-import { reconstructStylist } from '@lib/prismaConverters/Stylist'
+import { reconstructStylist } from '@prismaConverters/Stylist'
 
 export const StylistRepository: StylistRepositoryInterface = {
 

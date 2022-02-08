@@ -1,6 +1,6 @@
 import { UserRepositoryInterface as ReservationServiceSocket } from '@reservation/services/ReservationService'
 import prisma from '@lib/prisma'
-import { reconstructUser } from '@lib/prismaConverters/User'
+import { reconstructUser } from '@prismaConverters/User'
 
 const UserRepository: ReservationServiceSocket = {
   async fetchUsersByIds(userIds) {

@@ -1,8 +1,8 @@
 import { ReservationStatus } from '@prisma/client'
 import { ReservationRepositoryInterface } from '@reservation/services/ReservationService'
 import prisma from '@lib/prisma'
-import { convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
-import { convertReservationStatusToEntity, reconstructReservation } from '@lib/prismaConverters/Reservation'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
+import { convertReservationStatusToEntity, reconstructReservation } from '@prismaConverters/Reservation'
 
 const ReservationRepository: ReservationRepositoryInterface = {
 

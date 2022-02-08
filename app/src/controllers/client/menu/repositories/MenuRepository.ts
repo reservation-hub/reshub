@@ -3,7 +3,7 @@ import { Menu } from '@entities/Menu'
 import prisma from '@lib/prisma'
 import redis from '@lib/redis'
 import setPopularMenus from '@lib/PopularMenuSetter'
-import { convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
 
 const MenuRepository: MenuRepositoryInterface = {
   async fetchPopularMenus() {

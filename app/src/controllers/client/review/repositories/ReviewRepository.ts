@@ -1,7 +1,7 @@
 import { ReviewRepositoryInterface } from '@client/review/services/ReviewService'
 import prisma from '@lib/prisma'
-import { convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
-import { convertEntityToReviewScore, reconstructReview } from '@lib/prismaConverters/Review'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
+import { convertEntityToReviewScore, reconstructReview } from '@prismaConverters/Review'
 
 const ReviewRepository: ReviewRepositoryInterface = {
   async fetchShopReviews(shopId, page, order, take) {

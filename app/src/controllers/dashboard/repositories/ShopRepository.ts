@@ -1,7 +1,7 @@
 import { ShopRepositoryInterface as ShopServiceSocket } from '@dashboard/services/ShopService'
 import { ShopRepositoryInterface as ReservationServiceSocket } from '@dashboard/services/ReservationService'
 import prisma from '@lib/prisma'
-import { reconstructShop } from '@lib/prismaConverters/Shop'
+import { reconstructShop } from '@prismaConverters/Shop'
 
 const ShopRepository: ReservationServiceSocket & ShopServiceSocket = {
 

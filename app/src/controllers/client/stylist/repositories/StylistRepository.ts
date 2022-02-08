@@ -1,7 +1,7 @@
 import { StylistRepositoryInterface } from '@client/stylist/services/StylistService'
 import prisma from '@lib/prisma'
-import { convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
-import { reconstructStylist } from '@lib/prismaConverters/Stylist'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
+import { reconstructStylist } from '@prismaConverters/Stylist'
 
 const StylistRepository: StylistRepositoryInterface = {
   async fetchShopStylists(shopId, page, order, take) {

@@ -1,6 +1,6 @@
 import prisma from '@lib/prisma'
 import { StylistRepositoryInterface } from '@client/shop/services/StylistService'
-import { reconstructStylist } from '@lib/prismaConverters/Stylist'
+import { reconstructStylist } from '@prismaConverters/Stylist'
 
 const StylistRepository: StylistRepositoryInterface = {
   async fetchShopStylists(shopId, limit) {

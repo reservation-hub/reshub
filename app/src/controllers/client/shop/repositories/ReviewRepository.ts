@@ -1,6 +1,6 @@
 import { ReviewRepositoryInterface } from '@client/shop/services/ReviewService'
 import prisma from '@lib/prisma'
-import { reconstructReview } from '@lib/prismaConverters/Review'
+import { reconstructReview } from '@prismaConverters/Review'
 
 const ReviewRepository: ReviewRepositoryInterface = {
   async fetchShopReviews(shopId, take) {

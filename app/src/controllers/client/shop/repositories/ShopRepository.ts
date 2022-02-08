@@ -5,8 +5,8 @@ import { ShopRepositoryInterface as MenuServiceSocket } from '@client/shop/servi
 import { ShopRepositoryInterface as StylistServiceSocket } from '@client/shop/services/StylistService'
 import setPopularShops from '@lib/PopularShopSetter'
 import redis from '@lib/redis'
-import { convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
-import { reconstructShop } from '@lib/prismaConverters/Shop'
+import { convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
+import { reconstructShop } from '@prismaConverters/Shop'
 
 const ShopRepository: ShopServiceSocket & MenuServiceSocket & StylistServiceSocket = {
   async fetchShops(page, order, take) {

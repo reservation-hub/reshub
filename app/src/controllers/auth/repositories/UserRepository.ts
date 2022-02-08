@@ -1,6 +1,6 @@
 import { UserRepositoryInterface as AuthServiceSocket } from '@auth/services/AuthService'
 import prisma from '@lib/prisma'
-import { reconstructUser } from '@lib/prismaConverters/User'
+import { reconstructUser } from '@prismaConverters/User'
 
 const UserRepository: AuthServiceSocket = {
 

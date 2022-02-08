@@ -1,6 +1,6 @@
 import { UserRepositoryInterface } from '@client/review/services/ReviewService'
 import prisma from '@lib/prisma'
-import { reconstructUser } from '@lib/prismaConverters/User'
+import { reconstructUser } from '@prismaConverters/User'
 
 const UserRepository: UserRepositoryInterface = {
   async fetchUsers(userIds) {
