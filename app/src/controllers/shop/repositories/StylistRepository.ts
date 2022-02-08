@@ -1,26 +1,7 @@
-import { Stylist as PrismaStylist, Days } from '@prisma/client'
-import { ScheduleDays } from '@entities/Common'
+import { Stylist as PrismaStylist } from '@prisma/client'
 import { StylistRepositoryInterface as StylistServiceSocket } from '@shop/services/StylistService'
 import prisma from '@lib/prisma'
-
-const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
-  switch (day) {
-    case Days.MONDAY:
-      return ScheduleDays.MONDAY
-    case Days.TUESDAY:
-      return ScheduleDays.TUESDAY
-    case Days.WEDNESDAY:
-      return ScheduleDays.WEDNESDAY
-    case Days.THURSDAY:
-      return ScheduleDays.THURSDAY
-    case Days.FRIDAY:
-      return ScheduleDays.FRIDAY
-    case Days.SATURDAY:
-      return ScheduleDays.SATURDAY
-    default:
-      return ScheduleDays.SUNDAY
-  }
-}
+import { convertPrismaDayToEntityDay } from '@prismaConverters/Common'
 
 export const StylistRepository: StylistServiceSocket = {
 

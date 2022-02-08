@@ -1,19 +1,7 @@
-import { Prisma, Tag as PrismaTag } from '@prisma/client'
-import { OrderBy } from '@entities/Common'
-import { Tag } from '@entities/Tag'
 import prisma from '@lib/prisma'
 import { TagRepositoryInterface } from '@client/tag/services/TagService'
-
-const convertToEntityTag = (tag: PrismaTag): Tag => ({ id: tag.id, slug: tag.slug })
-
-const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
-  switch (order) {
-    case OrderBy.ASC:
-      return Prisma.SortOrder.asc
-    default:
-      return Prisma.SortOrder.desc
-  }
-}
+import { convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
+import { convertToEntityTag } from '@lib/prismaConverters/Tag'
 
 const TagRepository: TagRepositoryInterface = {
   async searchTag(keyword, page, order, take) {

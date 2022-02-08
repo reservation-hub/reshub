@@ -58,6 +58,9 @@
       ],
       "@review/*": [
         "src/controllers/review/*"
+      ],
+      "@prismaConverters/*": [
+        "src/lib/prismaConverters/*"
       ]
     },
     /* Basic Options */

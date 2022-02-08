@@ -1,94 +1,9 @@
-import { Prisma, Days } from '@prisma/client'
-import { Shop } from '@entities/Shop'
-import { ScheduleDays, OrderBy } from '@entities/Common'
 import { ShopRepositoryInterface as ShopServiceSocket } from '@shop/services/ShopService'
 import { ShopRepositoryInterface as MenuServiceSocket } from '@shop/services/MenuService'
 import { ShopRepositoryInterface as StylistServiceSocket } from '@shop/services/StylistService'
 import prisma from '@lib/prisma'
-
-const shopWithShopDetailsAndAreaAndPrefectureAndCity = Prisma.validator<Prisma.ShopArgs>()(
-  {
-    include: {
-      shopDetail: true, area: true, prefecture: true, city: true,
-    },
-  },
-)
-type shopWithShopDetailsAndAreaAndPrefectureAndCity =
-Prisma.ShopGetPayload<typeof shopWithShopDetailsAndAreaAndPrefectureAndCity>
-
-const convertEntityDayToPrismaDay = (day: ScheduleDays): Days => {
-  switch (day) {
-    case ScheduleDays.MONDAY:
-      return Days.MONDAY
-    case ScheduleDays.TUESDAY:
-      return Days.TUESDAY
-    case ScheduleDays.WEDNESDAY:
-      return Days.WEDNESDAY
-    case ScheduleDays.THURSDAY:
-      return Days.THURSDAY
-    case ScheduleDays.FRIDAY:
-      return Days.FRIDAY
-    case ScheduleDays.SATURDAY:
-      return Days.SATURDAY
-    default:
-      return Days.SUNDAY
-  }
-}
-
-const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
-  switch (day) {
-    case Days.MONDAY:
-      return ScheduleDays.MONDAY
-    case Days.TUESDAY:
-      return ScheduleDays.TUESDAY
-    case Days.WEDNESDAY:
-      return ScheduleDays.WEDNESDAY
-    case Days.THURSDAY:
-      return ScheduleDays.THURSDAY
-    case Days.FRIDAY:
-      return ScheduleDays.FRIDAY
-    case Days.SATURDAY:
-      return ScheduleDays.SATURDAY
-    default:
-      return ScheduleDays.SUNDAY
-  }
-}
-
-const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
-  switch (order) {
-    case OrderBy.ASC:
-      return Prisma.SortOrder.asc
-    default:
-      return Prisma.SortOrder.desc
-  }
-}
-
-export const reconstructShop = (shop: shopWithShopDetailsAndAreaAndPrefectureAndCity): Shop => ({
-  id: shop.id,
-  area: {
-    id: shop.area.id,
-    name: shop.area.name,
-    slug: shop.area.slug,
-  },
-  prefecture: {
-    id: shop.prefecture.id,
-    name: shop.prefecture.name,
-    slug: shop.prefecture.slug,
-  },
-  city: {
-    id: shop.city.id,
-    name: shop.city.name,
-    slug: shop.city.slug,
-  },
-  name: shop.shopDetail?.name,
-  address: shop.shopDetail?.address ?? undefined,
-  phoneNumber: shop.shopDetail?.phoneNumber ?? undefined,
-  days: shop.shopDetail?.days.map(d => convertPrismaDayToEntityDay(d)),
-  seats: shop.shopDetail.seats,
-  startTime: shop.shopDetail.startTime,
-  endTime: shop.shopDetail.endTime,
-  details: shop.shopDetail?.details ?? undefined,
-})
+import { convertEntityDayToPrismaDay, convertEntityOrderToRepositoryOrder } from '@lib/prismaConverters/Common'
+import { reconstructShop } from '@lib/prismaConverters/Shop'
 
 const ShopRepository: ShopServiceSocket & MenuServiceSocket &
 StylistServiceSocket = {
@@ -139,6 +54,7 @@ StylistServiceSocket = {
         shopDetail: {
           create: {
             name,
+            shopForSearch: name.toLowerCase(),
             address,
             phoneNumber,
             days: days.map(convertEntityDayToPrismaDay),

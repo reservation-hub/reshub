@@ -1,65 +1,7 @@
-import { OrderBy, ScheduleDays } from '@entities/Common'
-import { Prisma, Stylist as PrismaStylist, Days } from '@prisma/client'
-import { Stylist } from '@entities/Stylist'
 import { StylistRepositoryInterface } from '@stylist/services/StylistService'
 import prisma from '@lib/prisma'
-
-const convertEntityDayToPrismaDay = (day: ScheduleDays): Days => {
-  switch (day) {
-    case ScheduleDays.MONDAY:
-      return Days.MONDAY
-    case ScheduleDays.TUESDAY:
-      return Days.TUESDAY
-    case ScheduleDays.WEDNESDAY:
-      return Days.WEDNESDAY
-    case ScheduleDays.THURSDAY:
-      return Days.THURSDAY
-    case ScheduleDays.FRIDAY:
-      return Days.FRIDAY
-    case ScheduleDays.SATURDAY:
-      return Days.SATURDAY
-    default:
-      return Days.SUNDAY
-  }
-}
-
-const convertPrismaDayToEntityDay = (day: Days): ScheduleDays => {
-  switch (day) {
-    case Days.MONDAY:
-      return ScheduleDays.MONDAY
-    case Days.TUESDAY:
-      return ScheduleDays.TUESDAY
-    case Days.WEDNESDAY:
-      return ScheduleDays.WEDNESDAY
-    case Days.THURSDAY:
-      return ScheduleDays.THURSDAY
-    case Days.FRIDAY:
-      return ScheduleDays.FRIDAY
-    case Days.SATURDAY:
-      return ScheduleDays.SATURDAY
-    default:
-      return ScheduleDays.SUNDAY
-  }
-}
-
-const convertEntityOrderToRepositoryOrder = (order: OrderBy): Prisma.SortOrder => {
-  switch (order) {
-    case OrderBy.ASC:
-      return Prisma.SortOrder.asc
-    default:
-      return Prisma.SortOrder.desc
-  }
-}
-
-const reconstructStylist = (stylist: PrismaStylist): Stylist => ({
-  id: stylist.id,
-  shopId: stylist.shopId,
-  name: stylist.name,
-  price: stylist.price,
-  days: stylist.days.map(s => convertPrismaDayToEntityDay(s)),
-  startTime: stylist.startTime,
-  endTime: stylist.endTime,
-})
+import { convertEntityDayToPrismaDay, convertEntityOrderToRepositoryOrder } from '@prismaConverters/Common'
+import { reconstructStylist } from '@prismaConverters/Stylist'
 
 export const StylistRepository: StylistRepositoryInterface = {
   async fetchShopStylists(shopId, page, order, take) {

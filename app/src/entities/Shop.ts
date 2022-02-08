@@ -4,6 +4,7 @@ import { ScheduleDays } from './Common'
 export type Shop = {
   id: number
   name: string
+  nameForSearch: string
   area: Area
   prefecture: Prefecture
   city: City
