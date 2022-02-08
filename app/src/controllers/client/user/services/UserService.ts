@@ -5,6 +5,10 @@ import { UserServiceInterface } from '@client/user/UserController'
 import UserRepository from '@client/user/repositories/UserRepository'
 import ReservationRepository from '@client/user/repositories/ReservationRepository'
 import ReviewRepository from '@client/user/repositories/ReviewRepository'
+import ShopRepository from '@client/user/repositories/ShopRepository'
+import MenuRepository from '@client/user/repositories/MenuRepository'
+import StylistRepository from '@client/user/repositories/StylistRepository'
+import { Reservation } from '@entities/Reservation'
 
 export type UserRepositoryInterface = {
   fetchUser(id: number): Promise<User | null>
@@ -17,6 +21,20 @@ export type UserRepositoryInterface = {
 
 export type ReservationRepositoryInterface = {
   fetchUserReservationCount(id: number): Promise<number>
+  fetchUserReservations(id: number, take: number): Promise<Reservation[]>
+  fetchCompletedReservationsShopIdsAndVisitedDate(id: number): Promise<{ shopId: number, visitedDate: Date }[]>
+}
+
+export type ShopRepositoryInterface = {
+  fetchShopNamesByIds(shopIds: number[]): Promise<{shopId: number, shopName: string}[]>
+}
+
+export type StylistRepositoryInterface = {
+  fetchStylistNamesByIds(shopIds: number[]): Promise<{stylistId: number, stylistName: string}[]>
+}
+
+export type MenuRepositoryInterface = {
+  fetchMenuNamesByIds(menuIds: number[]): Promise<{menuId: number, menuName: string}[]>
 }
 
 export type ReviewRepositoryInterface = {
@@ -79,6 +97,43 @@ const UserService: UserServiceInterface = {
     const hash = bcrypt.hashSync(newPassword, 10 /* hash rounds */)
 
     return UserRepository.updateUserPassword(id, hash)
+  },
+
+  async fetchUserReservationsWithShopMenuAndStylistNames(userId, take = 3) {
+    const reservations = await ReservationRepository.fetchUserReservations(userId, take)
+    if (!reservations) {
+      throw new NotFoundError('No reservations found for this user')
+    }
+    const menuIds: number[] = []
+    const shopIds: number[] = []
+    const stylistIds: number[] = []
+    reservations.forEach(r => {
+      menuIds.push(r.menuId)
+      shopIds.push(r.shopId)
+      if (r.stylistId) {
+        stylistIds.push(r.stylistId)
+      }
+    })
+    const reservationMenus = await MenuRepository.fetchMenuNamesByIds(menuIds)
+    const reservationShops = await ShopRepository.fetchShopNamesByIds(shopIds)
+    const reservationStylists = await StylistRepository.fetchStylistNamesByIds(stylistIds)
+
+    return reservations.map(r => ({
+      ...r,
+      shopName: reservationShops.find(s => s.shopId === r.shopId)!.shopName,
+      StylistName: reservationStylists.find(s => s.stylistId === r.stylistId)!.stylistName,
+      menuName: reservationMenus.find(m => m.menuId === r.menuId)!.menuName,
+    }))
+  },
+
+  async fetchUserVisitedShopsHistory(userId) {
+    const shopIdsAndDates = await ReservationRepository.fetchCompletedReservationsShopIdsAndVisitedDate(userId)
+    const visitedShops = await ShopRepository.fetchShopNamesByIds(shopIdsAndDates.map(s => s.shopId))
+    return shopIdsAndDates.map(idAndDates => ({
+      id: idAndDates.shopId,
+      shopName: visitedShops.find(s => s.shopId === idAndDates.shopId)!.shopName,
+      visitedDate: idAndDates.visitedDate,
+    }))
   },
 }
 

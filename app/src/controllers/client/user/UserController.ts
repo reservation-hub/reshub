@@ -5,8 +5,12 @@ import { User as EntityUser } from '@entities/User'
 import { signUpSchema, updateUserSchema, userPasswordUpdateSchema } from '@client/user/schemas'
 import MailService from '@client/user/services/MailService'
 import { UnauthorizedError } from '@errors/ControllerErrors'
-import { convertDateObjectToOutboundDateString, convertDateStringToDateObject } from '@lib/Date'
 import { convertEntityGenderToDTO, convertGenderToEntity } from '@dtoConverters/User'
+import {
+  convertDateObjectToOutboundDateString, convertDateStringToDateObject,
+  convertDateTimeObjectToDateTimeString,
+} from '@lib/Date'
+import { Reservation } from '@entities/Reservation'
 
 export type UserServiceInterface = {
   fetchUserWithReservationCountAndReviewCount(id: number)
@@ -16,6 +20,10 @@ export type UserServiceInterface = {
     firstNameKana: string, gender: Gender, birthday: Date): Promise<EntityUser>
   updateUserPassword(id: number, oldPassword: string, newPassword: string, confirmNewPassword: string)
     : Promise<EntityUser>
+  fetchUserReservationsWithShopMenuAndStylistNames(userId:number):
+   Promise<(Reservation & { shopName: string, StylistName: string, menuName: string})[]>
+   fetchUserVisitedShopsHistory(userId: number):
+    Promise<{id: number, shopName: string, visitedDate: Date}[]>
 }
 
 export type MailServiceInterface = {
@@ -42,7 +50,25 @@ const UserController: UserControllerInterface = {
     if (!user) {
       throw new UnauthorizedError('User not found in request')
     }
-    return reconstructUser(user.id)
+    const reservations = await UserService.fetchUserReservationsWithShopMenuAndStylistNames(user.id)
+    const visitedShops = await UserService.fetchUserVisitedShopsHistory(user.id)
+    return {
+      user: await reconstructUser(user.id),
+      reservations: reservations.map(r => ({
+        id: r.id,
+        shopId: r.shopId,
+        shopName: r.shopName,
+        menuName: r.menuName,
+        status: r.status,
+        reservationDate: convertDateTimeObjectToDateTimeString(r.reservationDate),
+        stylistName: r.StylistName,
+      })),
+      visitedShops: visitedShops.map(vs => ({
+        id: vs.id,
+        shopName: vs.shopName,
+        visitedDate: convertDateTimeObjectToDateTimeString(vs.visitedDate),
+      })),
+    }
   },
 
   async signUp(query) {
