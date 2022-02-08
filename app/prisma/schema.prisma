@@ -123,19 +123,19 @@ model ShopUser {
 }
 
 model ShopDetail {
-  id          Int          @id @default(autoincrement())
-  name        String       @db.VarChar(255)
-  shopForSearch String @db.VarChar(255) @map("shop_for_search")
-  address     String?      @db.VarChar(255)
-  phoneNumber String?      @map("phone_number") @db.VarChar(255)
-  shopId      Int?         @unique @map("shop_id")
-  details     String?      @db.VarChar(255)
-  days        Days[]
-  endTime     String       @map("end_time")
-  startTime   String       @map("start_time")
-  seats       Int
-  images      ModelImage[]
-  shop        Shop?
+  id            Int          @id @default(autoincrement())
+  name          String       @db.VarChar(255)
+  nameForSearch String       @map("name_for_search") @db.VarChar(255)
+  address       String?      @db.VarChar(255)
+  phoneNumber   String?      @map("phone_number") @db.VarChar(255)
+  shopId        Int?         @unique @map("shop_id")
+  details       String?      @db.VarChar(255)
+  days          Days[]
+  endTime       String       @map("end_time")
+  startTime     String       @map("start_time")
+  seats         Int
+  images        ModelImage[]
+  shop          Shop?
 }
 
 model ModelImage {

@@ -99,6 +99,7 @@ const shopSeeder = async (count: number, shopCities: (City & {
     const shopDetails = await Promise.all(Array(count).fill('').map(v => prisma.shopDetail.create({
       data: {
         name: 'TEST',
+        nameForSearch: 'test',
         days: [
           Days.MONDAY,
           Days.WEDNESDAY,
