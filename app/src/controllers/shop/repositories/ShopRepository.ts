@@ -54,7 +54,7 @@ StylistServiceSocket = {
         shopDetail: {
           create: {
             name,
-            shopForSearch: name.toLowerCase(),
+            nameForSearch: name.toLowerCase(),
             address,
             phoneNumber,
             days: days.map(convertEntityDayToPrismaDay),
