@@ -15,7 +15,7 @@ import {
   indexSchema, searchByAreaSchema, searchByTagsSchema, searchByNameSchema,
 } from '@client/shop/schemas'
 import { convertEntityDaysToDTO, convertOrderByToEntity } from '@dtoConverters/Common'
-import { UnauthorizedError } from '@errors/RouteErrors'
+import { UnauthorizedError } from '@errors/ControllerErrors'
 
 export type ShopServiceInterface = {
   fetchShopsWithTotalCount(user: UserForAuth | undefined, page?: number, order?: OrderBy, take?: number)
